@@ -1,5 +1,8 @@
 Opencraft is an Open Source Cube based adventure, have fun removing and placing blocks in your own 3D cube world.
 
+Licence
+-------
+
 All content unless otherwise mentioned is licensed under the ZLib Licence.
 
 Copyright (c) 2011 - Daniel Lloyd Evans
@@ -22,3 +25,10 @@ freely, subject to the following restrictions:
 
    3. This notice may not be removed or altered from any source
    distribution.
+
+Building
+--------
+
+Requires sfml (Simple Fast Media Layer): [sfml-dev.org](http://www.sfml-dev.org/)
+
+[Debian and Ubuntu repositories for smfl](http://www.sfml-dev.org/wiki/en/tutorials/getdebpackage)

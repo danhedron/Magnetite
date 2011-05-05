@@ -1,5 +1,5 @@
 ### Open Craft CMake build scripts ~
-# 
+#
 # Written By Daniel `Haribo' Evans
 # Copyright (C) 2011 Daniel Lloyd Evans
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -28,9 +28,9 @@ set (OPENCRAFT_VERSION_MINOR 1)
 #Pass important things to Code
 configure_file(
 	"${PROJECT_SOURCE_DIR}/include/BuildConfig.h.in"
-	"${PROJECT_SOURCE_DIR}/include/BuildConfig.h"	
+	"${PROJECT_SOURCE_DIR}/include/BuildConfig.h"
 )
-	
+
 set(OPENCRAFT_SOURCES
 	source/OpencraftCore.cpp
 	source/Main.cpp
@@ -49,7 +49,7 @@ add_executable(OpenCraft ${OPENCRAFT_SOURCES} ${OPENCRAFT_HEADERS})
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 #Find SFML
 find_package(SFML REQUIRED)
 if(SFML_FOUND)
