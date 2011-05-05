@@ -53,8 +53,15 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 #Find SFML
 find_package(SFML REQUIRED)
 if(SFML_FOUND)
-	target_link_libraries(OpenCraft ${SFML_LIBRARY} OpenGl32.lib glu32.lib winmm.lib)
+	target_link_libraries(OpenCraft ${SFML_LIBRARY})
 	include_directories(${SFML_INCLUDE_DIR})
 endif(SFML_FOUND)
+
+#Find OpenGl
+find_package(OpenGL REQUIRED)
+if(OpenGL_FOUND)
+	target_link_libraries(OpenCraft ${OpenGL_LIBRARY})
+	include_directories(${OpenGL_INCLUDE_DIR})
+endif(OpenGL_FOUND)
 
 # Bin = ${OPEN_BINARY_DIR}
