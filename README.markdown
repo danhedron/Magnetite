@@ -38,8 +38,8 @@ Requires sfml (Simple Fast Media Layer): [sfml-dev.org](http://www.sfml-dev.org/
 #### Installing SFML
 
 + Add these to /etc/apt/sources.list
-    deb http://ppa.launchpad.net/christoph-egger/ubuntu hardy main
-    deb-src http://ppa.launchpad.net/christoph-egger/ubuntu hardy main
+  - `deb http://ppa.launchpad.net/christoph-egger/ubuntu hardy main`
+  - `deb-src http://ppa.launchpad.net/christoph-egger/ubuntu hardy main`
 + Run `aptitude update && apt-get libsfml-dev libcsfml-dev`
 
 #### Installing OpenGL
