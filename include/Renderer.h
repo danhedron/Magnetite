@@ -9,6 +9,8 @@ class Renderer
 {
 protected:
 	float totalTime;
+	GLuint chunkVbo;
+	GLuint chunkSize;
 public:
 	Renderer(void);
 	~Renderer(void);

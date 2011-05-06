@@ -56,6 +56,10 @@ source_group("Source Files" FILES ${OPENCRAFT_SOURCES})
 add_executable(OpenCraft ${OPENCRAFT_SOURCES} ${OPENCRAFT_HEADERS})
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/depends/include/glee)
+
+# Include GLee
+target_link_libraries(OpenCraft ${PROJECT_SOURCE_DIR}/depends/lib/Glee.lib)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 #Find SFML
@@ -67,6 +71,9 @@ endif(SFML_FOUND)
 
 #Find OpenGl
 find_package(OpenGL REQUIRED)
+if(WIN32)
+	target_link_libraries(OpenCraft opengl32.lib glu32.lib winmm.lib)
+	endif(WIN32)
 if(OpenGL_FOUND)
 	target_link_libraries(OpenCraft ${OpenGL_LIBRARY})
 	include_directories(${OpenGL_INCLUDE_DIR})
