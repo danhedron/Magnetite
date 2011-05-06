@@ -1,4 +1,5 @@
 #include "OpencraftCore.h"
+#include "WorldChunk.h"
 #include "Renderer.h"
 
 
@@ -17,7 +18,7 @@ void OpencraftCore::createWindow()
 	sf::WindowSettings wnds;
 	wnds.DepthBits = 24;
 	wnds.DepthBits = 8;
-	wnds.AntialiasingLevel = 2;
+	//wnds.AntialiasingLevel = 2;
 	mWindow.Create(sf::VideoMode(800,600,32), "Opencraft", sf::Style::Close, wnds);
 	mWindow.UseVerticalSync(true);
 	mRenderer->initialize();
@@ -26,6 +27,9 @@ void OpencraftCore::createWindow()
 void OpencraftCore::go() 
 {
 	createWindow();
+
+	//Create some testing chunks
+	createChunk(0,0,0);
 
 	while(mContinue && mWindow.IsOpened()) {
 		float lDelta = mClock.GetElapsedTime();
@@ -46,7 +50,7 @@ void OpencraftCore::go()
 			}
 		}
 
-		mRenderer->render(lDelta);
+		mRenderer->render(lDelta, mChunks);
 
 		mWindow.Display();
 	}
@@ -58,4 +62,11 @@ void OpencraftCore::go()
 void OpencraftCore::exit()
 {
 	mContinue = false;
+}
+
+void OpencraftCore::createChunk(long x, long y, long z)
+{
+	WorldChunk* newChunk = new WorldChunk(x, y, z);
+	newChunk->fillWithTestData();
+	mChunks.push_back(newChunk);
 }

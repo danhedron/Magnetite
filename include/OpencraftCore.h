@@ -3,6 +3,7 @@
 #include "prerequisites.h"
 
 class Renderer;
+class WorldChunk;
 
 /** @class OpencraftCore
  * Responsible for managing stuff 
@@ -14,9 +15,12 @@ protected:
 	sf::Clock	mClock;
 	Renderer*	mRenderer;
 	bool		mContinue;
+	std::vector<WorldChunk*> mChunks;
 public:
 	OpencraftCore(void);
 	~OpencraftCore(void);
+
+	void createChunk(long x, long y, long z);
 
 	void createWindow();
 

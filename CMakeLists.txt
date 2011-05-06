@@ -35,12 +35,20 @@ set(OPENCRAFT_SOURCES
 	source/OpencraftCore.cpp
 	source/Main.cpp
 	source/Renderer.cpp
+	source/BaseBlock.cpp
+	source/StoneBlock.cpp
+	source/ChunkLoader.cpp
+	source/WorldChunk.cpp
 )
 set(OPENCRAFT_HEADERS
 	include/OpencraftCore.h
 	include/prerequisites.h
 	include/BuildConfig.h
 	include/Renderer.h
+	include/StoneBlock.h
+	include/BaseBlock.h
+	include/ChunkLoader.h
+	include/WorldChunk.h
 )
 source_group("Header Files" FILES ${OPENCRAFT_HEADERS})
 source_group("Source Files" FILES ${OPENCRAFT_SOURCES})
