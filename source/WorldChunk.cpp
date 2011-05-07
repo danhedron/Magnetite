@@ -52,6 +52,8 @@ BaseBlock* WorldChunk::getBlockAt(long x, long y, long z)
 {
 	// For a 3D array stored in 1D array, you must:-
 	//  z*height*width + y * width + x
+	if( x < 0 || y < 0 || z < 0 || x == CHUNK_WIDTH || y == CHUNK_HEIGHT || z == CHUNK_WIDTH )
+		return NULL;
 	BlockList::iterator it = mBlockData.find( z * CHUNK_WIDTH * CHUNK_HEIGHT + y * CHUNK_WIDTH + x );
 	if( it != mBlockData.end() )
 		return it->second;
@@ -94,7 +96,7 @@ void WorldChunk::updateVisibility()
 			_blockVisible( (*block), true );
 		else if( getBlockAt( b->getX(), b->getY(), b->getZ() + 1 ) == NULL )
 			_blockVisible( (*block), true );
-		else if( getBlockAt( b->getX(), b->getY(), b->getZ() + 1 ) == NULL )
+		else if( getBlockAt( b->getX(), b->getY(), b->getZ() - 1 ) == NULL )
 			_blockVisible( (*block), true );
 		else
 			_blockVisible( (*block), false );

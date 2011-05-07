@@ -49,6 +49,7 @@ set(OPENCRAFT_HEADERS
 	include/BaseBlock.h
 	include/ChunkLoader.h
 	include/WorldChunk.h
+	include/util.h
 )
 source_group("Header Files" FILES ${OPENCRAFT_HEADERS})
 source_group("Source Files" FILES ${OPENCRAFT_SOURCES})

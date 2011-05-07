@@ -3,9 +3,15 @@
 #include <SFML/Window.hpp>
 #include <SFML/Window/OpenGL.hpp>
 
+#include <string>
+#include <sstream>
+#include <algorithm>
+#include <iterator>
 #include <vector>
 #include <map>
 #include <iostream>
+
+typedef std::vector<std::string> stringvector;
 
 class BaseBlock;
 typedef std::map<size_t,BaseBlock*> BlockList;

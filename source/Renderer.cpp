@@ -2,13 +2,16 @@
 #include "WorldChunk.h"
 #include "BaseBlock.h"
 
+#include "util.h"
+
 Renderer::Renderer(void)
 : totalTime( 0 ),
 chunkVbo( 0 ),
 mScrWidth( 0 ),
 mScrHeight( 0 ),
 mBlRendered( 0 ),
-mBlTotal( 0 )
+mBlTotal( 0 ),
+mRenderMode( RENDER_SOLID )
 {
 }
 
@@ -53,8 +56,8 @@ void Renderer::enable2D()
 	glLoadIdentity();
 	// Set perspective & coordinate fix
 	gluOrtho2D(0.0, mScrWidth, 0.0, mScrHeight);
-	//glScalef(1, -1, 1); // Flip Y coordinates
-	//glTranslatef(0, -mScrHeight, 0);
+	glTranslatef(0, mScrHeight, 0);
+	glScalef(1, -1, 1); // Flip Y coordinates
 	// Switch Back
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
@@ -67,6 +70,16 @@ void Renderer::disable2D()
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
+}
+
+void Renderer::setRenderMode( size_t rendermode )
+{
+	mRenderMode = rendermode;
+}
+
+size_t Renderer::getRenderMode()
+{
+	return mRenderMode;
 }
 
 void Renderer::buildCubeData(BaseBlock* block, size_t& ind, GLfloat* data)
@@ -229,26 +242,42 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(3, GL_FLOAT, 0, PositionData);
 		// Draw the chunk.
-		glDrawArrays(GL_QUADS, 0, chunkSize);
+		if(mRenderMode == RENDER_WIRE)
+			glDrawArrays(GL_LINES, 0, chunkSize);
+		else
+			glDrawArrays(GL_QUADS, 0, chunkSize);
 		glDisableClientState(GL_VERTEX_ARRAY);
 	}
 
+	drawStats( dt, chunks.size() );
+}
+
+void Renderer::drawStats(double dt, size_t chunkCount)
+{
 	// Switch to 2D for overlays
 	enable2D();
-
-	// Draw stats
-	glColor3f(0,1,0);
-	char buff[150];
-	sprintf( buff, "Opencraft Test, dt: %f Blocks: %u/%u - %u%%", dt, mBlRendered, mBlTotal, (mBlRendered*100)/(mBlTotal));
+	char buff[200];
+	sprintf( buff, "Opencraft Performance:\n dt: %f\n %f FPS\n"
+					"World Stats:\n Blocks: %u/%u - %u%%\n Rendered Chunks: %u", dt, (1/dt), mBlRendered, mBlTotal, (mBlRendered*100)/(mBlTotal), chunkCount);
 	std::string stats(buff);
 
-	glRasterPos2i( 10, 10 );
-	void* fnt = GLUT_BITMAP_9_BY_15;
-	for( std::string::iterator i = stats.begin(); i != stats.end(); i++ ) 
-	{
-		glutBitmapCharacter(fnt, *i);
-	}
+	drawText( stats, 6, 15 );
 
 	disable2D();
+}
 
+void Renderer::drawText(std::string text, int x, int y)
+{
+	stringvector lines = Util::split(text, '\n');	
+	glColor3f(0,1,0);
+	size_t line = 0;
+	void* fnt = GLUT_BITMAP_9_BY_15;
+	for(stringvector::iterator it = lines.begin(); it != lines.end(); ++it) {
+		glRasterPos2i( x, y + (line * 16) );
+		for( std::string::iterator i = (*it).begin(); i != (*it).end(); ++i ) 
+		{
+			glutBitmapCharacter(fnt, *i);
+		}
+		line++;
+	}
 }
