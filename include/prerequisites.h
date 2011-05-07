@@ -1,11 +1,27 @@
+#include <GL/glee.h>
+#include <GL/freeglut.h>
 #include <SFML/Window.hpp>
 #include <SFML/Window/OpenGL.hpp>
 
+#include <string>
+#include <sstream>
+#include <algorithm>
+#include <iterator>
 #include <vector>
+#include <map>
 #include <iostream>
 
+#include "Util.h"
+
+typedef std::vector<std::string> stringvector;
+
 class BaseBlock;
-typedef std::vector<BaseBlock*> BlockList;
+typedef std::map<size_t,BaseBlock*> BlockList;
+typedef std::pair<const size_t,BaseBlock*> BlockPosPair;
+//typedef *BaseBlock[] BlockList;
+
+class WorldChunk;
+typedef std::vector<WorldChunk*> ChunkList;
 
 #define CHUNK_WIDTH 32
 #define CHUNK_HEIGHT 128

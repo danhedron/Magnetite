@@ -49,6 +49,7 @@ set(OPENCRAFT_HEADERS
 	include/BaseBlock.h
 	include/ChunkLoader.h
 	include/WorldChunk.h
+	include/util.h
 )
 source_group("Header Files" FILES ${OPENCRAFT_HEADERS})
 source_group("Source Files" FILES ${OPENCRAFT_SOURCES})
@@ -56,6 +57,14 @@ source_group("Source Files" FILES ${OPENCRAFT_SOURCES})
 add_executable(OpenCraft ${OPENCRAFT_SOURCES} ${OPENCRAFT_HEADERS})
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/depends/include/)
+
+# Include GLee + Freeglut
+target_link_libraries(OpenCraft ${PROJECT_SOURCE_DIR}/depends/lib/Glee.lib)
+target_link_libraries(OpenCraft ${PROJECT_SOURCE_DIR}/depends/lib/freeglut.lib)
+
+# 'fix' LIBC.lib error
+set(CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"LIBC.lib\")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 #Find SFML
@@ -65,11 +74,15 @@ if(SFML_FOUND)
 	include_directories(${SFML_INCLUDE_DIR})
 endif(SFML_FOUND)
 
-#Find OpenGl
+#Find OpenGl Under Linux
 find_package(OpenGL REQUIRED)
 if(OpenGL_FOUND)
 	target_link_libraries(OpenCraft ${OpenGL_LIBRARY})
 	include_directories(${OpenGL_INCLUDE_DIR})
 endif(OpenGL_FOUND)
+#FindOpenGL doesn't seem to work under windows
+if(WIN32)
+	target_link_libraries(OpenCraft opengl32.lib glu32.lib winmm.lib)
+endif(WIN32)
 
 # Bin = ${OPEN_BINARY_DIR}

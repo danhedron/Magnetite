@@ -15,16 +15,30 @@ protected:
 	sf::Clock	mClock;
 	Renderer*	mRenderer;
 	bool		mContinue;
-	std::vector<WorldChunk*> mChunks;
+	ChunkList	mChunks;
+	int		radius;
 public:
 	OpencraftCore(void);
 	~OpencraftCore(void);
 
+	/**
+	 * Creates a chunk at the given coordinates and fills it with test data
+	 * @param x Coordinate
+	 * @param y Coordinate
+	 * @param z Coordinate
+	 */
 	void createChunk(long x, long y, long z);
 
-	void createWindow();
+	void removeChunk(long x, long y, long z);
 
-	void go();
+	void createTestChunks( int size );
+	void destoryWorld();
+
+	WorldChunk* getChunk(const long x, const long y, const long z);
+
+	void createWindow(int *argc, char **argv);
+
+	void go(int *argc, char **argv);
 
 	void exit();
 };
