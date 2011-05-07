@@ -5,6 +5,9 @@
 class WorldChunk;
 class BaseBlock;
 
+typedef std::pair<WorldChunk*,GLfloat*> ChunkGeomBuffer;
+typedef std::map<WorldChunk*,GLfloat*> ChunkGeomList;
+
 class Renderer
 {
 protected:
@@ -19,6 +22,11 @@ protected:
 	size_t mBlTotal;
 
 	size_t mRenderMode;
+
+	size_t mFpsAvg;
+	
+	ChunkGeomList mWorldBuffers;
+
 public:
 	Renderer(void);
 	~Renderer(void);
@@ -65,6 +73,12 @@ public:
 
 	void buildChunkVBO(WorldChunk* chunk);
 	void buildCubeData(BaseBlock* block, size_t& ind, GLfloat* data);
+
+	/**
+	 * Notify the renderer that a chunk has been unloaded from the engine and it is ok to release it's graphics buffer.
+	 * @param chunk pointer to the unloaded chunk
+	 */
+	void notifyChunkUnloaded( WorldChunk* chunk );
 
 	/**
 	 * Sets the internal rendermode:-

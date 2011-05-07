@@ -13,6 +13,11 @@ mHasChanged( false )
 WorldChunk::~WorldChunk(void)
 {
 	//TODO: FIX MEMORY LEAK HERE
+	for(BlockList::iterator block = mBlockData.begin(); block != mBlockData.end();) {
+		BaseBlock* b = (*block).second;
+		delete b;
+		block = mBlockData.erase( block );
+	}
 }
 
 void WorldChunk::initalize()
@@ -40,7 +45,7 @@ void WorldChunk::fillWithTestData()
 void WorldChunk::addBlockToChunk(BaseBlock* block)
 {
 	if( getBlockAt( block->getX(), block->getY(), block->getZ() ) != NULL ) {
-		std::cout << "Error: Block already exsists!" << std::endl;
+		Util::log("Error: Block already exsists!");
 	}
 	else {
 		mHasChanged = true;

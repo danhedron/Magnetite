@@ -11,6 +11,8 @@
 #include <map>
 #include <iostream>
 
+#include "Util.h"
+
 typedef std::vector<std::string> stringvector;
 
 class BaseBlock;

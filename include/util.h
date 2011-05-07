@@ -18,6 +18,26 @@ public:
 		stringvector elems;
 		return Util::split(s, delim, elems);
 	}
+
+	static void log(const std::string text)
+	{
+		std::cout << "| " << text << std::endl;
+	}
+
+	static std::string toString(int number)
+	{
+		char* buff = new char[100];
+		_itoa_s(number, buff, 100, 10);
+		return std::string( buff );
+	}
+
+	// Causes Ambiguity errors.
+	/*static std::string toString(bool t)
+	{
+		if( t )
+			return "true";
+		return "false";
+	}*/
 };
 
 #endif
