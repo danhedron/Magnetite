@@ -4,7 +4,11 @@
 
 Renderer::Renderer(void)
 : totalTime( 0 ),
-chunkVbo( 0 )
+chunkVbo( 0 ),
+mScrWidth( 0 ),
+mScrHeight( 0 ),
+mBlRendered( 0 ),
+mBlTotal( 0 )
 {
 }
 
@@ -14,7 +18,7 @@ Renderer::~Renderer(void)
 		glDeleteBuffersARB(1, &chunkVbo);
 }
 
-void Renderer::initialize()
+void Renderer::initialize(int *argc, char **argv)
 {
 	// Set color and depth clear value
 	glClearDepth(1.f);
@@ -28,11 +32,41 @@ void Renderer::initialize()
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(90.f, 1.f, 1.f, 500.f);
+
+	glutInit( argc, argv );
 }
 
 void Renderer::resizeViewport(size_t x, size_t y, size_t w, size_t h)
 {
 	glViewport(x, y, w, h);
+	mScrWidth = w;
+	mScrHeight = h;
+	std::cout << "Window Resized: " << w << "x" << h << std::endl;
+}
+
+void Renderer::enable2D()
+{
+	//Switch matrix
+	glMatrixMode(GL_PROJECTION);
+	// Clear to identity
+	glPushMatrix();
+	glLoadIdentity();
+	// Set perspective & coordinate fix
+	gluOrtho2D(0.0, mScrWidth, 0.0, mScrHeight);
+	//glScalef(1, -1, 1); // Flip Y coordinates
+	//glTranslatef(0, -mScrHeight, 0);
+	// Switch Back
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+}
+
+void Renderer::disable2D()
+{
+	// Just pop 2d matrix.
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
 }
 
 void Renderer::buildCubeData(BaseBlock* block, size_t& ind, GLfloat* data)
@@ -132,15 +166,18 @@ static GLuint PositionSize;
 void Renderer::buildChunkVBO(WorldChunk* chunk)
 {
 	PositionSize = chunk->getBlockCount() * 6 * 4 * 3 * sizeof(GLfloat);
-	PositionData = new GLfloat[chunk->getBlockCount() * 6 * 4 * 3];
-	chunkSize = chunk->getBlockCount() * 6 * 4;
+	PositionData = new GLfloat[chunk->getVisibleBlockCount() * 6 * 4 * 3];
+	chunkSize = chunk->getVisibleBlockCount() * 6 * 4;
 	
-	BlockList* blocks = chunk->getBlocks();
+	BlockList* blocks = chunk->getVisibleBlocks();
 	size_t ind = 0;
 	//glTranslatef( (*block)->getX(), (*block)->getY(), (*block)->getZ() );
 	for(BlockList::iterator block = blocks->begin(); block != blocks->end(); ++block) {
 		buildCubeData((*block).second, ind, PositionData);
 	}
+
+	mBlRendered = chunk->getVisibleBlockCount();
+	mBlTotal = chunk->getBlockCount();
 
 	//glGenBuffersARB(1, &chunkVbo);
 	//glBindBufferARB(GL_ARRAY_BUFFER_ARB, chunkVbo);
@@ -164,7 +201,7 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 		if(PositionData == NULL) {
 			//Generate this chunk's vertex buffer object
 			// Get blocks in this chunk.
-			BlockList* blocks = (*chunk)->getBlocks();
+			//BlockList* blocks = (*chunk)->getVisibleBlocks();
 			buildChunkVBO( (*chunk) );
 		}
 		
@@ -188,10 +225,30 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 		glDisableClientState(GL_VERTEX_ARRAY);
 
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);*/
+		glColor3f(1,1,1);
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(3, GL_FLOAT, 0, PositionData);
 		// Draw the chunk.
 		glDrawArrays(GL_QUADS, 0, chunkSize);
 		glDisableClientState(GL_VERTEX_ARRAY);
 	}
+
+	// Switch to 2D for overlays
+	enable2D();
+
+	// Draw stats
+	glColor3f(0,1,0);
+	char buff[150];
+	sprintf( buff, "Opencraft Test, dt: %f Blocks: %u/%u - %u%%", dt, mBlRendered, mBlTotal, (mBlRendered*100)/(mBlTotal));
+	std::string stats(buff);
+
+	glRasterPos2i( 10, 10 );
+	void* fnt = GLUT_BITMAP_9_BY_15;
+	for( std::string::iterator i = stats.begin(); i != stats.end(); i++ ) 
+	{
+		glutBitmapCharacter(fnt, *i);
+	}
+
+	disable2D();
+
 }

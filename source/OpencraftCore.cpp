@@ -13,7 +13,7 @@ OpencraftCore::~OpencraftCore(void)
 {
 }
 
-void OpencraftCore::createWindow()
+void OpencraftCore::createWindow(int *argc, char **argv)
 {
 	sf::WindowSettings wnds;
 	wnds.DepthBits = 24;
@@ -21,12 +21,13 @@ void OpencraftCore::createWindow()
 	//wnds.AntialiasingLevel = 2;
 	mWindow.Create(sf::VideoMode(800,600,32), "Opencraft", sf::Style::Close, wnds);
 	mWindow.UseVerticalSync(true);
-	mRenderer->initialize();
+	mRenderer->initialize(argc, argv);
+	mRenderer->resizeViewport(0,0,800,600);
 }
 
-void OpencraftCore::go() 
+void OpencraftCore::go(int *argc, char **argv) 
 {
-	createWindow();
+	createWindow(argc, argv);
 
 	//Create some testing chunks
 	createChunk(0,0,0);
@@ -50,6 +51,10 @@ void OpencraftCore::go()
 			}
 		}
 
+		//Ensure each loaded chunk is updated before being sent to the GPU
+		for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
+			(*it)->update(lDelta);
+		}
 		mRenderer->render(lDelta, mChunks);
 
 		mWindow.Display();

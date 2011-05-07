@@ -11,12 +11,21 @@ protected:
 	float totalTime;
 	GLuint chunkVbo;
 	GLuint chunkSize;
+
+	size_t mScrWidth;
+	size_t mScrHeight;
+
+	size_t mBlRendered;
+	size_t mBlTotal;
 public:
 	Renderer(void);
 	~Renderer(void);
 
-	void initialize();
+	void initialize(int *argc, char **argv);
 	void resizeViewport( size_t x, size_t y, size_t w, size_t h );
+
+	void enable2D();
+	void disable2D();
 
 	void render( double dt, std::vector<WorldChunk*> &chunks );
 

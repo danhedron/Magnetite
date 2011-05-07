@@ -15,16 +15,16 @@ protected:
 	sf::Clock	mClock;
 	Renderer*	mRenderer;
 	bool		mContinue;
-	std::vector<WorldChunk*> mChunks;
+	ChunkList	mChunks;
 public:
 	OpencraftCore(void);
 	~OpencraftCore(void);
 
 	void createChunk(long x, long y, long z);
 
-	void createWindow();
+	void createWindow(int *argc, char **argv);
 
-	void go();
+	void go(int *argc, char **argv);
 
 	void exit();
 };

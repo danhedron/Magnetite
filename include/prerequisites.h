@@ -1,4 +1,5 @@
-#include <glee.h>
+#include <GL/glee.h>
+#include <GL/freeglut.h>
 #include <SFML/Window.hpp>
 #include <SFML/Window/OpenGL.hpp>
 
@@ -8,8 +9,11 @@
 
 class BaseBlock;
 typedef std::map<size_t,BaseBlock*> BlockList;
-typedef std::pair<size_t,BaseBlock*> BlockPosPair;
+typedef std::pair<const size_t,BaseBlock*> BlockPosPair;
 //typedef *BaseBlock[] BlockList;
+
+class WorldChunk;
+typedef std::vector<WorldChunk*> ChunkList;
 
 #define CHUNK_WIDTH 32
 #define CHUNK_HEIGHT 128
