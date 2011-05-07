@@ -27,7 +27,7 @@ public:
 	static std::string toString(int number)
 	{
 		char* buff = new char[100];
-		_itoa_s(number, buff, 100, 10);
+		itoa(number, buff, 10);
 		return std::string( buff );
 	}
 
