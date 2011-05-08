@@ -4,6 +4,7 @@
 
 class Renderer;
 class WorldChunk;
+class TextureManager;
 
 /** @class OpencraftCore
  * Responsible for managing stuff 
@@ -14,12 +15,23 @@ protected:
 	sf::Window	mWindow;
 	sf::Clock	mClock;
 	Renderer*	mRenderer;
+	TextureManager* mTextureManager;
 	bool		mContinue;
 	ChunkList	mChunks;
-	int		radius;
+	int			radius;
 public:
 	OpencraftCore(void);
 	~OpencraftCore(void);
+
+	/**
+	 * Singleton instance of the OpencraftCore
+	 */
+	static OpencraftCore *Singleton;
+
+	/**
+	 * @return a pointer to the Texture Manager
+	 */
+	TextureManager *getTextureManager();
 
 	/**
 	 * Creates a chunk at the given coordinates and fills it with test data

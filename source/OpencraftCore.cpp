@@ -1,13 +1,17 @@
 #include "OpencraftCore.h"
 #include "WorldChunk.h"
 #include "Renderer.h"
+#include "TextureManager.h"
 
+OpencraftCore* OpencraftCore::Singleton = 0;
 
 OpencraftCore::OpencraftCore(void)
 : mContinue( true ),
 radius( 0 )
 {
+	OpencraftCore::Singleton = this;
 	mRenderer = new Renderer();
+	mTextureManager = new TextureManager();
 }
 
 OpencraftCore::~OpencraftCore(void)
@@ -23,6 +27,7 @@ void OpencraftCore::createWindow(int *argc, char **argv)
 	mWindow.Create(sf::VideoMode(800,600,32), "Opencraft", sf::Style::Close | sf::Style::Resize, wnds);
 	//mWindow.UseVerticalSync(true);
 	mRenderer->initialize(argc, argv);
+	mTextureManager->initalize();
 	mRenderer->resizeViewport(0,0,800,600);
 }
 
@@ -83,6 +88,11 @@ void OpencraftCore::go(int *argc, char **argv)
 void OpencraftCore::exit()
 {
 	mContinue = false;
+}
+
+TextureManager* OpencraftCore::getTextureManager()
+{
+	return mTextureManager;
 }
 
 void OpencraftCore::createTestChunks( int size )

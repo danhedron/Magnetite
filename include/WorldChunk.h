@@ -15,7 +15,7 @@ protected:
 	long mY;
 	long mZ;
 	bool mHasChanged;
-
+	long mVisibleFaces;
 	void _blockVisible( BlockPosPair &block, bool v );
 public:
 	WorldChunk(long x, long y, long z);
@@ -71,6 +71,11 @@ public:
 	 * Returns the visible block count
 	 */
 	size_t getVisibleBlockCount();
+
+	/** 
+	 * Returns the number of visible faces
+	 */
+	long getVisibleFaceCount();
 
 	/**
 	 * Performs a visibility test on all blocks in this chunk

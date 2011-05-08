@@ -37,8 +37,10 @@ set(OPENCRAFT_SOURCES
 	source/Renderer.cpp
 	source/BaseBlock.cpp
 	source/StoneBlock.cpp
+	source/WoodBlock.cpp
 	source/ChunkLoader.cpp
 	source/WorldChunk.cpp
+	source/TextureManager.cpp
 )
 set(OPENCRAFT_HEADERS
 	include/OpencraftCore.h
@@ -46,9 +48,11 @@ set(OPENCRAFT_HEADERS
 	include/BuildConfig.h
 	include/Renderer.h
 	include/StoneBlock.h
+	include/WoodBlock.h
 	include/BaseBlock.h
 	include/ChunkLoader.h
 	include/WorldChunk.h
+	include/TextureManager.h
 	include/util.h
 )
 source_group("Header Files" FILES ${OPENCRAFT_HEADERS})
@@ -62,6 +66,10 @@ include_directories(${PROJECT_SOURCE_DIR}/depends/include/)
 # Include GLee + Freeglut
 target_link_libraries(OpenCraft ${PROJECT_SOURCE_DIR}/depends/lib/Glee.lib)
 target_link_libraries(OpenCraft ${PROJECT_SOURCE_DIR}/depends/lib/freeglut.lib)
+if(WIN32)
+	# Windows Memory Usage
+	target_link_libraries(OpenCraft psapi.lib)
+endif(WIN32)
 
 # 'fix' LIBC.lib error
 set(CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"LIBC.lib\")

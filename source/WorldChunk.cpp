@@ -1,11 +1,13 @@
 #include "WorldChunk.h"
 #include "StoneBlock.h"
+#include "WoodBlock.h"
 
 WorldChunk::WorldChunk(long x, long y, long z)
 : mX( x ),
 mY( y ),
 mZ( z ),
-mHasChanged( false )
+mHasChanged( false ),
+mVisibleFaces( 0 )
 {
 	initalize();
 }
@@ -13,11 +15,10 @@ mHasChanged( false )
 WorldChunk::~WorldChunk(void)
 {
 	//TODO: FIX MEMORY LEAK HERE
-	for(BlockList::iterator block = mBlockData.begin(); block != mBlockData.end();) {
-		BaseBlock* b = (*block).second;
-		delete b;
-		block = mBlockData.erase( block );
+	for(BlockList::iterator block = mBlockData.begin(); block != mBlockData.end(); ++block) {
+		delete block->second;
 	}
+	mBlockData.clear();
 }
 
 void WorldChunk::initalize()
@@ -27,15 +28,19 @@ void WorldChunk::initalize()
 
 void WorldChunk::fillWithTestData()
 {
+	float d = 0;
 	if(mY == 0)
 	{
 		for(int x = 0; x < CHUNK_WIDTH; x++)
 		{
 			for(int z = 0; z < CHUNK_WIDTH; z++)
 			{
-				for(int y = 10; y >= 0; y--)
+				for(int y = 0; y < 10; y++)
 				{
-					addBlockToChunk( new StoneBlock(x, y, z) );
+					if( y == 9 ) 
+						addBlockToChunk( new WoodBlock(x, y, z) );
+					else
+						addBlockToChunk( new StoneBlock(x, y, z) );
 				}
 			}
 		}
@@ -44,13 +49,27 @@ void WorldChunk::fillWithTestData()
 
 void WorldChunk::addBlockToChunk(BaseBlock* block)
 {
-	if( getBlockAt( block->getX(), block->getY(), block->getZ() ) != NULL ) {
-		Util::log("Error: Block already exsists!");
+	long k = block->getZ() * CHUNK_WIDTH * CHUNK_HEIGHT + block->getY() * CHUNK_WIDTH + block->getX();
+	BlockList::iterator lb = mBlockData.lower_bound( k );
+
+	if(lb != mBlockData.end() && !(mBlockData.key_comp()(k, lb->first)))
+	{
+		delete lb->second;
+		lb->second = block;
+		Util::log("Block replaced");
 	}
-	else {
-		mHasChanged = true;
-		mBlockData.insert( BlockPosPair( block->getZ() * CHUNK_WIDTH * CHUNK_HEIGHT + block->getY() * CHUNK_WIDTH + block->getX(), block ) );
+	else
+	{
+		// the key does not exist in the map
+		// add it to the map
+		mBlockData.insert(lb, BlockList::value_type(k, block));
 	}
+	mHasChanged = true;
+}
+
+void WorldChunk::reserveBlocks( size_t count )
+{
+	
 }
 
 BaseBlock* WorldChunk::getBlockAt(long x, long y, long z)
@@ -85,26 +104,48 @@ size_t WorldChunk::getVisibleBlockCount()
 	return mVisibleBlocks.size();
 }
 
+long WorldChunk::getVisibleFaceCount()
+{
+	return mVisibleFaces;
+}
+
 void WorldChunk::updateVisibility()
 {
+	mVisibleFaces = 0;
 	// Just a brute force Occlusion test: perhaps this could be optimized?
 	for(BlockList::iterator block = mBlockData.begin(); block != mBlockData.end(); ++block) {
 		BaseBlock* b = (*block).second;
+		short visFlags = VIS_NONE;
 		//Check All axes for adjacent blocks.
-		if( getBlockAt( b->getX() + 1, b->getY(), b->getZ() ) == NULL )
-			_blockVisible( (*block), true );
-		else if( getBlockAt( b->getX() - 1, b->getY(), b->getZ() ) == NULL )
-			_blockVisible( (*block), true );
-		else if( getBlockAt( b->getX(), b->getY() + 1, b->getZ() ) == NULL )
-			_blockVisible( (*block), true );
-		else if( getBlockAt( b->getX(), b->getY() - 1, b->getZ() ) == NULL )
-			_blockVisible( (*block), true );
-		else if( getBlockAt( b->getX(), b->getY(), b->getZ() + 1 ) == NULL )
-			_blockVisible( (*block), true );
-		else if( getBlockAt( b->getX(), b->getY(), b->getZ() - 1 ) == NULL )
-			_blockVisible( (*block), true );
-		else
+		if( getBlockAt( b->getX() + 1, b->getY(), b->getZ() ) == NULL ) {
+			mVisibleFaces++;
+			visFlags = visFlags | VIS_RIGHT;
+		}
+		if( getBlockAt( b->getX() - 1, b->getY(), b->getZ() ) == NULL ) {
+			mVisibleFaces++;
+			visFlags = visFlags | VIS_LEFT;
+		}
+		if( getBlockAt( b->getX(), b->getY() + 1, b->getZ() ) == NULL ) {
+			mVisibleFaces++;
+			visFlags = visFlags | VIS_TOP;
+		}
+		if( getBlockAt( b->getX(), b->getY() - 1, b->getZ() ) == NULL ) {
+			mVisibleFaces++;
+			visFlags = visFlags | VIS_BOTTOM;
+		}
+		if( getBlockAt( b->getX(), b->getY(), b->getZ() + 1 ) == NULL ) {
+			mVisibleFaces++;
+			visFlags = visFlags | VIS_BACK;
+		}
+		if( getBlockAt( b->getX(), b->getY(), b->getZ() - 1 ) == NULL ) {
+			mVisibleFaces++;
+			visFlags = visFlags | VIS_FORWARD;
+		}
+		(*block).second->mViewFlags = visFlags;
+		if( visFlags == VIS_NONE )
 			_blockVisible( (*block), false );
+		else
+			_blockVisible( (*block), true);
 	}
 }
 

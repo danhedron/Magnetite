@@ -5,8 +5,29 @@
 class WorldChunk;
 class BaseBlock;
 
-typedef std::pair<WorldChunk*,GLfloat*> ChunkGeomBuffer;
-typedef std::map<WorldChunk*,GLfloat*> ChunkGeomList;
+/**
+ * @struct Struct to represent a vertex, memory aligned for easy array-xing
+ */
+struct GLvertex {
+	float x, y, z;
+	float nx, ny, nz;
+	float s0, t0;
+};
+typedef unsigned short GLedge;
+
+struct GLgeometry {
+	GLedge* edgeData;
+	GLvertex* vertexData;
+	size_t edgeCount;
+	size_t vertexCount;
+};
+struct GLbuffer {
+	GLuint vertex;
+	GLuint index;
+};
+
+typedef std::map<WorldChunk*,GLgeometry> ChunkGeomList;
+//typedef std::map<WorldChunk*,GLbuffer> ChunkGeomList;
 
 class Renderer
 {
@@ -23,9 +44,14 @@ protected:
 
 	size_t mRenderMode;
 
+	float orbitDistance;
+	float orbitHeight;
+
 	size_t mFpsAvg;
 	
 	ChunkGeomList mWorldBuffers;
+
+	GLvertex vertex( float x, float y, float z, float nx, float ny, float nz, float u = 0.f, float v = 0.f, float w = 0.f );
 
 public:
 	Renderer(void);
@@ -72,7 +98,7 @@ public:
 	void drawText( std::string text, int x, int y );
 
 	void buildChunkVBO(WorldChunk* chunk);
-	void buildCubeData(BaseBlock* block, size_t& ind, GLfloat* data);
+	void buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges);
 
 	/**
 	 * Notify the renderer that a chunk has been unloaded from the engine and it is ok to release it's graphics buffer.

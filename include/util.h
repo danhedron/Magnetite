@@ -2,6 +2,10 @@
 #define _UTIL_H_
 #include "prerequisites.h"
 
+#ifdef _WIN32
+#include <psapi.h>
+#endif
+
 class Util
 {
 public:
@@ -17,6 +21,27 @@ public:
 	static stringvector split(const std::string &s, char delim) {
 		stringvector elems;
 		return Util::split(s, delim, elems);
+	}
+
+	static void getMemoryUsage(size_t &mainCurrent, size_t &mainMax, size_t &pagedCurrent, size_t &pagedMax, size_t &pageFault)
+	{
+		HANDLE hProcess;
+		PROCESS_MEMORY_COUNTERS pmc;
+
+		hProcess = OpenProcess( PROCESS_QUERY_INFORMATION |
+								PROCESS_VM_READ,
+								FALSE,
+								GetCurrentProcessId() );
+
+		if( GetProcessMemoryInfo( hProcess, &pmc, sizeof(pmc) ) ) {
+			mainCurrent = pmc.WorkingSetSize;
+			mainMax = pmc.PeakWorkingSetSize;
+			pagedCurrent = pmc.PagefileUsage;
+			pagedMax = pmc.PeakPagefileUsage;
+			pageFault = pmc.PageFaultCount;
+		}
+
+		CloseHandle( hProcess );
 	}
 
 	static void log(const std::string text)

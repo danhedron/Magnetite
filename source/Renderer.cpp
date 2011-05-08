@@ -1,8 +1,11 @@
 #include "Renderer.h"
 #include "WorldChunk.h"
 #include "BaseBlock.h"
+#include "OpencraftCore.h"
+#include "TextureManager.h"
 
 #include "util.h"
+#include "assert.h"
 
 Renderer::Renderer(void)
 : totalTime( 0 ),
@@ -12,7 +15,9 @@ mScrHeight( 0 ),
 mBlRendered( 0 ),
 mBlTotal( 0 ),
 mRenderMode( RENDER_SOLID ),
-mFpsAvg( 0 )
+mFpsAvg( 0 ),
+orbitDistance( 50.f ),
+orbitHeight( 16.f )
 {
 }
 
@@ -45,9 +50,13 @@ void Renderer::resizeViewport(size_t x, size_t y, size_t w, size_t h)
 	glViewport(x, y, w, h);
 	mScrWidth = w;
 	mScrHeight = h;
-	std::stringstream msg;
-	msg << "Window Resized: " << w << "x" << h;
-	Util::log( msg.str() );
+	float width = w;
+	float height = h;
+	float aspect = width/height;
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(90.f, aspect, 1.f, 500.f);
+	Util::log( "Window Resized: " + Util::toString(w) + "x" + Util::toString(h) + " " + Util::toString(aspect) );
 }
 
 void Renderer::enable2D()
@@ -85,87 +94,153 @@ size_t Renderer::getRenderMode()
 	return mRenderMode;
 }
 
-void Renderer::buildCubeData(BaseBlock* block, size_t& ind, GLfloat* data)
+GLvertex Renderer::vertex(float x, float y, float z, float nx, float ny, float nz, float u, float v, float w)
 {
-	/* Sorry */
-	data[ind + 0] = block->getX() + 0.5f;
-	data[ind + 1] = block->getY() + 0.5f;
-	data[ind + 2] = block->getZ() + 0.5f;
-	data[ind + 3] = block->getX() - 0.5f;
-	data[ind + 4] = block->getY() + 0.5f;
-	data[ind + 5] = block->getZ() + 0.5f;
-	data[ind + 6] = block->getX() - 0.5f;
-	data[ind + 7] = block->getY() - 0.5f;
-	data[ind + 8] = block->getZ() + 0.5f;
-	data[ind + 9] = block->getX() + 0.5f;
-	data[ind + 10] = block->getY() - 0.5f;
-	data[ind + 11] = block->getZ() + 0.5f;
-	ind += 12;
-	data[ind + 0] = block->getX() + 0.5f;
-	data[ind + 1] = block->getY() + 0.5f;
-	data[ind + 2] = block->getZ() - 0.5f;
-	data[ind + 3] = block->getX() - 0.5f;
-	data[ind + 4] = block->getY() + 0.5f;
-	data[ind + 5] = block->getZ() - 0.5f;
-	data[ind + 6] = block->getX() - 0.5f;
-	data[ind + 7] = block->getY() - 0.5f;
-	data[ind + 8] = block->getZ() - 0.5f;
-	data[ind + 9] = block->getX() + 0.5f;
-	data[ind + 10] = block->getY() - 0.5f;
-	data[ind + 11] = block->getZ() - 0.5f;
-	ind += 12;
-	data[ind + 0] = block->getX() + 0.5f;
-	data[ind + 1] = block->getY() + 0.5f;
-	data[ind + 2] = block->getZ() + 0.5f;
-	data[ind + 3] = block->getX() + 0.5f;
-	data[ind + 4] = block->getY() - 0.5f;
-	data[ind + 5] = block->getZ() + 0.5f;
-	data[ind + 6] = block->getX() + 0.5f;
-	data[ind + 7] = block->getY() - 0.5f;
-	data[ind + 8] = block->getZ() - 0.5f;
-	data[ind + 9] = block->getX() + 0.5f;
-	data[ind + 10] = block->getY() + 0.5f;
-	data[ind + 11] = block->getZ() - 0.5f;
-	ind += 12;
-	data[ind + 0] = block->getX() - 0.5f;
-	data[ind + 1] = block->getY() - 0.5f;
-	data[ind + 2] = block->getZ() + 0.5f;
-	data[ind + 3] = block->getX() - 0.5f;
-	data[ind + 4] = block->getY() - 0.5f;
-	data[ind + 5] = block->getZ() - 0.5f;
-	data[ind + 6] = block->getX() + 0.5f;
-	data[ind + 7] = block->getY() - 0.5f;
-	data[ind + 8] = block->getZ() - 0.5f;
-	data[ind + 9] = block->getX() + 0.5f;
-	data[ind + 10] = block->getY() - 0.5f;
-	data[ind + 11] = block->getZ() + 0.5f;
-	ind += 12;
-	data[ind + 0] = block->getX() - 0.5f;
-	data[ind + 1] = block->getY() + 0.5f;
-	data[ind + 2] = block->getZ() + 0.5f;
-	data[ind + 3] = block->getX() + 0.5f;
-	data[ind + 4] = block->getY() + 0.5f;
-	data[ind + 5] = block->getZ() + 0.5f;
-	data[ind + 6] = block->getX() + 0.5f;
-	data[ind + 7] = block->getY() + 0.5f;
-	data[ind + 8] = block->getZ() - 0.5f;
-	data[ind + 9] = block->getX() - 0.5f;
-	data[ind + 10] = block->getY() + 0.5f;
-	data[ind + 11] = block->getZ() - 0.5f;
-	ind += 12;
-	data[ind + 0] = block->getX() - 0.5f;
-	data[ind + 1] = block->getY() + 0.5f;
-	data[ind + 2] = block->getZ() - 0.5f;
-	data[ind + 3] = block->getX() - 0.5f;
-	data[ind + 4] = block->getY() - 0.5f;
-	data[ind + 5] = block->getZ() - 0.5f;
-	data[ind + 6] = block->getX() - 0.5f;
-	data[ind + 7] = block->getY() - 0.5f;
-	data[ind + 8] = block->getZ() + 0.5f;
-	data[ind + 9] = block->getX() - 0.5f;
-	data[ind + 10] = block->getY() + 0.5f;
-	data[ind + 11] = block->getZ() + 0.5f;
-	ind += 12;
+	GLvertex vert = { x, y, z, nx, ny, nz, u, v };
+	return vert;
+}
+
+void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges)
+{
+	GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( block->getTextureX(), block->getTextureY() );
+	/* Face -Z */
+	if((block->mViewFlags & VIS_BACK) == VIS_BACK ) {
+		data[ind + 0] = vertex( block->getX() + 0.5f, block->getY() + 0.5f,	block->getZ() + 0.5f, // Coordinates
+								0.0f, 0.0f, -1.0f,
+								rect.x, rect.y );
+		data[ind + 1] = vertex( block->getX() - 0.5f, block->getY() + 0.5f, block->getZ() + 0.5f, // Coordinates
+								0.0f, 0.0f, -1.0f,
+								rect.x + rect.w, rect.y );
+		data[ind + 2] = vertex( block->getX() - 0.5f, block->getY() - 0.5f, block->getZ() + 0.5f, // Coordinates
+								0.0f, 0.0f, -1.0f,
+								rect.x + rect.w, rect.y + rect.h );
+		data[ind + 3] = vertex( block->getX() + 0.5f, block->getY() - 0.5f, block->getZ() + 0.5f, // Coordinates
+								0.0f, 0.0f, -1.0f,
+								rect.x, rect.y + rect.h );
+		edges[eInd + 0] = ind + 0; edges[eInd + 1] = ind + 2;
+		edges[eInd + 2] = ind + 2; edges[eInd + 3] = ind + 1;
+		edges[eInd + 4] = ind + 1; edges[eInd + 5] = ind + 0;
+		edges[eInd + 6] = ind + 0; edges[eInd + 7] = ind + 3;
+		edges[eInd + 8] = ind + 3; edges[eInd + 9] = ind + 2;
+		edges[eInd +10] = ind + 2; edges[eInd +11] = ind + 0;
+		eInd += 12;
+ 		ind += 4;
+	}
+	/* Face +Z */
+	if((block->mViewFlags & VIS_FORWARD) == VIS_FORWARD ) {
+		data[ind + 0] = vertex( block->getX() + 0.5f, block->getY() + 0.5f, block->getZ() - 0.5f, // Coordinates
+								0.0f, 0.0f, 1.0f,
+								rect.x, rect.y );
+		data[ind + 1] = vertex( block->getX() - 0.5f, block->getY() + 0.5f, block->getZ() - 0.5f, // Coordinates
+								0.0f, 0.0f, 1.0f,
+								rect.x + rect.w, rect.y );
+		data[ind + 2] = vertex( block->getX() - 0.5f, block->getY() - 0.5f, block->getZ() - 0.5f, // Coordinates
+								0.0f, 0.0f, 1.0f,
+								rect.x + rect.w, rect.y + rect.h );
+		data[ind + 3] = vertex( block->getX() + 0.5f, block->getY() - 0.5f, block->getZ() - 0.5f, // Coordinates
+								0.0f, 0.0f, 1.0f,
+								rect.x, rect.y + rect.h );
+		edges[eInd + 0] = ind + 0; edges[eInd + 1] = ind + 2;
+		edges[eInd + 2] = ind + 2; edges[eInd + 3] = ind + 3;
+		edges[eInd + 4] = ind + 3; edges[eInd + 5] = ind + 0;
+		edges[eInd + 6] = ind + 0; edges[eInd + 7] = ind + 1;
+		edges[eInd + 8] = ind + 1; edges[eInd + 9] = ind + 2;
+		edges[eInd +10] = ind + 2; edges[eInd +11] = ind + 0;
+		eInd += 12;
+		ind += 4;
+	}
+	/* Face +X */
+	if((block->mViewFlags & VIS_RIGHT) == VIS_RIGHT) {
+		data[ind + 0] = vertex( block->getX() + 0.5f, block->getY() + 0.5f, block->getZ() + 0.5f, // Coordinates
+								1.0f, 0.0f, 0.0f,
+								rect.x, rect.y );
+		data[ind + 1] = vertex( block->getX() + 0.5f, block->getY() - 0.5f, block->getZ() + 0.5f, // Coordinates
+								1.0f, 0.0f, 0.0f,
+								rect.x + rect.w, rect.y );
+		data[ind + 2] = vertex( block->getX() + 0.5f, block->getY() - 0.5f, block->getZ() - 0.5f, // Coordinates
+								1.0f, 0.0f, 0.0f,
+								rect.x + rect.w, rect.y + rect.h );
+		data[ind + 3] = vertex( block->getX() + 0.5f, block->getY() + 0.5f, block->getZ() - 0.5f, // Coordinates
+								1.0f, 0.0f, 0.0f,
+								rect.x, rect.y + rect.h );
+		edges[eInd + 0] = ind + 0; edges[eInd + 1] = ind + 2;
+		edges[eInd + 2] = ind + 2; edges[eInd + 3] = ind + 1;
+		edges[eInd + 4] = ind + 1; edges[eInd + 5] = ind + 0;
+		edges[eInd + 6] = ind + 0; edges[eInd + 7] = ind + 3;
+		edges[eInd + 8] = ind + 3; edges[eInd + 9] = ind + 2;
+		edges[eInd +10] = ind + 2; edges[eInd +11] = ind + 0;
+		eInd += 12;
+		ind += 4;
+	}
+	/* Face -Y */
+	if((block->mViewFlags & VIS_BOTTOM) == VIS_BOTTOM) {
+		data[ind + 0] = vertex( block->getX() - 0.5f, block->getY() - 0.5f, block->getZ() + 0.5f, // Coordinates
+								0.0f, -1.0f, 0.0f,
+								rect.x, rect.y );
+		data[ind + 1] = vertex( block->getX() - 0.5f, block->getY() - 0.5f, block->getZ() - 0.5f, // Coordinates
+								0.0f, -1.0f, 0.0f,
+								rect.x + rect.w, rect.y );
+		data[ind + 2] = vertex( block->getX() + 0.5f, block->getY() - 0.5f, block->getZ() - 0.5f, // Coordinates
+								0.0f, -1.0f, 0.0f,
+								rect.x + rect.w, rect.y + rect.h );
+		data[ind + 3] = vertex( block->getX() + 0.5f, block->getY() - 0.5f, block->getZ() + 0.5f, // Coordinates
+								0.0f, -1.0f, 0.0f,
+								rect.x, rect.y + rect.h );
+		edges[eInd + 0] = ind + 0; edges[eInd + 1] = ind + 2;
+		edges[eInd + 2] = ind + 2; edges[eInd + 3] = ind + 1;
+		edges[eInd + 4] = ind + 1; edges[eInd + 5] = ind + 0;
+		edges[eInd + 6] = ind + 0; edges[eInd + 7] = ind + 3;
+		edges[eInd + 8] = ind + 3; edges[eInd + 9] = ind + 2;
+		edges[eInd +10] = ind + 2; edges[eInd +11] = ind + 0;
+		eInd += 12;
+		ind += 4;
+	}
+	/* Face +Y */
+	if((block->mViewFlags & VIS_TOP) == VIS_TOP) {
+		data[ind + 0] = vertex( block->getX() - 0.5f, block->getY() + 0.5f, block->getZ() + 0.5f, // Coordinates
+								0.0f, 1.0f, 0.0f,
+								rect.x, rect.y );
+		data[ind + 1] = vertex( block->getX() + 0.5f, block->getY() + 0.5f, block->getZ() + 0.5f, // Coordinates
+								0.0f, 1.0f, 0.0f,
+								rect.x + rect.w, rect.y );
+		data[ind + 2] = vertex( block->getX() + 0.5f, block->getY() + 0.5f, block->getZ() - 0.5f, // Coordinates
+								0.0f, 1.0f, 0.0f,
+								rect.x + rect.w, rect.y + rect.h );
+		data[ind + 3] = vertex( block->getX() - 0.5f, block->getY() + 0.5f, block->getZ() - 0.5f, // Coordinates
+								0.0f, 1.0f, 0.0f,
+								rect.x, rect.y + rect.h );
+		edges[eInd + 0] = ind + 0; edges[eInd + 1] = ind + 2;
+		edges[eInd + 2] = ind + 2; edges[eInd + 3] = ind + 1;
+		edges[eInd + 4] = ind + 1; edges[eInd + 5] = ind + 0;
+		edges[eInd + 6] = ind + 0; edges[eInd + 7] = ind + 3;
+		edges[eInd + 8] = ind + 3; edges[eInd + 9] = ind + 2;
+		edges[eInd +10] = ind + 2; edges[eInd +11] = ind + 0;
+		eInd += 12;
+		ind += 4;
+	}
+	/* Face -X */
+	if((block->mViewFlags & VIS_LEFT) == VIS_LEFT) {
+		data[ind + 0] = vertex( block->getX() - 0.5f, block->getY() + 0.5f, block->getZ() - 0.5f, // Coordinates
+								-1.0f, 0.0f, 0.0f,
+								rect.x, rect.y );
+		data[ind + 1] = vertex( block->getX() - 0.5f, block->getY() - 0.5f, block->getZ() - 0.5f, // Coordinates
+								-1.0f, 0.0f, 0.0f,
+								rect.x + rect.w, rect.y );
+		data[ind + 2] = vertex( block->getX() - 0.5f, block->getY() - 0.5f, block->getZ() + 0.5f, // Coordinates
+								-1.0f, 0.0f, 0.0f,
+								rect.x + rect.w, rect.y + rect.h );
+		data[ind + 3] = vertex( block->getX() - 0.5f, block->getY() + 0.5f, block->getZ() + 0.5f, // Coordinates
+								-1.0f, 0.0f, 0.0f,
+								rect.x, rect.y + rect.h );
+		edges[eInd + 0] = ind + 0; edges[eInd + 1] = ind + 2;
+		edges[eInd + 2] = ind + 2; edges[eInd + 3] = ind + 1;
+		edges[eInd + 4] = ind + 1; edges[eInd + 5] = ind + 0;
+		edges[eInd + 6] = ind + 0; edges[eInd + 7] = ind + 3;
+		edges[eInd + 8] = ind + 3; edges[eInd + 9] = ind + 2;
+		edges[eInd +10] = ind + 2; edges[eInd +11] = ind + 0;
+		eInd += 12;
+		ind += 4;
+	}
 }
 
 
@@ -176,33 +251,42 @@ enum {
 	POSITION_OBJECT = 0
 };
 
-static GLuint PositionSize;
+static GLuint VertexSize;
 
 void Renderer::buildChunkVBO(WorldChunk* chunk)
 {
-	PositionSize = chunk->getBlockCount() * 6 * 4 * 3 * sizeof(GLfloat);
-	GLfloat* PositionData = new GLfloat[chunk->getVisibleBlockCount() * 6 * 4 * 3];
-	chunkSize = chunk->getVisibleBlockCount() * 6 * 4;
+	VertexSize = chunk->getVisibleFaceCount() * 4 * sizeof(GLvertex);
+	GLuint vertexCount	 = chunk->getVisibleFaceCount() * 4;
+	GLuint edgeCount	 = chunk->getVisibleFaceCount() * 12;
+	GLvertex* vertexData = new GLvertex[vertexCount];
+	GLedge* edgeData	 = new GLedge[edgeCount];
 	
 	BlockList* blocks = chunk->getVisibleBlocks();
 	size_t ind = 0;
+	size_t edgeInd = 0;
 	//glTranslatef( (*block)->getX(), (*block)->getY(), (*block)->getZ() );
 	for(BlockList::iterator block = blocks->begin(); block != blocks->end(); ++block) {
-		buildCubeData((*block).second, ind, PositionData);
+		buildCubeData((*block).second, ind, edgeInd, vertexData, edgeData);
 	}
 
 	// Chunk has been defined, store it's data
-	mWorldBuffers.insert( std::pair<WorldChunk*,GLfloat*>( chunk, PositionData ) );
+	GLgeometry geom = { edgeData, vertexData, edgeCount, vertexCount };
+
+	//GLbuffer vboBuffer;
+	// Generate vertex buffer
+	//glGenBuffersARB(1, &vboBuffer.vertex);
+	//glBindBufferARB(GL_ARRAY_BUFFER_ARB, vboBuffer.vertex );
+	//glBufferDataARB(GL_ARRAY_BUFFER_ARB, sizeof(GLvertex)*vertexCount, &vertexData[0].x, GL_STATIC_DRAW_ARB);
+	//glGenBuffersARB(1, &vboBuffer.index);
+	
+	//delete[] vertexData;
+	//delete[] edgeData;
+
+	//mWorldBuffers.insert( ChunkGeomList::value_type( chunk, chunkId ) );
+	mWorldBuffers.insert( ChunkGeomList::value_type( chunk, geom ) );
 
 	mBlRendered += chunk->getVisibleBlockCount();
 	mBlTotal += chunk->getBlockCount();
-
-	/*glGenBuffersARB(1, &chunkVbo);
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB, chunkVbo);
-	
-	glBufferDataARB(GL_ARRAY_BUFFER_ARB, PositionSize, PositionData, GL_STATIC_DRAW_ARB);*/
-	
-	//delete[] PositionData;
 }
 
 void Renderer::notifyChunkUnloaded( WorldChunk* chunk )
@@ -210,7 +294,9 @@ void Renderer::notifyChunkUnloaded( WorldChunk* chunk )
 	ChunkGeomList::iterator it = mWorldBuffers.find( chunk );
 	if(it != mWorldBuffers.end()) {
 		// We have a buffer for this chunk, free it.
-		delete[] it->second;
+		delete[] it->second.vertexData;
+		delete[] it->second.edgeData;
+		//glDeleteBuffersARB(1, &it->second);
 		mWorldBuffers.erase( it );
 	}
 }
@@ -223,6 +309,8 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 
 	glMatrixMode(GL_MODELVIEW);
 
+	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CW);
 	for(std::vector<WorldChunk*>::iterator chunk = chunks.begin();
 		chunk != chunks.end();
 		++chunk)
@@ -236,7 +324,7 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 		
 		// Sort out view Matrix.
 		glLoadIdentity();
-		glTranslatef(0.f, -15.f, -50.f);
+		glTranslatef(0.f, -orbitHeight, -orbitDistance);
 		//glRotatef(totalTime * 50, 1.f, 0.f, 0.f);
 		glRotatef(totalTime * 10, 0.f, 1.f, 0.f);
 		float x = (*chunk)->getX() * CHUNK_WIDTH;
@@ -259,21 +347,48 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);*/
 
+		GLtexture* tex = OpencraftCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/world.png");
+		if( tex != 0 )
+		{
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, tex->glID);
+		}
+
 		if( it != mWorldBuffers.end() )
 		{
-			GLfloat* PositionData = (*it).second;
+			GLgeometry chunkGeom = (*it).second;
 
 			glColor3f(1,1,1);
 			glEnableClientState(GL_VERTEX_ARRAY);
-			glVertexPointer(3, GL_FLOAT, 0, PositionData);
+			glVertexPointer(3, GL_FLOAT, sizeof(GLvertex), &(chunkGeom.vertexData[0].x));
+			glEnableClientState(GL_NORMAL_ARRAY);
+			glNormalPointer(GL_FLOAT, sizeof(GLvertex), &(chunkGeom.vertexData[0].nx));
+			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			glTexCoordPointer(2, GL_FLOAT, sizeof(GLvertex), &(chunkGeom.vertexData[0].s0));
+			glClientActiveTexture(GL_TEXTURE1);
+
+			//Util::log( Util::toString( (int)chunkGeom.vertexData ) + " " + Util::toString( chunkGeom.vertexCount) );
+
 			// Draw the chunk.
 			if(mRenderMode == RENDER_WIRE)
-				glDrawArrays(GL_LINES, 0, chunkSize);
+				glDrawRangeElements(GL_LINES, 0, chunkGeom.vertexCount, chunkGeom.edgeCount, GL_UNSIGNED_SHORT, chunkGeom.edgeData);
 			else
-				glDrawArrays(GL_QUADS, 0, chunkSize);
+				glDrawRangeElements(GL_QUADS, 0, chunkGeom.vertexCount, chunkGeom.edgeCount, GL_UNSIGNED_SHORT, chunkGeom.edgeData);
+			
+			glVertexPointer(3, GL_FLOAT, 0, 0);
+			glNormalPointer(GL_FLOAT, 0, 0);
 			glDisableClientState(GL_VERTEX_ARRAY);
+			glDisableClientState(GL_NORMAL_ARRAY);
+			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		}
+
+		if( tex != 0 )
+		{
+			glDisable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 	}
+	glDisable(GL_CULL_FACE);
 
 	drawStats( dt, chunks.size() );
 }
@@ -282,10 +397,15 @@ void Renderer::drawStats(double dt, size_t chunkCount)
 {
 	// Switch to 2D for overlays
 	enable2D();
-	char buff[200];
+	/*size_t memCurrent,memPeak,pagedCurrent,pagedPeak,pageFaults;
+	Util::getMemoryUsage(memCurrent,memPeak,pagedCurrent,pagedPeak,pageFaults);*/
+
+	char buff[500];
 	long percent = ( mBlTotal > 0 ? (mBlRendered*100)/(mBlTotal) : 0 );
-	sprintf( buff, "Opencraft Performance:\n dt: %f\n %f FPS\n Avg: %u\n"
-		"World Stats:\n Blocks: %u/%u - %u%%\n Rendered Chunks: %u", dt, (1/dt), mFpsAvg, mBlRendered, mBlTotal, percent, chunkCount);
+	sprintf( buff,  "Opencraft Performance:\n dt: %f\n %f FPS\n Avg: %u\n"
+					"World Stats:\n Blocks: %u/%u - %u%%\n Rendered Chunks: %u"
+					/*"Memory Stats:\n RAM: %u/%u\n Paged: %u/%u\n PageFaults: %u"*/,
+					dt, (1/dt), mFpsAvg, mBlRendered, mBlTotal, percent, chunkCount /*, memCurrent, memPeak, pagedCurrent, pagedPeak, pageFaults*/);
 	std::string stats(buff);
 
 	drawText( stats, 6, 15 );
