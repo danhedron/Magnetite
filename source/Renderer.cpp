@@ -3,6 +3,7 @@
 #include "BaseBlock.h"
 
 #include "util.h"
+#include <stdio.h>
 
 Renderer::Renderer(void)
 : totalTime( 0 ),
@@ -183,7 +184,7 @@ void Renderer::buildChunkVBO(WorldChunk* chunk)
 	PositionSize = chunk->getBlockCount() * 6 * 4 * 3 * sizeof(GLfloat);
 	GLfloat* PositionData = new GLfloat[chunk->getVisibleBlockCount() * 6 * 4 * 3];
 	chunkSize = chunk->getVisibleBlockCount() * 6 * 4;
-	
+
 	BlockList* blocks = chunk->getVisibleBlocks();
 	size_t ind = 0;
 	//glTranslatef( (*block)->getX(), (*block)->getY(), (*block)->getZ() );
@@ -199,9 +200,9 @@ void Renderer::buildChunkVBO(WorldChunk* chunk)
 
 	/*glGenBuffersARB(1, &chunkVbo);
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, chunkVbo);
-	
+
 	glBufferDataARB(GL_ARRAY_BUFFER_ARB, PositionSize, PositionData, GL_STATIC_DRAW_ARB);*/
-	
+
 	//delete[] PositionData;
 }
 
@@ -233,7 +234,7 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 			// This chunk hasn't been generated yet, fix that:
 			buildChunkVBO( (*chunk) );
 		}
-		
+
 		// Sort out view Matrix.
 		glLoadIdentity();
 		glTranslatef(0.f, -15.f, -50.f);
@@ -243,10 +244,10 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 		float y = (*chunk)->getY() * CHUNK_HEIGHT;
 		float z = (*chunk)->getZ() * CHUNK_WIDTH;
 		glTranslatef(x,y,z);
-		
+
 		//Draw VBO
 		/*glBindBufferARB(GL_ARRAY_BUFFER_ARB, chunkVbo);
-		
+
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(3, GL_FLOAT, 0,0);
 
@@ -295,13 +296,13 @@ void Renderer::drawStats(double dt, size_t chunkCount)
 
 void Renderer::drawText(std::string text, int x, int y)
 {
-	stringvector lines = Util::split(text, '\n');	
+	stringvector lines = Util::split(text, '\n');
 	glColor3f(0,1,0);
 	size_t line = 0;
 	void* fnt = GLUT_BITMAP_9_BY_15;
 	for(stringvector::iterator it = lines.begin(); it != lines.end(); ++it) {
 		glRasterPos2i( x, y + (line * 16) );
-		for( std::string::iterator i = (*it).begin(); i != (*it).end(); ++i ) 
+		for( std::string::iterator i = (*it).begin(); i != (*it).end(); ++i )
 		{
 			glutBitmapCharacter(fnt, *i);
 		}
