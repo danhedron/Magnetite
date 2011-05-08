@@ -33,6 +33,12 @@ Requires sfml (Simple Fast Media Layer): [sfml-dev.org](http://www.sfml-dev.org/
 
 [Debian and Ubuntu repositories for smfl](http://www.sfml-dev.org/wiki/en/tutorials/getdebpackage)
 
+### On Windows
+
++ Add an Environment Variable named SFMLDIR, set it to the SFML folder.
+
++ Run CMake
+
 ### On Ubuntu
 
 #### Installing SFML
