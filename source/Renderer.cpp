@@ -15,9 +15,7 @@ mScrHeight( 0 ),
 mBlRendered( 0 ),
 mBlTotal( 0 ),
 mRenderMode( RENDER_SOLID ),
-mFpsAvg( 0 ),
-orbitDistance( 50.f ),
-orbitHeight( 16.f )
+mFpsAvg( 0 )
 {
 }
 
@@ -40,9 +38,11 @@ void Renderer::initialize(int *argc, char **argv)
 	// Setup a perspective projection
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(90.f, 1.f, 1.f, 500.f);
+	gluPerspective(90.f, 1.f, 0.1f, 500.f);
 
 	glutInit( argc, argv );
+
+	mCamera.setPosition(Vector3(0, 10.0f, 50.0f));
 }
 
 void Renderer::resizeViewport(size_t x, size_t y, size_t w, size_t h)
@@ -55,8 +55,9 @@ void Renderer::resizeViewport(size_t x, size_t y, size_t w, size_t h)
 	float aspect = width/height;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(90.f, aspect, 1.f, 500.f);
-	Util::log( "Window Resized: " + Util::toString(w) + "x" + Util::toString(h) + " " + Util::toString(aspect) );
+	gluPerspective(90.f, aspect, 0.1f, 500.f);
+	Util::log( "Window Resized: " + Util::toString(w) + "x" + Util::toString(h) );
+
 }
 
 void Renderer::enable2D()
@@ -92,6 +93,11 @@ void Renderer::setRenderMode( size_t rendermode )
 size_t Renderer::getRenderMode()
 {
 	return mRenderMode;
+}
+
+Camera& Renderer::getCamera()
+{
+	return mCamera;
 }
 
 GLvertex Renderer::vertex(float x, float y, float z, float nx, float ny, float nz, float u, float v, float w)
@@ -324,9 +330,8 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 		
 		// Sort out view Matrix.
 		glLoadIdentity();
-		glTranslatef(0.f, -orbitHeight, -orbitDistance);
+		mCamera.applyMatrix();
 		//glRotatef(totalTime * 50, 1.f, 0.f, 0.f);
-		glRotatef(totalTime * 10, 0.f, 1.f, 0.f);
 		float x = (*chunk)->getX() * CHUNK_WIDTH;
 		float y = (*chunk)->getY() * CHUNK_HEIGHT;
 		float z = (*chunk)->getZ() * CHUNK_WIDTH;

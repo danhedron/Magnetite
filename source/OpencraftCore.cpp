@@ -38,6 +38,9 @@ void OpencraftCore::go(int *argc, char **argv)
 	//Create some testing chunks
 	createTestChunks( radius += 2 );
 
+	int lastX = 0;
+	int lastY = 0;
+
 	while(mContinue && mWindow.IsOpened()) {
 		float lDelta = mClock.GetElapsedTime();
 		mClock.Reset();
@@ -66,6 +69,36 @@ void OpencraftCore::go(int *argc, char **argv)
 			if( (lEvt.Type == sf::Event::KeyPressed) &&
 				(lEvt.Key.Code == sf::Key::Add) ) {
 					createTestChunks( ++radius );
+			}
+			if( (lEvt.Type == sf::Event::KeyPressed) &&
+				(lEvt.Key.Code == sf::Key::A) ) {
+					mRenderer->getCamera().translate(Vector3(-0.2f,0,0));
+			}
+			if( (lEvt.Type == sf::Event::KeyPressed) &&
+				(lEvt.Key.Code == sf::Key::D) ) {
+					mRenderer->getCamera().translate(Vector3(0.2f,0,0));
+			}
+			if( (lEvt.Type == sf::Event::KeyPressed) &&
+				(lEvt.Key.Code == sf::Key::W) ) {
+					mRenderer->getCamera().translate(Vector3(0,0,-0.2f));
+			}
+			if( (lEvt.Type == sf::Event::KeyPressed) &&
+				(lEvt.Key.Code == sf::Key::S) ) {
+					mRenderer->getCamera().translate(Vector3(0,0,0.2f));
+			}
+			if( (lEvt.Type == sf::Event::KeyPressed) &&
+				(lEvt.Key.Code == sf::Key::PageUp) ) {
+					mRenderer->getCamera().translate(Vector3(0,0.2f,0));
+			}
+			if( (lEvt.Type == sf::Event::KeyPressed) &&
+				(lEvt.Key.Code == sf::Key::PageDown) ) {
+					mRenderer->getCamera().translate(Vector3(0,-0.2f,0));
+			}
+			if( (lEvt.Type == sf::Event::MouseMoved) ) {
+					mRenderer->getCamera().pitch( lEvt.MouseMove.Y  - lastY );
+					mRenderer->getCamera().yaw( lEvt.MouseMove.X - lastX );
+					lastY = lEvt.MouseMove.Y;
+					lastX = lEvt.MouseMove.X;
 			}
 			if( lEvt.Type == sf::Event::Resized ) {
 				mRenderer->resizeViewport( 0, 0, lEvt.Size.Width, lEvt.Size.Height );

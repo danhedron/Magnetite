@@ -3,7 +3,7 @@
 WoodBlock::WoodBlock(long x, long y, long z)
 : BaseBlock( x, y, z)
 {
-	texture(0,1);
+	texture(4,0);
 }
 
 WoodBlock::~WoodBlock(void)

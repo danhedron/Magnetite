@@ -6,6 +6,18 @@
 #include <psapi.h>
 #endif
 
+
+// Simple 3d vector
+struct Vector3 {
+	float x,y,z,w;
+	Vector3( float _x = 0.0f, float _y = 0.0f, float _z = 0.0f, float _w = 0.0f ) {
+		x = _x; y = _y; z = _z; w = _w;
+	}
+	Vector3 operator- () {
+		return Vector3(-x,-y,-z);
+	}
+};
+
 class Util
 {
 public:
@@ -52,6 +64,11 @@ public:
 	static std::string toString(int number)
 	{
 		return itoa(number, 10);
+	}
+
+	static std::string toString(Vector3 &vec)
+	{
+		return itoa(vec.x, 10) + "," + itoa(vec.y, 10) + "," + itoa(vec.z, 10);
 	}
 
 	/**

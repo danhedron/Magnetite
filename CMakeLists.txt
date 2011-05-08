@@ -35,6 +35,8 @@ set(OPENCRAFT_SOURCES
 	source/OpencraftCore.cpp
 	source/Main.cpp
 	source/Renderer.cpp
+	source/Camera.cpp
+	source/Matrix.cpp
 	source/BaseBlock.cpp
 	source/StoneBlock.cpp
 	source/WoodBlock.cpp
@@ -47,6 +49,8 @@ set(OPENCRAFT_HEADERS
 	include/prerequisites.h
 	include/BuildConfig.h
 	include/Renderer.h
+	include/Camera.h
+	include/Matrix.h
 	include/StoneBlock.h
 	include/WoodBlock.h
 	include/BaseBlock.h

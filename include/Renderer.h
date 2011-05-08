@@ -1,9 +1,11 @@
 #ifndef _RENDERER_H_
 #define _RENDERER_H_
 #include "prerequisites.h"
+#include "Camera.h"
 
 class WorldChunk;
 class BaseBlock;
+class Camera;
 
 /**
  * @struct Struct to represent a vertex, memory aligned for easy array-xing
@@ -44,8 +46,7 @@ protected:
 
 	size_t mRenderMode;
 
-	float orbitDistance;
-	float orbitHeight;
+	Camera mCamera;
 
 	size_t mFpsAvg;
 	
@@ -115,6 +116,8 @@ public:
 	void setRenderMode( size_t rendermode );
 
 	size_t getRenderMode();
+
+	Camera& getCamera();
 
 };
 
