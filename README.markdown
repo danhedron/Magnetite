@@ -31,8 +31,6 @@ Building
 
 Requires sfml (Simple Fast Media Layer): [sfml-dev.org](http://www.sfml-dev.org/)
 
-[Debian and Ubuntu repositories for smfl](http://www.sfml-dev.org/wiki/en/tutorials/getdebpackage)
-
 ### On Windows
 
 + Add an Environment Variable named SFMLDIR, set it to the SFML folder.
@@ -41,13 +39,22 @@ Requires sfml (Simple Fast Media Layer): [sfml-dev.org](http://www.sfml-dev.org/
 
 ### On Ubuntu
 
+Currently, OpenCraft does not build correctly on linux.
+
+[Debian and Ubuntu repositories for smfl](http://www.sfml-dev.org/wiki/en/tutorials/getdebpackage)
+
 #### Installing SFML
 
 + Add these to /etc/apt/sources.list
-    deb http://ppa.launchpad.net/christoph-egger/ubuntu hardy main
-    deb-src http://ppa.launchpad.net/christoph-egger/ubuntu hardy main
+  - `deb http://ppa.launchpad.net/christoph-egger/ubuntu hardy main`
+  - `deb-src http://ppa.launchpad.net/christoph-egger/ubuntu hardy main`
 + Run `aptitude update && apt-get libsfml-dev libcsfml-dev`
 
 #### Installing OpenGL
 
 + Run `aptitude update && apt-get mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev`
+
+#### Building
+
++ Run cmake
++ Run make in the build folder
