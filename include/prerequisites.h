@@ -1,4 +1,4 @@
-#include <GL/glee.h>
+#include <GL/GLee.h>
 #include <GL/freeglut.h>
 #include <SFML/Window.hpp>
 #include <SFML/Window/OpenGL.hpp>
@@ -12,7 +12,7 @@
 #include <map>
 #include <iostream>
 
-#include "Util.h"
+#include "util.h"
 
 typedef std::vector<std::string> stringvector;
 
