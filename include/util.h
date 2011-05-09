@@ -37,6 +37,7 @@ public:
 
 	static void getMemoryUsage(size_t &mainCurrent, size_t &mainMax, size_t &pagedCurrent, size_t &pagedMax, size_t &pageFault)
 	{
+#ifdef _WIN32
 		HANDLE hProcess;
 		PROCESS_MEMORY_COUNTERS pmc;
 
@@ -54,6 +55,7 @@ public:
 		}
 
 		CloseHandle( hProcess );
+#endif
 	}
 
 	static void log(const std::string text)
@@ -78,16 +80,16 @@ public:
 		enum { kMaxDigits = 35 };
 		std::string buf;
 		buf.reserve( kMaxDigits ); // Pre-allocate enough space.
-	
+
 		// check that the base if valid
-	
+
 		if (base < 2 || base > 16) return buf;
 		int quotient = value;
 		// Translating number to string with base:
 		do {
 			buf += "0123456789abcdef"[ std::abs( quotient % base ) ];
 			quotient /= base;
-		
+
 		} while ( quotient );
 
 		// Append the negative sign for base 10

@@ -1,5 +1,6 @@
 #include <GL/GLee.h>
 #include <GL/freeglut.h>
+#undef None
 #include <SFML/Window.hpp>
 #include <SFML/Window/OpenGL.hpp>
 #include <SFML/Graphics.hpp>
@@ -11,6 +12,7 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <stdio.h>
 
 #include "util.h"
 
