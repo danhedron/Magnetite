@@ -48,21 +48,23 @@ void Camera::yaw( float amt )
 	mYaw += amt;
 }
 
-void Camera::pitch( float amt )
+void Camera::pitch( float amt ) 
 {
 	mPitch += amt;
 }
 
 void Camera::translate( Vector3& vec )
 {
-	Vector3 v = getPosition();
+	Vector3 pv = getPosition();
+	Vector3 f;
 	
-	vec.x = (vec.x * cos(mYaw*(3.141f/180))) - (vec.z * sin(mYaw*(3.141f/180)));
-	vec.z = (vec.z * cos(mYaw*(3.141f/180))) + (vec.x * sin(mYaw*(3.141f/180)));
+	Matrix4 matrix = Matrix4();
+	matrix.translate( vec );
 
-	vec.z = (vec.z * cos(mPitch*(3.141f/180))) - (vec.y * sin(mPitch*(3.141f/180)));
-	vec.y = (vec.y * cos(mPitch*(3.141f/180))) + (vec.z * sin(mPitch*(3.141f/180)));
+	matrix = matrix * Matrix4::rotateY( mYaw*(3.141f/180) );
 
-	Util::log( Util::toString( vec.y ) );
-	setPosition( Vector3( vec.x + v.x, vec.y + v.y, vec.z + v.z ) );
+	f = vec;
+
+	//Util::log( Util::toString( vec.y ) );
+	setPosition( Vector3( f.x + pv.x, f.y + pv.y, f.z + pv.z ) );
 }

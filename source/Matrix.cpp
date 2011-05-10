@@ -78,9 +78,9 @@ Matrix4 Matrix4::rotateY( float angle )
 {
 	Matrix4 matrix;
 	matrix.matrix[0] = cos(angle);
-	matrix.matrix[2] = -sin(angle);
+	matrix.matrix[2] = sin(angle);
 	matrix.matrix[5] = 1;
-	matrix.matrix[8] = sin(angle);
+	matrix.matrix[8] = -sin(angle);
 	matrix.matrix[10] = cos(angle);
 	return matrix;
 }
