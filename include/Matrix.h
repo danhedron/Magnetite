@@ -1,6 +1,7 @@
 #ifndef _MATRIX_H_
 #define _MATRIX_H_
 #include "prerequisites.h"
+#include "Vector.h"
 
 
 class Matrix4 {

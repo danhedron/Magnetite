@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include <GL/GLee.h>
 #include <GL/freeglut.h>
 #include <SFML/Window.hpp>
@@ -10,9 +11,12 @@
 #include <iterator>
 #include <vector>
 #include <map>
+#include <limits>
 #include <iostream>
 
 #include "util.h"
+#include "Vector.h"
+#include "Matrix.h"
 
 typedef std::vector<std::string> stringvector;
 

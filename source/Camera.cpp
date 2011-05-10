@@ -14,20 +14,17 @@ Camera::~Camera(void)
 
 Matrix4 Camera::getMatrix()
 {
-	Matrix4 mat2;
-	mat2.rotateY( mYaw*(3.141f/180) );
-	Matrix4 mat;
-	mat.translate( -mPosition );
-	mat = mat2*mat;
-	return mat;
+	Matrix4 matX = Matrix4::rotateX( -(mPitch*3.141f)/180 );
+	Matrix4 matY = Matrix4::rotateY( (mYaw*3.141f)/180 );
+	Matrix4 rotated = matX * matY;
+
+	return rotated;
 }
 
 void Camera::applyMatrix() 
 {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	//Util::log( Util::toString( getMatrix().getTranslation() ) );
-	//glMultMatrixf( getMatrix().matrix );
 	glRotatef( -mPitch, 1, 0, 0);
 	glRotatef( -mYaw, 0, 1, 0);
 	glTranslatef( -mPosition.x, -mPosition.y, -mPosition.z );
@@ -55,7 +52,7 @@ void Camera::pitch( float amt )
 
 void Camera::setPitch( float p )
 {
-	mPitch = max( min( p, 90 ), -90 );
+	mPitch = std::max<float>( std::min<float>( p, 90 ), -90 );
 }
 
 void Camera::setYaw( float y )

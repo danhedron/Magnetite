@@ -2,6 +2,7 @@
 #include "WorldChunk.h"
 #include "Renderer.h"
 #include "TextureManager.h"
+#include "StoneBlock.h"
 
 OpencraftCore* OpencraftCore::Singleton = 0;
 
@@ -38,8 +39,8 @@ void OpencraftCore::go(int *argc, char **argv)
 	//Create some testing chunks
 	createTestChunks( radius += 2 );
 
-	int lastX = 0;
-	int lastY = 0;
+	int lastX = mWindow.GetWidth()/2;
+	int lastY =  mWindow.GetHeight()/20;
 
 	while(mContinue && mWindow.IsOpened()) {
 		float lDelta = mClock.GetElapsedTime();
@@ -95,10 +96,50 @@ void OpencraftCore::go(int *argc, char **argv)
 					mRenderer->getCamera().translate(Vector3(0,-0.2f,0));
 			}
 			if( (lEvt.Type == sf::Event::MouseMoved) ) {
-					mRenderer->getCamera().pitch( lEvt.MouseMove.Y  - lastY );
-					mRenderer->getCamera().yaw( lEvt.MouseMove.X - lastX );
+					mRenderer->getCamera().pitch( -(lEvt.MouseMove.Y  - lastY) );
+					mRenderer->getCamera().yaw( -(lEvt.MouseMove.X - lastX) );
 					lastY = lEvt.MouseMove.Y;
 					lastX = lEvt.MouseMove.X;
+			}
+			if( lEvt.Type == sf::Event::MouseButtonPressed && lEvt.MouseButton.Button == sf::Mouse::Left ) {
+				raycast_r ray;
+				ray.orig = mRenderer->getCamera().getPosition();
+				ray.dir = (mRenderer->getCamera().getMatrix() * Vector3(0,0,1.0f)).normalize();
+				ray = raycastWorld(ray);
+				if(ray.hit)
+				{
+					long cX, cY, cZ, bX, bY, bZ;
+					cX = ray.worldHit.x/CHUNK_WIDTH;
+					cY = ray.worldHit.y/CHUNK_HEIGHT;
+					cZ = ray.worldHit.z/CHUNK_WIDTH;
+					bX = (int)ray.worldHit.x%CHUNK_WIDTH;
+					bY = (int)ray.worldHit.y%CHUNK_HEIGHT+1;
+					bZ = (int)ray.worldHit.z%CHUNK_WIDTH;
+					WorldChunk* chunk = getChunk( cX, cY, cZ );
+					Util::log("Ray hit block: " + Util::toString(Vector3(bX,bY,bZ)) + " in chunk " + Util::toString(Vector3(cX,cY,cZ)));
+					if(chunk)
+						chunk->addBlockToChunk( new StoneBlock( bX, bY, bZ ) );
+				}
+			}
+			if( lEvt.Type == sf::Event::MouseButtonPressed && lEvt.MouseButton.Button == sf::Mouse::Right ) {
+				raycast_r ray;
+				ray.orig = mRenderer->getCamera().getPosition();
+				ray.dir = (mRenderer->getCamera().getMatrix() * Vector3(0,0,1.0f)).normalize();
+				ray = raycastWorld(ray);
+				if(ray.hit)
+				{
+					long cX, cY, cZ, bX, bY, bZ;
+					cX = ray.worldHit.x/CHUNK_WIDTH;
+					cY = ray.worldHit.y/CHUNK_HEIGHT;
+					cZ = ray.worldHit.z/CHUNK_WIDTH;
+					bX = (int)ray.worldHit.x%CHUNK_WIDTH;
+					bY = (int)ray.worldHit.y%CHUNK_HEIGHT;
+					bZ = (int)ray.worldHit.z%CHUNK_WIDTH;
+					WorldChunk* chunk = getChunk( cX, cY, cZ );
+					Util::log("Ray hit block: " + Util::toString(Vector3(bX,bY,bZ)) + " in chunk " + Util::toString(Vector3(cX,cY,cZ)));
+					if(chunk)
+						chunk->removeBlockAt( bX, bY, bZ );
+				}
 			}
 			if( lEvt.Type == sf::Event::Resized ) {
 				mRenderer->resizeViewport( 0, 0, lEvt.Size.Width, lEvt.Size.Height );
@@ -183,4 +224,79 @@ void OpencraftCore::removeChunk(long x, long y, long z)
 			return;
 		}
 	}
+}
+
+raycast_r OpencraftCore::raycastWorld(raycast_r &ray)
+{
+	Vector3 min, max;
+	ChunkList hitChunks;
+	for(ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it)
+	{
+		min = Vector3( (*it)->getX() * CHUNK_WIDTH, (*it)->getY() * CHUNK_HEIGHT,  (*it)->getZ() * CHUNK_WIDTH );
+		max = Vector3( (*it)->getX() * CHUNK_WIDTH + CHUNK_WIDTH, (*it)->getY() * CHUNK_HEIGHT + CHUNK_HEIGHT,  (*it)->getZ() * CHUNK_WIDTH + CHUNK_WIDTH );
+		raycastCube(ray, min, max);
+		if(ray.hit)
+			hitChunks.push_back((*it));
+	}
+	BlockList* blocks = NULL;
+	ray.hit = false;
+	std::vector<raycast_r> raycasts;
+	for(ChunkList::iterator it = hitChunks.begin(); it != hitChunks.end(); ++it)
+	{
+		blocks = (*it)->getVisibleBlocks();
+		for(BlockList::iterator block = blocks->begin(); block != blocks->end(); ++block) {
+			min = Vector3( (*it)->getX() * CHUNK_WIDTH + (*block).second->getX() - 0.5f,
+							(*it)->getY() * CHUNK_HEIGHT + (*block).second->getY() - 0.5f,
+							(*it)->getZ() * CHUNK_WIDTH + (*block).second->getZ() - 0.5f );
+			max = Vector3( (*it)->getX() * CHUNK_WIDTH + (*block).second->getX() + 0.5f,
+							(*it)->getY() * CHUNK_HEIGHT + (*block).second->getY() + 0.5f,
+							(*it)->getZ() * CHUNK_WIDTH + (*block).second->getZ() + 0.5f );
+			raycast_r r = ray;
+			raycastCube(r, min, max);
+			if( r.hit == true )
+				raycasts.push_back( r );
+		}	
+	}
+	
+	// Final pass, find closest hit.
+	float m = std::numeric_limits<float>::max();
+	raycast_r closest;
+	for(std::vector<raycast_r>::iterator it = raycasts.begin(); it != raycasts.end(); ++it)
+	{
+		if((*it).i0 < m) {
+			closest = (*it);
+		}
+	}
+
+	return closest;
+}
+
+raycast_r& OpencraftCore::raycastCube(raycast_r &ray, Vector3& min, Vector3& max)
+{
+	float t0 = 0;
+	float t1 = ray.maxDistance;
+	for(int i = 0; i < 3; ++i)
+	{
+		float invRayDir = 1.f / ray.dir[i];
+		float near_t = (min[i] - ray.orig[i]) * invRayDir;
+		float far_t = (max[i] - ray.orig[i]) * invRayDir;
+		if(near_t > far_t)				
+		{					
+			float temp = near_t;
+			near_t = far_t;
+			far_t = temp;
+		}
+		t0 = near_t > t0 ? near_t : t0;
+		t1 = far_t < t1 ? far_t : t1;
+		if(t0 > t1) 
+		{
+			ray.hit = false;
+			return ray;
+		}
+	}			
+	ray.i0 = t0;
+	ray.i1 = t1;
+	ray.hit = true;
+	ray.worldHit = ray.orig + ray.dir*ray.i0;
+	return ray;
 }
