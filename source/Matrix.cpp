@@ -78,9 +78,9 @@ Matrix4 Matrix4::rotateY( float angle )
 {
 	Matrix4 matrix;
 	matrix.matrix[0] = cos(angle);
-	matrix.matrix[2] = sin(angle);
+	matrix.matrix[2] = -sin(angle);
 	matrix.matrix[5] = 1;
-	matrix.matrix[8] = -sin(angle);
+	matrix.matrix[8] = sin(angle);
 	matrix.matrix[10] = cos(angle);
 	return matrix;
 }
@@ -95,17 +95,17 @@ Matrix4 Matrix4::rotateZ( float angle )
 	return matrix;
 }
 
-Vector3 Matrix4::operator* (Vector3 &vec) 
+Vector3 Matrix4::operator* (const Vector3 &vec) 
 {
 	Vector3 final;
 	final.x = vec.x * matrix[0] + vec.y * matrix[4] + vec.z * matrix[8] + matrix[12];
 	final.y = vec.x * matrix[1] + vec.y * matrix[5] + vec.z * matrix[9] + matrix[13];
-	final.y = vec.x * matrix[2] + vec.y * matrix[6] + vec.z * matrix[10] + matrix[14];
+	final.z = vec.x * matrix[2] + vec.y * matrix[6] + vec.z * matrix[10] + matrix[14];
 	final.w = vec.x * matrix[3] + vec.y * matrix[7] + vec.z * matrix[11] + matrix[15];
 	return final;
 }
 
-Matrix4 Matrix4::operator * (Matrix4 &mat)
+Matrix4 Matrix4::operator * (const Matrix4 &mat)
 {
 	Matrix4 C;
     *C.m00 = *m00 * *mat.m00 + *m01 * *mat.m10 + *m02 * *mat.m20 + *m03 * *mat.m30;

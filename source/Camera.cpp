@@ -28,8 +28,8 @@ void Camera::applyMatrix()
 	glLoadIdentity();
 	//Util::log( Util::toString( getMatrix().getTranslation() ) );
 	//glMultMatrixf( getMatrix().matrix );
-	glRotatef( mPitch, 1, 0, 0);
-	glRotatef( mYaw, 0, 1, 0);
+	glRotatef( -mPitch, 1, 0, 0);
+	glRotatef( -mYaw, 0, 1, 0);
 	glTranslatef( -mPosition.x, -mPosition.y, -mPosition.z );
 }
 
@@ -45,12 +45,22 @@ Vector3 Camera::getPosition()
 
 void Camera::yaw( float amt )
 {
-	mYaw += amt;
+	setYaw( mYaw + amt );
 }
 
 void Camera::pitch( float amt ) 
 {
-	mPitch += amt;
+	setPitch( mPitch + amt );
+}
+
+void Camera::setPitch( float p )
+{
+	mPitch = max( min( p, 90 ), -90 );
+}
+
+void Camera::setYaw( float y )
+{
+	mYaw = y;
 }
 
 void Camera::translate( Vector3& vec )
@@ -58,13 +68,11 @@ void Camera::translate( Vector3& vec )
 	Vector3 pv = getPosition();
 	Vector3 f;
 	
-	Matrix4 matrix = Matrix4();
-	matrix.translate( vec );
+	//matrix = Matrix4();
 
-	matrix = matrix * Matrix4::rotateY( mYaw*(3.141f/180) );
+	Matrix4 matX = Matrix4::rotateX( (mPitch*3.141f)/180 );
+	Matrix4 matY = Matrix4::rotateY( (mYaw*3.141f)/180 );
+	f = matX * matY * vec;
 
-	f = vec;
-
-	//Util::log( Util::toString( vec.y ) );
 	setPosition( Vector3( f.x + pv.x, f.y + pv.y, f.z + pv.z ) );
 }

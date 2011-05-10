@@ -20,6 +20,8 @@ public:
 
 	void pitch( float amt );
 	void yaw( float amt );
+	void setPitch( float p );
+	void setYaw( float y );
 
 	void translate( Vector3& v );
 
