@@ -88,6 +88,13 @@ void OpencraftCore::go(int *argc, char **argv)
 					mRenderer->getCamera().translate(Vector3(0,0,0.2f));
 			}
 			if( (lEvt.Type == sf::Event::KeyPressed) &&
+				(lEvt.Key.Code == sf::Key::T) ) {
+					//Force regen of all chunk geom.
+					for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
+						(*it)->generate();
+					}
+			}
+			if( (lEvt.Type == sf::Event::KeyPressed) &&
 				(lEvt.Key.Code == sf::Key::PageUp) ) {
 					mRenderer->getCamera().translate(Vector3(0,0.2f,0));
 			}
@@ -112,9 +119,9 @@ void OpencraftCore::go(int *argc, char **argv)
 					cX = ray.worldHit.x/CHUNK_WIDTH;
 					cY = ray.worldHit.y/CHUNK_HEIGHT;
 					cZ = ray.worldHit.z/CHUNK_WIDTH;
-					bX = (int)ray.worldHit.x%CHUNK_WIDTH;
-					bY = (int)ray.worldHit.y%CHUNK_HEIGHT+1;
-					bZ = (int)ray.worldHit.z%CHUNK_WIDTH;
+					bX = abs((int)ray.worldHit.x)%CHUNK_WIDTH;
+					bY = abs((int)ceil(ray.worldHit.y))%CHUNK_HEIGHT;
+					bZ = abs((int)ray.worldHit.z)%CHUNK_WIDTH;
 					WorldChunk* chunk = getChunk( cX, cY, cZ );
 					Util::log("Ray hit block: " + Util::toString(Vector3(bX,bY,bZ)) + " in chunk " + Util::toString(Vector3(cX,cY,cZ)));
 					if(chunk)
@@ -185,7 +192,6 @@ void OpencraftCore::destoryWorld()
 	for(ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); )
 	{
 		Util::log("Deleted Chunk");
-		mRenderer->notifyChunkUnloaded((*it));
 		delete (*it);
 		it = mChunks.erase( it );
 	}
@@ -218,7 +224,6 @@ void OpencraftCore::removeChunk(long x, long y, long z)
 	{
 		if( x == (*it)->getX() && y == (*it)->getY() && z == (*it)->getZ() ) {
 			Util::log("Deleted Chunk");
-			mRenderer->notifyChunkUnloaded((*it));
 			delete (*it);
 			mChunks.erase( it );
 			return;

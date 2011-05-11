@@ -41,7 +41,7 @@ void Renderer::initialize(int *argc, char **argv)
 	gluPerspective(90.f, 1.f, 0.1f, 500.f);
 
 	glutInit( argc, argv );
-	Vector3 vec(0, 10.0f, 50.0f);
+	Vector3 vec(0, 10.0f, 10.0f);
 	mCamera.setPosition(vec);
 }
 
@@ -110,6 +110,21 @@ void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvert
 {
 	GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( block->getTextureX(), block->getTextureY() );
 	block->vertexIndex = ind;
+
+	//Calculate the UVs based on visibility and something else.
+	float y = 0.f;
+	for( size_t f = 0; f < 6; f++ ) {
+		if( (block->mViewFlags & (1<<f)) == (1<<f) )
+			y += (1.0f / 7.0f);
+	}
+
+	rect.x = 0;
+	rect.w = (1.0f/7.0f);
+	rect.y = y;
+	rect.h = (1.0f/7.0f);
+
+	Util::log( Util::toString( y * 7.0f ) );
+
 	/* Face -Z */
 	if((block->mViewFlags & VIS_BACK) == VIS_BACK ) {
 		//if( block->getY() >= 4 ) {
@@ -146,8 +161,8 @@ void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvert
 		data[ind + 3] = vertex( block->getX() + 0.5f, block->getY() - 0.5f, block->getZ() - 0.5f, // Coordinates
 								0.0f, 0.0f, 1.0f,
 								rect.x, rect.y + rect.h );
-		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
-		edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
+		edges[eInd + 5] = ind + 2; edges[eInd + 4] = ind + 1; edges[eInd + 3] = ind + 0;
+		edges[eInd + 2] = ind + 2; edges[eInd + 1] = ind + 0; edges[eInd + 0] = ind + 3;
 		eInd += 6;
 		ind += 4;
 	}
@@ -229,59 +244,6 @@ void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvert
 	}
 }
 
-void Renderer::buildChunkVBO(WorldChunk* chunk)
-{
-	Util::log("Generating chunk mesh");
-	GLuint VertexSize = chunk->getVisibleFaceCount() * 4 * sizeof(GLvertex);
-	GLuint vertexCount	 = chunk->getVisibleFaceCount() * 4;
-	GLuint edgeCount	 = chunk->getVisibleFaceCount() * 6;
-	GLvertex* vertexData = new GLvertex[vertexCount];
-	GLedge* edgeData	 = new GLedge[edgeCount];
-
-	BlockList* blocks = chunk->getVisibleBlocks();
-	size_t ind = 0;
-	size_t edgeInd = 0;
-	//glTranslatef( (*block)->getX(), (*block)->getY(), (*block)->getZ() );
-	for(BlockList::iterator block = blocks->begin(); block != blocks->end(); ++block) {
-		buildCubeData((*block).second, ind, edgeInd, vertexData, edgeData);
-	}
-
-	// Chunk has been defined, store it's data
-	GLgeometry geom = { edgeData, vertexData, edgeCount, vertexCount };
-
-	chunk->notifyGenerated();
-
-	//GLbuffer vboBuffer;
-	// Generate vertex buffer
-	//glGenBuffersARB(1, &vboBuffer.vertex);
-	//glBindBufferARB(GL_ARRAY_BUFFER_ARB, vboBuffer.vertex );
-	//glBufferDataARB(GL_ARRAY_BUFFER_ARB, sizeof(GLvertex)*vertexCount, &vertexData[0].x, GL_STATIC_DRAW_ARB);
-	//glGenBuffersARB(1, &vboBuffer.index);
-
-	//delete[] vertexData;
-	//delete[] edgeData;
-
-	//mWorldBuffers.insert( ChunkGeomList::value_type( chunk, chunkId ) );
-	// Delete the chunk's previous data
-	notifyChunkUnloaded(chunk);
-	mWorldBuffers.insert( ChunkGeomList::value_type( chunk, geom ) );
-
-	//mBlRendered += chunk->getVisibleBlockCount();
-	//mBlTotal += chunk->getBlockCount();
-}
-
-void Renderer::notifyChunkUnloaded( WorldChunk* chunk )
-{
-	ChunkGeomList::iterator it = mWorldBuffers.find( chunk );
-	if(it != mWorldBuffers.end()) {
-		// We have a buffer for this chunk, free it.
-		delete[] it->second.vertexData;
-		delete[] it->second.edgeData;
-		//glDeleteBuffersARB(1, &it->second);
-		mWorldBuffers.erase( it );
-	}
-}
-
 void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 {
 	totalTime += dt;
@@ -294,18 +256,18 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 	glFrontFace(GL_CW);
 
 	GLtexture* tex = OpencraftCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/world.png");
+	if(mRenderMode == RENDER_WIRE)
+		tex = OpencraftCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/vistest.png");
+	
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glColor3f(1,1,1);
 
 	for(std::vector<WorldChunk*>::iterator chunk = chunks.begin();
 		chunk != chunks.end();
 		++chunk)
 	{
-		ChunkGeomList::iterator it = mWorldBuffers.find( (*chunk) );
-
-		/*(if(it == mWorldBuffers.end() || !(*chunk)->hasGenerated()) {
-			// This chunk hasn't been generated yet, fix that:
-			buildChunkVBO( (*chunk) );
-		}*/
-
 		// Sort out view Matrix.
 		glLoadIdentity();
 		mCamera.applyMatrix();
@@ -340,63 +302,13 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 
 			GLgeometry* chunkGeom = (*chunk)->getGeometry();
 
-			/* Check vertex data for LOLWUT */
-			/*if((*chunk)->getX() == 1 && (*chunk)->getZ() == 1 && (*chunk)->getBlockCount() > CHUNK_WIDTH*3*CHUNK_WIDTH) {
-				BaseBlock* error = (*chunk)->getBlockAt(CHUNK_WIDTH-1,2,CHUNK_WIDTH-1);
-				if(error != NULL)
-				{
-					Util::log(Util::toString(error->getTextureX()) + " " + Util::toString(error->getTextureX()));
-					GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( error->getTextureX(), error->getTextureY() );
-					GLvertex* vertex = &chunkGeom->vertexData[error->vertexIndex];
-					size_t count = 0;
-					for( int f = 0; f < 6; f++ ) {
-						int flag = (1 << f);
-						if((error->mViewFlags & flag) == flag) {
-							if( vertex[0].u0 != rect.x ) {
-								vertex[0].u0 = rect.x; vertex[0].v0 = rect.y;
-								vertex[1].u0 = rect.x+rect.w; vertex[1].v0 = rect.y;
-								vertex[2].u0 = rect.x+rect.w; vertex[2].v0 = rect.y+rect.h;
-								vertex[3].u0 = rect.x; vertex[3].v0 = rect.y+rect.h;
-								count++;
-							}
-							vertex+=4; 
-						}
-					}
-					Util::log("Corrected UVs to: " + Util::toString( rect.x ) + " " + Util::toString( rect.y ) + " " + Util::toString( rect.w ) + " " + Util::toString( rect.h ) + " on " + Util::toString(count) + " faces" );
-				}
-				/*for( size_t i = 0; i < chunkGeom->vertexCount-3; i+=4 )
-				{
-					GLvertex vertex1 = chunkGeom->vertexData[i];
-					GLvertex vertex2 = chunkGeom->vertexData[i+1];
-					GLvertex vertex4 = chunkGeom->vertexData[i+3];
-					float width = abs( vertex2.u0 - vertex1.u0 );
-					float height = abs( vertex4.v0 - vertex1.v0 );
-					if( width != 0.0625f || height != 0.0625f )
-						Util::log( Util::toString( width ) + " " + Util::toString( height ));
-				}
-			}*/
-
-			glColor3f(1,1,1);
-			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(3, GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].x));
-			glEnableClientState(GL_NORMAL_ARRAY);
 			glNormalPointer(GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].nx));
-			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 			glTexCoordPointer(2, GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].u0));
 			glClientActiveTexture(GL_TEXTURE1);
 
 			// Draw the chunk.
-			if(mRenderMode == RENDER_WIRE)
-				glDrawRangeElements(GL_LINES, 0, chunkGeom->vertexCount, chunkGeom->edgeCount, GL_UNSIGNED_SHORT, chunkGeom->edgeData);
-			else
-				glDrawRangeElements(GL_TRIANGLES, 0, chunkGeom->vertexCount, chunkGeom->edgeCount, GL_UNSIGNED_SHORT, chunkGeom->edgeData);
-
-			glVertexPointer(3, GL_FLOAT, 0, 0);
-			glNormalPointer(GL_FLOAT, 0, 0);
-			glTexCoordPointer(2, GL_FLOAT, 0, 0);
-			glDisableClientState(GL_VERTEX_ARRAY);
-			glDisableClientState(GL_NORMAL_ARRAY);
-			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+			glDrawRangeElements(GL_TRIANGLES, 0, chunkGeom->vertexCount, chunkGeom->edgeCount, GL_UNSIGNED_SHORT, chunkGeom->edgeData);
 
 			if( tex != 0 )
 			{
@@ -405,6 +317,12 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 			}
 		}
 	}
+	glVertexPointer(3, GL_FLOAT, 0, 0);
+	glNormalPointer(GL_FLOAT, 0, 0);
+	glTexCoordPointer(2, GL_FLOAT, 0, 0);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisable(GL_CULL_FACE);
 
 	drawStats( dt, chunks.size() );

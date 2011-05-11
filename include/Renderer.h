@@ -22,13 +22,14 @@ struct GLgeometry {
 	GLvertex* vertexData;
 	size_t edgeCount;
 	size_t vertexCount;
+	GLgeometry::~GLgeometry() { delete[] edgeData; delete[] vertexData; }
 };
 struct GLbuffer {
 	GLuint vertex;
 	GLuint index;
 };
 
-typedef std::map<WorldChunk*,GLgeometry> ChunkGeomList;
+//typedef std::map<WorldChunk*,GLeometry> ChunkGeomList;
 //typedef std::map<WorldChunk*,GLbuffer> ChunkGeomList;
 
 class Renderer
@@ -50,7 +51,7 @@ protected:
 
 	size_t mFpsAvg;
 	
-	ChunkGeomList mWorldBuffers;
+	//ChunkGeomList mWorldBuffers;
 
 	static GLvertex vertex( float x, float y, float z, float nx, float ny, float nz, float u = 0.f, float v = 0.f, float w = 0.f );
 
@@ -98,7 +99,6 @@ public:
 	 */
 	void drawText( std::string text, int x, int y );
 
-	void buildChunkVBO(WorldChunk* chunk);
 	static void buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges);
 
 	/**

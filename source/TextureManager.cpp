@@ -19,6 +19,7 @@ void TextureManager::initalize()
 		mBlockWidth = texture->width;
 		mBlockHeight = texture->height;
 	}
+	loadTexture("../resources/sprites/vistest.png");
 }
 
 bool TextureManager::loadTexture(std::string textureName)

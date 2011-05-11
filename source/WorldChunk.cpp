@@ -34,11 +34,11 @@ void WorldChunk::fillWithTestData()
 	float d = 0;
 	if(mY == 0)
 	{
-		for(int x = 0; x < CHUNK_WIDTH; x++)
+		for(int x = 0; x < 2; x++)
 		{
-			for(int z = 0; z < CHUNK_WIDTH; z++)
+			for(int z = 0; z < 2; z++)
 			{
-				for(int y = 0; y < 3; y++)
+				for(int y = 0; y < 1; y++)
 				{
 					if( y == 9 )
 						addBlockToChunk( new WoodBlock(x, y, z) );
@@ -52,7 +52,7 @@ void WorldChunk::fillWithTestData()
 
 void WorldChunk::addBlockToChunk(BaseBlock* block)
 {
-	long k = block->getZ() * CHUNK_WIDTH * CHUNK_HEIGHT + block->getY() * CHUNK_WIDTH + block->getX();
+	long k = BLOCK_INDEX( block );
 	BlockList::iterator lb = mBlockData.find( k );
 
 	if(lb != mBlockData.end())
@@ -78,12 +78,10 @@ void WorldChunk::reserveBlocks( size_t count )
 void WorldChunk::removeBlockAt(long x, long y, long z)
 {
 	long k = z * CHUNK_WIDTH * CHUNK_HEIGHT + y * CHUNK_WIDTH + x;
-	BlockList::iterator lb = mBlockData.lower_bound( k );
-
-	if(lb != mBlockData.end() && !(mBlockData.key_comp()(k, lb->first)))
-	{
-		delete lb->second;
-		mBlockData.erase( lb );
+	BlockList::iterator it = mBlockData.find( k );
+	if( it != mBlockData.end() )  {
+		delete (*it).second;
+		mBlockData.erase( it++ );
 	}
 	mHasChanged = true;
 	mHasGenerated = false;
@@ -160,21 +158,28 @@ void WorldChunk::updateVisibility()
 			visFlags = visFlags | VIS_FORWARD;
 		}
 		(*block).second->mViewFlags = visFlags;
+		float y = 0.f;
+		for( size_t f = 0; f < 6; f++ ) {
+			if( ((*block).second->mViewFlags & (1<<f)) == (1<<f) )
+				y ++;
+		}
+		Util::log("Visible Faces: " + Util::toString(y));
 		if( visFlags == VIS_NONE )
 			_blockVisible( (*block), false );
 		else
 			_blockVisible( (*block), true);
 	}
+	//Util::log("Visible Faces: " + Util::toString(mVisibleFaces));
 }
 
 void WorldChunk::_blockVisible( BlockPosPair &block, bool v )
 {
 	BlockList::iterator it = mVisibleBlocks.find( block.first );
-	if( it == mVisibleBlocks.end() && v ) {
+	if( v && it == mVisibleBlocks.end() ) {
 		mVisibleBlocks.insert( block );
 	}
-	else if( it != mVisibleBlocks.end() && !v )  {
-		it = mVisibleBlocks.erase( it );
+	else if( !v && it != mVisibleBlocks.end() )  {
+		mVisibleBlocks.erase( it++ );
 	}
 }
 
@@ -182,8 +187,7 @@ void WorldChunk::generate()
 {
 	Util::log("Generating chunk mesh");
 	if( mGeometry != NULL ) {
-		delete[] mGeometry->edgeData;
-		delete[] mGeometry->vertexData;
+		delete mGeometry;
 	}
 	GLuint vertexCount	 = getVisibleFaceCount() * 4;
 	GLuint edgeCount	 = getVisibleFaceCount() * 6;
@@ -197,10 +201,6 @@ void WorldChunk::generate()
 	{
 		Renderer::buildCubeData((*block).second, ind, edgeInd, vertexData, edgeData);
 	}
-
-	Util::log("Chunk construction complete: " + Util::toString(edgeCount) + " " + Util::toString(vertexCount));
-
-	//Util::log("Highest Index: " + Util::toString(ind) + " Allocated: " + Util::toString(vertexCount) + " Highest Index: " + Util::toString(edgeInd) + " Allocated: " + Util::toString(edgeCount));
 	
 	// Chunk has been defined, store it's data
 	mGeometry = new GLgeometry;
@@ -233,7 +233,8 @@ void WorldChunk::update( float dt )
 {
 	if( mHasChanged ) {
 		updateVisibility();
-		generate();
+		if( !mHasGenerated )
+			generate();
 		mHasChanged = false;
 	}
 }
