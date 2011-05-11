@@ -11,17 +11,17 @@ protected:
 	Vector3 mPosition;
 public:
 	Camera(void);
-	~Camera(void);	
+	~Camera(void);
 
 	Matrix4 getMatrix();
 
-	void setPosition(Vector3& v);
+	void setPosition(const Vector3& v);
 	Vector3 getPosition();
 
 	void pitch( float amt );
 	void yaw( float amt );
 
-	void translate( Vector3& v );
+	void translate(const Vector3& v );
 
 	void applyMatrix();
 };

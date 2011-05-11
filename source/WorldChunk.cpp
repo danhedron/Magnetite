@@ -37,7 +37,7 @@ void WorldChunk::fillWithTestData()
 			{
 				for(int y = 0; y < 10; y++)
 				{
-					if( y == 9 ) 
+					if( y == 9 )
 						addBlockToChunk( new WoodBlock(x, y, z) );
 					else
 						addBlockToChunk( new StoneBlock(x, y, z) );
@@ -69,7 +69,7 @@ void WorldChunk::addBlockToChunk(BaseBlock* block)
 
 void WorldChunk::reserveBlocks( size_t count )
 {
-	
+
 }
 
 BaseBlock* WorldChunk::getBlockAt(long x, long y, long z)
@@ -156,11 +156,12 @@ void WorldChunk::_blockVisible( BlockPosPair &block, bool v )
 		mVisibleBlocks.insert( block );
 	}
 	else if( it != mVisibleBlocks.end() && !v )  {
-		it = mVisibleBlocks.erase( it );
+		//it =
+		mVisibleBlocks.erase( it++ );
 	}
 }
 
-void WorldChunk::update( float dt ) 
+void WorldChunk::update( float dt )
 {
 	if( mHasChanged ) {
 		updateVisibility();

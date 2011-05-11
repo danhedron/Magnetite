@@ -17,12 +17,12 @@ Matrix4 Camera::getMatrix()
 	Matrix4 mat2;
 	mat2.rotateY( mYaw*(3.141f/180) );
 	Matrix4 mat;
-	mat.translate( -mPosition );
+	//mat.translate( -mPosition );
 	mat = mat2*mat;
 	return mat;
 }
 
-void Camera::applyMatrix() 
+void Camera::applyMatrix()
 {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -33,7 +33,7 @@ void Camera::applyMatrix()
 	glTranslatef( -mPosition.x, -mPosition.y, -mPosition.z );
 }
 
-void Camera::setPosition(Vector3 &v)
+void Camera::setPosition(const Vector3 &v)
 {
 	mPosition = v;
 }
@@ -53,16 +53,15 @@ void Camera::pitch( float amt )
 	mPitch += amt;
 }
 
-void Camera::translate( Vector3& vec )
+void Camera::translate(const Vector3& vec )
 {
 	Vector3 v = getPosition();
-	
-	vec.x = (vec.x * cos(mYaw*(3.141f/180))) - (vec.z * sin(mYaw*(3.141f/180)));
-	vec.z = (vec.z * cos(mYaw*(3.141f/180))) + (vec.x * sin(mYaw*(3.141f/180)));
 
-	vec.z = (vec.z * cos(mPitch*(3.141f/180))) - (vec.y * sin(mPitch*(3.141f/180)));
-	vec.y = (vec.y * cos(mPitch*(3.141f/180))) + (vec.z * sin(mPitch*(3.141f/180)));
+	v.x += (vec.x * cos(mYaw*(3.141f/180))) - (vec.z * sin(mYaw*(3.141f/180)));
+	v.z += (vec.z * cos(mYaw*(3.141f/180))) + (vec.x * sin(mYaw*(3.141f/180)));
 
-	Util::log( Util::toString( vec.y ) );
-	setPosition( Vector3( vec.x + v.x, vec.y + v.y, vec.z + v.z ) );
+	v.z += (vec.z * cos(mPitch*(3.141f/180))) - (vec.y * sin(mPitch*(3.141f/180)));
+	v.y += (vec.y * cos(mPitch*(3.141f/180))) + (vec.z * sin(mPitch*(3.141f/180)));
+
+	setPosition(v);
 }

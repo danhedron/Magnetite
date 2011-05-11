@@ -31,7 +31,7 @@ void OpencraftCore::createWindow(int *argc, char **argv)
 	mRenderer->resizeViewport(0,0,800,600);
 }
 
-void OpencraftCore::go(int *argc, char **argv) 
+void OpencraftCore::go(int *argc, char **argv)
 {
 	createWindow(argc, argv);
 
@@ -146,7 +146,7 @@ void OpencraftCore::destoryWorld()
 		Util::log("Deleted Chunk");
 		mRenderer->notifyChunkUnloaded((*it));
 		delete (*it);
-		it = mChunks.erase( it ); 
+		it = mChunks.erase( it );
 	}
 }
 
@@ -179,7 +179,7 @@ void OpencraftCore::removeChunk(long x, long y, long z)
 			Util::log("Deleted Chunk");
 			mRenderer->notifyChunkUnloaded((*it));
 			delete (*it);
-			mChunks.erase( it ); 
+			mChunks.erase( it );
 			return;
 		}
 	}
