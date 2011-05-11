@@ -15,6 +15,7 @@ protected:
 	long mY;
 	long mZ;
 	bool mHasChanged;
+	bool mHasGenerated;
 	long mVisibleFaces;
 	void _blockVisible( BlockPosPair &block, bool v );
 public:
@@ -42,6 +43,12 @@ public:
 	 * @param block pointer to block
 	 */
 	void addBlockToChunk(BaseBlock* block);
+
+	/**
+	 * Removes the block at the specifed location
+	 *
+	 */
+	void removeBlockAt(long x, long y, long z);
 
 	/**
 	 * Returns a block if one exsists at the given position.
@@ -81,6 +88,16 @@ public:
 	 * Performs a visibility test on all blocks in this chunk
 	 */
 	void updateVisibility();
+
+	/**
+	 * Returns wether or not this chunk has had it's geometry 
+	 */
+	bool hasGenerated();
+
+	/**
+	 * Tells the chunk it's geometry has been cooked.
+	 */
+	void notifyGenerated();
 
 	/**
 	 * Performs updates on things inside the chunk.

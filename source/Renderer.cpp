@@ -261,6 +261,7 @@ static GLuint VertexSize;
 
 void Renderer::buildChunkVBO(WorldChunk* chunk)
 {
+	Util::log("Generating chunk mesh");
 	VertexSize = chunk->getVisibleFaceCount() * 4 * sizeof(GLvertex);
 	GLuint vertexCount	 = chunk->getVisibleFaceCount() * 4;
 	GLuint edgeCount	 = chunk->getVisibleFaceCount() * 12;
@@ -278,6 +279,8 @@ void Renderer::buildChunkVBO(WorldChunk* chunk)
 	// Chunk has been defined, store it's data
 	GLgeometry geom = { edgeData, vertexData, edgeCount, vertexCount };
 
+	chunk->notifyGenerated();
+
 	//GLbuffer vboBuffer;
 	// Generate vertex buffer
 	//glGenBuffersARB(1, &vboBuffer.vertex);
@@ -289,10 +292,12 @@ void Renderer::buildChunkVBO(WorldChunk* chunk)
 	//delete[] edgeData;
 
 	//mWorldBuffers.insert( ChunkGeomList::value_type( chunk, chunkId ) );
+	// Delete the chunk's previous data
+	notifyChunkUnloaded(chunk);
 	mWorldBuffers.insert( ChunkGeomList::value_type( chunk, geom ) );
 
-	mBlRendered += chunk->getVisibleBlockCount();
-	mBlTotal += chunk->getBlockCount();
+	//mBlRendered += chunk->getVisibleBlockCount();
+	//mBlTotal += chunk->getBlockCount();
 }
 
 void Renderer::notifyChunkUnloaded( WorldChunk* chunk )
@@ -323,7 +328,7 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 	{
 		ChunkGeomList::iterator it = mWorldBuffers.find( (*chunk) );
 
-		if(it == mWorldBuffers.end()) {
+		if(it == mWorldBuffers.end() || !(*chunk)->hasGenerated()) {
 			// This chunk hasn't been generated yet, fix that:
 			buildChunkVBO( (*chunk) );
 		}
@@ -408,9 +413,10 @@ void Renderer::drawStats(double dt, size_t chunkCount)
 	char buff[500];
 	size_t percent = ( mBlTotal > 0 ? (mBlRendered*100)/(mBlTotal) : 0 );
 	sprintf( buff,  "Opencraft Performance:\n dt: %f\n %f FPS\n Avg: %u\n"
-					"World Stats:\n Blocks: %u/%u - %u%%\n Rendered Chunks: %u"
-					/*"Memory Stats:\n RAM: %u/%u\n Paged: %u/%u\n PageFaults: %u"*/,
-					dt, (1/dt), mFpsAvg, mBlRendered, mBlTotal, percent, chunkCount /*, memCurrent, memPeak, pagedCurrent, pagedPeak, pageFaults*/);
+					"World Stats:\n Blocks: %u/%u - %u%%\n Rendered Chunks: %u\n"
+					"Camera:\n Position: %f %f %f",
+					dt, (1/dt), mFpsAvg, mBlRendered, mBlTotal, percent, chunkCount,
+					mCamera.getPosition().x,mCamera.getPosition().y,mCamera.getPosition().z);
 	std::string stats(buff);
 
 	drawText( stats, 6, 15 );

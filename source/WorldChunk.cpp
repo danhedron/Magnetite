@@ -7,6 +7,7 @@ WorldChunk::WorldChunk(long x, long y, long z)
 mY( y ),
 mZ( z ),
 mHasChanged( false ),
+mHasGenerated( false ),
 mVisibleFaces( 0 )
 {
 	initalize();
@@ -50,13 +51,12 @@ void WorldChunk::fillWithTestData()
 void WorldChunk::addBlockToChunk(BaseBlock* block)
 {
 	long k = block->getZ() * CHUNK_WIDTH * CHUNK_HEIGHT + block->getY() * CHUNK_WIDTH + block->getX();
-	BlockList::iterator lb = mBlockData.lower_bound( k );
+	BlockList::iterator lb = mBlockData.find( k );
 
-	if(lb != mBlockData.end() && !(mBlockData.key_comp()(k, lb->first)))
+	if(lb != mBlockData.end())
 	{
 		delete lb->second;
 		lb->second = block;
-		Util::log("Block replaced");
 	}
 	else
 	{
@@ -65,11 +65,26 @@ void WorldChunk::addBlockToChunk(BaseBlock* block)
 		mBlockData.insert(lb, BlockList::value_type(k, block));
 	}
 	mHasChanged = true;
+	mHasGenerated = false;
 }
 
 void WorldChunk::reserveBlocks( size_t count )
 {
 
+}
+
+void WorldChunk::removeBlockAt(long x, long y, long z)
+{
+	long k = z * CHUNK_WIDTH * CHUNK_HEIGHT + y * CHUNK_WIDTH + x;
+	BlockList::iterator lb = mBlockData.lower_bound( k );
+
+	if(lb != mBlockData.end() && !(mBlockData.key_comp()(k, lb->first)))
+	{
+		delete lb->second;
+		mBlockData.erase( lb );
+	}
+	mHasChanged = true;
+	mHasGenerated = false;
 }
 
 BaseBlock* WorldChunk::getBlockAt(long x, long y, long z)
@@ -112,6 +127,7 @@ long WorldChunk::getVisibleFaceCount()
 void WorldChunk::updateVisibility()
 {
 	mVisibleFaces = 0;
+	mVisibleBlocks.clear();
 	// Just a brute force Occlusion test: perhaps this could be optimized?
 	for(BlockList::iterator block = mBlockData.begin(); block != mBlockData.end(); ++block) {
 		BaseBlock* b = (*block).second;
@@ -156,12 +172,21 @@ void WorldChunk::_blockVisible( BlockPosPair &block, bool v )
 		mVisibleBlocks.insert( block );
 	}
 	else if( it != mVisibleBlocks.end() && !v )  {
-		//it =
-		mVisibleBlocks.erase( it++ );
+		it = mVisibleBlocks.erase( it );
 	}
 }
 
-void WorldChunk::update( float dt )
+bool WorldChunk::hasGenerated()
+{
+	return mHasGenerated;
+}
+
+void WorldChunk::notifyGenerated()
+{
+	mHasGenerated = true;
+}
+
+void WorldChunk::update( float dt ) 
 {
 	if( mHasChanged ) {
 		updateVisibility();

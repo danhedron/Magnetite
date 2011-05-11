@@ -1,6 +1,7 @@
 #ifndef _MATRIX_H_
 #define _MATRIX_H_
 #include "prerequisites.h"
+#include "Vector.h"
 
 
 class Matrix4 {
@@ -28,8 +29,8 @@ public:
 
 	void translate( Vector3& v );
 
-	Vector3 operator * ( Vector3& vec );
-	Matrix4 operator * ( Matrix4& mat );
+	Vector3 operator * ( const Vector3& vec );
+	Matrix4 operator * ( const Matrix4& mat );
 
 	Vector3 getTranslation();
 

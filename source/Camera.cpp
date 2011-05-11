@@ -14,22 +14,19 @@ Camera::~Camera(void)
 
 Matrix4 Camera::getMatrix()
 {
-	Matrix4 mat2;
-	mat2.rotateY( mYaw*(3.141f/180) );
-	Matrix4 mat;
-	//mat.translate( -mPosition );
-	mat = mat2*mat;
-	return mat;
+	Matrix4 matX = Matrix4::rotateX( -(mPitch*3.141f)/180 );
+	Matrix4 matY = Matrix4::rotateY( (mYaw*3.141f)/180 );
+	Matrix4 rotated = matX * matY;
+
+	return rotated;
 }
 
-void Camera::applyMatrix()
+void Camera::applyMatrix() 
 {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	//Util::log( Util::toString( getMatrix().getTranslation() ) );
-	//glMultMatrixf( getMatrix().matrix );
-	glRotatef( mPitch, 1, 0, 0);
-	glRotatef( mYaw, 0, 1, 0);
+	glRotatef( -mPitch, 1, 0, 0);
+	glRotatef( -mYaw, 0, 1, 0);
 	glTranslatef( -mPosition.x, -mPosition.y, -mPosition.z );
 }
 
@@ -45,23 +42,34 @@ Vector3 Camera::getPosition()
 
 void Camera::yaw( float amt )
 {
-	mYaw += amt;
+	setYaw( mYaw + amt );
 }
 
-void Camera::pitch( float amt )
+void Camera::pitch( float amt ) 
 {
-	mPitch += amt;
+	setPitch( mPitch + amt );
+}
+
+void Camera::setPitch( float p )
+{
+	mPitch = std::max<float>( std::min<float>( p, 90 ), -90 );
+}
+
+void Camera::setYaw( float y )
+{
+	mYaw = y;
 }
 
 void Camera::translate(const Vector3& vec )
 {
-	Vector3 v = getPosition();
+	Vector3 pv = getPosition();
+	Vector3 f;
+	
+	//matrix = Matrix4();
 
-	v.x += (vec.x * cos(mYaw*(3.141f/180))) - (vec.z * sin(mYaw*(3.141f/180)));
-	v.z += (vec.z * cos(mYaw*(3.141f/180))) + (vec.x * sin(mYaw*(3.141f/180)));
+	Matrix4 matX = Matrix4::rotateX( (mPitch*3.141f)/180 );
+	Matrix4 matY = Matrix4::rotateY( (mYaw*3.141f)/180 );
+	f = matX * matY * vec;
 
-	v.z += (vec.z * cos(mPitch*(3.141f/180))) - (vec.y * sin(mPitch*(3.141f/180)));
-	v.y += (vec.y * cos(mPitch*(3.141f/180))) + (vec.z * sin(mPitch*(3.141f/180)));
-
-	setPosition(v);
+	setPosition( Vector3( f.x + pv.x, f.y + pv.y, f.z + pv.z ) );
 }
