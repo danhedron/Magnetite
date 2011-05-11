@@ -187,7 +187,7 @@ void OpencraftCore::destoryWorld()
 		Util::log("Deleted Chunk");
 		mRenderer->notifyChunkUnloaded((*it));
 		delete (*it);
-		it = mChunks.erase( it ); 
+		it = mChunks.erase( it );
 	}
 }
 
@@ -220,7 +220,7 @@ void OpencraftCore::removeChunk(long x, long y, long z)
 			Util::log("Deleted Chunk");
 			mRenderer->notifyChunkUnloaded((*it));
 			delete (*it);
-			mChunks.erase( it ); 
+			mChunks.erase( it );
 			return;
 		}
 	}
