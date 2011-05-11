@@ -109,11 +109,12 @@ GLvertex Renderer::vertex(float x, float y, float z, float nx, float ny, float n
 void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges)
 {
 	GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( block->getTextureX(), block->getTextureY() );
+	block->vertexIndex = ind;
 	/* Face -Z */
 	if((block->mViewFlags & VIS_BACK) == VIS_BACK ) {
-		if( block->getY() >= 4 ) {
-			Util::log("Above surface: " + block->getType() + " " + Util::toString(rect.x) + " " + Util::toString(rect.y));
-		}
+		//if( block->getY() >= 4 ) {
+		//	Util::log("Above surface: " + block->getType() + " " + Util::toString(rect.x) + " " + Util::toString(rect.y));
+		//}
 		data[ind + 0] = vertex( block->getX() + 0.5f, block->getY() + 0.5f,	block->getZ() + 0.5f, // Coordinates
 								0.0f, 0.0f, -1.0f,
 								rect.x, rect.y );
@@ -126,13 +127,9 @@ void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvert
 		data[ind + 3] = vertex( block->getX() + 0.5f, block->getY() - 0.5f, block->getZ() + 0.5f, // Coordinates
 								0.0f, 0.0f, -1.0f,
 								rect.x, rect.y + rect.h );
-		edges[eInd + 0] = ind + 0; edges[eInd + 1] = ind + 2;
-		edges[eInd + 2] = ind + 2; edges[eInd + 3] = ind + 1;
-		edges[eInd + 4] = ind + 1; edges[eInd + 5] = ind + 0;
-		edges[eInd + 6] = ind + 0; edges[eInd + 7] = ind + 3;
-		edges[eInd + 8] = ind + 3; edges[eInd + 9] = ind + 2;
-		edges[eInd +10] = ind + 2; edges[eInd +11] = ind + 0;
-		eInd += 12;
+		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
+		edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
+		eInd += 6;
  		ind += 4;
 	}
 	/* Face +Z */
@@ -149,13 +146,9 @@ void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvert
 		data[ind + 3] = vertex( block->getX() + 0.5f, block->getY() - 0.5f, block->getZ() - 0.5f, // Coordinates
 								0.0f, 0.0f, 1.0f,
 								rect.x, rect.y + rect.h );
-		edges[eInd + 0] = ind + 0; edges[eInd + 1] = ind + 2;
-		edges[eInd + 2] = ind + 2; edges[eInd + 3] = ind + 3;
-		edges[eInd + 4] = ind + 3; edges[eInd + 5] = ind + 0;
-		edges[eInd + 6] = ind + 0; edges[eInd + 7] = ind + 1;
-		edges[eInd + 8] = ind + 1; edges[eInd + 9] = ind + 2;
-		edges[eInd +10] = ind + 2; edges[eInd +11] = ind + 0;
-		eInd += 12;
+		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
+		edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
+		eInd += 6;
 		ind += 4;
 	}
 	/* Face +X */
@@ -172,13 +165,9 @@ void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvert
 		data[ind + 3] = vertex( block->getX() + 0.5f, block->getY() + 0.5f, block->getZ() - 0.5f, // Coordinates
 								1.0f, 0.0f, 0.0f,
 								rect.x, rect.y + rect.h );
-		edges[eInd + 0] = ind + 0; edges[eInd + 1] = ind + 2;
-		edges[eInd + 2] = ind + 2; edges[eInd + 3] = ind + 1;
-		edges[eInd + 4] = ind + 1; edges[eInd + 5] = ind + 0;
-		edges[eInd + 6] = ind + 0; edges[eInd + 7] = ind + 3;
-		edges[eInd + 8] = ind + 3; edges[eInd + 9] = ind + 2;
-		edges[eInd +10] = ind + 2; edges[eInd +11] = ind + 0;
-		eInd += 12;
+		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
+		edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
+		eInd += 6;
 		ind += 4;
 	}
 	/* Face -Y */
@@ -195,13 +184,9 @@ void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvert
 		data[ind + 3] = vertex( block->getX() + 0.5f, block->getY() - 0.5f, block->getZ() + 0.5f, // Coordinates
 								0.0f, -1.0f, 0.0f,
 								rect.x, rect.y + rect.h );
-		edges[eInd + 0] = ind + 0; edges[eInd + 1] = ind + 2;
-		edges[eInd + 2] = ind + 2; edges[eInd + 3] = ind + 1;
-		edges[eInd + 4] = ind + 1; edges[eInd + 5] = ind + 0;
-		edges[eInd + 6] = ind + 0; edges[eInd + 7] = ind + 3;
-		edges[eInd + 8] = ind + 3; edges[eInd + 9] = ind + 2;
-		edges[eInd +10] = ind + 2; edges[eInd +11] = ind + 0;
-		eInd += 12;
+		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
+		edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
+		eInd += 6;
 		ind += 4;
 	}
 	/* Face +Y */
@@ -218,13 +203,9 @@ void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvert
 		data[ind + 3] = vertex( block->getX() - 0.5f, block->getY() + 0.5f, block->getZ() - 0.5f, // Coordinates
 								0.0f, 1.0f, 0.0f,
 								rect.x, rect.y + rect.h );
-		edges[eInd + 0] = ind + 0; edges[eInd + 1] = ind + 2;
-		edges[eInd + 2] = ind + 2; edges[eInd + 3] = ind + 1;
-		edges[eInd + 4] = ind + 1; edges[eInd + 5] = ind + 0;
-		edges[eInd + 6] = ind + 0; edges[eInd + 7] = ind + 3;
-		edges[eInd + 8] = ind + 3; edges[eInd + 9] = ind + 2;
-		edges[eInd +10] = ind + 2; edges[eInd +11] = ind + 0;
-		eInd += 12;
+		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
+		edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
+		eInd += 6;
 		ind += 4;
 	}
 	/* Face -X */
@@ -241,33 +222,19 @@ void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvert
 		data[ind + 3] = vertex( block->getX() - 0.5f, block->getY() + 0.5f, block->getZ() + 0.5f, // Coordinates
 								-1.0f, 0.0f, 0.0f,
 								rect.x, rect.y + rect.h );
-		edges[eInd + 0] = ind + 0; edges[eInd + 1] = ind + 2;
-		edges[eInd + 2] = ind + 2; edges[eInd + 3] = ind + 1;
-		edges[eInd + 4] = ind + 1; edges[eInd + 5] = ind + 0;
-		edges[eInd + 6] = ind + 0; edges[eInd + 7] = ind + 3;
-		edges[eInd + 8] = ind + 3; edges[eInd + 9] = ind + 2;
-		edges[eInd +10] = ind + 2; edges[eInd +11] = ind + 0;
-		eInd += 12;
+		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
+		edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
+		eInd += 6;
 		ind += 4;
 	}
 }
 
-
-static const int BufferSize = 1;
-static GLuint BufferName[BufferSize];
-
-enum {
-	POSITION_OBJECT = 0
-};
-
-static GLuint VertexSize;
-
 void Renderer::buildChunkVBO(WorldChunk* chunk)
 {
 	Util::log("Generating chunk mesh");
-	VertexSize = chunk->getVisibleFaceCount() * 4 * sizeof(GLvertex);
+	GLuint VertexSize = chunk->getVisibleFaceCount() * 4 * sizeof(GLvertex);
 	GLuint vertexCount	 = chunk->getVisibleFaceCount() * 4;
-	GLuint edgeCount	 = chunk->getVisibleFaceCount() * 12;
+	GLuint edgeCount	 = chunk->getVisibleFaceCount() * 6;
 	GLvertex* vertexData = new GLvertex[vertexCount];
 	GLedge* edgeData	 = new GLedge[edgeCount];
 
@@ -325,6 +292,9 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CW);
+
+	GLtexture* tex = OpencraftCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/world.png");
+
 	for(std::vector<WorldChunk*>::iterator chunk = chunks.begin();
 		chunk != chunks.end();
 		++chunk)
@@ -361,7 +331,7 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);*/
 
 		if( (*chunk)->hasGenerated() ) {
-			GLtexture* tex = OpencraftCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/world.png");
+
 			if( tex != 0 )
 			{
 				glEnable(GL_TEXTURE_2D);
@@ -370,23 +340,60 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 
 			GLgeometry* chunkGeom = (*chunk)->getGeometry();
 
+			/* Check vertex data for LOLWUT */
+			/*if((*chunk)->getX() == 1 && (*chunk)->getZ() == 1 && (*chunk)->getBlockCount() > CHUNK_WIDTH*3*CHUNK_WIDTH) {
+				BaseBlock* error = (*chunk)->getBlockAt(CHUNK_WIDTH-1,2,CHUNK_WIDTH-1);
+				if(error != NULL)
+				{
+					Util::log(Util::toString(error->getTextureX()) + " " + Util::toString(error->getTextureX()));
+					GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( error->getTextureX(), error->getTextureY() );
+					GLvertex* vertex = &chunkGeom->vertexData[error->vertexIndex];
+					size_t count = 0;
+					for( int f = 0; f < 6; f++ ) {
+						int flag = (1 << f);
+						if((error->mViewFlags & flag) == flag) {
+							if( vertex[0].u0 != rect.x ) {
+								vertex[0].u0 = rect.x; vertex[0].v0 = rect.y;
+								vertex[1].u0 = rect.x+rect.w; vertex[1].v0 = rect.y;
+								vertex[2].u0 = rect.x+rect.w; vertex[2].v0 = rect.y+rect.h;
+								vertex[3].u0 = rect.x; vertex[3].v0 = rect.y+rect.h;
+								count++;
+							}
+							vertex+=4; 
+						}
+					}
+					Util::log("Corrected UVs to: " + Util::toString( rect.x ) + " " + Util::toString( rect.y ) + " " + Util::toString( rect.w ) + " " + Util::toString( rect.h ) + " on " + Util::toString(count) + " faces" );
+				}
+				/*for( size_t i = 0; i < chunkGeom->vertexCount-3; i+=4 )
+				{
+					GLvertex vertex1 = chunkGeom->vertexData[i];
+					GLvertex vertex2 = chunkGeom->vertexData[i+1];
+					GLvertex vertex4 = chunkGeom->vertexData[i+3];
+					float width = abs( vertex2.u0 - vertex1.u0 );
+					float height = abs( vertex4.v0 - vertex1.v0 );
+					if( width != 0.0625f || height != 0.0625f )
+						Util::log( Util::toString( width ) + " " + Util::toString( height ));
+				}
+			}*/
+
 			glColor3f(1,1,1);
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(3, GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].x));
 			glEnableClientState(GL_NORMAL_ARRAY);
 			glNormalPointer(GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].nx));
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-			glTexCoordPointer(2, GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].s0));
+			glTexCoordPointer(2, GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].u0));
 			glClientActiveTexture(GL_TEXTURE1);
 
 			// Draw the chunk.
 			if(mRenderMode == RENDER_WIRE)
 				glDrawRangeElements(GL_LINES, 0, chunkGeom->vertexCount, chunkGeom->edgeCount, GL_UNSIGNED_SHORT, chunkGeom->edgeData);
 			else
-				glDrawRangeElements(GL_QUADS, 0, chunkGeom->vertexCount, chunkGeom->edgeCount, GL_UNSIGNED_SHORT, chunkGeom->edgeData);
+				glDrawRangeElements(GL_TRIANGLES, 0, chunkGeom->vertexCount, chunkGeom->edgeCount, GL_UNSIGNED_SHORT, chunkGeom->edgeData);
 
 			glVertexPointer(3, GL_FLOAT, 0, 0);
 			glNormalPointer(GL_FLOAT, 0, 0);
+			glTexCoordPointer(2, GL_FLOAT, 0, 0);
 			glDisableClientState(GL_VERTEX_ARRAY);
 			glDisableClientState(GL_NORMAL_ARRAY);
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);

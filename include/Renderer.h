@@ -13,7 +13,7 @@ class Camera;
 struct GLvertex {
 	float x, y, z;
 	float nx, ny, nz;
-	float s0, t0;
+	float u0, v0;
 };
 typedef unsigned short GLedge;
 

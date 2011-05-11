@@ -182,24 +182,24 @@ void WorldChunk::generate()
 {
 	Util::log("Generating chunk mesh");
 	if( mGeometry != NULL ) {
-		Util::log("Recycling mesh data");
 		delete[] mGeometry->edgeData;
 		delete[] mGeometry->vertexData;
 	}
-	GLuint VertexSize = getVisibleFaceCount() * 4 * sizeof(GLvertex);
 	GLuint vertexCount	 = getVisibleFaceCount() * 4;
-	GLuint edgeCount	 = getVisibleFaceCount() * 12;
+	GLuint edgeCount	 = getVisibleFaceCount() * 6;
 	GLvertex* vertexData = new GLvertex[vertexCount];
 	GLedge* edgeData	 = new GLedge[edgeCount];
 
-	BlockList* blocks = getVisibleBlocks();
 	size_t ind = 0;
 	size_t edgeInd = 0;
 
-	for( BlockList::iterator block = mBlockData.begin(); block != mBlockData.end(); ++block )
+	for( BlockList::iterator block = mVisibleBlocks.begin(); block != mVisibleBlocks.end(); ++block )
 	{
 		Renderer::buildCubeData((*block).second, ind, edgeInd, vertexData, edgeData);
 	}
+
+	Util::log("Chunk construction complete: " + Util::toString(edgeCount) + " " + Util::toString(vertexCount));
+
 	//Util::log("Highest Index: " + Util::toString(ind) + " Allocated: " + Util::toString(vertexCount) + " Highest Index: " + Util::toString(edgeInd) + " Allocated: " + Util::toString(edgeCount));
 	
 	// Chunk has been defined, store it's data

@@ -26,6 +26,8 @@ public:
 	BaseBlock(long x, long y, long z);
 	~BaseBlock(void);
 
+	short vertexIndex;
+
 	short mViewFlags;
 
 	virtual void created() = 0;
