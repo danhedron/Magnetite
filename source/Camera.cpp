@@ -30,7 +30,7 @@ void Camera::applyMatrix()
 	glTranslatef( -mPosition.x, -mPosition.y, -mPosition.z );
 }
 
-void Camera::setPosition(Vector3 &v)
+void Camera::setPosition(const Vector3 &v)
 {
 	mPosition = v;
 }
@@ -60,7 +60,7 @@ void Camera::setYaw( float y )
 	mYaw = y;
 }
 
-void Camera::translate( Vector3& vec )
+void Camera::translate(const Vector3& vec )
 {
 	Vector3 pv = getPosition();
 	Vector3 f;

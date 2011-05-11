@@ -41,8 +41,8 @@ void Renderer::initialize(int *argc, char **argv)
 	gluPerspective(90.f, 1.f, 0.1f, 500.f);
 
 	glutInit( argc, argv );
-
-	mCamera.setPosition(Vector3(0, 10.0f, 50.0f));
+	Vector3 vec(0, 10.0f, 50.0f);
+	mCamera.setPosition(vec);
 }
 
 void Renderer::resizeViewport(size_t x, size_t y, size_t w, size_t h)
@@ -267,7 +267,7 @@ void Renderer::buildChunkVBO(WorldChunk* chunk)
 	GLuint edgeCount	 = chunk->getVisibleFaceCount() * 12;
 	GLvertex* vertexData = new GLvertex[vertexCount];
 	GLedge* edgeData	 = new GLedge[edgeCount];
-	
+
 	BlockList* blocks = chunk->getVisibleBlocks();
 	size_t ind = 0;
 	size_t edgeInd = 0;
@@ -287,7 +287,7 @@ void Renderer::buildChunkVBO(WorldChunk* chunk)
 	//glBindBufferARB(GL_ARRAY_BUFFER_ARB, vboBuffer.vertex );
 	//glBufferDataARB(GL_ARRAY_BUFFER_ARB, sizeof(GLvertex)*vertexCount, &vertexData[0].x, GL_STATIC_DRAW_ARB);
 	//glGenBuffersARB(1, &vboBuffer.index);
-	
+
 	//delete[] vertexData;
 	//delete[] edgeData;
 
@@ -332,7 +332,7 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 			// This chunk hasn't been generated yet, fix that:
 			buildChunkVBO( (*chunk) );
 		}
-		
+
 		// Sort out view Matrix.
 		glLoadIdentity();
 		mCamera.applyMatrix();
@@ -341,10 +341,10 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 		float y = (*chunk)->getY() * CHUNK_HEIGHT;
 		float z = (*chunk)->getZ() * CHUNK_WIDTH;
 		glTranslatef(x,y,z);
-		
+
 		//Draw VBO
 		/*glBindBufferARB(GL_ARRAY_BUFFER_ARB, chunkVbo);
-		
+
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(3, GL_FLOAT, 0,0);
 
@@ -384,7 +384,7 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 				glDrawRangeElements(GL_LINES, 0, chunkGeom.vertexCount, chunkGeom.edgeCount, GL_UNSIGNED_SHORT, chunkGeom.edgeData);
 			else
 				glDrawRangeElements(GL_QUADS, 0, chunkGeom.vertexCount, chunkGeom.edgeCount, GL_UNSIGNED_SHORT, chunkGeom.edgeData);
-			
+
 			glVertexPointer(3, GL_FLOAT, 0, 0);
 			glNormalPointer(GL_FLOAT, 0, 0);
 			glDisableClientState(GL_VERTEX_ARRAY);
@@ -411,7 +411,7 @@ void Renderer::drawStats(double dt, size_t chunkCount)
 	Util::getMemoryUsage(memCurrent,memPeak,pagedCurrent,pagedPeak,pageFaults);*/
 
 	char buff[500];
-	long percent = ( mBlTotal > 0 ? (mBlRendered*100)/(mBlTotal) : 0 );
+	size_t percent = ( mBlTotal > 0 ? (mBlRendered*100)/(mBlTotal) : 0 );
 	sprintf( buff,  "Opencraft Performance:\n dt: %f\n %f FPS\n Avg: %u\n"
 					"World Stats:\n Blocks: %u/%u - %u%%\n Rendered Chunks: %u\n"
 					"Camera:\n Position: %f %f %f",
@@ -426,13 +426,13 @@ void Renderer::drawStats(double dt, size_t chunkCount)
 
 void Renderer::drawText(std::string text, int x, int y)
 {
-	stringvector lines = Util::split(text, '\n');	
+	stringvector lines = Util::split(text, '\n');
 	glColor3f(0,1,0);
 	size_t line = 0;
 	void* fnt = GLUT_BITMAP_9_BY_15;
 	for(stringvector::iterator it = lines.begin(); it != lines.end(); ++it) {
 		glRasterPos2i( x, y + (line * 16) );
-		for( std::string::iterator i = (*it).begin(); i != (*it).end(); ++i ) 
+		for( std::string::iterator i = (*it).begin(); i != (*it).end(); ++i )
 		{
 			glutBitmapCharacter(fnt, *i);
 		}

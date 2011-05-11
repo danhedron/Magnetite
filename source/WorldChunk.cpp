@@ -38,7 +38,7 @@ void WorldChunk::fillWithTestData()
 			{
 				for(int y = 0; y < 10; y++)
 				{
-					if( y == 9 ) 
+					if( y == 9 )
 						addBlockToChunk( new WoodBlock(x, y, z) );
 					else
 						addBlockToChunk( new StoneBlock(x, y, z) );
@@ -70,7 +70,7 @@ void WorldChunk::addBlockToChunk(BaseBlock* block)
 
 void WorldChunk::reserveBlocks( size_t count )
 {
-	
+
 }
 
 void WorldChunk::removeBlockAt(long x, long y, long z)
