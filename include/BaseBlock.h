@@ -35,6 +35,8 @@ public:
 	short getTextureX();
 	short getTextureY();
 
+	virtual std::string getType() = 0;
+
 	long getX();
 	long getY();
 	long getZ();

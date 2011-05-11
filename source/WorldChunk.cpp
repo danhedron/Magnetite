@@ -1,6 +1,7 @@
 #include "WorldChunk.h"
 #include "StoneBlock.h"
 #include "WoodBlock.h"
+#include "Renderer.h"
 
 WorldChunk::WorldChunk(long x, long y, long z)
 : mX( x ),
@@ -8,6 +9,7 @@ mY( y ),
 mZ( z ),
 mHasChanged( false ),
 mHasGenerated( false ),
+mGeometry( NULL ),
 mVisibleFaces( 0 )
 {
 	initalize();
@@ -36,7 +38,7 @@ void WorldChunk::fillWithTestData()
 		{
 			for(int z = 0; z < CHUNK_WIDTH; z++)
 			{
-				for(int y = 0; y < 10; y++)
+				for(int y = 0; y < 3; y++)
 				{
 					if( y == 9 )
 						addBlockToChunk( new WoodBlock(x, y, z) );
@@ -176,6 +178,42 @@ void WorldChunk::_blockVisible( BlockPosPair &block, bool v )
 	}
 }
 
+void WorldChunk::generate()
+{
+	Util::log("Generating chunk mesh");
+	if( mGeometry != NULL ) {
+		Util::log("Recycling mesh data");
+		delete[] mGeometry->edgeData;
+		delete[] mGeometry->vertexData;
+	}
+	GLuint VertexSize = getVisibleFaceCount() * 4 * sizeof(GLvertex);
+	GLuint vertexCount	 = getVisibleFaceCount() * 4;
+	GLuint edgeCount	 = getVisibleFaceCount() * 12;
+	GLvertex* vertexData = new GLvertex[vertexCount];
+	GLedge* edgeData	 = new GLedge[edgeCount];
+
+	BlockList* blocks = getVisibleBlocks();
+	size_t ind = 0;
+	size_t edgeInd = 0;
+
+	for( BlockList::iterator block = mBlockData.begin(); block != mBlockData.end(); ++block )
+	{
+		Renderer::buildCubeData((*block).second, ind, edgeInd, vertexData, edgeData);
+	}
+	//Util::log("Highest Index: " + Util::toString(ind) + " Allocated: " + Util::toString(vertexCount) + " Highest Index: " + Util::toString(edgeInd) + " Allocated: " + Util::toString(edgeCount));
+	
+	// Chunk has been defined, store it's data
+	mGeometry = new GLgeometry;
+	mGeometry->edgeData = edgeData;
+	mGeometry->vertexData = vertexData;
+	mGeometry->edgeCount = edgeCount;
+	mGeometry->vertexCount = vertexCount;
+
+	notifyGenerated();
+	// Delete the chunk's previous data
+	//mWorldBuffers.insert( ChunkGeomList::value_type( chunk, geom ) );
+}
+
 bool WorldChunk::hasGenerated()
 {
 	return mHasGenerated;
@@ -186,10 +224,16 @@ void WorldChunk::notifyGenerated()
 	mHasGenerated = true;
 }
 
+GLgeometry* WorldChunk::getGeometry()
+{
+	return mGeometry;
+}
+
 void WorldChunk::update( float dt ) 
 {
 	if( mHasChanged ) {
 		updateVisibility();
+		generate();
 		mHasChanged = false;
 	}
 }

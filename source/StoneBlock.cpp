@@ -19,3 +19,8 @@ void StoneBlock::hit()
 {
 
 }
+
+std::string StoneBlock::getType()
+{
+	return "stone";
+}

@@ -5,6 +5,7 @@
 #include <istream>
 
 class BaseBlock;
+struct GLgeometry;
 
 class WorldChunk
 {
@@ -18,6 +19,7 @@ protected:
 	bool mHasGenerated;
 	long mVisibleFaces;
 	void _blockVisible( BlockPosPair &block, bool v );
+	GLgeometry* mGeometry;
 public:
 	WorldChunk(long x, long y, long z);
 	~WorldChunk(void);
@@ -98,6 +100,16 @@ public:
 	 * Tells the chunk it's geometry has been cooked.
 	 */
 	void notifyGenerated();
+
+	/**
+	 * Generate geometry for this CHUNK
+	 */
+	void generate();
+
+	/**
+	 * Returns this chunk's geometry data
+	 */
+	GLgeometry* getGeometry();
 
 	/**
 	 * Performs updates on things inside the chunk.

@@ -11,6 +11,8 @@ public:
 	WoodBlock(long x, long y, long z);
 	~WoodBlock(void);
 
+	std::string getType();
+
 	void created();
 	void hit();
 };

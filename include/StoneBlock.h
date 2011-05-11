@@ -11,6 +11,8 @@ public:
 	StoneBlock(long x, long y, long z);
 	~StoneBlock(void);
 
+	std::string getType();
+
 	void created();
 	void hit();
 };

@@ -52,7 +52,7 @@ protected:
 	
 	ChunkGeomList mWorldBuffers;
 
-	GLvertex vertex( float x, float y, float z, float nx, float ny, float nz, float u = 0.f, float v = 0.f, float w = 0.f );
+	static GLvertex vertex( float x, float y, float z, float nx, float ny, float nz, float u = 0.f, float v = 0.f, float w = 0.f );
 
 public:
 	Renderer(void);
@@ -99,7 +99,7 @@ public:
 	void drawText( std::string text, int x, int y );
 
 	void buildChunkVBO(WorldChunk* chunk);
-	void buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges);
+	static void buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges);
 
 	/**
 	 * Notify the renderer that a chunk has been unloaded from the engine and it is ok to release it's graphics buffer.

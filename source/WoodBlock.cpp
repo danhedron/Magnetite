@@ -19,3 +19,8 @@ void WoodBlock::hit()
 {
 
 }
+
+std::string WoodBlock::getType()
+{
+	return "wood";
+}

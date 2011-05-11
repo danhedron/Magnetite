@@ -111,6 +111,9 @@ void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvert
 	GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( block->getTextureX(), block->getTextureY() );
 	/* Face -Z */
 	if((block->mViewFlags & VIS_BACK) == VIS_BACK ) {
+		if( block->getY() >= 4 ) {
+			Util::log("Above surface: " + block->getType() + " " + Util::toString(rect.x) + " " + Util::toString(rect.y));
+		}
 		data[ind + 0] = vertex( block->getX() + 0.5f, block->getY() + 0.5f,	block->getZ() + 0.5f, // Coordinates
 								0.0f, 0.0f, -1.0f,
 								rect.x, rect.y );
@@ -328,10 +331,10 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 	{
 		ChunkGeomList::iterator it = mWorldBuffers.find( (*chunk) );
 
-		if(it == mWorldBuffers.end() || !(*chunk)->hasGenerated()) {
+		/*(if(it == mWorldBuffers.end() || !(*chunk)->hasGenerated()) {
 			// This chunk hasn't been generated yet, fix that:
 			buildChunkVBO( (*chunk) );
-		}
+		}*/
 
 		// Sort out view Matrix.
 		glLoadIdentity();
@@ -357,45 +360,42 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);*/
 
-		GLtexture* tex = OpencraftCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/world.png");
-		if( tex != 0 )
-		{
-			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, tex->glID);
-		}
+		if( (*chunk)->hasGenerated() ) {
+			GLtexture* tex = OpencraftCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/world.png");
+			if( tex != 0 )
+			{
+				glEnable(GL_TEXTURE_2D);
+				glBindTexture(GL_TEXTURE_2D, tex->glID);
+			}
 
-		if( it != mWorldBuffers.end() )
-		{
-			GLgeometry chunkGeom = (*it).second;
+			GLgeometry* chunkGeom = (*chunk)->getGeometry();
 
 			glColor3f(1,1,1);
 			glEnableClientState(GL_VERTEX_ARRAY);
-			glVertexPointer(3, GL_FLOAT, sizeof(GLvertex), &(chunkGeom.vertexData[0].x));
+			glVertexPointer(3, GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].x));
 			glEnableClientState(GL_NORMAL_ARRAY);
-			glNormalPointer(GL_FLOAT, sizeof(GLvertex), &(chunkGeom.vertexData[0].nx));
+			glNormalPointer(GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].nx));
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-			glTexCoordPointer(2, GL_FLOAT, sizeof(GLvertex), &(chunkGeom.vertexData[0].s0));
+			glTexCoordPointer(2, GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].s0));
 			glClientActiveTexture(GL_TEXTURE1);
-
-			//Util::log( Util::toString( (int)chunkGeom.vertexData ) + " " + Util::toString( chunkGeom.vertexCount) );
 
 			// Draw the chunk.
 			if(mRenderMode == RENDER_WIRE)
-				glDrawRangeElements(GL_LINES, 0, chunkGeom.vertexCount, chunkGeom.edgeCount, GL_UNSIGNED_SHORT, chunkGeom.edgeData);
+				glDrawRangeElements(GL_LINES, 0, chunkGeom->vertexCount, chunkGeom->edgeCount, GL_UNSIGNED_SHORT, chunkGeom->edgeData);
 			else
-				glDrawRangeElements(GL_QUADS, 0, chunkGeom.vertexCount, chunkGeom.edgeCount, GL_UNSIGNED_SHORT, chunkGeom.edgeData);
+				glDrawRangeElements(GL_QUADS, 0, chunkGeom->vertexCount, chunkGeom->edgeCount, GL_UNSIGNED_SHORT, chunkGeom->edgeData);
 
 			glVertexPointer(3, GL_FLOAT, 0, 0);
 			glNormalPointer(GL_FLOAT, 0, 0);
 			glDisableClientState(GL_VERTEX_ARRAY);
 			glDisableClientState(GL_NORMAL_ARRAY);
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		}
 
-		if( tex != 0 )
-		{
-			glDisable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, 0);
+			if( tex != 0 )
+			{
+				glDisable(GL_TEXTURE_2D);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
 		}
 	}
 	glDisable(GL_CULL_FACE);
