@@ -171,9 +171,9 @@ Vector3 OpencraftCore::worldToChunks(const Vector3 &vec)
 Vector3 OpencraftCore::worldToBlock(const Vector3 &vec)
 {
 	Vector3 v;
-	v.x = ( vec.x < 0 ? 1 : 0 ) + ( vec.x < 0 ? -1 : 1 ) * abs((int)vec.x)%CHUNK_WIDTH;
-	v.y = ( vec.y < 0 ? 1 : 0 ) + ( vec.y < 0 ? -1 : 1 ) * abs((int)vec.y)%CHUNK_HEIGHT;
-	v.z = ( vec.z < 0 ? 1 : 0 ) + ( vec.z < 0 ? -1 : 1 ) * abs((int)vec.z)%CHUNK_WIDTH;
+	v.x = ( vec.x < 0 ? CHUNK_WIDTH-1 : 0 ) + ( vec.x < 0 ? -1 : 1 ) * abs((int)vec.x)%CHUNK_WIDTH;
+	v.y = ( vec.y < 0 ? CHUNK_HEIGHT-1 : 0 ) + ( vec.y < 0 ? -1 : 1 ) * abs((int)vec.y)%CHUNK_HEIGHT;
+	v.z = ( vec.z < 0 ? CHUNK_WIDTH-1 : 0 ) + ( vec.z < 0 ? -1 : 1 ) * abs((int)vec.z)%CHUNK_WIDTH;
 	return v;
 }
 
