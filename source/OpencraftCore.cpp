@@ -30,6 +30,20 @@ void OpencraftCore::createWindow(int *argc, char **argv)
 	mRenderer->initialize(argc, argv);
 	mTextureManager->initalize();
 	mRenderer->resizeViewport(0,0,800,600);
+
+	// This qualifies as 'Unit Testing' right?
+	Matrix4 mat1 = Matrix4::rotateY( 3.141f );
+	Matrix4 mat2 = Matrix4::rotateX( 3.141f );
+	Matrix4 mat3 = Matrix4::rotateZ( 3.141f );
+	Vector3 start1 = Vector3(1.0f,1.0f,0.0f);
+	Vector3 start2 = Vector3(-1.0f,1.0f,0.0f);
+	Vector3 start3 = Vector3(0.0f,0.0f,1.0f);
+	Vector3 rotated = mat1 * start1;
+	Util::log(Util::toString( start1 ) + " => " + Util::toString( rotated ) );
+	rotated = mat2 * start2;
+	Util::log(Util::toString( start2 ) + " => " + Util::toString( rotated ) );
+	rotated = mat3 * start3;
+	Util::log(Util::toString( start3 ) + " => " + Util::toString( rotated ) );
 }
 
 void OpencraftCore::go(int *argc, char **argv) 
@@ -108,8 +122,7 @@ void OpencraftCore::go(int *argc, char **argv)
 			if( lEvt.Type == sf::Event::MouseButtonPressed && lEvt.MouseButton.Button == sf::Mouse::Left ) {
 				raycast_r ray;
 				ray.orig = mRenderer->getCamera().getPosition();
-				Matrix4 cam = mRenderer->getCamera().getMatrix();
-				ray.dir = (cam * Vector3(0.f,0.f,1.0f)).normalize(); // 
+				ray.dir = mRenderer->getCamera().getForward();
 				ray = raycastWorld(ray);
 				if(ray.hit)
 				{
@@ -124,8 +137,7 @@ void OpencraftCore::go(int *argc, char **argv)
 			if( lEvt.Type == sf::Event::MouseButtonPressed && lEvt.MouseButton.Button == sf::Mouse::Right ) {
 				raycast_r ray;
 				ray.orig = mRenderer->getCamera().getPosition();
-				Matrix4 cam = mRenderer->getCamera().getMatrix();
-				ray.dir = (cam * Vector3(0.f,0.0f,1.0f)).normalize(); //(mRenderer->getCamera().getMatrix() * 
+				ray.dir = mRenderer->getCamera().getForward();
 				ray = raycastWorld(ray);
 				if(ray.hit)
 				{

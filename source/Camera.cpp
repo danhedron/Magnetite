@@ -21,6 +21,16 @@ Matrix4 Camera::getMatrix()
 	return rotated;
 }
 
+Vector3 Camera::getForward() 
+{
+	Matrix4 rotX = Matrix4::rotateX( 3.141f + (mPitch*3.141f)/180 );
+	Matrix4 rotY = Matrix4::rotateY( (mYaw*3.141f)/180 );
+	Vector3 vec = Vector3(0.f, 0.f, 1.f);
+	vec = rotX * vec;
+	vec = rotY * vec;
+	return vec.normalize();
+}
+
 void Camera::applyMatrix() 
 {
 	glMatrixMode(GL_MODELVIEW);
