@@ -84,6 +84,16 @@ public:
 	void destoryWorld();
 
 	/**
+	 *	Converts world coordinates into chunk indexes.
+	 */
+	Vector3 worldToChunks( const Vector3& vec );
+
+	/**
+	 *	Converts world coordinates into block offset ( in the chunk at that location )
+	 */
+	Vector3 worldToBlock( const Vector3& vec );
+
+	/**
 	 * Performs a raycast test against a single cube
 	 * @param ray Raycast object.
 	 * @param min Cube minimum.

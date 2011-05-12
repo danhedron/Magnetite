@@ -14,9 +14,9 @@ Camera::~Camera(void)
 
 Matrix4 Camera::getMatrix()
 {
-	Matrix4 matX = Matrix4::rotateX( (mPitch*3.141f)/180 );
-	Matrix4 matY = Matrix4::rotateY( (mYaw*3.141f)/180 - (3.141f) );
-	Matrix4 rotated = matY * matX;
+	Matrix4 matX = Matrix4::rotateX( 3.141f + (mPitch*3.141f)/180 );
+	//Matrix4 matY = Matrix4::rotateY( -(mYaw*3.141f)/180 );
+	Matrix4 rotated = matX; //;
 
 	return rotated;
 }
