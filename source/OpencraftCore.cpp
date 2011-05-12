@@ -130,8 +130,9 @@ void OpencraftCore::go(int *argc, char **argv)
 					Vector3 bIndex = worldToBlock( ray.worldHit );
 					WorldChunk* chunk = getChunk( cIndex.x, cIndex.y, cIndex.z );
 					//Util::log("Ray hit block: " + Util::toString(Vector3(bX,bY,bZ)) + " in chunk " +  Util::toString(cIndex));
-					if(chunk)
+					if(chunk) {
 						chunk->addBlockToChunk( new StoneBlock( bIndex.x, bIndex.y, bIndex.z ) );
+					}
 				}
 			}
 			if( lEvt.Type == sf::Event::MouseButtonPressed && lEvt.MouseButton.Button == sf::Mouse::Right ) {
@@ -144,8 +145,9 @@ void OpencraftCore::go(int *argc, char **argv)
 					Vector3 cIndex = worldToChunks( ray.worldHit );
 					Vector3 bIndex = worldToBlock( ray.worldHit );
 					WorldChunk* chunk = getChunk( cIndex.x, cIndex.y, cIndex.z );
-					if(chunk)
+					if(chunk) {
 						chunk->removeBlockAt( bIndex.x, bIndex.y - 1, bIndex.z );
+					}
 				}
 			}
 			if( lEvt.Type == sf::Event::Resized ) {
