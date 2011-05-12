@@ -27,18 +27,18 @@ WorldChunk::~WorldChunk(void)
 void WorldChunk::initalize()
 {
 	//do nothing! bet they wern't expecting that.
-}
+} 
 
 void WorldChunk::fillWithTestData()
 {
 	float d = 0;
 	if(mY == 0)
 	{
-		for(int x = 0; x < 2; x++)
+		for(int x = 0; x < CHUNK_WIDTH; x++)
 		{
-			for(int z = 0; z < 2; z++)
+			for(int z = 0; z < CHUNK_WIDTH; z++)
 			{
-				for(int y = 0; y < 1; y++)
+				for(int y = 0; y < 10; y++)
 				{
 					if( y == 9 )
 						addBlockToChunk( new WoodBlock(x, y, z) );
@@ -163,13 +163,11 @@ void WorldChunk::updateVisibility()
 			if( ((*block).second->mViewFlags & (1<<f)) == (1<<f) )
 				y ++;
 		}
-		Util::log("Visible Faces: " + Util::toString(y));
 		if( visFlags == VIS_NONE )
 			_blockVisible( (*block), false );
 		else
 			_blockVisible( (*block), true);
 	}
-	//Util::log("Visible Faces: " + Util::toString(mVisibleFaces));
 }
 
 void WorldChunk::_blockVisible( BlockPosPair &block, bool v )
@@ -187,7 +185,8 @@ void WorldChunk::generate()
 {
 	Util::log("Generating chunk mesh");
 	if( mGeometry != NULL ) {
-		delete mGeometry;
+		delete[] mGeometry->vertexData;
+		delete[] mGeometry->edgeData;
 	}
 	GLuint vertexCount	 = getVisibleFaceCount() * 4;
 	GLuint edgeCount	 = getVisibleFaceCount() * 6;
@@ -203,7 +202,8 @@ void WorldChunk::generate()
 	}
 	
 	// Chunk has been defined, store it's data
-	mGeometry = new GLgeometry;
+	if( mGeometry == NULL )
+		mGeometry = new GLgeometry;
 	mGeometry->edgeData = edgeData;
 	mGeometry->vertexData = vertexData;
 	mGeometry->edgeCount = edgeCount;

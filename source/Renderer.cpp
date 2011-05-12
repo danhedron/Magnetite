@@ -111,19 +111,17 @@ void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvert
 	GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( block->getTextureX(), block->getTextureY() );
 	block->vertexIndex = ind;
 
-	//Calculate the UVs based on visibility and something else.
-	float y = 0.f;
+	// Calculate the UVs based on visibility.
+	/*float y = 0.f;
 	for( size_t f = 0; f < 6; f++ ) {
-		if( (block->mViewFlags & (1<<f)) == (1<<f) )
-			y += (1.0f / 7.0f);
+		if( (block->mViewFlags & (1<<f)) == (1<<f) ) 
+			y += 0.0625f;
 	}
 
 	rect.x = 0;
-	rect.w = (1.0f/7.0f);
+	rect.w = 0.0625f;
 	rect.y = y;
-	rect.h = (1.0f/7.0f);
-
-	Util::log( Util::toString( y * 7.0f ) );
+	rect.h = 0.0625f;*/
 
 	/* Face -Z */
 	if((block->mViewFlags & VIS_BACK) == VIS_BACK ) {
@@ -264,6 +262,13 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glColor3f(1,1,1);
 
+	
+	if( tex != 0 )
+	{
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, tex->glID);
+	}
+
 	for(std::vector<WorldChunk*>::iterator chunk = chunks.begin();
 		chunk != chunks.end();
 		++chunk)
@@ -294,29 +299,24 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 
 		if( (*chunk)->hasGenerated() ) {
 
-			if( tex != 0 )
-			{
-				glEnable(GL_TEXTURE_2D);
-				glBindTexture(GL_TEXTURE_2D, tex->glID);
-			}
-
 			GLgeometry* chunkGeom = (*chunk)->getGeometry();
 
 			glVertexPointer(3, GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].x));
 			glNormalPointer(GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].nx));
 			glTexCoordPointer(2, GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].u0));
-			glClientActiveTexture(GL_TEXTURE1);
+			glClientActiveTexture(GL_TEXTURE0);
 
 			// Draw the chunk.
 			glDrawRangeElements(GL_TRIANGLES, 0, chunkGeom->vertexCount, chunkGeom->edgeCount, GL_UNSIGNED_SHORT, chunkGeom->edgeData);
-
-			if( tex != 0 )
-			{
-				glDisable(GL_TEXTURE_2D);
-				glBindTexture(GL_TEXTURE_2D, 0);
-			}
 		}
 	}
+
+	if( tex != 0 )
+	{
+		glDisable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
 	glVertexPointer(3, GL_FLOAT, 0, 0);
 	glNormalPointer(GL_FLOAT, 0, 0);
 	glTexCoordPointer(2, GL_FLOAT, 0, 0);

@@ -89,10 +89,7 @@ void OpencraftCore::go(int *argc, char **argv)
 			}
 			if( (lEvt.Type == sf::Event::KeyPressed) &&
 				(lEvt.Key.Code == sf::Key::T) ) {
-					//Force regen of all chunk geom.
-					for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
-						(*it)->generate();
-					}
+					createTestChunks( radius );
 			}
 			if( (lEvt.Type == sf::Event::KeyPressed) &&
 				(lEvt.Key.Code == sf::Key::PageUp) ) {
