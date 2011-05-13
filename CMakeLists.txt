@@ -42,6 +42,7 @@ set(OPENCRAFT_SOURCES
 	source/StoneBlock.cpp
 	source/WoodBlock.cpp
 	source/ChunkLoader.cpp
+	source/World.cpp
 	source/WorldChunk.cpp
 	source/TextureManager.cpp
 )
@@ -57,6 +58,7 @@ set(OPENCRAFT_HEADERS
 	include/WoodBlock.h
 	include/BaseBlock.h
 	include/ChunkLoader.h
+	include/World.h
 	include/WorldChunk.h
 	include/TextureManager.h
 	include/util.h

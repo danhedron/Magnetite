@@ -21,6 +21,8 @@
 int main( int argc, char** argv ) {
 	OpencraftCore core;
 
+	core.newWorld("test");
+
 	core.go(&argc, argv);
 
 	return EXIT_SUCCESS;
