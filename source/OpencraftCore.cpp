@@ -216,7 +216,7 @@ void OpencraftCore::placeEyeBlock()
 		WorldChunk* chunk = mWorld->getChunk( cIndex.x, cIndex.y, cIndex.z );
 		//Util::log("Ray hit block: " + Util::toString(Vector3(bX,bY,bZ)) + " in chunk " +  Util::toString(cIndex));
 		if(chunk) {
-			chunk->addBlockToChunk( new StoneBlock( bIndex.x, bIndex.y + 1, bIndex.z ) );
+			chunk->addBlockToChunk( new StoneBlock( bIndex.x, bIndex.y, bIndex.z ) );
 		}
 	}
 }

@@ -98,12 +98,12 @@ raycast_r World::raycastWorld(raycast_r &ray)
 	{
 		blocks = (*it)->getVisibleBlocks();
 		for(BlockList::iterator block = blocks->begin(); block != blocks->end(); ++block) {
-			min = Vector3( (*it)->getX() * CHUNK_WIDTH + (*block).second->getX() - 0.5f,
-							(*it)->getY() * CHUNK_HEIGHT + (*block).second->getY() - 0.5f,
-							(*it)->getZ() * CHUNK_WIDTH + (*block).second->getZ() - 0.5f );
-			max = Vector3( (*it)->getX() * CHUNK_WIDTH + (*block).second->getX() + 0.5f,
-							(*it)->getY() * CHUNK_HEIGHT + (*block).second->getY() + 0.5f,
-							(*it)->getZ() * CHUNK_WIDTH + (*block).second->getZ() + 0.5f );
+			min = Vector3( (*it)->getX() * CHUNK_WIDTH + (*block).second->getX() - 0.0f,
+							(*it)->getY() * CHUNK_HEIGHT + (*block).second->getY() - 0.0f,
+							(*it)->getZ() * CHUNK_WIDTH + (*block).second->getZ() - 0.0f );
+			max = Vector3( (*it)->getX() * CHUNK_WIDTH + (*block).second->getX() + 1.0f,
+							(*it)->getY() * CHUNK_HEIGHT + (*block).second->getY() + 1.0f,
+							(*it)->getZ() * CHUNK_WIDTH + (*block).second->getZ() + 1.0f );
 			raycast_r r = ray;
 			raycastCube(r, min, max);
 			if( r.hit == true )
