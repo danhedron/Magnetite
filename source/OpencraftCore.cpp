@@ -177,6 +177,11 @@ void OpencraftCore::unloadWorld()
 	mWorld = NULL;
 }
 
+World* OpencraftCore::getWorld()
+{
+	return mWorld;
+}
+
 Character* OpencraftCore::createCharacter()
 {
 	if( mPlayer == NULL )

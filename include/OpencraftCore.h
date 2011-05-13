@@ -55,6 +55,11 @@ public:
 	void loadWorld( std::string name );
 
 	/**
+	 * Retuns a pointer to the world.
+	 */
+	World* getWorld();
+
+	/**
 	 * Unloads the currently loaded world (if any)
 	 */
 	void unloadWorld();

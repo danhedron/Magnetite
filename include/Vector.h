@@ -13,6 +13,7 @@ public:
 	Vector3 operator- (const Vector3& right);
 
 	Vector3& operator += (const Vector3& right);
+	Vector3& operator -= (const Vector3& right);
 	
 	Vector3 operator* ( float scal );
 	Vector3 operator/ ( float scal );

@@ -54,6 +54,11 @@ public:
 	 * Gets a ray representing the Character's look
 	 */
 	raycast_r getEyeCast();
+	
+	/**
+	 * Gets a ray representing the -UP axis
+	 */
+	raycast_r getFeetCast();
 
 	/**
 	 * Sets the characer's position immediatley.

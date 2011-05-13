@@ -82,7 +82,14 @@ public:
 	 */
 	void resizeViewport( size_t x, size_t y, size_t w, size_t h );
 
+	/**
+	 * Sets up the OpenGL context for 2D Rendering
+	 */
 	void enable2D();
+
+	/**
+	 * Sets OpenGL back up for 3D rendering.
+	 */
 	void disable2D();
 
 	/**

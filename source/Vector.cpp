@@ -24,6 +24,13 @@ Vector3& Vector3::operator +=(const Vector3& right) {
 	return *this;
 }
 
+Vector3& Vector3::operator -=(const Vector3& right) {
+	this->x -= right.x;
+	this->y -= right.y;
+	this->z -= right.z;
+	return *this;
+}
+
 Vector3 Vector3::operator *( float scal ) {
 	return Vector3(x*scal,y*scal,z*scal);
 }
