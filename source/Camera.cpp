@@ -70,6 +70,16 @@ void Camera::setYaw( float y )
 	mYaw = y;
 }
 
+float Camera::getPitch()
+{
+	return mPitch;
+}
+
+float Camera::getYaw()
+{
+	return mYaw;	
+}
+
 void Camera::translate(const Vector3& vec )
 {
 	Vector3 pv = getPosition();

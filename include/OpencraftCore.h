@@ -5,6 +5,7 @@
 class Renderer;
 class TextureManager;
 class World;
+class Character;
 
 /** @class OpencraftCore
  * Responsible for managing stuff 
@@ -18,6 +19,7 @@ protected:
 	TextureManager* mTextureManager;
 	World*		mWorld;
 	bool		mContinue;
+	Character*	mPlayer;
 public:
 	OpencraftCore(void);
 	~OpencraftCore(void);
@@ -48,31 +50,19 @@ public:
 	void newWorld( std::string name );
 
 	/**
-<<<<<<< HEAD
 	 * loads an exsisting world.
-=======
-	 *	Converts world coordinates into chunk indexes.
-	 */
-	Vector3 worldToChunks( const Vector3& vec );
-
-	/**
-	 *	Converts world coordinates into block offset ( in the chunk at that location )
-	 */
-	Vector3 worldToBlock( const Vector3& vec );
-
-	/**
-	 * Performs a raycast test against a single cube
-	 * @param ray Raycast object.
-	 * @param min Cube minimum.
-	 * @param max Cube maximum.
->>>>>>> 6a80f6ece13cafcc4c01729d8bd9731591ff5001
-	 */
+	*/
 	void loadWorld( std::string name );
 
 	/**
 	 * Unloads the currently loaded world (if any)
 	 */
 	void unloadWorld();
+
+	/**
+	 * Creates a character
+	 */
+	Character* createCharacter();
 
 	
 	void createWindow(int *argc, char **argv);

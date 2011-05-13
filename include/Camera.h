@@ -23,6 +23,9 @@ public:
 	void setPitch( float p );
 	void setYaw( float y );
 
+	float getPitch();
+	float getYaw();
+
 	Vector3 getForward( );
 
 	void translate(const Vector3& v );

@@ -1,7 +1,6 @@
 #ifndef _RENDERER_H_
 #define _RENDERER_H_
 #include "prerequisites.h"
-#include "Camera.h"
 
 class WorldChunk;
 class BaseBlock;
@@ -47,7 +46,7 @@ protected:
 
 	size_t mRenderMode;
 
-	Camera mCamera;
+	Camera* mCamera;
 
 	size_t mFpsAvg;
 	
@@ -86,8 +85,19 @@ public:
 	void enable2D();
 	void disable2D();
 
+	/**
+	 * Sets the active rendering camera
+	 * @param cam Pointer to camera
+	 */
+	void setCamera( Camera* cam );
+	
+	Camera* getCamera();
+
 	void render( double dt, std::vector<WorldChunk*> &chunks );
 
+	/**
+	 * Draws debug statistics onto the screen
+	 */
 	void drawStats( double dt, size_t chunkCount );
 
 	/**
@@ -116,9 +126,6 @@ public:
 	void setRenderMode( size_t rendermode );
 
 	size_t getRenderMode();
-
-	Camera& getCamera();
-
 };
 
 #endif

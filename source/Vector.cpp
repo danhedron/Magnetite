@@ -17,7 +17,12 @@ Vector3 Vector3::operator +(const Vector3& right) {
 	return Vector3(x + right.x, y + right.y, z + right.z);
 }
 
-
+Vector3& Vector3::operator +=(const Vector3& right) {
+	this->x += right.x;
+	this->y += right.y;
+	this->z += right.z;
+	return *this;
+}
 
 Vector3 Vector3::operator *( float scal ) {
 	return Vector3(x*scal,y*scal,z*scal);

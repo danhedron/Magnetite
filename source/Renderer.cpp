@@ -3,6 +3,7 @@
 #include "BaseBlock.h"
 #include "OpencraftCore.h"
 #include "TextureManager.h"
+#include "Camera.h"
 
 #include "util.h"
 #include "assert.h"
@@ -15,7 +16,8 @@ mScrHeight( 0 ),
 mBlRendered( 0 ),
 mBlTotal( 0 ),
 mRenderMode( RENDER_SOLID ),
-mFpsAvg( 0 )
+mFpsAvg( 0 ),
+mCamera( NULL )
 {
 }
 
@@ -42,7 +44,6 @@ void Renderer::initialize(int *argc, char **argv)
 
 	glutInit( argc, argv );
 	Vector3 vec(0, 10.0f, 10.0f);
-	mCamera.setPosition(vec);
 }
 
 void Renderer::resizeViewport(size_t x, size_t y, size_t w, size_t h)
@@ -95,9 +96,14 @@ size_t Renderer::getRenderMode()
 	return mRenderMode;
 }
 
-Camera& Renderer::getCamera()
+Camera* Renderer::getCamera()
 {
 	return mCamera;
+}
+
+void Renderer::setCamera( Camera* cam )
+{
+	mCamera = cam;
 }
 
 GLvertex Renderer::vertex(float x, float y, float z, float nx, float ny, float nz, float u, float v, float w)
@@ -275,7 +281,7 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 	{
 		// Sort out view Matrix.
 		glLoadIdentity();
-		mCamera.applyMatrix();
+		mCamera->applyMatrix();
 		//glRotatef(totalTime * 50, 1.f, 0.f, 0.f);
 		float x = (*chunk)->getX() * CHUNK_WIDTH;
 		float y = (*chunk)->getY() * CHUNK_HEIGHT;
@@ -341,7 +347,7 @@ void Renderer::drawStats(double dt, size_t chunkCount)
 					"World Stats:\n Blocks: %u/%u - %u%%\n Rendered Chunks: %u\n"
 					"Camera:\n Position: %f %f %f",
 					dt, (1/dt), mFpsAvg, mBlRendered, mBlTotal, percent, chunkCount,
-					mCamera.getPosition().x,mCamera.getPosition().y,mCamera.getPosition().z);
+					mCamera->getPosition().x,mCamera->getPosition().y,mCamera->getPosition().z);
 	std::string stats(buff);
 
 	drawText( stats, 6, 15 );
