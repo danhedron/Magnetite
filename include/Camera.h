@@ -23,6 +23,8 @@ public:
 	void setPitch( float p );
 	void setYaw( float y );
 
+	Vector3 getForward( );
+
 	void translate(const Vector3& v );
 
 	void applyMatrix();

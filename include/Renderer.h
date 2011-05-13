@@ -22,7 +22,7 @@ struct GLgeometry {
 	GLvertex* vertexData;
 	size_t edgeCount;
 	size_t vertexCount;
-	GLgeometry::~GLgeometry() { delete[] edgeData; delete[] vertexData; }
+	~GLgeometry() { delete[] edgeData; delete[] vertexData; }
 };
 struct GLbuffer {
 	GLuint vertex;

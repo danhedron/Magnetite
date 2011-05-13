@@ -151,43 +151,33 @@ void OpencraftCore::removeEyeBlock()
 {
 	raycast_r ray;
 	ray.orig = mRenderer->getCamera().getPosition();
-	ray.dir = (mRenderer->getCamera().getMatrix() * Vector3(0,0,1.0f)).normalize();
+	ray.dir = mRenderer->getCamera().getForward();
 	ray = mWorld->raycastWorld(ray);
 	if(ray.hit)
 	{
-		long cX, cY, cZ, bX, bY, bZ;
-		cX = ray.worldHit.x/CHUNK_WIDTH;
-		cY = ray.worldHit.y/CHUNK_HEIGHT;
-		cZ = ray.worldHit.z/CHUNK_WIDTH;
-		bX = (int)ray.worldHit.x%CHUNK_WIDTH;
-		bY = (int)ray.worldHit.y%CHUNK_HEIGHT;
-		bZ = (int)ray.worldHit.z%CHUNK_WIDTH;
-		WorldChunk* chunk = mWorld->getChunk( cX, cY, cZ );
-		Util::log("Ray hit block: " + Util::toString(Vector3(bX,bY,bZ)) + " in chunk " + Util::toString(Vector3(cX,cY,cZ)));
-		if(chunk)
-			chunk->removeBlockAt( bX, bY, bZ );
+		Vector3 cIndex = mWorld->worldToChunks( ray.worldHit );
+		Vector3 bIndex = mWorld->worldToBlock( ray.worldHit );
+		WorldChunk* chunk = mWorld->getChunk( cIndex.x, cIndex.y, cIndex.z );
+		if(chunk) {
+			chunk->removeBlockAt( bIndex.x, bIndex.y - 1, bIndex.z );
+		}
 	}
-
 }
 
 void OpencraftCore::placeEyeBlock()
 {
 	raycast_r ray;
 	ray.orig = mRenderer->getCamera().getPosition();
-	ray.dir = (mRenderer->getCamera().getMatrix() * Vector3(0,0,1.0f)).normalize();
+	ray.dir = mRenderer->getCamera().getForward();
 	ray = mWorld->raycastWorld(ray);
 	if(ray.hit)
 	{
-		long cX, cY, cZ, bX, bY, bZ;
-		cX = ray.worldHit.x/CHUNK_WIDTH;
-		cY = ray.worldHit.y/CHUNK_HEIGHT;
-		cZ = ray.worldHit.z/CHUNK_WIDTH;
-		bX = abs((int)ray.worldHit.x)%CHUNK_WIDTH;
-		bY = abs((int)ceil(ray.worldHit.y))%CHUNK_HEIGHT;
-		bZ = abs((int)ray.worldHit.z)%CHUNK_WIDTH;
-		WorldChunk* chunk = mWorld->getChunk( cX, cY, cZ );
-		Util::log("Ray hit block: " + Util::toString(Vector3(bX,bY,bZ)) + " in chunk " + Util::toString(Vector3(cX,cY,cZ)));
-		if(chunk)
-			chunk->addBlockToChunk( new StoneBlock( bX, bY, bZ ) );
+		Vector3 cIndex = mWorld->worldToChunks( ray.worldHit );
+		Vector3 bIndex = mWorld->worldToBlock( ray.worldHit );
+		WorldChunk* chunk = mWorld->getChunk( cIndex.x, cIndex.y, cIndex.z );
+		//Util::log("Ray hit block: " + Util::toString(Vector3(bX,bY,bZ)) + " in chunk " +  Util::toString(cIndex));
+		if(chunk) {
+			chunk->addBlockToChunk( new StoneBlock( bIndex.x, bIndex.y + 1, bIndex.z ) );
+		}
 	}
 }

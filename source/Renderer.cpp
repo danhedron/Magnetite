@@ -128,16 +128,16 @@ void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvert
 		//if( block->getY() >= 4 ) {
 		//	Util::log("Above surface: " + block->getType() + " " + Util::toString(rect.x) + " " + Util::toString(rect.y));
 		//}
-		data[ind + 0] = vertex( block->getX() + 0.5f, block->getY() + 0.5f,	block->getZ() + 0.5f, // Coordinates
+		data[ind + 0] = vertex( block->getX() + 1.0f, block->getY() + 1.0f,	block->getZ() + 1.0f, // Coordinates
 								0.0f, 0.0f, -1.0f,
 								rect.x, rect.y );
-		data[ind + 1] = vertex( block->getX() - 0.5f, block->getY() + 0.5f, block->getZ() + 0.5f, // Coordinates
+		data[ind + 1] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() + 1.0f, // Coordinates
 								0.0f, 0.0f, -1.0f,
 								rect.x + rect.w, rect.y );
-		data[ind + 2] = vertex( block->getX() - 0.5f, block->getY() - 0.5f, block->getZ() + 0.5f, // Coordinates
+		data[ind + 2] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
 								0.0f, 0.0f, -1.0f,
 								rect.x + rect.w, rect.y + rect.h );
-		data[ind + 3] = vertex( block->getX() + 0.5f, block->getY() - 0.5f, block->getZ() + 0.5f, // Coordinates
+		data[ind + 3] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
 								0.0f, 0.0f, -1.0f,
 								rect.x, rect.y + rect.h );
 		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
@@ -147,16 +147,16 @@ void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvert
 	}
 	/* Face +Z */
 	if((block->mViewFlags & VIS_FORWARD) == VIS_FORWARD ) {
-		data[ind + 0] = vertex( block->getX() + 0.5f, block->getY() + 0.5f, block->getZ() - 0.5f, // Coordinates
+		data[ind + 0] = vertex( block->getX() + 1.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
 								0.0f, 0.0f, 1.0f,
 								rect.x, rect.y );
-		data[ind + 1] = vertex( block->getX() - 0.5f, block->getY() + 0.5f, block->getZ() - 0.5f, // Coordinates
+		data[ind + 1] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
 								0.0f, 0.0f, 1.0f,
 								rect.x + rect.w, rect.y );
-		data[ind + 2] = vertex( block->getX() - 0.5f, block->getY() - 0.5f, block->getZ() - 0.5f, // Coordinates
+		data[ind + 2] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
 								0.0f, 0.0f, 1.0f,
 								rect.x + rect.w, rect.y + rect.h );
-		data[ind + 3] = vertex( block->getX() + 0.5f, block->getY() - 0.5f, block->getZ() - 0.5f, // Coordinates
+		data[ind + 3] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
 								0.0f, 0.0f, 1.0f,
 								rect.x, rect.y + rect.h );
 		edges[eInd + 5] = ind + 2; edges[eInd + 4] = ind + 1; edges[eInd + 3] = ind + 0;
@@ -166,16 +166,16 @@ void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvert
 	}
 	/* Face +X */
 	if((block->mViewFlags & VIS_RIGHT) == VIS_RIGHT) {
-		data[ind + 0] = vertex( block->getX() + 0.5f, block->getY() + 0.5f, block->getZ() + 0.5f, // Coordinates
+		data[ind + 0] = vertex( block->getX() + 1.0f, block->getY() + 1.0f, block->getZ() + 1.0f, // Coordinates
 								1.0f, 0.0f, 0.0f,
 								rect.x, rect.y );
-		data[ind + 1] = vertex( block->getX() + 0.5f, block->getY() - 0.5f, block->getZ() + 0.5f, // Coordinates
+		data[ind + 1] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
 								1.0f, 0.0f, 0.0f,
 								rect.x + rect.w, rect.y );
-		data[ind + 2] = vertex( block->getX() + 0.5f, block->getY() - 0.5f, block->getZ() - 0.5f, // Coordinates
+		data[ind + 2] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
 								1.0f, 0.0f, 0.0f,
 								rect.x + rect.w, rect.y + rect.h );
-		data[ind + 3] = vertex( block->getX() + 0.5f, block->getY() + 0.5f, block->getZ() - 0.5f, // Coordinates
+		data[ind + 3] = vertex( block->getX() + 1.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
 								1.0f, 0.0f, 0.0f,
 								rect.x, rect.y + rect.h );
 		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
@@ -185,16 +185,16 @@ void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvert
 	}
 	/* Face -Y */
 	if((block->mViewFlags & VIS_BOTTOM) == VIS_BOTTOM) {
-		data[ind + 0] = vertex( block->getX() - 0.5f, block->getY() - 0.5f, block->getZ() + 0.5f, // Coordinates
+		data[ind + 0] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
 								0.0f, -1.0f, 0.0f,
 								rect.x, rect.y );
-		data[ind + 1] = vertex( block->getX() - 0.5f, block->getY() - 0.5f, block->getZ() - 0.5f, // Coordinates
+		data[ind + 1] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
 								0.0f, -1.0f, 0.0f,
 								rect.x + rect.w, rect.y );
-		data[ind + 2] = vertex( block->getX() + 0.5f, block->getY() - 0.5f, block->getZ() - 0.5f, // Coordinates
+		data[ind + 2] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
 								0.0f, -1.0f, 0.0f,
 								rect.x + rect.w, rect.y + rect.h );
-		data[ind + 3] = vertex( block->getX() + 0.5f, block->getY() - 0.5f, block->getZ() + 0.5f, // Coordinates
+		data[ind + 3] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
 								0.0f, -1.0f, 0.0f,
 								rect.x, rect.y + rect.h );
 		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
@@ -204,16 +204,16 @@ void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvert
 	}
 	/* Face +Y */
 	if((block->mViewFlags & VIS_TOP) == VIS_TOP) {
-		data[ind + 0] = vertex( block->getX() - 0.5f, block->getY() + 0.5f, block->getZ() + 0.5f, // Coordinates
+		data[ind + 0] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() + 1.0f, // Coordinates
 								0.0f, 1.0f, 0.0f,
 								rect.x, rect.y );
-		data[ind + 1] = vertex( block->getX() + 0.5f, block->getY() + 0.5f, block->getZ() + 0.5f, // Coordinates
+		data[ind + 1] = vertex( block->getX() + 1.0f, block->getY() + 1.0f, block->getZ() + 1.0f, // Coordinates
 								0.0f, 1.0f, 0.0f,
 								rect.x + rect.w, rect.y );
-		data[ind + 2] = vertex( block->getX() + 0.5f, block->getY() + 0.5f, block->getZ() - 0.5f, // Coordinates
+		data[ind + 2] = vertex( block->getX() + 1.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
 								0.0f, 1.0f, 0.0f,
 								rect.x + rect.w, rect.y + rect.h );
-		data[ind + 3] = vertex( block->getX() - 0.5f, block->getY() + 0.5f, block->getZ() - 0.5f, // Coordinates
+		data[ind + 3] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
 								0.0f, 1.0f, 0.0f,
 								rect.x, rect.y + rect.h );
 		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
@@ -223,16 +223,16 @@ void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvert
 	}
 	/* Face -X */
 	if((block->mViewFlags & VIS_LEFT) == VIS_LEFT) {
-		data[ind + 0] = vertex( block->getX() - 0.5f, block->getY() + 0.5f, block->getZ() - 0.5f, // Coordinates
+		data[ind + 0] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
 								-1.0f, 0.0f, 0.0f,
 								rect.x, rect.y );
-		data[ind + 1] = vertex( block->getX() - 0.5f, block->getY() - 0.5f, block->getZ() - 0.5f, // Coordinates
+		data[ind + 1] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
 								-1.0f, 0.0f, 0.0f,
 								rect.x + rect.w, rect.y );
-		data[ind + 2] = vertex( block->getX() - 0.5f, block->getY() - 0.5f, block->getZ() + 0.5f, // Coordinates
+		data[ind + 2] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
 								-1.0f, 0.0f, 0.0f,
 								rect.x + rect.w, rect.y + rect.h );
-		data[ind + 3] = vertex( block->getX() - 0.5f, block->getY() + 0.5f, block->getZ() + 0.5f, // Coordinates
+		data[ind + 3] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() + 1.0f, // Coordinates
 								-1.0f, 0.0f, 0.0f,
 								rect.x, rect.y + rect.h );
 		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
