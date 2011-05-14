@@ -8,7 +8,7 @@ class StoneBlock : public BaseBlock
 protected:
 	
 public:
-	StoneBlock(long x, long y, long z);
+	StoneBlock(long x = 0, long y = 0, long z = 0);
 	~StoneBlock(void);
 
 	std::string getType();

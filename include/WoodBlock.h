@@ -8,7 +8,7 @@ class WoodBlock : public BaseBlock
 protected:
 	
 public:
-	WoodBlock(long x, long y, long z);
+	WoodBlock(long x = 0, long y = 0, long z = 0);
 	~WoodBlock(void);
 
 	std::string getType();

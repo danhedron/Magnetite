@@ -44,3 +44,15 @@ short BaseBlock::getTextureY()
 {
 	return mBlockY;
 }
+
+void BaseBlock::setPosition( long x, long y, long z )
+{
+	mX = x;
+	mY = y;
+	mZ = z;
+}
+
+void BaseBlock::setPosition( const Vector3& vec)
+{
+	setPosition( vec.x, vec.y, vec.z );
+}

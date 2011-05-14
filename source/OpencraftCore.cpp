@@ -5,6 +5,7 @@
 #include "StoneBlock.h"
 #include "World.h"
 #include "Character.h"
+#include "BlockFactory.h"
 
 OpencraftCore* OpencraftCore::Singleton = 0;
 
@@ -43,6 +44,9 @@ void OpencraftCore::createWindow(int *argc, char **argv)
 void OpencraftCore::go(int *argc, char **argv) 
 {
 	createWindow(argc, argv);
+
+	// Print factory list for testing
+	FactoryManager::logFactories();
 
 	int lastX = mWindow.GetWidth()/2;
 	int lastY =  mWindow.GetHeight()/20;
@@ -216,7 +220,9 @@ void OpencraftCore::placeEyeBlock()
 		WorldChunk* chunk = mWorld->getChunk( cIndex.x, cIndex.y, cIndex.z );
 		//Util::log("Ray hit block: " + Util::toString(Vector3(bX,bY,bZ)) + " in chunk " +  Util::toString(cIndex));
 		if(chunk) {
-			chunk->addBlockToChunk( new StoneBlock( bIndex.x, bIndex.y, bIndex.z ) );
+			BaseBlock* block = FactoryManager::createBlock("stone");
+			block->setPosition( bIndex );
+			chunk->addBlockToChunk( block );
 		}
 	}
 }

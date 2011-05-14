@@ -1,7 +1,11 @@
 #include "StoneBlock.h"
+#include "BlockFactory.h"
+
+//REGISTER_BLOCK_TYPE( "stone", StoneBlock )
+GenericBlockFactory<StoneBlock> stoneFactory("stone");
 
 StoneBlock::StoneBlock(long x, long y, long z)
-: BaseBlock( x, y, z)
+: BaseBlock()
 {
 	texture(1,0);
 }

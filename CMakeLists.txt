@@ -39,6 +39,7 @@ set(OPENCRAFT_SOURCES
 	source/Matrix.cpp
 	source/Vector.cpp
 	source/Character.cpp
+	source/BlockFactory.cpp
 	source/BaseBlock.cpp
 	source/StoneBlock.cpp
 	source/WoodBlock.cpp
@@ -56,6 +57,7 @@ set(OPENCRAFT_HEADERS
 	include/Matrix.h
 	include/Vector.h
 	include/Character.h
+	include/BlockFactory.h
 	include/StoneBlock.h
 	include/WoodBlock.h
 	include/BaseBlock.h

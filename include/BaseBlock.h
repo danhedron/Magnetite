@@ -23,7 +23,7 @@ protected:
 	short mBlockX;
 	short mBlockY;
 public:
-	BaseBlock(long x, long y, long z);
+	BaseBlock(long x = 0, long y = 0, long z = 0);
 	~BaseBlock(void);
 
 	short vertexIndex;
@@ -42,6 +42,9 @@ public:
 	long getX();
 	long getY();
 	long getZ();
+
+	void setPosition( long x, long y, long z );
+	void setPosition( const Vector3& vec );
 };
 
 #endif

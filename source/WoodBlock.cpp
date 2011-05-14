@@ -1,4 +1,9 @@
 #include "WoodBlock.h"
+#include "BlockFactory.h"
+
+//REGISTER_BLOCK_TYPE( "wood", WoodBlock )
+GenericBlockFactory<WoodBlock> stoneFactory("wood");
+
 
 WoodBlock::WoodBlock(long x, long y, long z)
 : BaseBlock( x, y, z)
