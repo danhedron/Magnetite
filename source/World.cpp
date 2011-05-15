@@ -117,6 +117,7 @@ raycast_r World::raycastWorld(raycast_r &ray)
 	for(std::vector<raycast_r>::iterator it = raycasts.begin(); it != raycasts.end(); ++it)
 	{
 		if((*it).i0 < m) {
+			m = it->i0;
 			closest = (*it);
 		}
 	}
@@ -126,31 +127,21 @@ raycast_r World::raycastWorld(raycast_r &ray)
 
 raycast_r& World::raycastCube(raycast_r &ray, Vector3& min, Vector3& max)
 {
-	float t0 = 0;
-	float t1 = ray.maxDistance;
-	for(int i = 0; i < 3; ++i)
-	{
-		float invRayDir = 1.f / ray.dir[i];
-		float near_t = (min[i] - ray.orig[i]) * invRayDir;
-		float far_t = (max[i] - ray.orig[i]) * invRayDir;
-		if(near_t > far_t)				
-		{					
-			float temp = near_t;
-			near_t = far_t;
-			far_t = temp;
-		}
-		t0 = near_t > t0 ? near_t : t0;
-		t1 = far_t < t1 ? far_t : t1;
-		if(t0 > t1) 
-		{
-			ray.hit = false;
-			return ray;
-		}
-	}			
-	ray.i0 = t0;
-	ray.i1 = t1;
-	ray.hit = true;
-	ray.worldHit = ray.orig + ray.dir*ray.i0;
+	const Vector3 l1((min - ray.orig) / ray.dir);
+	const Vector3 l2((max - ray.orig) / ray.dir);
+
+	Vector3 v_far;
+	v_far.x = std::max( l1.x, l2.x );
+	v_far.y = std::max( l1.y, l2.y );
+	v_far.z = std::max( l1.z, l2.z );
+	Vector3 v_near;
+	v_near.x = std::min( l1.x, l2.x );
+	v_near.y = std::min( l1.y, l2.y );
+	v_near.z = std::min( l1.z, l2.z );
+	ray.i1 = std::min( v_far.smallestDimension(), ray.maxDistance );
+	ray.i0 = std::max( v_near.biggestDimension(), 0.f );
+	ray.hit = (ray.i1 >= ray.i0) & (ray.i1 >= 0.f );
+	ray.worldHit = ray.orig + ( ray.dir * ray.i0 );
 	return ray;
 }
 

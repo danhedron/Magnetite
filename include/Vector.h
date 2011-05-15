@@ -11,6 +11,7 @@ public:
 	Vector3 operator- ();
 	Vector3 operator+ (const Vector3& right);
 	Vector3 operator- (const Vector3& right);
+	Vector3 operator/ (const Vector3& right);
 
 	Vector3& operator += (const Vector3& right);
 	Vector3& operator -= (const Vector3& right);
@@ -20,6 +21,9 @@ public:
 
 	float length();
 	Vector3 normalize();
+
+	float smallestDimension();
+	float biggestDimension();
 
 	float operator[] ( int index );
 };

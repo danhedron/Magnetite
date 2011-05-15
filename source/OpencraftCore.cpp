@@ -223,6 +223,7 @@ void OpencraftCore::placeEyeBlock()
 	ray = mWorld->raycastWorld(ray);
 	if(ray.hit)
 	{
+		Util::log("Ray Hit: " + Util::toString( ray.worldHit ) );
 		Vector3 cIndex = mWorld->worldToChunks( ray.worldHit );
 		Vector3 bIndex = mWorld->worldToBlock( ray.worldHit );
 		WorldChunk* chunk = mWorld->getChunk( cIndex.x, cIndex.y, cIndex.z );

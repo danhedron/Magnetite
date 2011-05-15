@@ -1,4 +1,5 @@
 #include "Vector.h"
+#include <algorithm>
 
 Vector3::Vector3( float _x, float _y, float _z, float _w )
 {
@@ -15,6 +16,10 @@ Vector3 Vector3::operator -(const Vector3& right) {
 
 Vector3 Vector3::operator +(const Vector3& right) {
 	return Vector3(x + right.x, y + right.y, z + right.z);
+}
+
+Vector3 Vector3::operator /(const Vector3& right) {
+	return Vector3(x / right.x, y / right.y, z / right.z);
 }
 
 Vector3& Vector3::operator +=(const Vector3& right) {
@@ -59,4 +64,14 @@ float Vector3::length()
 Vector3 Vector3::normalize()
 {
 	return *this/length();
+}
+
+float Vector3::biggestDimension()
+{
+	return std::max( std::max( x, y ), z );
+}
+
+float Vector3::smallestDimension()
+{
+	return std::min( std::min( x, y ), z );
 }
