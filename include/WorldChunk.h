@@ -62,6 +62,11 @@ public:
 	BaseBlock* getBlockAt(long x, long y, long z);
 
 	/**
+	 * Called when a block inside the chunk is moved.
+	 */
+	void _blockMoved( BaseBlock* block, short x, short y, short z );
+
+	/**
 	 * Returns a pointer to the block list
 	 */
 	BlockList* getBlocks();
@@ -90,6 +95,11 @@ public:
 	 * Performs a visibility test on all blocks in this chunk
 	 */
 	void updateVisibility();
+
+	/**
+	 * Tells the chunk it's geometry may have been changed
+	 */
+	void markModified();
 
 	/**
 	 * Returns wether or not this chunk has had it's geometry 

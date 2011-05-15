@@ -60,6 +60,8 @@ void WorldChunk::addBlockToChunk(BaseBlock* block)
 	long k = BLOCK_INDEX( block );
 	BlockList::iterator lb = mBlockData.find( k );
 
+	block->_setChunk( this );
+
 	if(lb != mBlockData.end())
 	{
 		delete lb->second;
@@ -73,6 +75,18 @@ void WorldChunk::addBlockToChunk(BaseBlock* block)
 	}
 	mHasChanged = true;
 	mHasGenerated = false;
+}
+
+void WorldChunk::_blockMoved( BaseBlock* block, short x, short y, short z )
+{
+	long k = BLOCK_INDEX( block );
+	long kn = z * CHUNK_WIDTH * CHUNK_HEIGHT + y * CHUNK_WIDTH + x;
+	BlockList::iterator lb = mBlockData.find( k );
+	removeBlockAt( x, y, z );
+	if( lb != mBlockData.end() )
+		mBlockData.erase( lb++ );
+	mBlockData.insert( BlockList::value_type( kn, block ) );
+	markModified();
 }
 
 void WorldChunk::reserveBlocks( size_t count )
@@ -137,6 +151,7 @@ void WorldChunk::updateVisibility()
 	for(BlockList::iterator block = mBlockData.begin(); block != mBlockData.end(); ++block) {
 		BaseBlock* b = (*block).second;
 		short visFlags = FACE_NONE;
+		short visOrig = b->mViewFlags;
 		//Check All axes for adjacent blocks.
 		if( getBlockAt( b->getX() + 1, b->getY(), b->getZ() ) == NULL ) {
 			mVisibleFaces++;
@@ -163,10 +178,12 @@ void WorldChunk::updateVisibility()
 			visFlags = visFlags | FACE_FORWARD;
 		}
 		(*block).second->mViewFlags = visFlags;
-		float y = 0.f;
 		for( size_t f = 0; f < 6; f++ ) {
-			if( ((*block).second->mViewFlags & (1<<f)) == (1<<f) )
-				y ++;
+			if( ((1<<f) & visOrig ) == (1<<f) ) {
+				if( ( visOrig & visFlags ) != (1<<f) ) {
+					b->connectedChange( (1<<f) );
+				}
+			}
 		}
 		if( visFlags == FACE_NONE )
 			_blockVisible( (*block), false );
@@ -222,6 +239,11 @@ void WorldChunk::generate()
 bool WorldChunk::hasGenerated()
 {
 	return mHasGenerated;
+}
+
+void WorldChunk::markModified()
+{
+	mHasChanged = true;
 }
 
 void WorldChunk::notifyGenerated()

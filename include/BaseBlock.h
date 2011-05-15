@@ -13,6 +13,8 @@ enum {
 	FACE_BACK	= (1<<5)
 };
 
+class WorldChunk;
+
 class BaseBlock
 {
 protected:
@@ -22,9 +24,13 @@ protected:
 	long mZ;
 	short mBlockX;
 	short mBlockY;
+
+	WorldChunk* mChunk;
 public:
 	BaseBlock(long x = 0, long y = 0, long z = 0);
 	~BaseBlock(void);
+
+	void _setChunk( WorldChunk* chnk );
 
 	short vertexIndex;
 
@@ -32,6 +38,12 @@ public:
 
 	virtual void created() = 0;
 	virtual void hit() = 0;
+
+	/**
+	 * Called when a nearby block changes.
+	 * @param face The direction of the changed block.
+	 */
+	virtual void connectedChange( short face );
 
 	virtual void texture(int x, int y);
 	virtual void getTextureCoords( short face, short &x, short &y );
