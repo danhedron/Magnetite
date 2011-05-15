@@ -99,12 +99,12 @@ public:
 	 * @param min Cube minimum.
 	 * @param max Cube maximum.
 	 */
-	raycast_r& raycastCube(raycast_r &ray, Vector3& min, Vector3& max);
+	raycast_r raycastCube(const raycast_r &ray, Vector3& min, Vector3& max);
 
 	/**
 	 * Performs a raytest against the world.
 	 */
-	raycast_r raycastWorld(raycast_r &ray);
+	raycast_r raycastWorld(const raycast_r &inray);
 
 	/**
 	 * Returns the chunk at the given indexes.

@@ -79,15 +79,16 @@ void World::removeChunk(long x, long y, long z)
 	}
 }
 
-raycast_r World::raycastWorld(raycast_r &ray)
+raycast_r World::raycastWorld(const raycast_r &inray)
 {
+	raycast_r ray = inray;
 	Vector3 min, max;
 	ChunkList hitChunks;
 	for(ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it)
 	{
 		min = Vector3( (*it)->getX() * CHUNK_WIDTH, (*it)->getY() * CHUNK_HEIGHT,  (*it)->getZ() * CHUNK_WIDTH );
 		max = Vector3( (*it)->getX() * CHUNK_WIDTH + CHUNK_WIDTH, (*it)->getY() * CHUNK_HEIGHT + CHUNK_HEIGHT,  (*it)->getZ() * CHUNK_WIDTH + CHUNK_WIDTH );
-		raycastCube(ray, min, max);
+		ray = raycastCube(ray, min, max);
 		if(ray.hit)
 			hitChunks.push_back((*it));
 	}
@@ -104,13 +105,12 @@ raycast_r World::raycastWorld(raycast_r &ray)
 			max = Vector3( (*it)->getX() * CHUNK_WIDTH + (*block).second->getX() + 1.0f,
 							(*it)->getY() * CHUNK_HEIGHT + (*block).second->getY() + 1.0f,
 							(*it)->getZ() * CHUNK_WIDTH + (*block).second->getZ() + 1.0f );
-			raycast_r r = ray;
-			raycastCube(r, min, max);
+			raycast_r r = inray;
+			r = raycastCube(r, min, max);
 			if( r.hit == true )
 				raycasts.push_back( r );
 		}	
 	}
-	
 	// Final pass, find closest hit.
 	float m = std::numeric_limits<float>::max();
 	raycast_r closest;
@@ -125,8 +125,9 @@ raycast_r World::raycastWorld(raycast_r &ray)
 	return closest;
 }
 
-raycast_r& World::raycastCube(raycast_r &ray, Vector3& min, Vector3& max)
+raycast_r World::raycastCube(const raycast_r &inray, Vector3& min, Vector3& max)
 {
+	raycast_r ray(inray);
 	const Vector3 l1((min - ray.orig) / ray.dir);
 	const Vector3 l2((max - ray.orig) / ray.dir);
 
