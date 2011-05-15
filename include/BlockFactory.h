@@ -32,7 +32,7 @@ public:
 	 */
 	static void logFactories()
 	{
-		Util::log("Factories:");
+		Util::log("Block Types:");
 		for( BlockFactoryList::iterator it = blockFactoryList.begin(); it != blockFactoryList.end(); ++it )
 			Util::log( "\t" + (*it).first );
 	}

@@ -4,6 +4,7 @@
 #include "OpencraftCore.h"
 #include "TextureManager.h"
 #include "Camera.h"
+#include "BlockFactory.h"
 
 #include "util.h"
 #include "assert.h"
@@ -17,7 +18,8 @@ mBlRendered( 0 ),
 mBlTotal( 0 ),
 mRenderMode( RENDER_SOLID ),
 mFpsAvg( 0 ),
-mCamera( NULL )
+mCamera( NULL ),
+blockType( "" )
 {
 }
 
@@ -332,6 +334,8 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 	glDisable(GL_CULL_FACE);
 
 	drawStats( dt, chunks.size() );
+
+	drawBlockChooser( dt );
 }
 
 void Renderer::drawStats(double dt, size_t chunkCount)
@@ -353,6 +357,54 @@ void Renderer::drawStats(double dt, size_t chunkCount)
 	drawText( stats, 6, 15 );
 
 	disable2D();
+}
+
+void Renderer::drawBlockChooser( double dt )
+{
+	// Switch to 2D for overlays
+	enable2D();
+	/*size_t memCurrent,memPeak,pagedCurrent,pagedPeak,pageFaults;
+	Util::getMemoryUsage(memCurrent,memPeak,pagedCurrent,pagedPeak,pageFaults);*/
+
+	BlockFactoryList::iterator iter = FactoryManager::blockFactoryList.find(blockType);
+	if( iter == FactoryManager::blockFactoryList.end() )
+	{
+		iter = FactoryManager::blockFactoryList.begin();
+		blockType = iter->first;
+	}
+	
+	char buff[500];
+	sprintf( buff,  "Current Block: %s",
+					(*iter).first.c_str());
+	std::string stats(buff);
+
+	drawText( stats, 6, 200);
+
+	disable2D();
+}
+
+void Renderer::nextBlock()
+{
+	BlockFactoryList::iterator iter = FactoryManager::blockFactoryList.find(blockType);
+	if( iter == FactoryManager::blockFactoryList.end() || ++iter == FactoryManager::blockFactoryList.end() )
+	{
+		iter = FactoryManager::blockFactoryList.begin();
+	}
+
+	blockType = iter->first;
+}
+
+void Renderer::lastBlock()
+{
+	BlockFactoryList::iterator iter = FactoryManager::blockFactoryList.find(blockType);
+	if( iter == FactoryManager::blockFactoryList.begin() )
+	{
+		iter = FactoryManager::blockFactoryList.end();
+	}
+	--iter;
+
+
+	blockType = iter->first;
 }
 
 void Renderer::drawText(std::string text, int x, int y)

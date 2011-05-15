@@ -108,6 +108,18 @@ public:
 	void drawStats( double dt, size_t chunkCount );
 
 	/**
+	 * Draws the block chooser
+	 */
+	void drawBlockChooser( double dt );
+
+	/**
+	 * Chooses the next block 
+	 */
+	void nextBlock();
+	void lastBlock();
+	std::string blockType;
+
+	/**
 	 * Draws the string on the screen (coords start from top left)
 	 * Will split each line into a new draw call
 	 * @param text Text to draw

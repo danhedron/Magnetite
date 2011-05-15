@@ -112,6 +112,14 @@ void OpencraftCore::go(int *argc, char **argv)
 				(lEvt.Key.Code == sf::Key::LShift) ) {
 					mPlayer->enableSprint( false );
 			}
+			if( (lEvt.Type == sf::Event::KeyPressed) &&
+				(lEvt.Key.Code == sf::Key::Add) ) {
+					mRenderer->nextBlock();
+			}
+			if( (lEvt.Type == sf::Event::KeyPressed) &&
+				(lEvt.Key.Code == sf::Key::Subtract) ) {
+					mRenderer->lastBlock();
+			}
 			if( (lEvt.Type == sf::Event::MouseMoved) ) {
 					mPlayer->getCamera()->pitch( -(lEvt.MouseMove.Y  - lastY) );
 					mPlayer->getCamera()->yaw( -(lEvt.MouseMove.X - lastX) );
@@ -220,9 +228,11 @@ void OpencraftCore::placeEyeBlock()
 		WorldChunk* chunk = mWorld->getChunk( cIndex.x, cIndex.y, cIndex.z );
 		//Util::log("Ray hit block: " + Util::toString(Vector3(bX,bY,bZ)) + " in chunk " +  Util::toString(cIndex));
 		if(chunk) {
-			BaseBlock* block = FactoryManager::createBlock("stone");
-			block->setPosition( bIndex );
-			chunk->addBlockToChunk( block );
+			BaseBlock* block = FactoryManager::createBlock(	mRenderer->blockType );
+			if( block != NULL ) {
+				block->setPosition( bIndex );
+				chunk->addBlockToChunk( block );
+			}
 		}
 	}
 }

@@ -42,6 +42,7 @@ set(OPENCRAFT_SOURCES
 	source/BlockFactory.cpp
 	source/BaseBlock.cpp
 	source/StoneBlock.cpp
+	source/DirtBlock.cpp
 	source/WoodBlock.cpp
 	source/ChunkLoader.cpp
 	source/World.cpp
@@ -59,6 +60,7 @@ set(OPENCRAFT_HEADERS
 	include/Character.h
 	include/BlockFactory.h
 	include/StoneBlock.h
+	include/DirtBlock.h
 	include/WoodBlock.h
 	include/BaseBlock.h
 	include/ChunkLoader.h
