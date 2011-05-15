@@ -2,7 +2,7 @@
 #include "BlockFactory.h"
 
 //REGISTER_BLOCK_TYPE( "wood", WoodBlock )
-GenericBlockFactory<WoodBlock> stoneFactory("wood");
+GenericBlockFactory<WoodBlock> woodFactory("wood");
 
 
 WoodBlock::WoodBlock(long x, long y, long z)
