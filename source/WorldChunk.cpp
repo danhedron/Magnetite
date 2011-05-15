@@ -1,6 +1,6 @@
 #include "WorldChunk.h"
-#include "StoneBlock.h"
-#include "WoodBlock.h"
+#include "BaseBlock.h"
+#include "BlockFactory.h"
 #include "Renderer.h"
 
 WorldChunk::WorldChunk(long x, long y, long z)
@@ -40,10 +40,15 @@ void WorldChunk::fillWithTestData()
 			{
 				for(int y = 0; y < 10; y++)
 				{
+					BaseBlock* block = NULL;
 					if( y == 9 )
-						addBlockToChunk( new WoodBlock(x, y, z) );
+						block = FactoryManager::createBlock("grass");
+					else if( y == 8 || y == 7 )
+						block = FactoryManager::createBlock("dirt");
 					else
-						addBlockToChunk( new StoneBlock(x, y, z) );
+						block = FactoryManager::createBlock("stone");
+					block->setPosition( x, y, z );
+					addBlockToChunk( block );
 				}
 			}
 		}
@@ -131,31 +136,31 @@ void WorldChunk::updateVisibility()
 	// Just a brute force Occlusion test: perhaps this could be optimized?
 	for(BlockList::iterator block = mBlockData.begin(); block != mBlockData.end(); ++block) {
 		BaseBlock* b = (*block).second;
-		short visFlags = VIS_NONE;
+		short visFlags = FACE_NONE;
 		//Check All axes for adjacent blocks.
 		if( getBlockAt( b->getX() + 1, b->getY(), b->getZ() ) == NULL ) {
 			mVisibleFaces++;
-			visFlags = visFlags | VIS_RIGHT;
+			visFlags = visFlags | FACE_RIGHT;
 		}
 		if( getBlockAt( b->getX() - 1, b->getY(), b->getZ() ) == NULL ) {
 			mVisibleFaces++;
-			visFlags = visFlags | VIS_LEFT;
+			visFlags = visFlags | FACE_LEFT;
 		}
 		if( getBlockAt( b->getX(), b->getY() + 1, b->getZ() ) == NULL ) {
 			mVisibleFaces++;
-			visFlags = visFlags | VIS_TOP;
+			visFlags = visFlags | FACE_TOP;
 		}
 		if( getBlockAt( b->getX(), b->getY() - 1, b->getZ() ) == NULL ) {
 			mVisibleFaces++;
-			visFlags = visFlags | VIS_BOTTOM;
+			visFlags = visFlags | FACE_BOTTOM;
 		}
 		if( getBlockAt( b->getX(), b->getY(), b->getZ() + 1 ) == NULL ) {
 			mVisibleFaces++;
-			visFlags = visFlags | VIS_BACK;
+			visFlags = visFlags | FACE_BACK;
 		}
 		if( getBlockAt( b->getX(), b->getY(), b->getZ() - 1 ) == NULL ) {
 			mVisibleFaces++;
-			visFlags = visFlags | VIS_FORWARD;
+			visFlags = visFlags | FACE_FORWARD;
 		}
 		(*block).second->mViewFlags = visFlags;
 		float y = 0.f;
@@ -163,7 +168,7 @@ void WorldChunk::updateVisibility()
 			if( ((*block).second->mViewFlags & (1<<f)) == (1<<f) )
 				y ++;
 		}
-		if( visFlags == VIS_NONE )
+		if( visFlags == FACE_NONE )
 			_blockVisible( (*block), false );
 		else
 			_blockVisible( (*block), true);

@@ -36,13 +36,10 @@ void BaseBlock::texture(int x, int y)
 	mBlockY = y;
 }
 
-short BaseBlock::getTextureX()
+void BaseBlock::getTextureCoords( short face, short &x, short &y )
 {
-	return mBlockX;
-}
-short BaseBlock::getTextureY()
-{
-	return mBlockY;
+	x = mBlockX;
+	y = mBlockY;
 }
 
 void BaseBlock::setPosition( long x, long y, long z )

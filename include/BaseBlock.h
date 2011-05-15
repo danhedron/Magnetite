@@ -4,13 +4,13 @@
 
 
 enum {
-	VIS_NONE	= 0,
-	VIS_TOP		= (1<<0),
-	VIS_BOTTOM	= (1<<1),
-	VIS_LEFT	= (1<<2),
-	VIS_RIGHT	= (1<<3),
-	VIS_FORWARD	= (1<<4),
-	VIS_BACK	= (1<<5)
+	FACE_NONE	= 0,
+	FACE_TOP		= (1<<0),
+	FACE_BOTTOM	= (1<<1),
+	FACE_LEFT	= (1<<2),
+	FACE_RIGHT	= (1<<3),
+	FACE_FORWARD	= (1<<4),
+	FACE_BACK	= (1<<5)
 };
 
 class BaseBlock
@@ -34,8 +34,7 @@ public:
 	virtual void hit() = 0;
 
 	virtual void texture(int x, int y);
-	short getTextureX();
-	short getTextureY();
+	virtual void getTextureCoords( short face, short &x, short &y );
 
 	virtual std::string getType() = 0;
 
