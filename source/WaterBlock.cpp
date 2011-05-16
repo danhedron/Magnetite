@@ -1,75 +1,148 @@
-#include "BaseBlock.h"
-#include "OpencraftCore.h"
-#include "TextureManager.h"
-#include "Renderer.h"
+#include "WaterBlock.h"
+#include "BlockFactory.h"
 #include "WorldChunk.h"
+#include "TextureManager.h"
+#include "OpencraftCore.h"
+#include "Renderer.h"
 
-BaseBlock::BaseBlock(long x, long y, long z)
-: mDamage( 0 ),
-mX( x ),
-mY( y ),
-mZ( z ),
-mViewFlags(0),
-mBlockX(0),
-mBlockY(0),
-mChunk( NULL )
+//REGISTER_BLOCK_TYPE( "stone", StoneBlock )
+GenericBlockFactory<WaterBlock> waterFactory("water");
+
+WaterBlock::WaterBlock(long x, long y, long z)
+: BaseBlock(),
+mFluidLevel( 100.f ),
+mIsNew( true )
 {
-	
+	texture(13,12);
 }
 
-BaseBlock::~BaseBlock(void)
+WaterBlock::~WaterBlock(void)
 {
 }
 
-void BaseBlock::connectedChange( short face )
+void WaterBlock::created()
 {
 
 }
 
-void BaseBlock::_setChunk( WorldChunk* chnk )
+bool WaterBlock::isFluid()
 {
-	mChunk = chnk;
+	return true;
 }
 
-long BaseBlock::getX() {
-	return mX;
-}
-
-long BaseBlock::getY() {
-	return mY;
-}
-
-long BaseBlock::getZ() {
-	return mZ;
-}
-
-void BaseBlock::texture(int x, int y)
+bool WaterBlock::isOpaque()
 {
-	mBlockX = x;
-	mBlockY = y;
+	return false;
 }
 
-void BaseBlock::getTextureCoords( short face, short &x, short &y )
+void WaterBlock::getTextureCoords( short face, short &x, short &y )
 {
-	x = mBlockX;
-	y = mBlockY;
+	BaseBlock::getTextureCoords( face, x, y );
 }
 
-void BaseBlock::setPosition( long x, long y, long z )
+void WaterBlock::connectedChange( short face )
 {
-	if( mChunk )
-		mChunk->_blockMoved( this, x, y, z );
-	mX = x;
-	mY = y;
-	mZ = z;
+
 }
 
-void BaseBlock::setPosition( const Vector3& vec)
+float WaterBlock::getFluidLevel()
 {
-	setPosition( vec.x, vec.y, vec.z );
+	return mFluidLevel;
 }
 
-void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges)
+void WaterBlock::changeFluidLevel( float delta )
+{
+	mFluidLevel += delta;
+}
+
+void WaterBlock::setFluidLevel( float delta )
+{
+	mFluidLevel = delta;
+}
+
+void WaterBlock::balanceFluid( BaseBlock* block )
+{
+	if( block->getType() == this->getType() )
+	{
+		Util::log("Flowing to: " + Util::toString( block->getX() ) + " " + Util::toString( block->getY() ) + " " +  Util::toString( block->getZ() ) );
+		WaterBlock* water = (WaterBlock*)block;
+		float dif = mFluidLevel - water->getFluidLevel();
+		if( dif > 0.f ) {
+			changeFluidLevel( dif / 2.f );
+			mFluidLevel -= dif / 2.f;
+		}
+	}
+}
+
+void WaterBlock::flow( float dt )
+{
+	if( mIsNew == true ) {
+		mIsNew = false;
+		return;
+	}
+	BaseBlock* t = NULL;
+	/* Check -Z */
+	t = mChunk->getBlockAt( mX, mY, mZ - 1 );
+	if( t != NULL && t->isFluid() ) {
+		balanceFluid( t );
+	}
+	else if( t == NULL && mZ - 1 >= 0 ) {
+		WaterBlock* block = new WaterBlock();
+		block->setPosition( mX, mY, mZ - 1 );
+		changeFluidLevel( -mFluidLevel / 2.f );
+		block->setFluidLevel( mFluidLevel );
+		mChunk->addBlockToChunk( block );
+	}
+	/* Check +Z */
+	t = mChunk->getBlockAt( mX, mY, mZ + 1 );
+	if( t != NULL && t->isFluid() ) {
+		balanceFluid( t );
+	}
+	else if( t == NULL && mZ + 1 < CHUNK_WIDTH )  {
+		WaterBlock* block = new WaterBlock();
+		block->setPosition( mX, mY, mZ + 1 );
+		changeFluidLevel( -mFluidLevel / 2.f );
+		block->setFluidLevel( mFluidLevel );
+		mChunk->addBlockToChunk( block );
+	}
+	/* Check +X */
+	t = mChunk->getBlockAt( mX + 1, mY, mZ );
+	if( t != NULL && t->isFluid() ) {
+		balanceFluid( t );
+	}
+	else if( t == NULL && mX + 1 < CHUNK_WIDTH )  {
+		WaterBlock* block = new WaterBlock();
+		block->setPosition( mX + 1, mY, mZ );
+		changeFluidLevel( -mFluidLevel / 2.f );
+		block->setFluidLevel( mFluidLevel );
+		mChunk->addBlockToChunk( block );
+	}
+	/* Check -X */
+	t = mChunk->getBlockAt( mX - 1, mY, mZ );
+	if( t != NULL && t->isFluid() ) {
+		balanceFluid( t );
+	}
+	else if( t == NULL && mX - 1 >= 0 )  {
+		WaterBlock* block = new WaterBlock();
+		block->setPosition( mX - 1, mY, mZ );
+		changeFluidLevel( -mFluidLevel / 2.f );
+		block->setFluidLevel( mFluidLevel );
+		mChunk->addBlockToChunk( block );
+	}
+	Util::log( Util::toString( mFluidLevel ) );
+}
+
+void WaterBlock::hit()
+{
+
+}
+
+std::string WaterBlock::getType()
+{
+	return "water";
+}
+
+void WaterBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges)
 {
 	short x = 0, y = 0;
 	this->vertexIndex = ind;
@@ -86,15 +159,17 @@ void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge*
 	rect.y = y;
 	rect.h = 0.0625f;*/
 
+	float fluidHeight = mFluidLevel / 100.f;
+
 	/* Face -Z */
 	if((this->mViewFlags & FACE_BACK) == FACE_BACK ) {
 		this->getTextureCoords( FACE_BACK, x, y );
 		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 
-		data[ind + 0] = Renderer::vertex( this->getX() + 1.0f, this->getY() + 1.0f,	this->getZ() + 1.0f, // Coordinates
+		data[ind + 0] = Renderer::vertex( this->getX() + 1.0f, this->getY() + fluidHeight,	this->getZ() + 1.0f, // Coordinates
 								0.0f, 0.0f, -1.0f,
 								rect.x, rect.y );
-		data[ind + 1] = Renderer::vertex( this->getX() - 0.0f, this->getY() + 1.0f, this->getZ() + 1.0f, // Coordinates
+		data[ind + 1] = Renderer::vertex( this->getX() - 0.0f, this->getY() + fluidHeight, this->getZ() + 1.0f, // Coordinates
 								0.0f, 0.0f, -1.0f,
 								rect.x + rect.w, rect.y );
 		data[ind + 2] = Renderer::vertex( this->getX() - 0.0f, this->getY() - 0.0f, this->getZ() + 1.0f, // Coordinates
@@ -113,10 +188,10 @@ void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge*
 		this->getTextureCoords( FACE_FORWARD, x, y );
 		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 
-		data[ind + 0] = Renderer::vertex( this->getX() + 1.0f, this->getY() + 1.0f, this->getZ() - 0.0f, // Coordinates
+		data[ind + 0] = Renderer::vertex( this->getX() + 1.0f, this->getY() + fluidHeight, this->getZ() - 0.0f, // Coordinates
 								0.0f, 0.0f, 1.0f,
 								rect.x, rect.y );
-		data[ind + 1] = Renderer::vertex( this->getX() - 0.0f, this->getY() + 1.0f, this->getZ() - 0.0f, // Coordinates
+		data[ind + 1] = Renderer::vertex( this->getX() - 0.0f, this->getY() + fluidHeight, this->getZ() - 0.0f, // Coordinates
 								0.0f, 0.0f, 1.0f,
 								rect.x + rect.w, rect.y );
 		data[ind + 2] = Renderer::vertex( this->getX() - 0.0f, this->getY() - 0.0f, this->getZ() - 0.0f, // Coordinates
@@ -135,7 +210,7 @@ void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge*
 		this->getTextureCoords( FACE_RIGHT, x, y );
 		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 
-		data[ind + 0] = Renderer::vertex( this->getX() + 1.0f, this->getY() + 1.0f, this->getZ() + 1.0f, // Coordinates
+		data[ind + 0] = Renderer::vertex( this->getX() + 1.0f, this->getY() + fluidHeight, this->getZ() + 1.0f, // Coordinates
 								1.0f, 0.0f, 0.0f,
 								rect.x + rect.w, rect.y );
 		data[ind + 1] = Renderer::vertex( this->getX() + 1.0f, this->getY() - 0.0f, this->getZ() + 1.0f, // Coordinates
@@ -144,7 +219,7 @@ void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge*
 		data[ind + 2] = Renderer::vertex( this->getX() + 1.0f, this->getY() - 0.0f, this->getZ() - 0.0f, // Coordinates
 								1.0f, 0.0f, 0.0f,
 								rect.x, rect.y + rect.h );
-		data[ind + 3] = Renderer::vertex( this->getX() + 1.0f, this->getY() + 1.0f, this->getZ() - 0.0f, // Coordinates
+		data[ind + 3] = Renderer::vertex( this->getX() + 1.0f, this->getY() + fluidHeight, this->getZ() - 0.0f, // Coordinates
 								1.0f, 0.0f, 0.0f,
 								rect.x, rect.y );
 		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
@@ -179,16 +254,16 @@ void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge*
 		this->getTextureCoords( FACE_TOP, x, y );
 		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 
-		data[ind + 0] = Renderer::vertex( this->getX() - 0.0f, this->getY() + 1.0f, this->getZ() + 1.0f, // Coordinates
+		data[ind + 0] = Renderer::vertex( this->getX() - 0.0f, this->getY() + fluidHeight, this->getZ() + 1.0f, // Coordinates
 								0.0f, 1.0f, 0.0f,
 								rect.x, rect.y );
-		data[ind + 1] = Renderer::vertex( this->getX() + 1.0f, this->getY() + 1.0f, this->getZ() + 1.0f, // Coordinates
+		data[ind + 1] = Renderer::vertex( this->getX() + 1.0f, this->getY() + fluidHeight, this->getZ() + 1.0f, // Coordinates
 								0.0f, 1.0f, 0.0f,
 								rect.x + rect.w, rect.y );
-		data[ind + 2] = Renderer::vertex( this->getX() + 1.0f, this->getY() + 1.0f, this->getZ() - 0.0f, // Coordinates
+		data[ind + 2] = Renderer::vertex( this->getX() + 1.0f, this->getY() + fluidHeight, this->getZ() - 0.0f, // Coordinates
 								0.0f, 1.0f, 0.0f,
 								rect.x + rect.w, rect.y + rect.h );
-		data[ind + 3] = Renderer::vertex( this->getX() - 0.0f, this->getY() + 1.0f, this->getZ() - 0.0f, // Coordinates
+		data[ind + 3] = Renderer::vertex( this->getX() - 0.0f, this->getY() + fluidHeight, this->getZ() - 0.0f, // Coordinates
 								0.0f, 1.0f, 0.0f,
 								rect.x, rect.y + rect.h );
 		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
@@ -201,7 +276,7 @@ void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge*
 		this->getTextureCoords( FACE_LEFT, x, y );
 		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 
-		data[ind + 0] = Renderer::vertex( this->getX() - 0.0f, this->getY() + 1.0f, this->getZ() - 0.0f, // Coordinates
+		data[ind + 0] = Renderer::vertex( this->getX() - 0.0f, this->getY() + fluidHeight, this->getZ() - 0.0f, // Coordinates
 								-1.0f, 0.0f, 0.0f,
 								rect.x + rect.w, rect.y );
 		data[ind + 1] = Renderer::vertex( this->getX() - 0.0f, this->getY() - 0.0f, this->getZ() - 0.0f, // Coordinates
@@ -210,7 +285,7 @@ void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge*
 		data[ind + 2] = Renderer::vertex( this->getX() - 0.0f, this->getY() - 0.0f, this->getZ() + 1.0f, // Coordinates
 								-1.0f, 0.0f, 0.0f,
 								rect.x, rect.y + rect.h );
-		data[ind + 3] = Renderer::vertex( this->getX() - 0.0f, this->getY() + 1.0f, this->getZ() + 1.0f, // Coordinates
+		data[ind + 3] = Renderer::vertex( this->getX() - 0.0f, this->getY() + fluidHeight, this->getZ() + 1.0f, // Coordinates
 								-1.0f, 0.0f, 0.0f,
 								rect.x, rect.y );
 		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;

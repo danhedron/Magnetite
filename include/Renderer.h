@@ -52,11 +52,11 @@ protected:
 	
 	//ChunkGeomList mWorldBuffers;
 
-	static GLvertex vertex( float x, float y, float z, float nx, float ny, float nz, float u = 0.f, float v = 0.f, float w = 0.f );
-
 public:
 	Renderer(void);
 	~Renderer(void);
+
+	static GLvertex vertex( float x, float y, float z, float nx, float ny, float nz, float u = 0.f, float v = 0.f, float w = 0.f );
 
 	/**
 	 * Rendermode enum

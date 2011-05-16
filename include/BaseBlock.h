@@ -2,6 +2,8 @@
 #define _BASEBLOCK_H_
 #include "prerequisites.h"
 
+struct GLvertex;
+typedef unsigned short GLedge;
 
 enum {
 	FACE_NONE	= 0,
@@ -33,11 +35,21 @@ public:
 	void _setChunk( WorldChunk* chnk );
 
 	short vertexIndex;
-
 	short mViewFlags;
 
 	virtual void created() = 0;
 	virtual void hit() = 0;
+
+	/**
+	 * Returns true if this object inherits FluidBlock
+	 */
+	virtual bool isFluid() { return false; }
+	
+	/**
+	 * Returns true if block should stop occlusion
+	 */
+	virtual bool isOpaque() { return true; }
+
 
 	/**
 	 * Called when a nearby block changes.
@@ -47,6 +59,11 @@ public:
 
 	virtual void texture(int x, int y);
 	virtual void getTextureCoords( short face, short &x, short &y );
+
+	/**
+	 * Returns the Verex Data for this block
+	 */
+	virtual void buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges);
 
 	virtual std::string getType() = 0;
 

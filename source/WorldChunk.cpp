@@ -1,5 +1,6 @@
 #include "WorldChunk.h"
 #include "BaseBlock.h"
+#include "WaterBlock.h"
 #include "BlockFactory.h"
 #include "Renderer.h"
 
@@ -10,7 +11,8 @@ mZ( z ),
 mHasChanged( false ),
 mHasGenerated( false ),
 mGeometry( NULL ),
-mVisibleFaces( 0 )
+mVisibleFaces( 0 ),
+mUpdateTimer( 0 )
 {
 	initalize();
 }
@@ -73,6 +75,7 @@ void WorldChunk::addBlockToChunk(BaseBlock* block)
 		// add it to the map
 		mBlockData.insert(lb, BlockList::value_type(k, block));
 	}
+
 	mHasChanged = true;
 	mHasGenerated = false;
 }
@@ -153,27 +156,33 @@ void WorldChunk::updateVisibility()
 		short visFlags = FACE_NONE;
 		short visOrig = b->mViewFlags;
 		//Check All axes for adjacent blocks.
-		if( getBlockAt( b->getX() + 1, b->getY(), b->getZ() ) == NULL ) {
+		BaseBlock* cb = getBlockAt( b->getX() + 1, b->getY(), b->getZ() );
+		if( cb == NULL || !cb->isOpaque() ) {
 			mVisibleFaces++;
 			visFlags = visFlags | FACE_RIGHT;
 		}
-		if( getBlockAt( b->getX() - 1, b->getY(), b->getZ() ) == NULL ) {
+		cb = getBlockAt( b->getX() - 1, b->getY(), b->getZ() );
+		if( cb == NULL || !cb->isOpaque() ) {
 			mVisibleFaces++;
 			visFlags = visFlags | FACE_LEFT;
 		}
-		if( getBlockAt( b->getX(), b->getY() + 1, b->getZ() ) == NULL ) {
+		cb = getBlockAt( b->getX(), b->getY() + 1, b->getZ() );
+		if( cb == NULL || !cb->isOpaque() ) {
 			mVisibleFaces++;
 			visFlags = visFlags | FACE_TOP;
 		}
-		if( getBlockAt( b->getX(), b->getY() - 1, b->getZ() ) == NULL ) {
+		cb = getBlockAt( b->getX(), b->getY() - 1, b->getZ() );
+		if( cb == NULL || !cb->isOpaque() ) {
 			mVisibleFaces++;
 			visFlags = visFlags | FACE_BOTTOM;
 		}
-		if( getBlockAt( b->getX(), b->getY(), b->getZ() + 1 ) == NULL ) {
+		cb = getBlockAt( b->getX(), b->getY(), b->getZ() + 1 );
+		if( cb == NULL || !cb->isOpaque() ) {
 			mVisibleFaces++;
 			visFlags = visFlags | FACE_BACK;
 		}
-		if( getBlockAt( b->getX(), b->getY(), b->getZ() - 1 ) == NULL ) {
+		cb = getBlockAt( b->getX(), b->getY(), b->getZ() - 1 );
+		if( cb == NULL || !cb->isOpaque() ) {
 			mVisibleFaces++;
 			visFlags = visFlags | FACE_FORWARD;
 		}
@@ -220,7 +229,7 @@ void WorldChunk::generate()
 
 	for( BlockList::iterator block = mVisibleBlocks.begin(); block != mVisibleBlocks.end(); ++block )
 	{
-		Renderer::buildCubeData((*block).second, ind, edgeInd, vertexData, edgeData);
+		block->second->buildCubeData(ind, edgeInd, vertexData, edgeData);
 	}
 	
 	// Chunk has been defined, store it's data
@@ -264,6 +273,16 @@ void WorldChunk::update( float dt )
 			generate();
 		mHasChanged = false;
 	}
+
+	if( mUpdateTimer >= 0.5f ) {
+		mUpdateTimer = 0.0f;
+		for( BlockList::iterator it = mBlockData.begin(); it != mBlockData.end(); ++it ) {
+			if( it->second->isFluid() ) {
+				((WaterBlock*)it->second)->flow( dt );
+			}
+		}
+	}
+	mUpdateTimer += dt;
 }
 
 long WorldChunk::getX()

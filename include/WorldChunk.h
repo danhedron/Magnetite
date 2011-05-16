@@ -20,6 +20,7 @@ protected:
 	long mVisibleFaces;
 	void _blockVisible( BlockPosPair &block, bool v );
 	GLgeometry* mGeometry;
+	float mUpdateTimer;
 public:
 	WorldChunk(long x, long y, long z);
 	~WorldChunk(void);
