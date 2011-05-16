@@ -88,7 +88,30 @@ void WaterBlock::flowToBlock(short x, short y, short z, float dt)
 	if( t != NULL && t->isFluid() ) {
 		balanceFluid( t, dt );
 	}
-	else if( t == NULL && mZ - 1 >= 0 ) {
+	else if( t == NULL && x >= 0 && x < CHUNK_WIDTH && y >= 0 && y < CHUNK_HEIGHT && z >= 0 && z < CHUNK_WIDTH ) {
+		BaseBlock* lower = mChunk->getBlockAt( x, y - 1, z );
+		if( y > 0 && lower == NULL )
+			y--;
+		else if( y > 0 && lower->getType() == this->getType() ) {
+			WaterBlock* water = (WaterBlock*)lower;
+			float total = water->getFluidLevel() + mFluidLevel / 2.f;
+			if( total < 100.0f ) {
+				// If the lower block can accept a whole half, send it and exit
+				water->changeFluidLevel( mFluidLevel / 2.f );
+				return;
+			}
+			else {
+				float over = ((mFluidLevel / 2.f) + water->getFluidLevel()) - 100.f;
+				water->setFluidLevel( 100.f );
+				WaterBlock* block = new WaterBlock();
+				block->setPosition( x, y, z );
+				changeFluidLevel( -mFluidLevel / 2.f );
+				block->setFluidLevel( over );
+				mChunk->addBlockToChunk( block );
+				return;
+			}
+		}
+			
 		WaterBlock* block = new WaterBlock();
 		block->setPosition( x, y, z );
 		changeFluidLevel( -mFluidLevel / 2.f );
@@ -118,6 +141,22 @@ void WaterBlock::flow( float dt )
 	BaseBlock* t = mChunk->getBlockAt( mX, mY - 1, mZ );
 	if( t == NULL && mY > 0 ) {
 		this->setPosition( mX, mY - 1, mZ );
+	}
+	else if( t->getType() == this->getType() )
+	{
+		WaterBlock* water = (WaterBlock*)t;
+		float total = water->getFluidLevel() + mFluidLevel;
+		if( total < 100.0f ) {
+			// If the lower block can accept this whole block, just drop us and delete.
+			water->changeFluidLevel( mFluidLevel );
+			mChunk->_addBlockToRemoveList( this );
+			return;
+		}
+		else {
+			float over = ((mFluidLevel) + water->getFluidLevel()) - 100.f;
+			water->setFluidLevel( 100.f );
+			setFluidLevel( over );
+		}
 	}
 
 	/* Check -Z */
