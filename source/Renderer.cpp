@@ -1,5 +1,7 @@
 #include "Renderer.h"
 #include "WorldChunk.h"
+#include "World.h"
+#include "Sky.h"
 #include "BaseBlock.h"
 #include "OpencraftCore.h"
 #include "TextureManager.h"
@@ -86,6 +88,7 @@ void Renderer::disable2D()
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
 }
 
 void Renderer::setRenderMode( size_t rendermode )
@@ -265,27 +268,33 @@ void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvert
 	}
 }
 
-void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
+void Renderer::render(double dt, World* world)
 {
 	totalTime += dt;
 	mFpsAvg = (mFpsAvg + (1/dt)) / 2;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glColor3f(1,1,1);
 
 	glMatrixMode(GL_MODELVIEW);
 
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CW);
 
+	std::vector<WorldChunk*> chunks = world->getChunks();
+
 	GLtexture* tex = OpencraftCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/world.png");
 	if(mRenderMode == RENDER_WIRE)
 		tex = OpencraftCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/vistest.png");
+
 	
+	mCamera->applyMatrix( true, false );
+
+	world->getSky()->renderSky();
+
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glColor3f(1,1,1);
 
-	
 	if( tex != 0 )
 	{
 		glEnable(GL_TEXTURE_2D);

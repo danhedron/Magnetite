@@ -1,9 +1,11 @@
 #include "World.h"
 #include "WorldChunk.h"
 #include "Renderer.h"
+#include "Sky.h"
 #include "StoneBlock.h"
 
 World::World()
+: mSky( NULL )
 {	
 	createWorld();
 }
@@ -15,6 +17,7 @@ World::~World()
 
 void World::createWorld()
 {
+	createSky(200);
 	//Create some testing chunks
 	createTestChunks( 2 );
 }
@@ -64,6 +67,28 @@ void World::createChunk(long x, long y, long z)
 	newChunk->fillWithTestData();
 	mChunks.push_back(newChunk);
 	Util::log( "Chunk Created" );
+}
+
+void World::update( float dt )
+{
+	if( mSky != NULL )
+		mSky->update( dt );
+	for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
+		(*it)->update(dt);
+	}
+}
+
+void World::createSky( size_t time )
+{
+	if(mSky != NULL)
+		delete mSky;
+	mSky = new Sky();
+	mSky->setTime( time );
+}
+
+Sky* World::getSky()
+{
+	return mSky;
 }
 
 void World::removeChunk(long x, long y, long z)

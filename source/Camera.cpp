@@ -31,13 +31,17 @@ Vector3 Camera::getForward()
 	return vec.normalize();
 }
 
-void Camera::applyMatrix() 
+void Camera::applyMatrix( bool rot, bool pos ) 
 {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glRotatef( -mPitch, 1, 0, 0);
-	glRotatef( -mYaw, 0, 1, 0);
-	glTranslatef( -mPosition.x, -mPosition.y, -mPosition.z );
+	if( rot ) {
+		glRotatef( -mPitch, 1, 0, 0);
+		glRotatef( -mYaw, 0, 1, 0);
+	}
+	if( pos ) {
+		glTranslatef( -mPosition.x, -mPosition.y, -mPosition.z );
+	}
 }
 
 void Camera::setPosition(const Vector3 &v)

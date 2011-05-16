@@ -5,6 +5,7 @@
 class WorldChunk;
 class BaseBlock;
 class Camera;
+class World;
 
 /**
  * @struct Struct to represent a vertex, memory aligned for easy array-xing
@@ -100,7 +101,7 @@ public:
 	
 	Camera* getCamera();
 
-	void render( double dt, std::vector<WorldChunk*> &chunks );
+	void render( double dt, World* world );
 
 	/**
 	 * Draws debug statistics onto the screen

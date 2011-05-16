@@ -140,13 +140,11 @@ void OpencraftCore::go(int *argc, char **argv)
 		mPlayer->update( lDelta );
 
 		//Ensure each loaded chunk is updated before being sent to the GPU
-		for( ChunkList::iterator it = mWorld->getChunks().begin(); it != mWorld->getChunks().end(); ++it ) {
-			(*it)->update(lDelta);
-		}
+		mWorld->update( lDelta );
 
 		//Ensure the renderer has the correct camera
 		mRenderer->setCamera(mPlayer->getCamera());
-		mRenderer->render(lDelta, mWorld->getChunks());
+		mRenderer->render(lDelta, mWorld);
 
 		mWindow.Display();
 	}

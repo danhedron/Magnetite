@@ -26,10 +26,13 @@ struct raycast_r
 	}
 };
 
+class Sky;
+
 class World
 {
 protected:
 	ChunkList	mChunks;
+	Sky*		mSky;
 
 public:
 	/** 
@@ -94,6 +97,11 @@ public:
 	void destoryWorld();
 
 	/**
+	 * Updates all loaded chunks
+	 */
+	void update( float dt );
+
+	/**
 	 * Performs a raycast test against a single cube
 	 * @param ray Raycast object.
 	 * @param min Cube minimum.
@@ -110,6 +118,16 @@ public:
 	 * Returns the chunk at the given indexes.
 	 */
 	WorldChunk* getChunk(const long x, const long y, const long z);
+
+	/**
+	 * Creates a new sky object 
+	 */
+	void createSky( size_t time );
+
+	/**
+	 * @returns a Pointer to the sky object.
+	 */
+	Sky* getSky();
 
 };
 

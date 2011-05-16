@@ -30,7 +30,7 @@ public:
 
 	void translate(const Vector3& v );
 
-	void applyMatrix();
+	void applyMatrix( bool rot = true, bool pos = true );
 };
 
 #endif
