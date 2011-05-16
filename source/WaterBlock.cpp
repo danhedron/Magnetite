@@ -52,24 +52,31 @@ float WaterBlock::getFluidLevel()
 
 void WaterBlock::changeFluidLevel( float delta )
 {
-	mFluidLevel += delta;
+	setFluidLevel(mFluidLevel + delta);
 }
 
 void WaterBlock::setFluidLevel( float delta )
 {
 	mFluidLevel = delta;
+	if( mChunk ) {
+		mChunk->markModified();
+		if( mFluidLevel <= 1.0f )
+			mChunk->_addBlockToRemoveList(this);
+	}
 }
 
-void WaterBlock::balanceFluid( BaseBlock* block )
+static float FLOW_MAX = 1.0f; // Maximum flow per second
+
+void WaterBlock::balanceFluid( BaseBlock* block, float dt )
 {
 	if( block->getType() == this->getType() )
 	{
-		Util::log("Flowing to: " + Util::toString( block->getX() ) + " " + Util::toString( block->getY() ) + " " +  Util::toString( block->getZ() ) );
 		WaterBlock* water = (WaterBlock*)block;
 		float dif = mFluidLevel - water->getFluidLevel();
-		if( dif > 0.f ) {
-			changeFluidLevel( dif / 2.f );
-			mFluidLevel -= dif / 2.f;
+		if( dif > 0.0001f ) {
+			//dif = std::min(dif, FLOW_MAX * dt);
+			water->changeFluidLevel( dif / 2.f );
+			changeFluidLevel( -dif / 2.f );
 		}
 	}
 }
@@ -80,11 +87,22 @@ void WaterBlock::flow( float dt )
 		mIsNew = false;
 		return;
 	}
+	
+	if( mFluidLevel < 10.f ) {
+		//Less than 10% will slowly evaporate.
+		changeFluidLevel( -0.5f * dt );
+	}
+
+	// Less than 2% doesn't spread
+	if( mFluidLevel < 1.f )
+		return;
+
+
 	BaseBlock* t = NULL;
 	/* Check -Z */
 	t = mChunk->getBlockAt( mX, mY, mZ - 1 );
 	if( t != NULL && t->isFluid() ) {
-		balanceFluid( t );
+		balanceFluid( t, dt );
 	}
 	else if( t == NULL && mZ - 1 >= 0 ) {
 		WaterBlock* block = new WaterBlock();
@@ -96,7 +114,7 @@ void WaterBlock::flow( float dt )
 	/* Check +Z */
 	t = mChunk->getBlockAt( mX, mY, mZ + 1 );
 	if( t != NULL && t->isFluid() ) {
-		balanceFluid( t );
+		balanceFluid( t, dt );
 	}
 	else if( t == NULL && mZ + 1 < CHUNK_WIDTH )  {
 		WaterBlock* block = new WaterBlock();
@@ -108,7 +126,7 @@ void WaterBlock::flow( float dt )
 	/* Check +X */
 	t = mChunk->getBlockAt( mX + 1, mY, mZ );
 	if( t != NULL && t->isFluid() ) {
-		balanceFluid( t );
+		balanceFluid( t, dt );
 	}
 	else if( t == NULL && mX + 1 < CHUNK_WIDTH )  {
 		WaterBlock* block = new WaterBlock();
@@ -120,7 +138,7 @@ void WaterBlock::flow( float dt )
 	/* Check -X */
 	t = mChunk->getBlockAt( mX - 1, mY, mZ );
 	if( t != NULL && t->isFluid() ) {
-		balanceFluid( t );
+		balanceFluid( t, dt );
 	}
 	else if( t == NULL && mX - 1 >= 0 )  {
 		WaterBlock* block = new WaterBlock();
@@ -129,7 +147,6 @@ void WaterBlock::flow( float dt )
 		block->setFluidLevel( mFluidLevel );
 		mChunk->addBlockToChunk( block );
 	}
-	Util::log( Util::toString( mFluidLevel ) );
 }
 
 void WaterBlock::hit()

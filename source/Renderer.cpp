@@ -332,6 +332,9 @@ void Renderer::render(double dt, std::vector<WorldChunk*> &chunks)
 			// Draw the chunk.
 			glDrawRangeElements(GL_TRIANGLES, 0, chunkGeom->vertexCount, chunkGeom->edgeCount, GL_UNSIGNED_SHORT, chunkGeom->edgeData);
 		}
+		else {
+			Util::log("Warning: Ungenerated Chunk in render queue.");
+		}
 	}
 
 	if( tex != 0 )

@@ -12,6 +12,7 @@ class WorldChunk
 protected:
 	BlockList mBlockData;
 	BlockList mVisibleBlocks; //< Used in Rendering
+	BlockList mShouldDelete; //< Used to allow blocks to remove themselves
 	long mX;
 	long mY;
 	long mZ;
@@ -52,6 +53,11 @@ public:
 	 *
 	 */
 	void removeBlockAt(long x, long y, long z);
+
+	/**
+	 * Adds a block to the delete list so that a block can delete itself
+	 */
+	void _addBlockToRemoveList(BaseBlock* block);
 
 	/**
 	 * Returns a block if one exsists at the given position.

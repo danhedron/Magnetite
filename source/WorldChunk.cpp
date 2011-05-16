@@ -109,6 +109,11 @@ void WorldChunk::removeBlockAt(long x, long y, long z)
 	mHasGenerated = false;
 }
 
+void WorldChunk::_addBlockToRemoveList(BaseBlock* block)
+{
+	mShouldDelete.insert( BlockList::value_type( BLOCK_INDEX( block ) , block ) );
+}
+
 BaseBlock* WorldChunk::getBlockAt(long x, long y, long z)
 {
 	// For a 3D array stored in 1D array, you must:-
@@ -253,6 +258,7 @@ bool WorldChunk::hasGenerated()
 void WorldChunk::markModified()
 {
 	mHasChanged = true;
+	mHasGenerated = false;
 }
 
 void WorldChunk::notifyGenerated()
@@ -267,13 +273,6 @@ GLgeometry* WorldChunk::getGeometry()
 
 void WorldChunk::update( float dt ) 
 {
-	if( mHasChanged ) {
-		updateVisibility();
-		if( !mHasGenerated )
-			generate();
-		mHasChanged = false;
-	}
-
 	if( mUpdateTimer >= 0.5f ) {
 		mUpdateTimer = 0.0f;
 		for( BlockList::iterator it = mBlockData.begin(); it != mBlockData.end(); ++it ) {
@@ -283,6 +282,18 @@ void WorldChunk::update( float dt )
 		}
 	}
 	mUpdateTimer += dt;
+
+	for( BlockList::iterator it = mShouldDelete.begin(); it != mShouldDelete.end(); ) {
+		removeBlockAt( it->second->getX(), it->second->getY(), it->second->getZ() );
+		mShouldDelete.erase( it++ );
+	}
+
+	if( mHasChanged ) {
+		updateVisibility();
+		if( !mHasGenerated )
+			generate();
+		mHasChanged = false;
+	}
 }
 
 long WorldChunk::getX()

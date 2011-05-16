@@ -27,7 +27,7 @@ public:
 
 	void flow( float dt );
 
-	void balanceFluid( BaseBlock* block );
+	void balanceFluid( BaseBlock* block, float dt);
 
 	/**
 	 * Returns the Verex Data for this block:- includes fluid height.
