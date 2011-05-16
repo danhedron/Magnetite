@@ -98,6 +98,7 @@ void WaterBlock::flowToBlock(short x, short y, short z, float dt)
 			if( total < 100.0f ) {
 				// If the lower block can accept a whole half, send it and exit
 				water->changeFluidLevel( mFluidLevel / 2.f );
+				changeFluidLevel( -mFluidLevel / 2.f );
 				return;
 			}
 			else {

@@ -273,8 +273,8 @@ GLgeometry* WorldChunk::getGeometry()
 
 void WorldChunk::update( float dt ) 
 {
-	if( mUpdateTimer >= 0.5f ) {
-		mUpdateTimer = 0.0f;
+	while( mUpdateTimer >= 0.25f ) {
+		mUpdateTimer -= 0.25f;
 		for( BlockList::iterator it = mBlockData.begin(); it != mBlockData.end(); ++it ) {
 			if( it->second->isFluid() ) {
 				((WaterBlock*)it->second)->flow( dt );
