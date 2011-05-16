@@ -81,6 +81,23 @@ void WaterBlock::balanceFluid( BaseBlock* block, float dt )
 	}
 }
 
+void WaterBlock::flowToBlock(short x, short y, short z, float dt)
+{
+	BaseBlock* t = mChunk->getBlockAt( x, y, z );
+	/* Check -Z */
+	if( t != NULL && t->isFluid() ) {
+		balanceFluid( t, dt );
+	}
+	else if( t == NULL && mZ - 1 >= 0 ) {
+		WaterBlock* block = new WaterBlock();
+		block->setPosition( x, y, z );
+		changeFluidLevel( -mFluidLevel / 2.f );
+		block->setFluidLevel( mFluidLevel );
+		mChunk->addBlockToChunk( block );
+	}
+
+}
+
 void WaterBlock::flow( float dt )
 {
 	if( mIsNew == true ) {
@@ -97,56 +114,20 @@ void WaterBlock::flow( float dt )
 	if( mFluidLevel < 1.f )
 		return;
 
+	// If there is nothing beneath us, fall
+	BaseBlock* t = mChunk->getBlockAt( mX, mY - 1, mZ );
+	if( t == NULL && mY > 0 ) {
+		this->setPosition( mX, mY - 1, mZ );
+	}
 
-	BaseBlock* t = NULL;
 	/* Check -Z */
-	t = mChunk->getBlockAt( mX, mY, mZ - 1 );
-	if( t != NULL && t->isFluid() ) {
-		balanceFluid( t, dt );
-	}
-	else if( t == NULL && mZ - 1 >= 0 ) {
-		WaterBlock* block = new WaterBlock();
-		block->setPosition( mX, mY, mZ - 1 );
-		changeFluidLevel( -mFluidLevel / 2.f );
-		block->setFluidLevel( mFluidLevel );
-		mChunk->addBlockToChunk( block );
-	}
+	flowToBlock( mX, mY, mZ - 1, dt);
 	/* Check +Z */
-	t = mChunk->getBlockAt( mX, mY, mZ + 1 );
-	if( t != NULL && t->isFluid() ) {
-		balanceFluid( t, dt );
-	}
-	else if( t == NULL && mZ + 1 < CHUNK_WIDTH )  {
-		WaterBlock* block = new WaterBlock();
-		block->setPosition( mX, mY, mZ + 1 );
-		changeFluidLevel( -mFluidLevel / 2.f );
-		block->setFluidLevel( mFluidLevel );
-		mChunk->addBlockToChunk( block );
-	}
+	flowToBlock( mX, mY, mZ + 1, dt );
 	/* Check +X */
-	t = mChunk->getBlockAt( mX + 1, mY, mZ );
-	if( t != NULL && t->isFluid() ) {
-		balanceFluid( t, dt );
-	}
-	else if( t == NULL && mX + 1 < CHUNK_WIDTH )  {
-		WaterBlock* block = new WaterBlock();
-		block->setPosition( mX + 1, mY, mZ );
-		changeFluidLevel( -mFluidLevel / 2.f );
-		block->setFluidLevel( mFluidLevel );
-		mChunk->addBlockToChunk( block );
-	}
+	flowToBlock( mX + 1, mY, mZ, dt );
 	/* Check -X */
-	t = mChunk->getBlockAt( mX - 1, mY, mZ );
-	if( t != NULL && t->isFluid() ) {
-		balanceFluid( t, dt );
-	}
-	else if( t == NULL && mX - 1 >= 0 )  {
-		WaterBlock* block = new WaterBlock();
-		block->setPosition( mX - 1, mY, mZ );
-		changeFluidLevel( -mFluidLevel / 2.f );
-		block->setFluidLevel( mFluidLevel );
-		mChunk->addBlockToChunk( block );
-	}
+	flowToBlock( mX - 1, mY, mZ, dt );
 }
 
 void WaterBlock::hit()
