@@ -139,12 +139,17 @@ void Sky::setTime( size_t time )
 	mTime = time;
 }
 
+size_t Sky::getTime()
+{
+	return mTime;
+}
+
 void Sky::update( float dt )
 {
 	mMilliTime += dt;
-	while( mMilliTime > 1000.f ) {
+	while( mMilliTime > 1.f ) {
 		mTime++;
-		mMilliTime -= 1000.f;
+		mMilliTime -= 1.f;
 	}
 
 	/* Update geometry UVs with current time */

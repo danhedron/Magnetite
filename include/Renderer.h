@@ -106,7 +106,7 @@ public:
 	/**
 	 * Draws debug statistics onto the screen
 	 */
-	void drawStats( double dt, size_t chunkCount );
+	void drawStats( double dt, size_t chunkCount, World* world );
 
 	/**
 	 * Draws the block chooser
