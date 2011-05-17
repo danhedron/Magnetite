@@ -48,6 +48,8 @@ void Renderer::initialize(int *argc, char **argv)
 
 	glutInit( argc, argv );
 	Vector3 vec(0, 10.0f, 10.0f);
+
+	OpencraftCore::Singleton->getTextureManager()->loadTexture("../resources/ui/crosshair.png");
 }
 
 void Renderer::resizeViewport(size_t x, size_t y, size_t w, size_t h)
@@ -294,6 +296,7 @@ void Renderer::render(double dt, World* world)
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	if( tex != 0 )
 	{
@@ -363,6 +366,8 @@ void Renderer::render(double dt, World* world)
 	drawStats( dt, chunks.size(), world );
 
 	drawBlockChooser( dt );
+
+	drawCrosshair( dt );
 }
 
 void Renderer::drawStats(double dt, size_t chunkCount, World* world)
@@ -408,6 +413,44 @@ void Renderer::drawBlockChooser( double dt )
 	std::string stats(buff);
 
 	drawText( stats, 6, 200);
+
+	disable2D();
+}
+
+void Renderer::drawCrosshair( double dt )
+{
+	// Switch to 2D for overlays
+	enable2D();
+
+	GLtexture* tex = OpencraftCore::Singleton->getTextureManager()->fetchTexture("../resources/ui/crosshair.png");
+	
+	if( tex != 0 )
+	{
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, tex->glID);
+	}
+
+	glEnable (GL_BLEND);
+
+	glColor3f(1,1,1);
+	
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.f,0.f);
+		glVertex2i( (mScrWidth/2) + 8, (mScrHeight/2) + 8);
+		glTexCoord2f(0.f,1.f);
+		glVertex2i( (mScrWidth/2) - 8, (mScrHeight/2) + 8);
+		glTexCoord2f(1.f,1.f);
+		glVertex2i( (mScrWidth/2) - 8, (mScrHeight/2) - 8);
+		glTexCoord2f(1.f,0.f);
+		glVertex2i( (mScrWidth/2) + 8, (mScrHeight/2) - 8);
+	glEnd();
+
+	glDisable (GL_BLEND);
+
+	if( tex != 0 )
+	{
+		glDisable(GL_TEXTURE_2D);
+	}
 
 	disable2D();
 }

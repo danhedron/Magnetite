@@ -114,6 +114,11 @@ public:
 	void drawBlockChooser( double dt );
 
 	/**
+	 * Draws the crosshair
+	 */
+	void drawCrosshair( double dt );
+
+	/**
 	 * Chooses the next block 
 	 */
 	void nextBlock();
