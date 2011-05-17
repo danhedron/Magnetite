@@ -17,12 +17,15 @@ struct raycast_r
 	Vector3 dir;
 	Vector3 worldHit;
 
+	BaseBlock* block;
+
 	raycast_r(void) { 
 		i0 = std::numeric_limits<float>::max();
 		i1 = -std::numeric_limits<float>::max();
 		maxDistance = 100.f;
 		length = std::numeric_limits<float>::max();
 		hit = false;
+		block = NULL;
 	}
 };
 

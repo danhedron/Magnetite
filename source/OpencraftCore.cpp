@@ -207,10 +207,10 @@ void OpencraftCore::removeEyeBlock()
 	if(ray.hit)
 	{
 		Vector3 cIndex = mWorld->worldToChunks( ray.worldHit );
-		Vector3 bIndex = mWorld->worldToBlock( ray.worldHit );
+		//Vector3 bIndex = mWorld->worldToBlock( ray.worldHit );
 		WorldChunk* chunk = mWorld->getChunk( cIndex.x, cIndex.y, cIndex.z );
-		if(chunk) {
-			chunk->removeBlockAt( bIndex.x, bIndex.y - 1, bIndex.z );
+		if(chunk && ray.block) {
+			chunk->removeBlockAt( ray.block->getX(), ray.block->getY(), ray.block->getZ() );
 		}
 	}
 }

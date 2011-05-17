@@ -132,8 +132,10 @@ raycast_r World::raycastWorld(const raycast_r &inray)
 							(*it)->getZ() * CHUNK_WIDTH + (*block).second->getZ() + 1.0f );
 			raycast_r r = inray;
 			r = raycastCube(r, min, max);
-			if( r.hit == true )
+			if( r.hit == true ) {
+				r.block = block->second;
 				raycasts.push_back( r );
+			}
 		}	
 	}
 	// Final pass, find closest hit.
