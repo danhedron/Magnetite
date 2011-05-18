@@ -20,6 +20,7 @@ protected:
 	World*		mWorld;
 	bool		mContinue;
 	Character*	mPlayer;
+	float		mTimescale;
 public:
 	OpencraftCore(void);
 	~OpencraftCore(void);
@@ -68,6 +69,11 @@ public:
 	 * Creates a character
 	 */
 	Character* createCharacter();
+
+	/** 
+	 * Returns the timescale
+	 */
+	float getTimescale();
 
 	
 	void createWindow(int *argc, char **argv);

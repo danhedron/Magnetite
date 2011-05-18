@@ -76,6 +76,9 @@ void World::update( float dt )
 	for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
 		(*it)->update(dt);
 	}
+	for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
+		(*it)->requestGenerate();
+	}
 }
 
 void World::createSky( size_t time )

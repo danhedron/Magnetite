@@ -3,6 +3,8 @@
 #include "WaterBlock.h"
 #include "BlockFactory.h"
 #include "Renderer.h"
+#include "OpencraftCore.h"
+#include "World.h"
 
 WorldChunk::WorldChunk(long x, long y, long z)
 : mX( x ),
@@ -59,6 +61,23 @@ void WorldChunk::fillWithTestData()
 
 void WorldChunk::addBlockToChunk(BaseBlock* block)
 {
+	WorldChunk* chunk = getRelativeChunk( block->getX(), block->getY(), block->getZ() );
+	if( chunk != this ) {
+		if( block->getX() < 0 )
+			block->setPosition( Vector3( block->getX() + CHUNK_WIDTH, block->getY(), block->getZ() ) );
+		else if( block->getX() >= CHUNK_WIDTH )
+			block->setPosition( Vector3( block->getX() - CHUNK_WIDTH, block->getY(), block->getZ() ) );
+		if( block->getY() < 0 )
+			block->setPosition( Vector3( block->getX(), block->getY() + CHUNK_HEIGHT, block->getZ() ) );
+		else if( block->getY() >= CHUNK_HEIGHT )
+			block->setPosition( Vector3( block->getX(), block->getY() - CHUNK_HEIGHT, block->getZ() ) );
+		if( block->getZ() < 0 )
+			block->setPosition( Vector3( block->getX(), block->getY(), block->getZ() + CHUNK_WIDTH ) );
+		else if( block->getZ() >= CHUNK_WIDTH )
+			block->setPosition( Vector3( block->getX(), block->getY(), block->getZ() - CHUNK_WIDTH ) );
+		chunk->addBlockToChunk( block );
+		return;
+	}
 	long k = BLOCK_INDEX( block );
 	BlockList::iterator lb = mBlockData.find( k );
 
@@ -99,6 +118,23 @@ void WorldChunk::reserveBlocks( size_t count )
 
 void WorldChunk::removeBlockAt(long x, long y, long z)
 {
+	WorldChunk* chunk = getRelativeChunk( x, y, z );
+	if( chunk != this ) {
+		if( x < 0 )
+			x += CHUNK_WIDTH;
+		else if( x >= CHUNK_WIDTH )
+			x -= CHUNK_WIDTH;
+		if( y < 0 )
+			y += CHUNK_HEIGHT;
+		else if( y >= CHUNK_HEIGHT )
+			y -= CHUNK_HEIGHT;
+		if( z < 0 )
+			z += CHUNK_WIDTH;
+		else if( z >= CHUNK_WIDTH )
+			z -= CHUNK_WIDTH;
+		chunk->removeBlockAt( x, y, z );
+		return;
+	}
 	long k = z * CHUNK_WIDTH * CHUNK_HEIGHT + y * CHUNK_WIDTH + x;
 	BlockList::iterator it = mBlockData.find( k );
 	if( it != mBlockData.end() )  {
@@ -116,12 +152,55 @@ void WorldChunk::_addBlockToRemoveList(BaseBlock* block)
 	mShouldDelete.insert( BlockList::value_type( BLOCK_INDEX( block ) , block ) );
 }
 
+WorldChunk* WorldChunk::getRelativeChunk(long x, long y, long z)
+{
+	if( ( x >= 0 && y >= 0 && z >= 0 ) && ( x < CHUNK_WIDTH && y < CHUNK_HEIGHT && z < CHUNK_WIDTH ) )
+		return this;
+
+	/*if( x < 0 )
+		x += CHUNK_WIDTH;
+	else if( x >= CHUNK_WIDTH ) 
+		x -= CHUNK_WIDTH;
+	if( y < 0 )
+		y += CHUNK_HEIGHT;
+	else if( y >= CHUNK_HEIGHT )
+		y -= CHUNK_HEIGHT;
+	if( z < 0 )
+		z += CHUNK_WIDTH;
+	else if( z >= CHUNK_WIDTH )
+		z -= CHUNK_WIDTH;*/
+
+	Vector3 chunk = World::worldToChunks( Vector3( ( mX * CHUNK_WIDTH ) + x , ( mY * CHUNK_HEIGHT ) + y , ( mZ * CHUNK_WIDTH ) + z ) );
+	return OpencraftCore::Singleton->getWorld()->getChunk( chunk.x, chunk.y, chunk.z );
+	//return chunk;
+}
+
 BaseBlock* WorldChunk::getBlockAt(long x, long y, long z)
 {
 	// For a 3D array stored in 1D array, you must:-
 	//  z*height*width + y * width + x
-	if( x < 0 || y < 0 || z < 0 || x == CHUNK_WIDTH || y == CHUNK_HEIGHT || z == CHUNK_WIDTH )
-		return NULL;
+	WorldChunk* chunk = getRelativeChunk( x, y, z );
+	if( chunk != this ) {
+		// If the coordinates fall outside of this chunk, silently return the chunk containing that relative block.
+		WorldChunk* relChunk = getRelativeChunk( x, y, z );
+		if( x < 0 )
+			x += CHUNK_WIDTH;
+		else if( x >= CHUNK_WIDTH )
+			x -= CHUNK_WIDTH;
+		if( y < 0 )
+			y += CHUNK_HEIGHT;
+		else if( y >= CHUNK_HEIGHT )
+			y -= CHUNK_HEIGHT;
+		if( z < 0 )
+			z += CHUNK_WIDTH;
+		else if( z >= CHUNK_WIDTH )
+			z -= CHUNK_WIDTH;
+		if( relChunk )
+			return relChunk->getBlockAt(x, y, z);
+		else 
+			return NULL;
+		//return NULL;
+	}
 	BlockList::iterator it = mBlockData.find( z * CHUNK_WIDTH * CHUNK_HEIGHT + y * CHUNK_WIDTH + x );
 	if( it != mBlockData.end() )
 		return it->second;
@@ -289,7 +368,10 @@ void WorldChunk::update( float dt )
 		removeBlockAt( it->second->getX(), it->second->getY(), it->second->getZ() );
 		mShouldDelete.erase( it++ );
 	}
+}
 
+void WorldChunk::requestGenerate()
+{
 	if( mHasChanged ) {
 		updateVisibility();
 		if( !mHasGenerated )

@@ -380,10 +380,13 @@ void Renderer::drawStats(double dt, size_t chunkCount, World* world)
 	char buff[500];
 	size_t percent = ( mBlTotal > 0 ? (mBlRendered*100)/(mBlTotal) : 0 );
 	sprintf( buff,  "Opencraft Performance:\n dt: %f\n %f FPS\n Avg: %u\n"
+					" Timescale: %f\n"
 					"World Stats:\n Blocks: %u/%u - %u%%\n Rendered Chunks: %u\n"
 					" Time: %u ( %u )\n"
 					"Camera:\n Position: %f %f %f",
-					dt, (1/dt), mFpsAvg, mBlRendered, mBlTotal, percent, chunkCount,
+					dt, (1/dt), mFpsAvg,
+					OpencraftCore::Singleton->getTimescale(),
+					mBlRendered, mBlTotal, percent, chunkCount,
 					world->getSky()->getTime() % DAY_LENGTH, world->getSky()->getTime(),
 					mCamera->getPosition().x,mCamera->getPosition().y,mCamera->getPosition().z);
 	std::string stats(buff);

@@ -12,7 +12,8 @@ OpencraftCore* OpencraftCore::Singleton = 0;
 OpencraftCore::OpencraftCore(void)
 : mContinue( true ),
 mWorld( NULL ),
-mPlayer( NULL )
+mPlayer( NULL ),
+mTimescale( 1.f )
 {
 	OpencraftCore::Singleton = this;
 	mRenderer = new Renderer();
@@ -120,6 +121,14 @@ void OpencraftCore::go(int *argc, char **argv)
 				(lEvt.Key.Code == sf::Key::Subtract) ) {
 					mRenderer->lastBlock();
 			}
+			if( (lEvt.Type == sf::Event::KeyPressed) &&
+				(lEvt.Key.Code == sf::Key::Num9) ) {
+					mTimescale *= 0.5f;
+			}
+			if( (lEvt.Type == sf::Event::KeyPressed) &&
+				(lEvt.Key.Code == sf::Key::Num0) ) {
+					mTimescale *= 2.f;
+			}
 			if( (lEvt.Type == sf::Event::MouseMoved) ) {
 					mPlayer->getCamera()->pitch( -(lEvt.MouseMove.Y  - lastY) );
 					mPlayer->getCamera()->yaw( -(lEvt.MouseMove.X - lastX) );
@@ -136,6 +145,8 @@ void OpencraftCore::go(int *argc, char **argv)
 				mRenderer->resizeViewport( 0, 0, lEvt.Size.Width, lEvt.Size.Height );
 			}
 		}
+
+		lDelta *= mTimescale;
 
 		mPlayer->update( lDelta );
 
@@ -161,6 +172,11 @@ void OpencraftCore::exit()
 TextureManager* OpencraftCore::getTextureManager()
 {
 	return mTextureManager;
+}
+
+float OpencraftCore::getTimescale()
+{
+	return mTimescale;
 }
 
 void OpencraftCore::newWorld( std::string name )

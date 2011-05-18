@@ -60,6 +60,11 @@ public:
 	void _addBlockToRemoveList(BaseBlock* block);
 
 	/**
+	 * returns a relative chunk
+	 */
+	WorldChunk* getRelativeChunk( long x, long y, long z );
+
+	/**
 	 * Returns a block if one exsists at the given position.
 	 * @param x X coordinate.
 	 * @param y Y coordinate.
@@ -133,6 +138,11 @@ public:
 	 * @param dt The time since the last update.
 	 */
 	void update( float dt );
+
+	/**
+	 * Requests that the chunk generate it's geometry if hasn't already been generated
+	 */
+	void requestGenerate();
 
 	/**
 	 * Returns the X index of this chunk.

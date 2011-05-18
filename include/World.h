@@ -66,12 +66,12 @@ public:
 	/**
 	 *	Converts world coordinates into chunk indexes.
 	 */
-	Vector3 worldToChunks( const Vector3& vec );
+	static Vector3 worldToChunks( const Vector3& vec );
 
 	/**
 	 *	Converts world coordinates into block offset ( in the chunk at that location )
 	 */
-	Vector3 worldToBlock( const Vector3& vec );
+	static Vector3 worldToBlock( const Vector3& vec );
 
 	/**
 	 * Creates a chunk at the given coordinates and fills it with test data
