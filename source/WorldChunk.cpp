@@ -103,6 +103,8 @@ void WorldChunk::removeBlockAt(long x, long y, long z)
 	BlockList::iterator it = mBlockData.find( k );
 	if( it != mBlockData.end() )  {
 		delete (*it).second;
+		(*it).second = NULL;
+		_blockVisible( *it, false );
 		mBlockData.erase( it++ );
 	}
 	mHasChanged = true;
@@ -273,11 +275,11 @@ GLgeometry* WorldChunk::getGeometry()
 
 void WorldChunk::update( float dt ) 
 {
-	while( mUpdateTimer >= 0.25f ) {
-		mUpdateTimer -= 0.25f;
+	while( mUpdateTimer >= 0.1f ) {
+		mUpdateTimer -= 0.1f;
 		for( BlockList::iterator it = mBlockData.begin(); it != mBlockData.end(); ++it ) {
 			if( it->second->isFluid() ) {
-				((WaterBlock*)it->second)->flow( dt );
+				((WaterBlock*)it->second)->flow( 0.1f );
 			}
 		}
 	}

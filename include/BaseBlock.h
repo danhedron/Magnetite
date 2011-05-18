@@ -50,6 +50,11 @@ public:
 	 */
 	virtual bool isOpaque() { return true; }
 
+	/**
+	 * Returns true if this block is solid.
+	 */
+	virtual bool isSolid() { return true; }
+
 
 	/**
 	 * Called when a nearby block changes.

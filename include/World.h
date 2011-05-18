@@ -115,7 +115,7 @@ public:
 	/**
 	 * Performs a raytest against the world.
 	 */
-	raycast_r raycastWorld(const raycast_r &inray);
+	raycast_r raycastWorld(const raycast_r &inray, bool solidOnly = false);
 
 	/**
 	 * Returns the chunk at the given indexes.

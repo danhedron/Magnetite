@@ -80,7 +80,7 @@ void Character::update(float dt)
 {
 	mPosition += ( Matrix4::rotateY( (mCamera.getYaw()*3.141f)/180 ) * mMoveVector ) * ( mSprint ? mSprintSpeed : mMoveSpeed ) * dt;
 	// Raycast down and check out height.
-	raycast_r gRay = OpencraftCore::Singleton->getWorld()->raycastWorld( getFeetCast() );
+	raycast_r gRay = OpencraftCore::Singleton->getWorld()->raycastWorld( getFeetCast(), true );
 	if( gRay.hit == true )
 		mPosition.y -= gRay.i0 - mHeight;
 		///mPosition -= Vector3( 0.f, gRay.i0 - mHeight, 0.f);

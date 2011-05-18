@@ -14,6 +14,7 @@ public:
 
 	bool isFluid();
 	bool isOpaque();
+	bool isSolid();
 
 	std::string getType();
 

@@ -104,7 +104,7 @@ void World::removeChunk(long x, long y, long z)
 	}
 }
 
-raycast_r World::raycastWorld(const raycast_r &inray)
+raycast_r World::raycastWorld(const raycast_r &inray, bool solidOnly)
 {
 	raycast_r ray = inray;
 	Vector3 min, max;
@@ -124,6 +124,8 @@ raycast_r World::raycastWorld(const raycast_r &inray)
 	{
 		blocks = (*it)->getVisibleBlocks();
 		for(BlockList::iterator block = blocks->begin(); block != blocks->end(); ++block) {
+			if( solidOnly && !(*block).second->isSolid() )
+				continue;
 			min = Vector3( (*it)->getX() * CHUNK_WIDTH + (*block).second->getX() - 0.0f,
 							(*it)->getY() * CHUNK_HEIGHT + (*block).second->getY() - 0.0f,
 							(*it)->getZ() * CHUNK_WIDTH + (*block).second->getZ() - 0.0f );

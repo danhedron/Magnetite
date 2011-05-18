@@ -35,6 +35,11 @@ bool WaterBlock::isOpaque()
 	return false;
 }
 
+bool WaterBlock::isSolid()
+{
+	return false;
+}
+
 void WaterBlock::getTextureCoords( short face, short &x, short &y )
 {
 	BaseBlock::getTextureCoords( face, x, y );
@@ -65,7 +70,7 @@ void WaterBlock::setFluidLevel( float delta )
 	}
 }
 
-static float FLOW_MAX = 1.0f; // Maximum flow per second
+static float FLOW_MAX = 60.0f; // Maximum flow per second
 
 void WaterBlock::balanceFluid( BaseBlock* block, float dt )
 {
@@ -74,7 +79,7 @@ void WaterBlock::balanceFluid( BaseBlock* block, float dt )
 		WaterBlock* water = (WaterBlock*)block;
 		float dif = mFluidLevel - water->getFluidLevel();
 		if( dif > 0.0001f ) {
-			//dif = std::min(dif, FLOW_MAX * dt);
+			dif = std::min(dif, FLOW_MAX * dt);
 			water->changeFluidLevel( dif / 2.f );
 			changeFluidLevel( -dif / 2.f );
 		}
@@ -115,8 +120,10 @@ void WaterBlock::flowToBlock(short x, short y, short z, float dt)
 			
 		WaterBlock* block = new WaterBlock();
 		block->setPosition( x, y, z );
-		changeFluidLevel( -mFluidLevel / 2.f );
-		block->setFluidLevel( mFluidLevel );
+		float dif = mFluidLevel;
+		dif = std::min(dif, FLOW_MAX * dt);
+		changeFluidLevel( -dif / 2 );
+		block->setFluidLevel( dif / 2 );
 		mChunk->addBlockToChunk( block );
 	}
 
