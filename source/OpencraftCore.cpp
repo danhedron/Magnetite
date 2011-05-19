@@ -148,10 +148,11 @@ void OpencraftCore::go(int *argc, char **argv)
 
 		lDelta *= mTimescale;
 
-		mPlayer->update( lDelta );
-
 		//Ensure each loaded chunk is updated before being sent to the GPU
 		mWorld->update( lDelta );
+
+		// Update the player once the world update has finished.
+		mPlayer->update( lDelta );
 
 		//Ensure the renderer has the correct camera
 		mRenderer->setCamera(mPlayer->getCamera());

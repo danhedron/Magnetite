@@ -61,6 +61,14 @@ raycast_r Character::getFeetCast()
 	return ray;
 }
 
+collision_r Character::getCollision()
+{
+	collision_r col;
+	col.min1 = getPosition() + Vector3( -.4f, 0.f, -.4f );
+	col.max1 = getPosition() + Vector3( .4f, mHeight, .4f );
+	return col;
+}
+
 void Character::addMoveDelta(const Vector3 &dp)
 {
 	mMoveVector += dp;

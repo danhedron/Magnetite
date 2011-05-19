@@ -9,6 +9,7 @@ class Character
 protected:
 	Vector3 mPosition;
 	Vector3 mMoveVector;
+	Vector3 mGravity;
 	float mMoveSpeed;
 	float mSprintSpeed;
 	bool mSprint;
@@ -59,6 +60,11 @@ public:
 	 * Gets a ray representing the -UP axis
 	 */
 	raycast_r getFeetCast();
+
+	/**
+	 * Gets the collision test for this character
+	 */
+	collision_r getCollision();
 
 	/**
 	 * Sets the characer's position immediatley.

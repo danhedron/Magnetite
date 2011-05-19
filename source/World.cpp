@@ -157,6 +157,61 @@ raycast_r World::raycastWorld(const raycast_r &inray, bool solidOnly)
 	return closest;
 }
 
+collision_r World::AABBWorld(const collision_r& info)
+{
+	ChunkList hitChunks;
+	for(ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it)
+	{
+		collision_r col = info;
+		col.min2 = Vector3( (*it)->getX() * CHUNK_WIDTH, (*it)->getY() * CHUNK_HEIGHT,  (*it)->getZ() * CHUNK_WIDTH );
+		col.max2 = Vector3( (*it)->getX() * CHUNK_WIDTH + CHUNK_WIDTH, (*it)->getY() * CHUNK_HEIGHT + CHUNK_HEIGHT,  (*it)->getZ() * CHUNK_WIDTH + CHUNK_WIDTH );
+		col = AABBCube( col );
+		if( col.collision )
+			hitChunks.push_back( *it );
+	}
+	BlockList* blocks = NULL;
+	collision_r coll;
+	for(ChunkList::iterator it = hitChunks.begin(); it != hitChunks.end(); ++it)
+	{
+		blocks = (*it)->getVisibleBlocks();
+		for(BlockList::iterator block = blocks->begin(); block != blocks->end(); ++block) {
+			collision_r bcol = info;
+			bcol.min2 = Vector3( (*it)->getX() * CHUNK_WIDTH + (*block).second->getX() - 0.0f,
+							(*it)->getY() * CHUNK_HEIGHT + (*block).second->getY() - 0.0f,
+							(*it)->getZ() * CHUNK_WIDTH + (*block).second->getZ() - 0.0f );
+			bcol.max2 = Vector3( (*it)->getX() * CHUNK_WIDTH + (*block).second->getX() + 1.0f,
+							(*it)->getY() * CHUNK_HEIGHT + (*block).second->getY() + 1.0f,
+							(*it)->getZ() * CHUNK_WIDTH + (*block).second->getZ() + 1.0f );
+			bcol = AABBCube( bcol );
+			if( bcol.collision )
+				coll.collision = true;
+		}	
+	}
+
+	return coll;
+}
+
+collision_r World::AABBCube(const collision_r& info)
+{
+	collision_r collision = info;
+	
+	if( collision.max1.x < collision.min2.x )
+		collision.collision = false;
+	if( collision.max1.y < collision.min2.y )
+		collision.collision = false;
+	if( collision.max1.z < collision.min2.z )
+		collision.collision = false;
+
+	if( collision.min1.x > collision.max2.x )
+		collision.collision = false;
+	if( collision.min1.y > collision.max2.y )
+		collision.collision = false;
+	if( collision.min1.z > collision.max2.z )
+		collision.collision = false;
+
+	return collision;
+}
+
 raycast_r World::raycastCube(const raycast_r &inray, Vector3& min, Vector3& max)
 {
 	raycast_r ray(inray);

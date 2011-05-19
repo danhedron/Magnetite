@@ -29,6 +29,24 @@ struct raycast_r
 	}
 };
 
+/**
+ * @struct AABB->AABB collision test 
+ */
+struct collision_r
+{
+	Vector3 min1;
+	Vector3 max1;
+
+	Vector3 min2;
+	Vector3 max2;
+
+	bool collision;
+
+	collision_r() {
+		collision = false;
+	}
+};
+
 class Sky;
 
 class World
@@ -121,6 +139,13 @@ public:
 	 * Returns the chunk at the given indexes.
 	 */
 	WorldChunk* getChunk(const long x, const long y, const long z);
+
+	/**
+	 * Performs an AABB test against the world.
+	 */
+	collision_r AABBWorld(const collision_r& info );
+
+	collision_r AABBCube(const collision_r& info );
 
 	/**
 	 * Creates a new sky object 
