@@ -3,11 +3,13 @@
 #include "Renderer.h"
 #include "Sky.h"
 #include "StoneBlock.h"
+#include "ChunkGenerator.h"
 
 World::World()
 : mSky( NULL )
 {	
 	createWorld();
+	mGenerator = new ChunkGenerator(1024);
 }
 
 World::~World()
@@ -63,8 +65,7 @@ void World::createChunk(long x, long y, long z)
 {
 	Util::log( "Creating Chunk: " + Util::toString(x) + "," + Util::toString(y) + "," + Util::toString(z) );
 	WorldChunk* newChunk = new WorldChunk(x, y, z);
-	Util::log("Adding test data..");
-	newChunk->fillWithTestData();
+	mGenerator->fillChunk( newChunk );
 	mChunks.push_back(newChunk);
 	Util::log( "Chunk Created" );
 }

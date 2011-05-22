@@ -48,12 +48,14 @@ struct collision_r
 };
 
 class Sky;
+class ChunkGenerator;
 
 class World
 {
 protected:
 	ChunkList	mChunks;
 	Sky*		mSky;
+	ChunkGenerator* mGenerator;
 
 public:
 	/** 

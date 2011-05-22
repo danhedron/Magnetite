@@ -213,7 +213,7 @@ Character* OpencraftCore::createCharacter()
 {
 	if( mPlayer == NULL )
 		mPlayer = new Character();
-	mPlayer->setPosition( Vector3( 0.f, 10.f, 0.f )  );
+	mPlayer->setPosition( Vector3( 0.f, 100.f, 0.f )  );
 	return mPlayer;
 }
 
