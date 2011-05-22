@@ -16,6 +16,7 @@ public:
 	void setSeed( long seed );
 	float noise( long x, long z );
 	float interpolateCosine( float a, float b, float x );
+	float interpolatedNoise( float x, float y );
 	float smooth( float x, float y );
 
 	void fillChunk( WorldChunk* chunk );
