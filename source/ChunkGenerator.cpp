@@ -80,6 +80,16 @@ float ChunkGenerator::smooth( float x, float z )
 					chunk->addBlockToChunk( block );
 				}
 			}
+			if( 64 + total < 64 )
+			{
+				for( int y = 64+total; y < 64; y++ ) {
+					BaseBlock* block = FactoryManager::createBlock("water");
+					if( block ) {
+						block->setPosition( x, y, z );
+						chunk->addBlockToChunk( block );
+					}
+				}
+			}
 		}
 	}
 }

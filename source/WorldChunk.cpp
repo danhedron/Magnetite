@@ -63,6 +63,10 @@ void WorldChunk::addBlockToChunk(BaseBlock* block)
 {
 	WorldChunk* chunk = getRelativeChunk( block->getX(), block->getY(), block->getZ() );
 	if( chunk != this ) {
+		if( chunk == NULL ) {
+			delete block;
+			return;
+		}
 		if( block->getX() < 0 )
 			block->setPosition( Vector3( block->getX() + CHUNK_WIDTH, block->getY(), block->getZ() ) );
 		else if( block->getX() >= CHUNK_WIDTH )

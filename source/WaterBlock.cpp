@@ -94,8 +94,6 @@ void WaterBlock::flowToBlock(short x, short y, short z, float dt)
 		balanceFluid( t, dt );
 	}
 	else if( t != NULL && !t->isFluid() ) {
-		if( z < 0 )
-			Util::log("Flowing -z");
 	}
 	else if( t == NULL ) { //&& x >= 0 && x < CHUNK_WIDTH && y >= 0 && y < CHUNK_HEIGHT && z >= 0 && z < CHUNK_WIDTH ) {
 		BaseBlock* lower = mChunk->getBlockAt( x, y - 1, z );
@@ -121,9 +119,6 @@ void WaterBlock::flowToBlock(short x, short y, short z, float dt)
 				return;
 			}
 		}
-
-		if( y < 0 || x < 0 || z < 0 )
-			Util::log("Flowing into adjacent chunk");
 
 		WaterBlock* block = new WaterBlock();
 		block->setPosition( x, y, z );
