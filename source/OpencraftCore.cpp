@@ -213,7 +213,9 @@ Character* OpencraftCore::createCharacter()
 {
 	if( mPlayer == NULL )
 		mPlayer = new Character();
-	mPlayer->setPosition( Vector3( 0.f, 100.f, 0.f )  );
+	mPlayer->setPosition( Vector3( 0.f, 80.f, 0.f )  );
+	if( mWorld )
+		mWorld->setPagingCamera( mPlayer->getCamera() );
 	return mPlayer;
 }
 

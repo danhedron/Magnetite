@@ -376,7 +376,7 @@ void WorldChunk::update( float dt )
 
 void WorldChunk::requestGenerate()
 {
-	if( mHasChanged ) {
+	if( mHasChanged || !mHasGenerated ) {
 		updateVisibility();
 		if( !mHasGenerated )
 			generate();

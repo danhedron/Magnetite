@@ -58,32 +58,54 @@ float ChunkGenerator::smooth( float x, float z )
 
  void ChunkGenerator::fillChunk(WorldChunk *chunk)
 {
-	float p = 0.25f;
-	float octs = 10;
-	for( int x = 0; x < CHUNK_WIDTH; x++ ) {
-		for( int z = 0; z < CHUNK_WIDTH; z++ ) {
-			float total = 0.f;
-			for( float i = 0; i < octs; i++ ) {
-				float freq = pow(2.f, i);
-				float amp = pow(p, i);
-				total = total + interpolatedNoise((float)((chunk->getX()*CHUNK_WIDTH) + x) * freq * 0.05f , (float)((chunk->getZ() * CHUNK_WIDTH) + z) *freq * 0.05f ) * amp * 64.f;
-			}
-			std::string type = "stone";
-			for( int y = 0; y < 64+total; y++ ) {
-				if( y > total - 5 )
-					type = "dirt";
-				if( y > total -1 )
-					type = "grass";
-				BaseBlock* block = FactoryManager::createBlock(type);
-				if( block ) {
-					block->setPosition( x, y, z );
-					chunk->addBlockToChunk( block );
+	if( chunk->getY() > 0 ) return; //Don't fill chunks above ground yet (supermountains yet to come)
+	if( chunk->getY() == 0 ) {
+		float p = 0.25f;
+		float octs = 10;
+		for( int x = 0; x < CHUNK_WIDTH; x++ ) {
+			for( int z = 0; z < CHUNK_WIDTH; z++ ) {
+				float total = 0.f;
+				for( float i = 0; i < octs; i++ ) {
+					float freq = pow(2.f, i);
+					float amp = pow(p, i);
+					int Cx, Cz;
+					Cx=(chunk->getX()*CHUNK_WIDTH);
+					Cz=(chunk->getZ()*CHUNK_WIDTH);
+					total = total + interpolatedNoise((float)(Cx + x) * freq * 0.05f , (float)(Cz + z) *freq * 0.05f ) * amp;
 				}
+				std::string type = "stone";
+				total = (total*30.f) + 64.f;
+				for( int y = 0; y < total; y++ ) {
+					if( y > total - 5 )
+						type = "dirt";
+					if( y > total -1 )
+						type = "grass";
+					BaseBlock* block = FactoryManager::createBlock(type);
+					if( block ) {
+						block->setPosition( x, y, z );
+						chunk->addBlockToChunk( block );
+					}
+				}
+	/*			if( 64 + total < 64 )
+				{
+					for( int y = 64+total; y < 64; y++ ) {
+						BaseBlock* block = FactoryManager::createBlock("water");
+						if( block ) {
+							block->setPosition( x, y, z );
+							chunk->addBlockToChunk( block );
+						}
+					}
+				}*/
 			}
-			if( 64 + total < 64 )
-			{
-				for( int y = 64+total; y < 64; y++ ) {
-					BaseBlock* block = FactoryManager::createBlock("water");
+		}
+	}
+	else
+	{
+		for( int x = 0; x < CHUNK_WIDTH; x++ ) {
+			for( int z = 0; z < CHUNK_WIDTH; z++ ) {
+				std::string type = "stone";
+				for( int y = 0; y < CHUNK_HEIGHT; y++ ) {
+					BaseBlock* block = FactoryManager::createBlock(type);
 					if( block ) {
 						block->setPosition( x, y, z );
 						chunk->addBlockToChunk( block );

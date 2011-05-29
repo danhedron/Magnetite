@@ -49,6 +49,7 @@ struct collision_r
 
 class Sky;
 class ChunkGenerator;
+class Camera;
 
 class World
 {
@@ -56,6 +57,7 @@ protected:
 	ChunkList	mChunks;
 	Sky*		mSky;
 	ChunkGenerator* mGenerator;
+	Camera*		mPagingCamera;
 
 public:
 	/** 
@@ -113,6 +115,21 @@ public:
 	 * @param size Radius
 	 */
 	void createTestChunks( int size );
+
+	/**
+	 * Activates a chunk, loading it if it is stored on disk, or generating it if necassery
+	 */
+	void activateChunk( long x, long y, long z );
+
+	/**
+	 * Deactivates a chunk
+	 */
+	void deativateChunk( long x, long y, long z );
+
+	/**
+	 * Sets the camera used for paging chunks
+	 */
+	void setPagingCamera( Camera* _c );
 
 	/**
 	 * Destroys all chunks in the world.
