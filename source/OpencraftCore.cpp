@@ -13,7 +13,9 @@ OpencraftCore::OpencraftCore(void)
 : mContinue( true ),
 mWorld( NULL ),
 mPlayer( NULL ),
-mTimescale( 1.f )
+mTimescale( 1.f ),
+mLastX( 0.f ),
+mLastY( 0.f )
 {
 	OpencraftCore::Singleton = this;
 	mRenderer = new Renderer();
@@ -50,7 +52,7 @@ void OpencraftCore::go(int *argc, char **argv)
 	FactoryManager::logFactories();
 
 	int lastX = mWindow.GetWidth()/2;
-	int lastY =  mWindow.GetHeight()/20;
+	int lastY = mWindow.GetHeight()/2;
 
 	while(mContinue && mWindow.IsOpened()) {
 		float lDelta = mClock.GetElapsedTime();
@@ -132,8 +134,10 @@ void OpencraftCore::go(int *argc, char **argv)
 			if( (lEvt.Type == sf::Event::MouseMoved) ) {
 					mPlayer->getCamera()->pitch( -(lEvt.MouseMove.Y  - lastY) );
 					mPlayer->getCamera()->yaw( -(lEvt.MouseMove.X - lastX) );
-					lastY = lEvt.MouseMove.Y;
-					lastX = lEvt.MouseMove.X;
+					lastX = mWindow.GetWidth()/2;
+					lastY = mWindow.GetHeight()/2;
+					
+					mWindow.SetCursorPosition( mWindow.GetWidth() / 2, mWindow.GetHeight() / 2 );
 			}
 			if( lEvt.Type == sf::Event::MouseButtonPressed && lEvt.MouseButton.Button == sf::Mouse::Left ) {
 				placeEyeBlock();

@@ -75,6 +75,9 @@ public:
 	 */
 	float getTimescale();
 
+	float mLastX;
+	float mLastY;
+
 	
 	void createWindow(int *argc, char **argv);
 
