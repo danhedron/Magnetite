@@ -8,6 +8,7 @@ Character::Character( void )
 	setMoveSpeed( 1.2f );
 	setSprintSpeed( 3.f );
 	enableSprint( false );
+	enableFlying( false );
 }
 
 Character::~Character( void )
@@ -38,6 +39,16 @@ void Character::setSprintSpeed( float s )
 void Character::enableSprint( bool s )
 {
 	mSprint = s;
+}
+
+void Character::enableFlying( bool f )
+{
+	mFlying = f;
+}
+
+bool Character::isFlying()
+{
+	return mFlying;
 }
 
 Camera* Character::getCamera()
@@ -87,11 +98,35 @@ Vector3 Character::getPosition()
 void Character::update(float dt)
 {
 	mPosition += ( Matrix4::rotateY( (mCamera.getYaw()*3.141f)/180 ) * mMoveVector ) * ( mSprint ? mSprintSpeed : mMoveSpeed ) * dt;
-	// Raycast down and check out height.
-	raycast_r gRay = OpencraftCore::Singleton->getWorld()->raycastWorld( getFeetCast(), true );
-	if( gRay.hit == true )
-		mPosition.y -= gRay.i0 - mHeight;
-		///mPosition -= Vector3( 0.f, gRay.i0 - mHeight, 0.f);
+	if( !mFlying )
+	{
+		raycast_r feetRay = getFeetCast();
+		raycast_r gRay[4];
+		// Perform 4 raycasts for edges of player since AABB collision testing doesn't work.
+		feetRay.orig += Vector3(0.49f, 0.f, 0.49f);
+		gRay[0] = OpencraftCore::Singleton->getWorld()->raycastWorld( feetRay, true );
+		feetRay.orig += Vector3(0.f, 0.f, -0.98f);
+		gRay[1] = OpencraftCore::Singleton->getWorld()->raycastWorld( feetRay, true );
+		feetRay.orig += Vector3(-0.98f, 0.f, 0.f);
+		gRay[2] = OpencraftCore::Singleton->getWorld()->raycastWorld( feetRay, true );
+		feetRay.orig += Vector3(0.0f, 0.f, 0.98f);
+		gRay[3] = OpencraftCore::Singleton->getWorld()->raycastWorld( feetRay, true );
+		
+		float i0 = -1;
+		for( int i = 0; i < 4; i++ ) {
+			if( gRay[i].hit == true ) {
+				if( i0 = -1 ) {
+					i0 = gRay[i].i0 - mHeight;
+				}
+				else
+				{
+					i0 = std::min<float>(i0, gRay[i].i0 - mHeight);
+				}
+			}
+		}
+		if( i0 != -1 )
+			mPosition.y -= i0;
+	}
 
 	// Offset camera by eye height.
 	mCamera.setPosition( mPosition + Vector3( 0.f, mHeight * 0.9f, 0.f) );
