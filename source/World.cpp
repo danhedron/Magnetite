@@ -101,7 +101,7 @@ void World::update( float dt )
 			for( int z = PagingCenter.z - LoadedArea; z < PagingCenter.z + LoadedArea; z++ ) {
 				for( int y = PagingCenter.y - LoadedArea; y < PagingCenter.y + LoadedArea; y++ ) {
 					if( getChunk( x, y, z ) == NULL ) {
-						Util::log("Activating Chunk: " + Util::toString( x ) + ", " + Util::toString( y ) + ", "  + Util::toString( z ) );
+						//Util::log("Activating Chunk: " + Util::toString( x ) + ", " + Util::toString( y ) + ", "  + Util::toString( z ) );
 						activateChunk( x, y, z );
 					}
 				}

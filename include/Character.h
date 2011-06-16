@@ -10,6 +10,7 @@ protected:
 	Vector3 mPosition;
 	Vector3 mMoveVector;
 	Vector3 mGravity;
+	bool mFlying;
 	float mMoveSpeed;
 	float mSprintSpeed;
 	bool mSprint;
@@ -45,6 +46,16 @@ public:
 	 * switch betweeen sprinting and walking
 	 */
 	void enableSprint( bool s );
+
+	/**
+	 * Enables/disables flying
+	 */
+	void enableFlying( bool f );
+
+	/**
+	 * Returns if the character is currently flying
+	 */
+	bool isFlying();
 
 	/**
 	 * Gets a pointer to the camera

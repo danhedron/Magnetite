@@ -115,6 +115,11 @@ void OpencraftCore::go(int *argc, char **argv)
 				(lEvt.Key.Code == sf::Key::LShift) ) {
 					mPlayer->enableSprint( false );
 			}
+			if( (lEvt.Type == sf::Event::KeyReleased) &&
+				(lEvt.Key.Code == sf::Key::F) ) {
+					mPlayer->enableFlying( !mPlayer->isFlying() );
+					Util::log( (Util::toString(mPlayer->isFlying())) + " Flying");
+			}
 			if( (lEvt.Type == sf::Event::KeyPressed) &&
 				(lEvt.Key.Code == sf::Key::Add) ) {
 					mRenderer->nextBlock();
@@ -217,7 +222,7 @@ Character* OpencraftCore::createCharacter()
 {
 	if( mPlayer == NULL )
 		mPlayer = new Character();
-	mPlayer->setPosition( Vector3( 0.f, 80.f, 0.f )  );
+	mPlayer->setPosition( Vector3( 0.f, 150.f, 0.f )  );
 	if( mWorld )
 		mWorld->setPagingCamera( mPlayer->getCamera() );
 	return mPlayer;
