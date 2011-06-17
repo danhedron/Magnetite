@@ -15,21 +15,24 @@ enum {
 	FACE_BACK	= (1<<5)
 };
 
+enum {
+	BMASK_XPOS = ( 1 | (1<<1) | (1<<2) | (1<<3) ),
+	BMASK_ZPOS = ( (1<<4) | (1<<5) | (1<<6) | (1<<7) ),
+	BMASK_YPOS = ( (1<<8) | (1<<9) | (1<<10) | (1<<11) | (1<<12) | (1<<13)  | (1<<14) )
+};
+
 class WorldChunk;
 
 class BaseBlock
 {
 protected:
-	size_t mDamage;
-	long mX;
-	long mY;
-	long mZ;
-	short mBlockX;
-	short mBlockY;
+	unsigned short mDataFlags;
 
 	WorldChunk* mChunk;
+
+	void _setPosition( unsigned short x, unsigned  short y, unsigned short z );
 public:
-	BaseBlock(long x = 0, long y = 0, long z = 0);
+	BaseBlock();
 	~BaseBlock(void);
 
 	void _setChunk( WorldChunk* chnk );
@@ -55,14 +58,11 @@ public:
 	 */
 	virtual bool isSolid() { return true; }
 
-
 	/**
 	 * Called when a nearby block changes.
 	 * @param face The direction of the changed block.
 	 */
 	virtual void connectedChange( short face );
-
-	virtual void texture(int x, int y);
 	virtual void getTextureCoords( short face, short &x, short &y );
 
 	/**
@@ -72,9 +72,9 @@ public:
 
 	virtual std::string getType() = 0;
 
-	long getX();
-	long getY();
-	long getZ();
+	unsigned short getX();
+	unsigned short getY();
+	unsigned short getZ();
 
 	void setPosition( long x, long y, long z );
 	void setPosition( const Vector3& vec );

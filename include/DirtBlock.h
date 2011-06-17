@@ -13,6 +13,8 @@ public:
 
 	std::string getType();
 
+	void getTextureCoords( short face, short &x, short &y );
+
 	void created();
 	void hit();
 };

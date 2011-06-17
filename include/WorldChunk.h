@@ -10,7 +10,7 @@ struct GLgeometry;
 class WorldChunk
 {
 protected:
-	BlockList mBlockData;
+	BlockArray mBlockData;
 	BlockList mVisibleBlocks; //< Used in Rendering
 	BlockList mShouldDelete; //< Used to allow blocks to remove themselves
 	long mX;
@@ -19,7 +19,7 @@ protected:
 	bool mHasChanged;
 	bool mHasGenerated;
 	long mVisibleFaces;
-	void _blockVisible( BlockPosPair &block, bool v );
+	void _blockVisible( BlockPtr &block, bool v );
 	GLgeometry* mGeometry;
 	float mUpdateTimer;
 public:
@@ -62,7 +62,7 @@ public:
 	/**
 	 * returns a relative chunk
 	 */
-	WorldChunk* getRelativeChunk( long x, long y, long z );
+	WorldChunk* getRelativeChunk( unsigned short x, unsigned short y, unsigned short z );
 
 	/**
 	 * Returns a block if one exsists at the given position.
@@ -81,7 +81,7 @@ public:
 	/**
 	 * Returns a pointer to the block list
 	 */
-	BlockList* getBlocks();
+	BlockArray* getBlocks();
 
 	/**
 	 * Returns a pointer to the Visible block list

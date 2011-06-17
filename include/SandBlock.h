@@ -8,12 +8,13 @@ class SandBlock : public BaseBlock
 protected:
 	
 public:
-	SandBlock(long x = 0, long y = 0, long z = 0);
+	SandBlock();
 	~SandBlock(void);
 	
 	void connectedChange( short face );
 
 	std::string getType();
+	void getTextureCoords( short face, short &x, short &y );
 
 	void created();
 	void hit();

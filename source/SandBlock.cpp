@@ -5,10 +5,9 @@
 //REGISTER_BLOCK_TYPE( "stone", StoneBlock )
 GenericBlockFactory<SandBlock> sandFactory("sand");
 
-SandBlock::SandBlock(long x, long y, long z)
+SandBlock::SandBlock()
 : BaseBlock()
 {
-	texture(2,1);
 }
 
 SandBlock::~SandBlock(void)
@@ -18,11 +17,11 @@ SandBlock::~SandBlock(void)
 void SandBlock::connectedChange( short face )
 {
 	// If something around us changes, we may have to drop down.
-	for( long y = mY-1; y >= 0; y-- ) {
-		BaseBlock* block = mChunk->getBlockAt(mX, y, mZ);
+	for( long y = getY()-1; y >= 0; y-- ) {
+		BaseBlock* block = mChunk->getBlockAt(getX(), y, getZ());
 		if( block != NULL ) {
-			if( y != mY-1 ) {
-				this->setPosition(mX, y + 1, mZ);
+			if( y != getY()-1 ) {
+				this->setPosition(getX(), y + 1, getZ());
 			}
 			break;
 		}
@@ -38,6 +37,14 @@ void SandBlock::hit()
 {
 
 }
+
+
+void SandBlock::getTextureCoords( short face, short &x, short &y )
+{
+	x = 2;
+	y = 1;
+}
+
 
 std::string SandBlock::getType()
 {

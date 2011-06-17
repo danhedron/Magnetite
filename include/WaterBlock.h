@@ -9,7 +9,7 @@ protected:
 	float mFluidLevel;
 	bool mIsNew;
 public:
-	WaterBlock(long x = 0, long y = 0, long z = 0);
+	WaterBlock();
 	~WaterBlock(void);
 
 	bool isFluid();
@@ -29,7 +29,7 @@ public:
 	void flow( float dt );
 
 	void balanceFluid( BaseBlock* block, float dt);
-	void flowToBlock(short x, short y, short z, float dt);
+	void flowToBlock(unsigned short x, unsigned short y, unsigned short z, float dt);
 
 	/**
 	 * Returns the Verex Data for this block:- includes fluid height.

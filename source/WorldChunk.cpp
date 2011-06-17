@@ -16,21 +16,24 @@ mGeometry( NULL ),
 mVisibleFaces( 0 ),
 mUpdateTimer( 0 )
 {
+	mBlockData = new BlockPtr[CHUNK_SIZE];
 	initalize();
 }
 
 WorldChunk::~WorldChunk(void)
 {
 	//TODO: FIX MEMORY LEAK HERE
-	for(BlockList::iterator block = mBlockData.begin(); block != mBlockData.end(); ++block) {
-		delete block->second;
+	for( size_t i = 0; i < CHUNK_SIZE; i++ ) {
+		if( mBlockData[i] != NULL )
+			delete mBlockData[i];
 	}
-	mBlockData.clear();
 }
 
 void WorldChunk::initalize()
 {
-	//do nothing! bet they wern't expecting that.
+	for( size_t i = 0; i < CHUNK_SIZE; i++ ) {
+		mBlockData[i] = NULL;
+	}
 } 
 
 void WorldChunk::fillWithTestData()
@@ -82,22 +85,16 @@ void WorldChunk::addBlockToChunk(BaseBlock* block)
 		chunk->addBlockToChunk( block );
 		return;
 	}
-	long k = BLOCK_INDEX( block );
-	BlockList::iterator lb = mBlockData.find( k );
 
 	block->_setChunk( this );
 
-	if(lb != mBlockData.end())
-	{
-		delete lb->second;
-		lb->second = block;
+	long k = BLOCK_INDEX( block );
+	BlockPtr lb = mBlockData[ k ];
+
+	if(lb != NULL) {
+		delete lb;
 	}
-	else
-	{
-		// the key does not exist in the map
-		// add it to the map
-		mBlockData.insert(lb, BlockList::value_type(k, block));
-	}
+	mBlockData[ k ] = block;
 
 	mHasChanged = true;
 	mHasGenerated = false;
@@ -107,11 +104,9 @@ void WorldChunk::_blockMoved( BaseBlock* block, short x, short y, short z )
 {
 	long k = BLOCK_INDEX( block );
 	long kn = z * CHUNK_WIDTH * CHUNK_HEIGHT + y * CHUNK_WIDTH + x;
-	BlockList::iterator lb = mBlockData.find( k );
+	BlockPtr lb = mBlockData[ k ];
 	removeBlockAt( x, y, z );
-	if( lb != mBlockData.end() )
-		mBlockData.erase( lb++ );
-	mBlockData.insert( BlockList::value_type( kn, block ) );
+	mBlockData[ k ] = block;
 	markModified();
 }
 
@@ -140,12 +135,11 @@ void WorldChunk::removeBlockAt(long x, long y, long z)
 		return;
 	}
 	long k = z * CHUNK_WIDTH * CHUNK_HEIGHT + y * CHUNK_WIDTH + x;
-	BlockList::iterator it = mBlockData.find( k );
-	if( it != mBlockData.end() )  {
-		delete (*it).second;
-		(*it).second = NULL;
-		_blockVisible( *it, false );
-		mBlockData.erase( it++ );
+	BlockPtr it = mBlockData[ k ];
+	if( it != NULL )  {
+		delete it;
+		_blockVisible( it, false );
+		mBlockData[ k ] = NULL;
 	}
 	mHasChanged = true;
 	mHasGenerated = false;
@@ -156,7 +150,7 @@ void WorldChunk::_addBlockToRemoveList(BaseBlock* block)
 	mShouldDelete.insert( BlockList::value_type( BLOCK_INDEX( block ) , block ) );
 }
 
-WorldChunk* WorldChunk::getRelativeChunk(long x, long y, long z)
+WorldChunk* WorldChunk::getRelativeChunk(unsigned short x, unsigned short y, unsigned short z)
 {
 	if( ( x >= 0 && y >= 0 && z >= 0 ) && ( x < CHUNK_WIDTH && y < CHUNK_HEIGHT && z < CHUNK_WIDTH ) )
 		return this;
@@ -205,20 +199,20 @@ BaseBlock* WorldChunk::getBlockAt(long x, long y, long z)
 			return NULL;
 		//return NULL;
 	}
-	BlockList::iterator it = mBlockData.find( z * CHUNK_WIDTH * CHUNK_HEIGHT + y * CHUNK_WIDTH + x );
-	if( it != mBlockData.end() )
-		return it->second;
-	return NULL;
+	size_t k =  z * CHUNK_WIDTH * CHUNK_HEIGHT + y * CHUNK_WIDTH + x;
+	if( k >= CHUNK_SIZE || k < 0) return NULL;
+	BlockPtr it = mBlockData[k];
+	return it;
 }
 
-BlockList* WorldChunk::getBlocks()
+BlockArray* WorldChunk::getBlocks()
 {
 	return &mBlockData;
 }
 
 size_t WorldChunk::getBlockCount()
 {
-	return mBlockData.size();
+	return 5;//mBlockData.size();
 }
 
 BlockList* WorldChunk::getVisibleBlocks()
@@ -241,8 +235,9 @@ void WorldChunk::updateVisibility()
 	mVisibleFaces = 0;
 	mVisibleBlocks.clear();
 	// Just a brute force Occlusion test: perhaps this could be optimized?
-	for(BlockList::iterator block = mBlockData.begin(); block != mBlockData.end(); ++block) {
-		BaseBlock* b = (*block).second;
+	for( size_t i = 0; i < CHUNK_SIZE; i++ ) {
+		if( mBlockData[i] == NULL ) continue;
+		BaseBlock* b = mBlockData[i];
 		short visFlags = FACE_NONE;
 		short visOrig = b->mViewFlags;
 		//Check All axes for adjacent blocks.
@@ -276,7 +271,7 @@ void WorldChunk::updateVisibility()
 			mVisibleFaces++;
 			visFlags = visFlags | FACE_FORWARD;
 		}
-		(*block).second->mViewFlags = visFlags;
+		b->mViewFlags = visFlags;
 		for( size_t f = 0; f < 6; f++ ) {
 			if( ((1<<f) & visOrig ) == (1<<f) ) {
 				if( ( visOrig & visFlags ) != (1<<f) ) {
@@ -285,17 +280,17 @@ void WorldChunk::updateVisibility()
 			}
 		}
 		if( visFlags == FACE_NONE )
-			_blockVisible( (*block), false );
+			_blockVisible( b, false );
 		else
-			_blockVisible( (*block), true);
+			_blockVisible( b, true);
 	}
 }
 
-void WorldChunk::_blockVisible( BlockPosPair &block, bool v )
+void WorldChunk::_blockVisible( BlockPtr &block, bool v )
 {
-	BlockList::iterator it = mVisibleBlocks.find( block.first );
+	BlockList::iterator it = mVisibleBlocks.find( BLOCK_INDEX( block ) );
 	if( v && it == mVisibleBlocks.end() ) {
-		mVisibleBlocks.insert( block );
+		mVisibleBlocks.insert( BlockList::value_type( BLOCK_INDEX( block ), block ) );
 	}
 	else if( !v && it != mVisibleBlocks.end() )  {
 		mVisibleBlocks.erase( it++ );
@@ -360,9 +355,11 @@ void WorldChunk::update( float dt )
 {
 	while( mUpdateTimer >= 0.1f ) {
 		mUpdateTimer -= 0.1f;
-		for( BlockList::iterator it = mBlockData.begin(); it != mBlockData.end(); ++it ) {
-			if( it->second->isFluid() ) {
-				((WaterBlock*)it->second)->flow( 0.1f );
+		for( size_t i = 0; i < CHUNK_SIZE; i++ ) {
+			if( mBlockData[i] == NULL ) continue;
+			BlockPtr b = mBlockData[i];
+			if( b->isFluid() ) {
+				((WaterBlock*)b)->flow( 0.1f );
 			}
 		}
 	}

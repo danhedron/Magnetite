@@ -5,10 +5,9 @@
 GenericBlockFactory<WoodBlock> woodFactory("wood");
 
 
-WoodBlock::WoodBlock(long x, long y, long z)
-: BaseBlock( x, y, z)
+WoodBlock::WoodBlock()
+: BaseBlock()
 {
-	texture(4,0);
 }
 
 WoodBlock::~WoodBlock(void)
@@ -24,6 +23,13 @@ void WoodBlock::hit()
 {
 
 }
+
+void WoodBlock::getTextureCoords( short face, short &x, short &y )
+{
+	x = 4;
+	y = 0;
+}
+
 
 std::string WoodBlock::getType()
 {

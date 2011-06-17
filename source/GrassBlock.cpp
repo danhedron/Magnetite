@@ -7,7 +7,6 @@ GenericBlockFactory<GrassBlock> grassFactory("grass");
 GrassBlock::GrassBlock(long x, long y, long z)
 : BaseBlock()
 {
-	texture(3,0);
 }
 
 GrassBlock::~GrassBlock(void)
@@ -21,9 +20,10 @@ void GrassBlock::created()
 
 void GrassBlock::getTextureCoords( short face, short &x, short &y )
 {
-	BaseBlock::getTextureCoords( face, x, y );
+	x = 3;
 	if( face == FACE_TOP )
 		x = 0;
+	y = 0;
 }
 
 void GrassBlock::hit()
