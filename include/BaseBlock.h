@@ -6,19 +6,20 @@ struct GLvertex;
 typedef unsigned short GLedge;
 
 enum {
-	FACE_NONE	= 0,
 	FACE_TOP		= (1<<0),
 	FACE_BOTTOM	= (1<<1),
 	FACE_LEFT	= (1<<2),
 	FACE_RIGHT	= (1<<3),
 	FACE_FORWARD	= (1<<4),
-	FACE_BACK	= (1<<5)
+	FACE_BACK	= (1<<5),
+	FACE_ALL	= FACE_TOP | FACE_BOTTOM | FACE_LEFT | FACE_RIGHT | FACE_FORWARD | FACE_BACK
 };
 
 enum {
 	BMASK_XPOS = ( 1 | (1<<1) | (1<<2) | (1<<3) ),
 	BMASK_ZPOS = ( (1<<4) | (1<<5) | (1<<6) | (1<<7) ),
-	BMASK_YPOS = ( (1<<8) | (1<<9) | (1<<10) | (1<<11) | (1<<12) | (1<<13)  | (1<<14) )
+	BMASK_YPOS = ( (1<<8) | (1<<9) | (1<<10) | (1<<11) | (1<<12) | (1<<13)  | (1<<14) ),
+	BMASK_VISFLAGS = ( (1<<15) | (1<<16) | (1<<17) | (1<<18) | (1<<19) | (1<<20) )
 };
 
 class WorldChunk;
@@ -26,7 +27,7 @@ class WorldChunk;
 class BaseBlock
 {
 protected:
-	unsigned short mDataFlags;
+	unsigned int mDataFlags;
 
 	WorldChunk* mChunk;
 
@@ -36,9 +37,6 @@ public:
 	~BaseBlock(void);
 
 	void _setChunk( WorldChunk* chnk );
-
-	short vertexIndex;
-	short mViewFlags;
 
 	virtual void created() = 0;
 	virtual void hit() = 0;
@@ -66,15 +64,26 @@ public:
 	virtual void getTextureCoords( short face, short &x, short &y );
 
 	/**
+	 * Updates the viewflags for this block
+	 * @param flags the new bitfield
+	 */
+	void updateVisFlags(unsigned int flags);
+
+	/**
+	 * Returns the viewflags for this block
+	 */
+	unsigned short getVisFlags();
+
+	/**
 	 * Returns the Verex Data for this block
 	 */
 	virtual void buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges);
 
 	virtual std::string getType() = 0;
 
-	unsigned short getX();
-	unsigned short getY();
-	unsigned short getZ();
+	short getX();
+	short getY();
+	short getZ();
 
 	void setPosition( long x, long y, long z );
 	void setPosition( const Vector3& vec );
