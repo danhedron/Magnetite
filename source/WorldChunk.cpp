@@ -238,8 +238,8 @@ void WorldChunk::updateVisibility()
 	for( size_t i = 0; i < CHUNK_SIZE; i++ ) {
 		if( mBlockData[i] == NULL ) continue;
 		BaseBlock* b = mBlockData[i];
-		short visFlags = FACE_NONE;
-		short visOrig = b->mViewFlags;
+		short visFlags = 0;
+		short visOrig = b->getVisFlags();
 		//Check All axes for adjacent blocks.
 		BaseBlock* cb = getBlockAt( b->getX() + 1, b->getY(), b->getZ() );
 		if( cb == NULL || !cb->isOpaque() ) {
@@ -271,7 +271,7 @@ void WorldChunk::updateVisibility()
 			mVisibleFaces++;
 			visFlags = visFlags | FACE_FORWARD;
 		}
-		b->mViewFlags = visFlags;
+		b->updateVisFlags(visFlags);
 		for( size_t f = 0; f < 6; f++ ) {
 			if( ((1<<f) & visOrig ) == (1<<f) ) {
 				if( ( visOrig & visFlags ) != (1<<f) ) {
@@ -279,7 +279,7 @@ void WorldChunk::updateVisibility()
 				}
 			}
 		}
-		if( visFlags == FACE_NONE )
+		if( visFlags == 0 )
 			_blockVisible( b, false );
 		else
 			_blockVisible( b, true);

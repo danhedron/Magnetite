@@ -122,7 +122,6 @@ GLvertex Renderer::vertex(float x, float y, float z, float nx, float ny, float n
 void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges)
 {
 	short x = 0, y = 0;
-	block->vertexIndex = ind;
 
 	// Calculate the UVs based on visibility.
 	/*float y = 0.f;
@@ -137,137 +136,137 @@ void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvert
 	rect.h = 0.0625f;*/
 
 	/* Face -Z */
-	if((block->mViewFlags & FACE_BACK) == FACE_BACK ) {
-		block->getTextureCoords( FACE_BACK, x, y );
-		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
+	//if((block->mViewFlags & FACE_BACK) == FACE_BACK ) {
+	//	block->getTextureCoords( FACE_BACK, x, y );
+	//	GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 
-		data[ind + 0] = vertex( block->getX() + 1.0f, block->getY() + 1.0f,	block->getZ() + 1.0f, // Coordinates
-								0.0f, 0.0f, -1.0f,
-								rect.x, rect.y );
-		data[ind + 1] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() + 1.0f, // Coordinates
-								0.0f, 0.0f, -1.0f,
-								rect.x + rect.w, rect.y );
-		data[ind + 2] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
-								0.0f, 0.0f, -1.0f,
-								rect.x + rect.w, rect.y + rect.h );
-		data[ind + 3] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
-								0.0f, 0.0f, -1.0f,
-								rect.x, rect.y + rect.h );
-		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
-		edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
-		eInd += 6;
- 		ind += 4;
-	}
-	/* Face +Z */
-	if((block->mViewFlags & FACE_FORWARD) == FACE_FORWARD ) {
-		block->getTextureCoords( FACE_FORWARD, x, y );
-		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
+	//	data[ind + 0] = vertex( block->getX() + 1.0f, block->getY() + 1.0f,	block->getZ() + 1.0f, // Coordinates
+	//							0.0f, 0.0f, -1.0f,
+	//							rect.x, rect.y );
+	//	data[ind + 1] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() + 1.0f, // Coordinates
+	//							0.0f, 0.0f, -1.0f,
+	//							rect.x + rect.w, rect.y );
+	//	data[ind + 2] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
+	//							0.0f, 0.0f, -1.0f,
+	//							rect.x + rect.w, rect.y + rect.h );
+	//	data[ind + 3] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
+	//							0.0f, 0.0f, -1.0f,
+	//							rect.x, rect.y + rect.h );
+	//	edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
+	//	edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
+	//	eInd += 6;
+ //		ind += 4;
+	//}
+	///* Face +Z */
+	//if((block->mViewFlags & FACE_FORWARD) == FACE_FORWARD ) {
+	//	block->getTextureCoords( FACE_FORWARD, x, y );
+	//	GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 
-		data[ind + 0] = vertex( block->getX() + 1.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
-								0.0f, 0.0f, 1.0f,
-								rect.x, rect.y );
-		data[ind + 1] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
-								0.0f, 0.0f, 1.0f,
-								rect.x + rect.w, rect.y );
-		data[ind + 2] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
-								0.0f, 0.0f, 1.0f,
-								rect.x + rect.w, rect.y + rect.h );
-		data[ind + 3] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
-								0.0f, 0.0f, 1.0f,
-								rect.x, rect.y + rect.h );
-		edges[eInd + 5] = ind + 2; edges[eInd + 4] = ind + 1; edges[eInd + 3] = ind + 0;
-		edges[eInd + 2] = ind + 2; edges[eInd + 1] = ind + 0; edges[eInd + 0] = ind + 3;
-		eInd += 6;
-		ind += 4;
-	}
-	/* Face +X */
-	if((block->mViewFlags & FACE_RIGHT) == FACE_RIGHT) {
-		block->getTextureCoords( FACE_RIGHT, x, y );
-		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
+	//	data[ind + 0] = vertex( block->getX() + 1.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
+	//							0.0f, 0.0f, 1.0f,
+	//							rect.x, rect.y );
+	//	data[ind + 1] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
+	//							0.0f, 0.0f, 1.0f,
+	//							rect.x + rect.w, rect.y );
+	//	data[ind + 2] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
+	//							0.0f, 0.0f, 1.0f,
+	//							rect.x + rect.w, rect.y + rect.h );
+	//	data[ind + 3] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
+	//							0.0f, 0.0f, 1.0f,
+	//							rect.x, rect.y + rect.h );
+	//	edges[eInd + 5] = ind + 2; edges[eInd + 4] = ind + 1; edges[eInd + 3] = ind + 0;
+	//	edges[eInd + 2] = ind + 2; edges[eInd + 1] = ind + 0; edges[eInd + 0] = ind + 3;
+	//	eInd += 6;
+	//	ind += 4;
+	//}
+	///* Face +X */
+	//if((block->mViewFlags & FACE_RIGHT) == FACE_RIGHT) {
+	//	block->getTextureCoords( FACE_RIGHT, x, y );
+	//	GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 
-		data[ind + 0] = vertex( block->getX() + 1.0f, block->getY() + 1.0f, block->getZ() + 1.0f, // Coordinates
-								1.0f, 0.0f, 0.0f,
-								rect.x + rect.w, rect.y );
-		data[ind + 1] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
-								1.0f, 0.0f, 0.0f,
-								rect.x + rect.w, rect.y + rect.h );
-		data[ind + 2] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
-								1.0f, 0.0f, 0.0f,
-								rect.x, rect.y + rect.h );
-		data[ind + 3] = vertex( block->getX() + 1.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
-								1.0f, 0.0f, 0.0f,
-								rect.x, rect.y );
-		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
-		edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
-		eInd += 6;
-		ind += 4;
-	}
-	/* Face -Y */
-	if((block->mViewFlags & FACE_BOTTOM) == FACE_BOTTOM) {
-		block->getTextureCoords( FACE_BOTTOM, x, y );
-		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
+	//	data[ind + 0] = vertex( block->getX() + 1.0f, block->getY() + 1.0f, block->getZ() + 1.0f, // Coordinates
+	//							1.0f, 0.0f, 0.0f,
+	//							rect.x + rect.w, rect.y );
+	//	data[ind + 1] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
+	//							1.0f, 0.0f, 0.0f,
+	//							rect.x + rect.w, rect.y + rect.h );
+	//	data[ind + 2] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
+	//							1.0f, 0.0f, 0.0f,
+	//							rect.x, rect.y + rect.h );
+	//	data[ind + 3] = vertex( block->getX() + 1.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
+	//							1.0f, 0.0f, 0.0f,
+	//							rect.x, rect.y );
+	//	edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
+	//	edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
+	//	eInd += 6;
+	//	ind += 4;
+	//}
+	///* Face -Y */
+	//if((block->mViewFlags & FACE_BOTTOM) == FACE_BOTTOM) {
+	//	block->getTextureCoords( FACE_BOTTOM, x, y );
+	//	GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 
-		data[ind + 0] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
-								0.0f, -1.0f, 0.0f,
-								rect.x, rect.y );
-		data[ind + 1] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
-								0.0f, -1.0f, 0.0f,
-								rect.x + rect.w, rect.y );
-		data[ind + 2] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
-								0.0f, -1.0f, 0.0f,
-								rect.x + rect.w, rect.y + rect.h );
-		data[ind + 3] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
-								0.0f, -1.0f, 0.0f,
-								rect.x, rect.y + rect.h );
-		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
-		edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
-		eInd += 6;
-		ind += 4;
-	}
-	/* Face +Y */
-	if((block->mViewFlags & FACE_TOP) == FACE_TOP) {
-		block->getTextureCoords( FACE_TOP, x, y );
-		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
+	//	data[ind + 0] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
+	//							0.0f, -1.0f, 0.0f,
+	//							rect.x, rect.y );
+	//	data[ind + 1] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
+	//							0.0f, -1.0f, 0.0f,
+	//							rect.x + rect.w, rect.y );
+	//	data[ind + 2] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
+	//							0.0f, -1.0f, 0.0f,
+	//							rect.x + rect.w, rect.y + rect.h );
+	//	data[ind + 3] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
+	//							0.0f, -1.0f, 0.0f,
+	//							rect.x, rect.y + rect.h );
+	//	edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
+	//	edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
+	//	eInd += 6;
+	//	ind += 4;
+	//}
+	///* Face +Y */
+	//if((block->mViewFlags & FACE_TOP) == FACE_TOP) {
+	//	block->getTextureCoords( FACE_TOP, x, y );
+	//	GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 
-		data[ind + 0] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() + 1.0f, // Coordinates
-								0.0f, 1.0f, 0.0f,
-								rect.x, rect.y );
-		data[ind + 1] = vertex( block->getX() + 1.0f, block->getY() + 1.0f, block->getZ() + 1.0f, // Coordinates
-								0.0f, 1.0f, 0.0f,
-								rect.x + rect.w, rect.y );
-		data[ind + 2] = vertex( block->getX() + 1.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
-								0.0f, 1.0f, 0.0f,
-								rect.x + rect.w, rect.y + rect.h );
-		data[ind + 3] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
-								0.0f, 1.0f, 0.0f,
-								rect.x, rect.y + rect.h );
-		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
-		edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
-		eInd += 6;
-		ind += 4;
-	}
-	/* Face -X */
-	if((block->mViewFlags & FACE_LEFT) == FACE_LEFT) {
-		block->getTextureCoords( FACE_LEFT, x, y );
-		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
+	//	data[ind + 0] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() + 1.0f, // Coordinates
+	//							0.0f, 1.0f, 0.0f,
+	//							rect.x, rect.y );
+	//	data[ind + 1] = vertex( block->getX() + 1.0f, block->getY() + 1.0f, block->getZ() + 1.0f, // Coordinates
+	//							0.0f, 1.0f, 0.0f,
+	//							rect.x + rect.w, rect.y );
+	//	data[ind + 2] = vertex( block->getX() + 1.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
+	//							0.0f, 1.0f, 0.0f,
+	//							rect.x + rect.w, rect.y + rect.h );
+	//	data[ind + 3] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
+	//							0.0f, 1.0f, 0.0f,
+	//							rect.x, rect.y + rect.h );
+	//	edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
+	//	edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
+	//	eInd += 6;
+	//	ind += 4;
+	//}
+	///* Face -X */
+	//if((block->mViewFlags & FACE_LEFT) == FACE_LEFT) {
+	//	block->getTextureCoords( FACE_LEFT, x, y );
+	//	GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 
-		data[ind + 0] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
-								-1.0f, 0.0f, 0.0f,
-								rect.x + rect.w, rect.y );
-		data[ind + 1] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
-								-1.0f, 0.0f, 0.0f,
-								rect.x + rect.w, rect.y + rect.h );
-		data[ind + 2] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
-								-1.0f, 0.0f, 0.0f,
-								rect.x, rect.y + rect.h );
-		data[ind + 3] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() + 1.0f, // Coordinates
-								-1.0f, 0.0f, 0.0f,
-								rect.x, rect.y );
-		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
-		edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
-		eInd += 6;
-		ind += 4;
-	}
+	//	data[ind + 0] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
+	//							-1.0f, 0.0f, 0.0f,
+	//							rect.x + rect.w, rect.y );
+	//	data[ind + 1] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
+	//							-1.0f, 0.0f, 0.0f,
+	//							rect.x + rect.w, rect.y + rect.h );
+	//	data[ind + 2] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
+	//							-1.0f, 0.0f, 0.0f,
+	//							rect.x, rect.y + rect.h );
+	//	data[ind + 3] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() + 1.0f, // Coordinates
+	//							-1.0f, 0.0f, 0.0f,
+	//							rect.x, rect.y );
+	//	edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
+	//	edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
+	//	eInd += 6;
+	//	ind += 4;
+	//}
 }
 
 void Renderer::render(double dt, World* world)

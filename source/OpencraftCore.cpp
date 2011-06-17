@@ -218,6 +218,7 @@ World* OpencraftCore::getWorld()
 
 Character* OpencraftCore::createCharacter()
 {
+	Util::log("Size Of Block: " + Util::toString(sizeof BaseBlock));
 	if( mPlayer == NULL )
 		mPlayer = new Character();
 	mPlayer->setPosition( Vector3( 0.f, 150.f, 0.f )  );

@@ -7,7 +7,6 @@
 
 BaseBlock::BaseBlock()
 : mDataFlags( 0 ),
-mViewFlags(0),
 mChunk( NULL )
 {
 }
@@ -31,16 +30,27 @@ void BaseBlock::_setChunk( WorldChunk* chnk )
 	mChunk = chnk;
 }
 
-unsigned short BaseBlock::getX() {
+short BaseBlock::getX() {
 	return (mDataFlags & BMASK_XPOS);
 }
 
-unsigned short BaseBlock::getY() {
+short BaseBlock::getY() {
 	return ((mDataFlags & BMASK_YPOS)>>8);
 }
 
-unsigned short BaseBlock::getZ() {
+short BaseBlock::getZ() {
 	return ((mDataFlags & BMASK_ZPOS)>>4);
+}
+
+void BaseBlock::updateVisFlags(unsigned int flags)
+{
+	mDataFlags = (mDataFlags & ~BMASK_VISFLAGS) | (mDataFlags & ~(FACE_ALL<<15));
+	mDataFlags = mDataFlags | (flags<<15);
+}
+
+unsigned short BaseBlock::getVisFlags()
+{
+	return ((mDataFlags & BMASK_VISFLAGS)>>15);
 }
 
 void BaseBlock::getTextureCoords( short face, short &x, short &y )
@@ -64,22 +74,11 @@ void BaseBlock::setPosition( const Vector3& vec)
 void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges)
 {
 	short x = 0, y = 0;
-	this->vertexIndex = ind;
 
-	// Calculate the UVs based on visibility.
-	/*float y = 0.f;
-	for( size_t f = 0; f < 6; f++ ) {
-		if( (block->mViewFlags & (1<<f)) == (1<<f) ) 
-			y += 0.0625f;
-	}
-
-	rect.x = 0;
-	rect.w = 0.0625f;
-	rect.y = y;
-	rect.h = 0.0625f;*/
+	short visFlags = getVisFlags();
 
 	/* Face -Z */
-	if((this->mViewFlags & FACE_BACK) == FACE_BACK ) {
+	if((visFlags & FACE_BACK) == FACE_BACK ) {
 		this->getTextureCoords( FACE_BACK, x, y );
 		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 
@@ -101,7 +100,7 @@ void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge*
  		ind += 4;
 	}
 	/* Face +Z */
-	if((this->mViewFlags & FACE_FORWARD) == FACE_FORWARD ) {
+	if((visFlags & FACE_FORWARD) == FACE_FORWARD ) {
 		this->getTextureCoords( FACE_FORWARD, x, y );
 		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 
@@ -123,7 +122,7 @@ void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge*
 		ind += 4;
 	}
 	/* Face +X */
-	if((this->mViewFlags & FACE_RIGHT) == FACE_RIGHT) {
+	if((visFlags & FACE_RIGHT) == FACE_RIGHT) {
 		this->getTextureCoords( FACE_RIGHT, x, y );
 		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 
@@ -145,7 +144,7 @@ void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge*
 		ind += 4;
 	}
 	/* Face -Y */
-	if((this->mViewFlags & FACE_BOTTOM) == FACE_BOTTOM) {
+	if((visFlags & FACE_BOTTOM) == FACE_BOTTOM) {
 		this->getTextureCoords( FACE_BOTTOM, x, y );
 		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 
@@ -167,7 +166,7 @@ void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge*
 		ind += 4;
 	}
 	/* Face +Y */
-	if((this->mViewFlags & FACE_TOP) == FACE_TOP) {
+	if((visFlags & FACE_TOP) == FACE_TOP) {
 		this->getTextureCoords( FACE_TOP, x, y );
 		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 
@@ -189,7 +188,7 @@ void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge*
 		ind += 4;
 	}
 	/* Face -X */
-	if((this->mViewFlags & FACE_LEFT) == FACE_LEFT) {
+	if((visFlags & FACE_LEFT) == FACE_LEFT) {
 		this->getTextureCoords( FACE_LEFT, x, y );
 		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 
