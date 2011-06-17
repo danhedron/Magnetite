@@ -8,10 +8,12 @@ class StoneBlock : public BaseBlock
 protected:
 	
 public:
-	StoneBlock(long x = 0, long y = 0, long z = 0);
+	StoneBlock();
 	~StoneBlock(void);
 
 	std::string getType();
+
+	void getTextureCoords( short face, short &x, short &y );
 
 	void created();
 	void hit();

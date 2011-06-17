@@ -3,22 +3,22 @@
 #include "TextureManager.h"
 #include "Renderer.h"
 #include "WorldChunk.h"
+#include <string>
 
-BaseBlock::BaseBlock(long x, long y, long z)
-: mDamage( 0 ),
-mX( x ),
-mY( y ),
-mZ( z ),
+BaseBlock::BaseBlock()
+: mDataFlags( 0 ),
 mViewFlags(0),
-mBlockX(0),
-mBlockY(0),
 mChunk( NULL )
 {
-	
 }
 
 BaseBlock::~BaseBlock(void)
 {
+}
+
+void BaseBlock::_setPosition( unsigned short x, unsigned  short y, unsigned short z)
+{
+	mDataFlags = ( x | (z<<4) | (y<<8) );
 }
 
 void BaseBlock::connectedChange( short face )
@@ -31,37 +31,29 @@ void BaseBlock::_setChunk( WorldChunk* chnk )
 	mChunk = chnk;
 }
 
-long BaseBlock::getX() {
-	return mX;
+unsigned short BaseBlock::getX() {
+	return (mDataFlags & BMASK_XPOS);
 }
 
-long BaseBlock::getY() {
-	return mY;
+unsigned short BaseBlock::getY() {
+	return ((mDataFlags & BMASK_YPOS)>>8);
 }
 
-long BaseBlock::getZ() {
-	return mZ;
-}
-
-void BaseBlock::texture(int x, int y)
-{
-	mBlockX = x;
-	mBlockY = y;
+unsigned short BaseBlock::getZ() {
+	return ((mDataFlags & BMASK_ZPOS)>>4);
 }
 
 void BaseBlock::getTextureCoords( short face, short &x, short &y )
 {
-	x = mBlockX;
-	y = mBlockY;
+	x = 0;
+	y = 0;
 }
 
 void BaseBlock::setPosition( long x, long y, long z )
 {
 	if( mChunk )
 		mChunk->_blockMoved( this, x, y, z );
-	mX = x;
-	mY = y;
-	mZ = z;
+	_setPosition(x,y,z);
 }
 
 void BaseBlock::setPosition( const Vector3& vec)

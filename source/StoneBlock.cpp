@@ -4,10 +4,9 @@
 //REGISTER_BLOCK_TYPE( "stone", StoneBlock )
 GenericBlockFactory<StoneBlock> stoneFactory("stone");
 
-StoneBlock::StoneBlock(long x, long y, long z)
+StoneBlock::StoneBlock()
 : BaseBlock()
 {
-	texture(1,0);
 }
 
 StoneBlock::~StoneBlock(void)
@@ -23,6 +22,13 @@ void StoneBlock::hit()
 {
 
 }
+
+void StoneBlock::getTextureCoords( short face, short &x, short &y )
+{
+	x = 1;
+	y = 0;
+}
+
 
 std::string StoneBlock::getType()
 {

@@ -23,6 +23,8 @@
 typedef std::vector<std::string> stringvector;
 
 class BaseBlock;
+typedef BaseBlock* BlockPtr;
+typedef BlockPtr* BlockArray;
 typedef std::map<size_t,BaseBlock*> BlockList;
 typedef std::pair<const size_t,BaseBlock*> BlockPosPair;
 //typedef *BaseBlock[] BlockList;

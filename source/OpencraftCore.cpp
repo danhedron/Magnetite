@@ -194,8 +194,6 @@ void OpencraftCore::newWorld( std::string name )
 	unloadWorld();
 
 	mWorld = new World();
-	// Creates a testing world for now.
-	mWorld->createWorld();
 	createCharacter();
 }
 

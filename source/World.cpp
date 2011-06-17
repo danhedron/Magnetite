@@ -23,7 +23,7 @@ void World::createWorld()
 {
 	createSky(200);
 	//Create some testing chunks
-	createTestChunks( 1 );
+	createTestChunks( 5 );
 }
 
 void World::createTestChunks( int size )
@@ -93,34 +93,10 @@ void World::update( float dt )
 	if( mSky != NULL )
 		mSky->update( dt );
 
-	// Updated paging
-	Vector3 PagingCenter = worldToChunks( mPagingCamera->getPosition() );
-	int LoadedArea = 1;
-	if( mPagingCamera != NULL ) {
-		for( int x = PagingCenter.x - LoadedArea; x < PagingCenter.x + LoadedArea; x++ ) {
-			for( int z = PagingCenter.z - LoadedArea; z < PagingCenter.z + LoadedArea; z++ ) {
-				for( int y = PagingCenter.y - LoadedArea; y < PagingCenter.y + LoadedArea; y++ ) {
-					if( getChunk( x, y, z ) == NULL ) {
-						//Util::log("Activating Chunk: " + Util::toString( x ) + ", " + Util::toString( y ) + ", "  + Util::toString( z ) );
-						activateChunk( x, y, z );
-					}
-				}
-			}
-		}
-
-	}
-
 	for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
-		int dX = abs( (*it)->getX() - (PagingCenter.x) );
-		int dY = abs( (*it)->getY() - (PagingCenter.y) );
-		int dZ = abs( (*it)->getZ() - (PagingCenter.z) );
-		if( dX > LoadedArea || dY > LoadedArea || dZ > LoadedArea ) {
-			deativateChunk( (*it)->getX(),  (*it)->getY(),  (*it)->getZ() );
-			break;
-		}
 		(*it)->update(dt);
-		
 	}
+
 	for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
 		(*it)->requestGenerate();
 	}

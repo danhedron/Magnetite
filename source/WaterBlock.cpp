@@ -8,12 +8,11 @@
 //REGISTER_BLOCK_TYPE( "stone", StoneBlock )
 GenericBlockFactory<WaterBlock> waterFactory("water");
 
-WaterBlock::WaterBlock(long x, long y, long z)
+WaterBlock::WaterBlock()
 : BaseBlock(),
 mFluidLevel( 100.f ),
 mIsNew( true )
 {
-	texture(13,12);
 }
 
 WaterBlock::~WaterBlock(void)
@@ -42,7 +41,8 @@ bool WaterBlock::isSolid()
 
 void WaterBlock::getTextureCoords( short face, short &x, short &y )
 {
-	BaseBlock::getTextureCoords( face, x, y );
+	x = 13;
+	y = 12;
 }
 
 void WaterBlock::connectedChange( short face )
@@ -86,7 +86,7 @@ void WaterBlock::balanceFluid( BaseBlock* block, float dt )
 	}
 }
 
-void WaterBlock::flowToBlock(short x, short y, short z, float dt)
+void WaterBlock::flowToBlock(unsigned short x, unsigned short y, unsigned short z, float dt)
 {
 	BaseBlock* t = mChunk->getBlockAt( x, y, z );
 	/* Check -Z */
@@ -112,7 +112,7 @@ void WaterBlock::flowToBlock(short x, short y, short z, float dt)
 				float over = ((mFluidLevel / 2.f) + water->getFluidLevel()) - 100.f;
 				water->setFluidLevel( 100.f );
 				WaterBlock* block = new WaterBlock();
-				block->setPosition( x, y, z );
+				block->setPosition(x,y,z);
 				changeFluidLevel( -mFluidLevel / 2.f );
 				block->setFluidLevel( over );
 				mChunk->addBlockToChunk( block );
@@ -121,7 +121,7 @@ void WaterBlock::flowToBlock(short x, short y, short z, float dt)
 		}
 
 		WaterBlock* block = new WaterBlock();
-		block->setPosition( x, y, z );
+		block->setPosition(x,y,z);
 		float dif = mFluidLevel;
 		dif = std::min(dif, FLOW_MAX * dt);
 		changeFluidLevel( -dif / 2 );
@@ -148,9 +148,9 @@ void WaterBlock::flow( float dt )
 		return;
 
 	// If there is nothing beneath us, fall
-	BaseBlock* t = mChunk->getBlockAt( mX, mY - 1, mZ );
-	if( t == NULL && mY > 0 ) {
-		this->setPosition( mX, mY - 1, mZ );
+	BaseBlock* t = mChunk->getBlockAt( getX(), getY() - 1, getZ() );
+	if( t == NULL && getY() > 0 ) {
+		this->setPosition( getX(), getY() - 1, getZ() );
 	}
 	else if( t->getType() == this->getType() )
 	{
@@ -170,13 +170,13 @@ void WaterBlock::flow( float dt )
 	}
 
 	/* Check -Z */
-	flowToBlock( mX, mY, mZ - 1, dt);
+	flowToBlock( getX(), getY(), getZ() - 1, dt);
 	/* Check +Z */
-	flowToBlock( mX, mY, mZ + 1, dt );
+	flowToBlock( getX(), getY(), getZ() + 1, dt );
 	/* Check +X */
-	flowToBlock( mX + 1, mY, mZ, dt );
+	flowToBlock( getX() + 1, getY(), getZ(), dt );
 	/* Check -X */
-	flowToBlock( mX - 1, mY, mZ, dt );
+	flowToBlock( getX() - 1, getY(), getZ(), dt );
 }
 
 void WaterBlock::hit()

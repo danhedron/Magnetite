@@ -5,8 +5,8 @@
 Character::Character( void )
 {
 	setHeight( 1.9f );
-	setMoveSpeed( 1.2f );
-	setSprintSpeed( 3.f );
+	setMoveSpeed( 2.f );
+	setSprintSpeed( 4.f );
 	enableSprint( false );
 	enableFlying( false );
 }

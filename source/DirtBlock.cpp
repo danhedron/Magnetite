@@ -7,7 +7,6 @@ GenericBlockFactory<DirtBlock> dirtFactory("dirt");
 DirtBlock::DirtBlock(long x, long y, long z)
 : BaseBlock()
 {
-	texture(2,0);
 }
 
 DirtBlock::~DirtBlock(void)
@@ -23,6 +22,14 @@ void DirtBlock::hit()
 {
 
 }
+
+
+void DirtBlock::getTextureCoords( short face, short &x, short &y )
+{
+	x = 2;
+	y = 0;
+}
+
 
 std::string DirtBlock::getType()
 {
