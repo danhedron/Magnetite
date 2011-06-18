@@ -15,6 +15,7 @@ public:
 	bool isFluid();
 	bool isOpaque();
 	bool isSolid();
+	bool isThinking();
 
 	std::string getType();
 
