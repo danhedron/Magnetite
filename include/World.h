@@ -1,6 +1,7 @@
 #ifndef _WORLD_H_
 #define _WORLD_H_
 #include "prerequisites.h"
+#include "WorldNode.h"
 
 /**
  * @struct Raycast result structure.
@@ -51,10 +52,13 @@ class Sky;
 class ChunkGenerator;
 class Camera;
 
+typedef std::vector<WorldNode*> NodeList;
+
 class World
 {
 protected:
 	ChunkList	mChunks;
+	NodeList	mQuadTrees;
 	Sky*		mSky;
 	ChunkGenerator* mGenerator;
 	Camera*		mPagingCamera;
@@ -94,6 +98,22 @@ public:
 	 *	Converts world coordinates into block offset ( in the chunk at that location )
 	 */
 	static Vector3 worldToBlock( const Vector3& vec );
+
+	/**
+	 * Returns the top-level Quadtree node at the given coordinates or NULL if it's not in memory
+	 * @param Vector3 pos The position to use
+	 * @param safe In the case that the leaf doesn't exist and this is true, the leaf will be created for you.
+	 */
+	WorldNode* getWorldNode( const Vector3& pos, bool safe = false );
+
+	/**
+	 * Returns the chunk node at the given position
+	 */
+	WorldNode* getChunkNode( const Vector3& pos, bool safe = false );
+	void _populateTree( WorldNode* parent, const NodeIndex &ppos, int depth );
+
+	std::string printTree();
+	std::string _printTree(WorldNode* node, int depth);
 
 	/**
 	 * Creates a chunk at the given coordinates and fills it with test data

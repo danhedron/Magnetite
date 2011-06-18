@@ -6,6 +6,8 @@
 #include "StoneBlock.h"
 #include "ChunkGenerator.h"
 
+#define NODE_SIZE ((CHUNK_HEIGHT/CHUNK_WIDTH))
+
 World::World()
 : mSky( NULL ),
 mPagingCamera( NULL )
@@ -14,9 +16,24 @@ mPagingCamera( NULL )
 	mGenerator = new ChunkGenerator(1024);
 }
 
+void _deleteTree( WorldNode* node )
+{
+	for( int c = 0; c < 4; c++ ) {
+		if( node->children[c]->isChunk )
+			delete node->children[c];
+		else
+			_deleteTree(node->children[c]);
+	}
+	delete node;
+}
+
 World::~World()
 {
 
+	for( NodeList::iterator it = mQuadTrees.begin(); it != mQuadTrees.end(); ++it) {
+		WorldNode* node = *it;
+		_deleteTree(node);
+	}
 }
 
 void World::createWorld()
@@ -63,12 +80,134 @@ WorldChunk* World::getChunk(const long x, const long y, const long z)
 	return NULL;
 }
 
+void World::_populateTree(WorldNode* parent, const NodeIndex& ppos, int depth )
+{
+	if(depth > 8 ) return; // End of recursion
+
+	NodeIndex ind = ppos;
+	WorldNode* node = new WorldNode();
+	node->index = ind;
+	node->isChunk = (depth==8 ? true : false);
+	_populateTree(node, ind, depth*2);
+	parent->children[0] = node;
+
+	NodeIndex ind2 = { ppos.x + NODE_SIZE/depth, ppos.y, ppos.z };
+	node = new WorldNode();
+	node->index = ind2;
+	node->isChunk = (depth==8 ? true : false);
+	_populateTree(node, ind2, depth*2);
+	parent->children[1] = node;
+
+	NodeIndex ind3 = { ppos.x + NODE_SIZE/depth, ppos.y, ppos.z + NODE_SIZE/depth };
+	node = new WorldNode();
+	node->index = ind3;
+	node->isChunk = (depth==8 ? true : false);
+	_populateTree(node, ind3, depth*2);
+	parent->children[2] = node;
+	
+	NodeIndex ind4 = { ppos.x, ppos.y, ppos.z + NODE_SIZE/depth };
+	node = new WorldNode();
+	node->index = ind4;
+	node->isChunk = (depth==8 ? true : false);
+	_populateTree(node, ind4, depth*2);
+	parent->children[3] = node;
+}
+
+WorldNode* World::getWorldNode( const Vector3& pos, bool safe )
+{
+	Vector3 nodepos = Vector3( (int)(floor(pos.x/NODE_SIZE))*NODE_SIZE,  (int)(pos.y),  (int)(floor(pos.z/NODE_SIZE))*NODE_SIZE );
+	NodeIndex index = { nodepos.x, nodepos.y, nodepos.z };
+	for( NodeList::iterator it = mQuadTrees.begin(); it != mQuadTrees.end(); ++it) {
+		if( (*it)->index == index ) return *it;
+	}
+	if(!safe) { 
+		return NULL;
+	}
+
+
+	WorldNode* node = new WorldNode();
+	node->isChunk = false;
+	node->index = index;
+	mQuadTrees.push_back(node);
+
+	// Populate tree
+	_populateTree(node, index, 2);
+
+	return node;
+}
+
+WorldNode* World::getChunkNode( const Vector3& pos, bool safe )
+{
+	// Find root level node.
+	WorldNode* node = getWorldNode( pos, safe );
+	Vector3 rootpos = Vector3( (int)(floor(pos.x/NODE_SIZE))*NODE_SIZE,  (int)(pos.y),  (int)(floor(pos.z/NODE_SIZE))*NODE_SIZE );
+
+	for( int i = 2; i <= 8; i*=2 ) {
+		int depthSize = NODE_SIZE/i;
+		Vector3 nodepos = Vector3( (int)(floor(pos.x/depthSize))*depthSize,  (int)(pos.y), (int)(floor(pos.z/depthSize))*depthSize );
+		NodeIndex index = { nodepos.x, nodepos.y, nodepos.z };
+		WorldNode* child;
+		for( int c = 0; c < 4; c++ ) {
+			child = node->children[c];
+			if( child->index == index ) {
+				if( child->isChunk ) return child;
+				else { node = child; break; }
+			}
+		}
+	}
+	
+	return NULL;
+}
+
+std::string World::printTree()
+{
+	std::string buff = "";
+	for( NodeList::iterator it = mQuadTrees.begin(); it != mQuadTrees.end(); ++it) {
+		buff += _printTree(*it, 0);
+	}
+	return buff;
+}
+
+std::string World::_printTree(WorldNode* node, int depth)
+{
+	std::string buff = "";
+	for(int i = 0; i < depth; i++ ) { buff += "\t"; }
+	if( node->isChunk )
+		buff += "[Chunk]";
+	else
+		buff += "[Node]";
+	buff += " " + Util::toString(node->index.x) + " " + Util::toString(node->index.y) + " " + Util::toString(node->index.z);
+	if( !node->isChunk )
+		buff += " =>";
+	else {
+		std::stringstream ss;
+		ss << (size_t)node->children[0];
+		buff += " 0x" + ss.str();
+
+	}
+	buff += "\n";
+	if(!node->isChunk) {
+		for(int c = 0; c < 4; c++) {
+			for(int i = 0; i < depth; i++ ) { buff += "\t"; }
+			if( node->children[0] != NULL )
+			buff += _printTree(node->children[c], depth+1);
+		}
+	}
+	return buff;
+}
+
 void World::createChunk(long x, long y, long z)
 {
 	Util::log( "Creating Chunk: " + Util::toString(x) + "," + Util::toString(y) + "," + Util::toString(z) );
 	WorldChunk* newChunk = new WorldChunk(x, y, z);
 	mGenerator->fillChunk( newChunk );
 	mChunks.push_back(newChunk);
+	WorldNode* node = getChunkNode(Vector3(x,y,z), true);
+	if( node == NULL ) 
+		Util::log( "NULL node" );
+	else
+		node->children[0] = (WorldNode*)newChunk;
+	
 	Util::log( "Chunk Created" );
 }
 
@@ -123,6 +262,12 @@ void World::removeChunk(long x, long y, long z)
 			Util::log("Deleted Chunk");
 			delete (*it);
 			mChunks.erase( it );
+
+			WorldNode* node = getChunkNode(Vector3(x,y,z), true);
+			if( node == NULL ) 
+				Util::log( "NULL node" );
+			else
+				node->children[0] = NULL;
 			return;
 		}
 	}

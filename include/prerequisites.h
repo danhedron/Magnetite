@@ -36,4 +36,4 @@ typedef std::vector<WorldChunk*> ChunkList;
 #define CHUNK_HEIGHT 128
 #define CHUNK_SIZE CHUNK_WIDTH*CHUNK_WIDTH*CHUNK_HEIGHT
 
-#define BLOCK_INDEX( block ) block->getZ() * CHUNK_WIDTH * CHUNK_HEIGHT + block->getY() * CHUNK_WIDTH + block->getX()
+#define BLOCK_INDEX( block ) (block->getZ() * CHUNK_WIDTH * CHUNK_HEIGHT + block->getY() * CHUNK_WIDTH + block->getX())
