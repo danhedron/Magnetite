@@ -57,6 +57,11 @@ public:
 	virtual bool isSolid() { return true; }
 
 	/**
+	 * Returns true if this block needs to think
+	 */
+	virtual bool isThinking() { return false; }
+
+	/**
 	 * Called when a nearby block changes.
 	 * @param face The direction of the changed block.
 	 */

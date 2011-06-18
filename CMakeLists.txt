@@ -75,6 +75,7 @@ set(OPENCRAFT_HEADERS
 	include/ChunkGenerator.h
 	include/ChunkLoader.h
 	include/World.h
+	include/WorldNode.h
 	include/WorldChunk.h
 	include/TextureManager.h
 	include/util.h
