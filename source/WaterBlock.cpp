@@ -39,6 +39,12 @@ bool WaterBlock::isSolid()
 	return false;
 }
 
+bool WaterBlock::isThinking()
+{
+	return true;
+}
+
+
 void WaterBlock::getTextureCoords( short face, short &x, short &y )
 {
 	x = 13;

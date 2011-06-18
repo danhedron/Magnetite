@@ -96,6 +96,9 @@ void WorldChunk::addBlockToChunk(BaseBlock* block)
 	}
 	mBlockData[ k ] = block;
 
+	if(block->isThinking())
+		mThinkingBlocks.insert( BlockList::value_type( k, block ) );
+
 	mHasChanged = true;
 	mHasGenerated = false;
 }
@@ -137,9 +140,15 @@ void WorldChunk::removeBlockAt(long x, long y, long z)
 	long k = z * CHUNK_WIDTH * CHUNK_HEIGHT + y * CHUNK_WIDTH + x;
 	BlockPtr it = mBlockData[ k ];
 	if( it != NULL )  {
+		if( it->isThinking() ) {
+			BlockList::iterator thinker = mThinkingBlocks.find( k );
+			if( thinker != mThinkingBlocks.end() )
+				mThinkingBlocks.erase( thinker );
+		}
 		delete it;
 		_blockVisible( it, false );
 		mBlockData[ k ] = NULL;
+
 	}
 	mHasChanged = true;
 	mHasGenerated = false;
@@ -355,11 +364,11 @@ void WorldChunk::update( float dt )
 {
 	while( mUpdateTimer >= 0.1f ) {
 		mUpdateTimer -= 0.1f;
-		for( size_t i = 0; i < CHUNK_SIZE; i++ ) {
-			if( mBlockData[i] == NULL ) continue;
-			BlockPtr b = mBlockData[i];
-			if( b->isFluid() ) {
-				((WaterBlock*)b)->flow( 0.1f );
+
+		for( BlockList::iterator block = mThinkingBlocks.begin(); block != mThinkingBlocks.end(); ++block )
+		{
+			if( block->second->isFluid() ) {
+				((WaterBlock*)(block->second))->flow( 0.1f );
 			}
 		}
 	}

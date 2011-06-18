@@ -12,6 +12,7 @@ class WorldChunk
 protected:
 	BlockArray mBlockData;
 	BlockList mVisibleBlocks; //< Used in Rendering
+	BlockList mThinkingBlocks; //< Used in updates
 	BlockList mShouldDelete; //< Used to allow blocks to remove themselves
 	long mX;
 	long mY;
