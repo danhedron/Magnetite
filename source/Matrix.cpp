@@ -40,6 +40,14 @@ void Matrix4::reset()
 	m33 = &matrix[15];
 }
 
+void Matrix4::zero()
+{
+	for(int i = 0; i < 16; i++)
+	{
+			matrix[i]=0;
+	}
+}
+
 std::string Matrix4::toString()
 {
 	std::stringstream ss;

@@ -16,16 +16,13 @@ Camera::~Camera(void)
 
 Matrix4 Camera::getMatrix()
 {
-	Matrix4 translated;
-	glPushMatrix();
-	glLoadIdentity();
-	glRotatef( -mPitch, 1, 0, 0);
-	glRotatef( mYaw, 0, 1, 0);
-	glTranslatef( -mPosition.x, -mPosition.y, -mPosition.z );
-	glGetFloatv(GL_MODELVIEW_MATRIX, translated.matrix);
-	glPopMatrix();
+	Matrix4 mat;
+	mat = mat * Matrix4::rotateX( 3.141f + (mPitch*3.141f)/180  );
+	//mat = mat * Matrix4::rotateY( -(3.141f/180.f)*mYaw  );
+	Util::log( Util::toString( mYaw ) );
+	//mat.translate( -mPosition );
 
-	return translated;
+	return mat;
 }
 
 Matrix4 Camera::getOrientationMatrix()
@@ -95,6 +92,10 @@ void Camera::setPitch( float p )
 void Camera::setYaw( float y )
 {
 	mYaw = y;
+	while( mYaw > 360 )
+		mYaw -= 360;
+	while( mYaw < -360 )
+		mYaw += 360;
 	mViewFrustum.updatePlanes();
 }
 

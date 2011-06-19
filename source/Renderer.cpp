@@ -353,7 +353,7 @@ void Renderer::_renderNode(WorldNode *node, int depth)
 	float nodeWorldSize = NODE_SIZE/pow(2.f, depth);
 
 	Vector3 min = Vector3( node->index.x * CHUNK_WIDTH, node->index.y * CHUNK_HEIGHT, node->index.z * CHUNK_WIDTH );
-	Vector3 max = Vector3( node->index.x * CHUNK_WIDTH + nodeWorldSize, node->index.y * CHUNK_HEIGHT + CHUNK_HEIGHT, node->index.z * CHUNK_WIDTH + nodeWorldSize );
+	Vector3 max = Vector3( min.x + nodeWorldSize, min.y + CHUNK_HEIGHT, min.z + nodeWorldSize );
 
 	if( mCamera->getFrustum().intersectsAABB( min, max ) == Frustum::OUTSIDE ) {
 		// This node is outside of the view, escape

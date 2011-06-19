@@ -37,6 +37,7 @@ public:
 	std::string toString();
 
 	void reset();
+	void zero();
 
 	static Matrix4 rotateX( float angle );
 	static Matrix4 rotateY( float angle );
