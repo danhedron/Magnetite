@@ -71,7 +71,7 @@ Matrix4 Frustum::getPerspective()
 
 void Frustum::updatePerspective()
 {
-	float tany = tan(mFov * 0.5f);
+	float tany = tan( mFov * 0.5f);
 	float tanx = tany * mAspect;
 
 	float half_w = tanx * mNear;
@@ -96,7 +96,7 @@ void Frustum::updatePerspective()
 	q = - (mFar+mNear) * invD;
 	qn = -2 * (mFar * mNear) * invD;
 
-	mPerspective.reset();
+	mPerspective.zero();
 	*mPerspective.m00 = A;
 	*mPerspective.m20 = C;
 	*mPerspective.m11 = B;
@@ -148,6 +148,7 @@ void Frustum::updatePlanes()
 
 int Frustum::intersectsAABB(const Vector3 &mins, const Vector3 &maxs)
 {
+	updatePlanes();
 	Vector3 halfSize = Vector3(maxs) - Vector3(mins);
 	Vector3 center = Vector3(mins) + halfSize;
 
