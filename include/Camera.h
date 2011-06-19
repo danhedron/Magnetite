@@ -2,6 +2,7 @@
 #define _CAMERA_H_
 #include "prerequisites.h"
 #include "Matrix.h"
+#include "Frustum.h"
 
 class Camera
 {
@@ -9,11 +10,15 @@ protected:
 	float mYaw;
 	float mPitch;
 	Vector3 mPosition;
+
+	Frustum mViewFrustum;
 public:
 	Camera(void);
 	~Camera(void);
 
 	Matrix4 getMatrix();
+	Matrix4 getOrientationMatrix();
+	Frustum& getFrustum();
 
 	void setPosition(const Vector3& v);
 	Vector3 getPosition();

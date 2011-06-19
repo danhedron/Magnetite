@@ -5,6 +5,8 @@ Camera::Camera(void)
 : mPitch ( 0 ),
 mYaw( 0 )
 {
+	mViewFrustum.setCamera(this);
+	setPosition(Vector3());
 }
 
 Camera::~Camera(void)
@@ -14,11 +16,30 @@ Camera::~Camera(void)
 
 Matrix4 Camera::getMatrix()
 {
+	Matrix4 translated;
+	glPushMatrix();
+	glLoadIdentity();
+	glRotatef( -mPitch, 1, 0, 0);
+	glRotatef( mYaw, 0, 1, 0);
+	glTranslatef( -mPosition.x, -mPosition.y, -mPosition.z );
+	glGetFloatv(GL_MODELVIEW_MATRIX, translated.matrix);
+	glPopMatrix();
+
+	return translated;
+}
+
+Matrix4 Camera::getOrientationMatrix()
+{
 	Matrix4 matX = Matrix4::rotateX( 3.141f + (mPitch*3.141f)/180 );
-	//Matrix4 matY = Matrix4::rotateY( -(mYaw*3.141f)/180 );
-	Matrix4 rotated = matX; //;
+	Matrix4 matY = Matrix4::rotateY( -(mYaw*3.141f)/180 );
+	Matrix4 rotated = (matX * matY);
 
 	return rotated;
+}
+
+Frustum& Camera::getFrustum()
+{
+	return mViewFrustum;
 }
 
 Vector3 Camera::getForward() 
@@ -47,6 +68,7 @@ void Camera::applyMatrix( bool rot, bool pos )
 void Camera::setPosition(const Vector3 &v)
 {
 	mPosition = v;
+	mViewFrustum.updatePlanes();
 }
 
 Vector3 Camera::getPosition()
@@ -67,11 +89,13 @@ void Camera::pitch( float amt )
 void Camera::setPitch( float p )
 {
 	mPitch = std::max<float>( std::min<float>( p, 90 ), -90 );
+	mViewFrustum.updatePlanes();
 }
 
 void Camera::setYaw( float y )
 {
 	mYaw = y;
+	mViewFrustum.updatePlanes();
 }
 
 float Camera::getPitch()

@@ -221,6 +221,7 @@ Character* OpencraftCore::createCharacter()
 	Util::log("Size Of Block: " + Util::toString(sizeof BaseBlock));
 	if( mPlayer == NULL )
 		mPlayer = new Character();
+	mWindow.SetSize(mWindow.GetWidth(), mWindow.GetHeight());
 	mPlayer->setPosition( Vector3( 0.f, 150.f, 0.f )  );
 	if( mWorld )
 		mWorld->setPagingCamera( mPlayer->getCamera() );
