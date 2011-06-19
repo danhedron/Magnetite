@@ -52,8 +52,6 @@ class Sky;
 class ChunkGenerator;
 class Camera;
 
-typedef std::vector<WorldNode*> NodeList;
-
 class World
 {
 protected:
@@ -114,6 +112,11 @@ public:
 
 	std::string printTree();
 	std::string _printTree(WorldNode* node, int depth);
+
+	/**
+	 * Returns the list of top-level nodes
+	 */
+	NodeList& getTopNodes();
 
 	/**
 	 * Creates a chunk at the given coordinates and fills it with test data

@@ -6,8 +6,6 @@
 #include "StoneBlock.h"
 #include "ChunkGenerator.h"
 
-#define NODE_SIZE ((CHUNK_HEIGHT/CHUNK_WIDTH))
-
 World::World()
 : mSky( NULL ),
 mPagingCamera( NULL )
@@ -78,6 +76,11 @@ WorldChunk* World::getChunk(const long x, const long y, const long z)
 		}
 	}
 	return NULL;
+}
+
+NodeList& World::getTopNodes()
+{
+	return mQuadTrees;
 }
 
 void World::_populateTree(WorldNode* parent, const NodeIndex& ppos, int depth )

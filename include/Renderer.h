@@ -104,6 +104,12 @@ public:
 	void render( double dt, World* world );
 
 	/**
+	 * Finds out if the given node is in the view frustum, and if so continues to children or draws the chunk on the node
+	 */
+	void _renderNode( WorldNode* node, int depth  );
+	void _renderChunk( WorldChunk* chunk );
+
+	/**
 	 * Draws debug statistics onto the screen
 	 */
 	void drawStats( double dt, size_t chunkCount, World* world );

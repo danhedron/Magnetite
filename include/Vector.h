@@ -19,8 +19,12 @@ public:
 	Vector3 operator* ( float scal );
 	Vector3 operator/ ( float scal );
 
+	Vector3 operator* ( Vector3& rhs );
+
 	float length();
 	Vector3 normalize();
+
+	float dotProduct( const Vector3& rhs );
 
 	float smallestDimension();
 	float biggestDimension();

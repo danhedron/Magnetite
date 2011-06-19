@@ -62,7 +62,13 @@ void Renderer::resizeViewport(size_t x, size_t y, size_t w, size_t h)
 	float aspect = width/height;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(90.f, aspect, 0.1f, 500.f);
+	if(mCamera) {
+		mCamera->getFrustum().setAspectRatio(aspect);
+		glMultMatrixf(mCamera->getFrustum().getPerspective().matrix);
+	}
+	else {
+		gluPerspective(90.f, aspect, 0.1f, 500.f);
+	}
 	Util::log( "Window Resized: " + Util::toString(w) + "x" + Util::toString(h) );
 
 }
@@ -268,7 +274,7 @@ void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvert
 	//	ind += 4;
 	//}
 }
-
+static size_t rendered;
 void Renderer::render(double dt, World* world)
 {
 	totalTime += dt;
@@ -280,8 +286,19 @@ void Renderer::render(double dt, World* world)
 
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CW);
+	rendered = 0;
 
-	std::vector<WorldChunk*> chunks = world->getChunks();
+	NodeList nodes = world->getTopNodes(); // world->getChunks();
+
+	// Testing 123
+	/*if( mCamera->getFrustum().intersectsAABB( Vector3(-1.f, 0.f, -1.f), Vector3(1.f, 128.f, 1.f) ) != Frustum::OUTSIDE )
+	{
+		Util::log("Observing Origin");
+	}
+	else
+	{
+		Util::log("Not Observing Origin");
+	}*/
 
 	GLtexture* tex = OpencraftCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/world.png");
 	if(mRenderMode == RENDER_WIRE)
@@ -295,7 +312,7 @@ void Renderer::render(double dt, World* world)
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	if( tex != 0 )
 	{
@@ -303,49 +320,11 @@ glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glBindTexture(GL_TEXTURE_2D, tex->glID);
 	}
 
-	for(std::vector<WorldChunk*>::iterator chunk = chunks.begin();
-		chunk != chunks.end();
-		++chunk)
+	for(NodeList::iterator node = nodes.begin();
+		node != nodes.end();
+		++node)
 	{
-		// Sort out view Matrix.
-		glLoadIdentity();
-		mCamera->applyMatrix();
-		//glRotatef(totalTime * 50, 1.f, 0.f, 0.f);
-		float x = (*chunk)->getX() * CHUNK_WIDTH;
-		float y = (*chunk)->getY() * CHUNK_HEIGHT;
-		float z = (*chunk)->getZ() * CHUNK_WIDTH;
-		glTranslatef(x,y,z);
-
-		//Draw VBO
-		/*glBindBufferARB(GL_ARRAY_BUFFER_ARB, chunkVbo);
-
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glVertexPointer(3, GL_FLOAT, 0,0);
-
-		if(mRenderMode == RENDER_WIRE)
-			glDrawElements(GL_LINES, chunkSize, GL_UNSIGNED_BYTE, 0);
-		else
-			glDrawElements(GL_QUADS, chunkSize, GL_UNSIGNED_BYTE, 0);
-
-		glDisableClientState(GL_VERTEX_ARRAY);
-
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);*/
-
-		if( (*chunk)->hasGenerated() ) {
-
-			GLgeometry* chunkGeom = (*chunk)->getGeometry();
-
-			glVertexPointer(3, GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].x));
-			glNormalPointer(GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].nx));
-			glTexCoordPointer(2, GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].u0));
-			glClientActiveTexture(GL_TEXTURE0);
-
-			// Draw the chunk.
-			glDrawRangeElements(GL_TRIANGLES, 0, chunkGeom->vertexCount, chunkGeom->edgeCount, GL_UNSIGNED_SHORT, chunkGeom->edgeData);
-		}
-		else {
-			Util::log("Warning: Ungenerated Chunk in render queue.");
-		}
+		_renderNode( *node, 0 );
 	}
 
 	if( tex != 0 )
@@ -362,11 +341,78 @@ glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisable(GL_CULL_FACE);
 
-	drawStats( dt, chunks.size(), world );
+	drawStats( dt, rendered, world );
 
 	drawBlockChooser( dt );
 
 	drawCrosshair( dt );
+}
+
+void Renderer::_renderNode(WorldNode *node, int depth)
+{
+	float nodeWorldSize = NODE_SIZE/pow(2.f, depth);
+
+	Vector3 min = Vector3( node->index.x * CHUNK_WIDTH, node->index.y * CHUNK_HEIGHT, node->index.z * CHUNK_WIDTH );
+	Vector3 max = Vector3( node->index.x * CHUNK_WIDTH + nodeWorldSize, node->index.y * CHUNK_HEIGHT + CHUNK_HEIGHT, node->index.z * CHUNK_WIDTH + nodeWorldSize );
+
+	if( mCamera->getFrustum().intersectsAABB( min, max ) == Frustum::OUTSIDE ) {
+		// This node is outside of the view, escape
+		return;
+	}
+
+	for( int i = 0; i < 4; i++ ) {
+		WorldNode* child = node->children[i];
+		if( child == NULL ) continue;
+		if( child->isChunk && child->children[0] != NULL )
+			_renderChunk( (WorldChunk*)child->children[0] ); // I am *So* sorry.
+		else
+			_renderNode( child, depth + 1 );
+	}
+
+}
+
+void Renderer::_renderChunk( WorldChunk* chunk )
+{
+	rendered++;
+	// Sort out view Matrix.
+	glLoadIdentity();
+	mCamera->applyMatrix();
+	//glRotatef(totalTime * 50, 1.f, 0.f, 0.f);
+	float x = chunk->getX() * CHUNK_WIDTH;
+	float y = chunk->getY() * CHUNK_HEIGHT;
+	float z = chunk->getZ() * CHUNK_WIDTH;
+	glTranslatef(x,y,z);
+
+	//Draw VBO
+	/*glBindBufferARB(GL_ARRAY_BUFFER_ARB, chunkVbo);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0,0);
+
+	if(mRenderMode == RENDER_WIRE)
+		glDrawElements(GL_LINES, chunkSize, GL_UNSIGNED_BYTE, 0);
+	else
+		glDrawElements(GL_QUADS, chunkSize, GL_UNSIGNED_BYTE, 0);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+
+	glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);*/
+
+	if( chunk->hasGenerated() ) {
+
+		GLgeometry* chunkGeom = chunk->getGeometry();
+
+		glVertexPointer(3, GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].x));
+		glNormalPointer(GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].nx));
+		glTexCoordPointer(2, GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].u0));
+		glClientActiveTexture(GL_TEXTURE0);
+
+		// Draw the chunk.
+		glDrawRangeElements(GL_TRIANGLES, 0, chunkGeom->vertexCount, chunkGeom->edgeCount, GL_UNSIGNED_SHORT, chunkGeom->edgeData);
+	}
+	else {
+		Util::log("Warning: Ungenerated Chunk in render queue. ~ Grab a developer and complain");
+	}
 }
 
 void Renderer::drawStats(double dt, size_t chunkCount, World* world)

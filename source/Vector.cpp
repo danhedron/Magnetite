@@ -40,6 +40,14 @@ Vector3 Vector3::operator *( float scal ) {
 	return Vector3(x*scal,y*scal,z*scal);
 }
 
+Vector3 Vector3::operator *( Vector3& rhs ) {
+	Vector3 res;
+	res.x = y * rhs.z - z * rhs.y;
+	res.y = z * rhs.x - x * rhs.z;
+	res.z = x * rhs.y - y * rhs.x;
+	return res;
+}
+
 Vector3 Vector3::operator /( float scal ) {
 	return Vector3(x/scal,y/scal,z/scal);
 }
@@ -54,6 +62,11 @@ float Vector3::operator[] ( int index ) {
 	if( index == 3 )
 		return w;
 	return 0;
+}
+
+float Vector3::dotProduct(const Vector3 &rhs)
+{
+	return (this->x * rhs.x) + (this->y * rhs.y) + (this->z * rhs.z);
 }
 
 float Vector3::length()
