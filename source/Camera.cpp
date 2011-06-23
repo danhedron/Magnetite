@@ -17,19 +17,19 @@ Camera::~Camera(void)
 Matrix4 Camera::getMatrix()
 {
 	Matrix4 mat;
-	mat = mat * Matrix4::rotateX( 3.141f + (mPitch*3.141f)/180  );
-	//mat = mat * Matrix4::rotateY( -(3.141f/180.f)*mYaw  );
-	Util::log( Util::toString( mYaw ) );
-	//mat.translate( -mPosition );
+	Matrix4 yaw = Matrix4::rotateY( 3.141f-(getYaw()*3.141f)/180 );
+	Matrix4 pitch = Matrix4::rotateX( (getPitch()*3.141f)/180 );
+	Matrix4 rot = yaw;//(pitch * yaw);
 
+	rot.translate( mPosition );
 	return mat;
 }
 
 Matrix4 Camera::getOrientationMatrix()
 {
-	Matrix4 matX = Matrix4::rotateX( 3.141f + (mPitch*3.141f)/180 );
-	Matrix4 matY = Matrix4::rotateY( -(mYaw*3.141f)/180 );
-	Matrix4 rotated = (matX * matY);
+	Matrix4 yaw = Matrix4::rotateY( 3.141f-(getYaw()*3.141f)/180 );
+	Matrix4 pitch = Matrix4::rotateX( (getPitch()*3.141f)/180 );
+	Matrix4 rotated = (pitch * yaw);
 
 	return rotated;
 }
@@ -41,11 +41,12 @@ Frustum& Camera::getFrustum()
 
 Vector3 Camera::getForward() 
 {
-	Matrix4 rotX = Matrix4::rotateX( 3.141f + (mPitch*3.141f)/180 );
-	Matrix4 rotY = Matrix4::rotateY( (mYaw*3.141f)/180 );
+	Matrix4 yaw = Matrix4::rotateY( 3.141f-(getYaw()*3.141f)/180 );
+	Matrix4 pitch = Matrix4::rotateX( (getPitch()*3.141f)/180 );
+	
 	Vector3 vec = Vector3(0.f, 0.f, 1.f);
-	vec = rotX * vec;
-	vec = rotY * vec;
+	vec = pitch * vec;
+	vec = yaw * vec;
 	return vec.normalize();
 }
 
@@ -117,8 +118,8 @@ void Camera::translate(const Vector3& vec )
 	//matrix = Matrix4();
 
 	Matrix4 matX = Matrix4::rotateX( (mPitch*3.141f)/180 );
-	Matrix4 matY = Matrix4::rotateY( (mYaw*3.141f)/180 );
-	f = matX * matY * vec;
+	Matrix4 matY = Matrix4::rotateY( 3.141f/2 - (mYaw*3.141f)/180 );
+	f = matY * vec;
 
 	setPosition( Vector3( f.x + pv.x, f.y + pv.y, f.z + pv.z ) );
 }

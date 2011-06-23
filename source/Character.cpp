@@ -97,7 +97,10 @@ Vector3 Character::getPosition()
 
 void Character::update(float dt)
 {
-	mPosition += ( Matrix4::rotateY( (mCamera.getYaw()*3.141f)/180 ) * mMoveVector ) * ( mSprint ? mSprintSpeed : mMoveSpeed ) * dt;
+	Matrix4 yaw = Matrix4::rotateY( -(mCamera.getYaw()*3.141f)/180 );
+	Vector3 newDir = yaw * mMoveVector;
+
+	mPosition += ( newDir * ( mSprint ? mSprintSpeed : mMoveSpeed ) * dt);
 	if( !mFlying )
 	{
 		raycast_r feetRay = getFeetCast();
