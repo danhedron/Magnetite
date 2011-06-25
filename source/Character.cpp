@@ -115,20 +115,16 @@ void Character::update(float dt)
 		feetRay.orig += Vector3(0.0f, 0.f, 0.98f);
 		gRay[3] = OpencraftCore::Singleton->getWorld()->raycastWorld( feetRay, true );
 		
-		float i0 = -1;
+		float smallestRay = 10000;
+		bool hit = false;
 		for( int i = 0; i < 4; i++ ) {
 			if( gRay[i].hit == true ) {
-				if( i0 = -1 ) {
-					i0 = gRay[i].i0 - mHeight;
-				}
-				else
-				{
-					i0 = std::min<float>(i0, gRay[i].i0 - mHeight);
-				}
+				hit = true;
+				smallestRay = std::min( smallestRay, gRay[i].i0 );
 			}
 		}
-		if( i0 != -1 )
-			mPosition.y -= i0;
+		if( hit )
+			mPosition.y -= smallestRay -= mHeight;
 	}
 
 	// Offset camera by eye height.
