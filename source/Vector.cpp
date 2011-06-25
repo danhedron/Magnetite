@@ -63,6 +63,10 @@ float Vector3::operator[] ( int index ) {
 		return w;
 	return 0;
 }
+ 
+bool Vector3::operator < (const Vector3& right) {
+	return (this->x < right.x && this->y < right.y && this->z < right.z);
+}
 
 float Vector3::dotProduct(const Vector3 &rhs)
 {

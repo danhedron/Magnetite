@@ -22,7 +22,12 @@ struct GLgeometry {
 	GLvertex* vertexData;
 	size_t edgeCount;
 	size_t vertexCount;
-	~GLgeometry() { delete[] edgeData; delete[] vertexData; }
+	GLgeometry() { vertexBO = 0; indexBO = 0; }
+	~GLgeometry() { releaseBuffer(); delete[] edgeData; delete[] vertexData; }
+	GLuint vertexBO;
+	GLuint indexBO;
+	void releaseBuffer();
+	void bindToBuffer();
 };
 struct GLbuffer {
 	GLuint vertex;
@@ -50,6 +55,9 @@ protected:
 	Camera* mCamera;
 
 	size_t mFpsAvg;
+
+	bool mDrawFrustum;
+	bool mDrawWorld;
 	
 	//ChunkGeomList mWorldBuffers;
 
@@ -57,7 +65,7 @@ public:
 	Renderer(void);
 	~Renderer(void);
 
-	static GLvertex vertex( float x, float y, float z, float nx, float ny, float nz, float u = 0.f, float v = 0.f, float w = 0.f );
+	static GLvertex vertex( float x, float y, float z, float nx = 0.f, float ny = 0.f, float nz = 0.f, float u = 0.f, float v = 0.f, float w = 0.f );
 
 	/**
 	 * Rendermode enum
@@ -141,6 +149,18 @@ public:
 	void drawText( std::string text, int x, int y );
 
 	static void buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges);
+
+	/**
+	 * Toggles the drawing of the camera's frustum
+	 */
+	void toggleCameraFrustum();
+
+	/**
+	 * Sets wether or not to draw the world
+	 */
+	void setWorldVisible( bool vis );
+
+	bool isWorldVisible();
 
 	/**
 	 * Notify the renderer that a chunk has been unloaded from the engine and it is ok to release it's graphics buffer.

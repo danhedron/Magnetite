@@ -116,6 +116,14 @@ void OpencraftCore::go(int *argc, char **argv)
 					mPlayer->enableSprint( false );
 			}
 			if( (lEvt.Type == sf::Event::KeyReleased) &&
+				(lEvt.Key.Code == sf::Key::F3) ) {
+					mRenderer->toggleCameraFrustum();
+			}
+			if( (lEvt.Type == sf::Event::KeyReleased) &&
+				(lEvt.Key.Code == sf::Key::F2) ) {
+					mRenderer->setWorldVisible( !mRenderer->isWorldVisible() );
+			}
+			if( (lEvt.Type == sf::Event::KeyReleased) &&
 				(lEvt.Key.Code == sf::Key::F) ) {
 					mPlayer->enableFlying( !mPlayer->isFlying() );
 					Util::log( (Util::toString(mPlayer->isFlying())) + " Flying");

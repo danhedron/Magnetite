@@ -1,6 +1,7 @@
 #ifndef _FRUSTUM_H_
 #define _FRUSTUM_H_
 #include "prerequisites.h"
+#include "Renderer.h"
 
 class Camera;
 
@@ -39,6 +40,8 @@ protected:
 	Camera* mCamera;
 public:
 
+	GLgeometry* mFrustumVolume;
+
 	enum {
 		INSIDE,
 		OUTSIDE,
@@ -68,6 +71,8 @@ public:
 	Matrix4 getPerspective();
 
 	void updatePlanes();
+
+	void updateFrustumVolume();
 
 
 	/**
