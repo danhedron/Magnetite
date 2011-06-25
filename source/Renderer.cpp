@@ -9,7 +9,31 @@
 #include "BlockFactory.h"
 
 #include "util.h"
-#include "assert.h"
+
+void GLgeometry::releaseBuffer()
+{
+	if( this->vertexBO != 0 ) {
+		glDeleteBuffers( 1, &this->vertexBO );
+		this->vertexBO = 0;
+	}
+	if( this->indexBO != 0 ) {
+		glDeleteBuffers( 1, &this->indexBO );
+		this->indexBO = 0;
+	}
+}
+void GLgeometry::bindToBuffer()
+{
+	glGenBuffers(1, &this->vertexBO);
+	glBindBuffer( GL_ARRAY_BUFFER, this->vertexBO);
+	glBufferData( GL_ARRAY_BUFFER, sizeof(GLvertex)*this->vertexCount+1, this->vertexData, GL_STATIC_DRAW );
+	glGenBuffers(1, &this->indexBO);
+	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, this->indexBO );
+	glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(GLedge)*this->edgeCount+1, this->edgeData, GL_STATIC_DRAW );
+	glBindBuffer( GL_ARRAY_BUFFER, 0);
+	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+#define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
 Renderer::Renderer(void)
 : totalTime( 0 ),
@@ -21,7 +45,9 @@ mBlTotal( 0 ),
 mRenderMode( RENDER_SOLID ),
 mFpsAvg( 0 ),
 mCamera( NULL ),
-blockType( "" )
+blockType( "" ),
+mDrawFrustum( false ),
+mDrawWorld( true )
 {
 }
 
@@ -114,9 +140,27 @@ Camera* Renderer::getCamera()
 	return mCamera;
 }
 
+void Renderer::setWorldVisible( bool vis )
+{
+	mDrawWorld = vis;
+}
+
+bool Renderer::isWorldVisible()
+{
+	return mDrawWorld;
+}
+
 void Renderer::setCamera( Camera* cam )
 {
 	mCamera = cam;
+}
+
+void Renderer::toggleCameraFrustum()
+{
+	mDrawFrustum = !mDrawFrustum;
+	if( mDrawFrustum ) {
+		mCamera->getFrustum().updateFrustumVolume();
+	}
 }
 
 GLvertex Renderer::vertex(float x, float y, float z, float nx, float ny, float nz, float u, float v, float w)
@@ -309,37 +353,48 @@ void Renderer::render(double dt, World* world)
 
 	world->getSky()->renderSky();
 
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	if( tex != 0 )
+	if( mDrawWorld ) 
 	{
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, tex->glID);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_NORMAL_ARRAY);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		if( tex != 0 )
+		{
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, tex->glID);
+		}
+
+		for(NodeList::iterator node = nodes.begin();
+			node != nodes.end();
+			++node)
+		{
+			_renderNode( *node, 0 );
+		}
+
+		if( tex != 0 )
+		{
+			glDisable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		glDisableClientState(GL_NORMAL_ARRAY);
+		glDisableClientState(GL_VERTEX_ARRAY);
+		glDisable(GL_CULL_FACE);
 	}
 
-	for(NodeList::iterator node = nodes.begin();
-		node != nodes.end();
-		++node)
+	if( mDrawFrustum )
 	{
-		_renderNode( *node, 0 );
-	}
+		glLoadIdentity();
+		mCamera->applyMatrix(true, false);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(3, GL_FLOAT, sizeof(GLvertex), &(mCamera->getFrustum().mFrustumVolume->vertexData[0].x));
 
-	if( tex != 0 )
-	{
-		glDisable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		glDrawRangeElements(GL_LINE_STRIP, 0, mCamera->getFrustum().mFrustumVolume->vertexCount, mCamera->getFrustum().mFrustumVolume->edgeCount, GL_UNSIGNED_SHORT, mCamera->getFrustum().mFrustumVolume->edgeData);
+		glDisableClientState(GL_VERTEX_ARRAY);
 	}
-
-	glVertexPointer(3, GL_FLOAT, 0, 0);
-	glNormalPointer(GL_FLOAT, 0, 0);
-	glTexCoordPointer(2, GL_FLOAT, 0, 0);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisableClientState(GL_NORMAL_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisable(GL_CULL_FACE);
 
 	drawStats( dt, rendered, world );
 
@@ -355,16 +410,14 @@ void Renderer::_renderNode(WorldNode *node, int depth)
 	Vector3 min = Vector3( node->index.x * CHUNK_WIDTH, node->index.y * CHUNK_HEIGHT, node->index.z * CHUNK_WIDTH );
 	Vector3 max = Vector3( min.x + nodeWorldSize, min.y + CHUNK_HEIGHT, min.z + nodeWorldSize );
 
-	if( mCamera->getFrustum().intersectsAABB( min, max ) == Frustum::OUTSIDE ) {
-		// This node is outside of the view, escape
-		return;
-	}
-
+	size_t pos = Frustum::INSIDE;
+	
 	for( int i = 0; i < 4; i++ ) {
 		WorldNode* child = node->children[i];
 		if( child == NULL ) continue;
-		if( child->isChunk && child->children[0] != NULL )
+		if( child->isChunk && child->children[0] != NULL ) {
 			_renderChunk( (WorldChunk*)child->children[0] ); // I am *So* sorry.
+		}
 		else
 			_renderNode( child, depth + 1 );
 	}
@@ -382,33 +435,23 @@ void Renderer::_renderChunk( WorldChunk* chunk )
 	float y = chunk->getY() * CHUNK_HEIGHT;
 	float z = chunk->getZ() * CHUNK_WIDTH;
 	glTranslatef(x,y,z);
-
-	//Draw VBO
-	/*glBindBufferARB(GL_ARRAY_BUFFER_ARB, chunkVbo);
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0,0);
-
-	if(mRenderMode == RENDER_WIRE)
-		glDrawElements(GL_LINES, chunkSize, GL_UNSIGNED_BYTE, 0);
-	else
-		glDrawElements(GL_QUADS, chunkSize, GL_UNSIGNED_BYTE, 0);
-
-	glDisableClientState(GL_VERTEX_ARRAY);
-
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);*/
-
+	
 	if( chunk->hasGenerated() ) {
-
 		GLgeometry* chunkGeom = chunk->getGeometry();
+		
+		glBindBuffer( GL_ARRAY_BUFFER, chunkGeom->vertexBO );
 
-		glVertexPointer(3, GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].x));
-		glNormalPointer(GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].nx));
-		glTexCoordPointer(2, GL_FLOAT, sizeof(GLvertex), &(chunkGeom->vertexData[0].u0));
-		glClientActiveTexture(GL_TEXTURE0);
+		glVertexPointer( 3, GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(0) );
+		glNormalPointer( GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(12) );
+		glTexCoordPointer( 2, GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(24));
 
-		// Draw the chunk.
-		glDrawRangeElements(GL_TRIANGLES, 0, chunkGeom->vertexCount, chunkGeom->edgeCount, GL_UNSIGNED_SHORT, chunkGeom->edgeData);
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, chunkGeom->indexBO );
+
+		//glDrawArrays( GL_TRIANGLES, 0, chunkGeom->vertexCount );
+		glDrawRangeElements( GL_TRIANGLES, 0, chunkGeom->vertexCount, chunkGeom->edgeCount, GL_UNSIGNED_SHORT, 0);
+	
+		glBindBuffer( GL_ARRAY_BUFFER, 0 );
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 	}
 	else {
 		Util::log("Warning: Ungenerated Chunk in render queue. ~ Grab a developer and complain");
@@ -426,12 +469,12 @@ void Renderer::drawStats(double dt, size_t chunkCount, World* world)
 	size_t percent = ( mBlTotal > 0 ? (mBlRendered*100)/(mBlTotal) : 0 );
 	sprintf( buff,  "Opencraft Performance:\n dt: %f\n %f FPS\n Avg: %u\n"
 					" Timescale: %f\n"
-					"World Stats:\n Blocks: %u/%u - %u%%\n Rendered Chunks: %u\n"
+					"World Stats:\n Blocks: %u/%u - %u%%\n Rendered Chunks: %u\nI: %u"
 					" Time: %u ( %u )\n"
 					"Camera:\n Position: %f %f %f",
 					dt, (1/dt), mFpsAvg,
 					OpencraftCore::Singleton->getTimescale(),
-					mBlRendered, mBlTotal, percent, chunkCount,
+					mBlRendered, mBlTotal, percent, chunkCount, 0,
 					world->getSky()->getTime() % DAY_LENGTH, world->getSky()->getTime(),
 					mCamera->getPosition().x,mCamera->getPosition().y,mCamera->getPosition().z);
 	std::string stats(buff);
@@ -542,3 +585,4 @@ void Renderer::drawText(std::string text, int x, int y)
 		line++;
 	}
 }
+

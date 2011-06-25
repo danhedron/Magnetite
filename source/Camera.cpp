@@ -22,7 +22,7 @@ Matrix4 Camera::getMatrix()
 	Matrix4 rot = yaw;//(pitch * yaw);
 
 	rot.translate( mPosition );
-	return mat;
+	return rot;
 }
 
 Matrix4 Camera::getOrientationMatrix()
@@ -60,6 +60,19 @@ void Camera::applyMatrix( bool rot, bool pos )
 	}
 	if( pos ) {
 		glTranslatef( -mPosition.x, -mPosition.y, -mPosition.z );
+	}
+}
+
+void Camera::applyModelViewMatrix( bool rot, bool pos ) 
+{
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	if( rot ) {
+		glRotatef( mPitch, 1, 0, 0);
+		glRotatef( mYaw, 0, 1, 0);
+	}
+	if( pos ) {
+		glTranslatef( mPosition.x, mPosition.y, mPosition.z );
 	}
 }
 
@@ -105,7 +118,7 @@ float Camera::getPitch()
 	return mPitch;
 }
 
-float Camera::getYaw()
+float Camera::getYaw() 
 {
 	return mYaw;	
 }

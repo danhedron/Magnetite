@@ -310,6 +310,7 @@ void WorldChunk::generate()
 {
 	Util::log("Generating chunk mesh");
 	if( mGeometry != NULL ) {
+		mGeometry->releaseBuffer();
 		delete[] mGeometry->vertexData;
 		delete[] mGeometry->edgeData;
 	}
@@ -333,6 +334,7 @@ void WorldChunk::generate()
 	mGeometry->vertexData = vertexData;
 	mGeometry->edgeCount = edgeCount;
 	mGeometry->vertexCount = vertexCount;
+	mGeometry->bindToBuffer();
 
 	notifyGenerated();
 	// Delete the chunk's previous data
