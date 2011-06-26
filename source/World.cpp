@@ -384,20 +384,37 @@ collision_r World::AABBCube(const collision_r& info)
 raycast_r World::raycastCube(const raycast_r &inray, Vector3& min, Vector3& max)
 {
 	raycast_r ray(inray);
-	const Vector3 l1((min - ray.orig) / ray.dir);
-	const Vector3 l2((max - ray.orig) / ray.dir);
 
-	Vector3 v_far;
-	v_far.x = std::max( l1.x, l2.x );
-	v_far.y = std::max( l1.y, l2.y );
-	v_far.z = std::max( l1.z, l2.z );
-	Vector3 v_near;
-	v_near.x = std::min( l1.x, l2.x );
-	v_near.y = std::min( l1.y, l2.y );
-	v_near.z = std::min( l1.z, l2.z );
-	ray.i1 = std::min( v_far.smallestDimension(), ray.maxDistance );
-	ray.i0 = std::max( v_near.biggestDimension(), 0.f );
-	ray.hit = (ray.i1 >= ray.i0) & (ray.i1 >= 0.f );
+	float Tnear = INT_MIN; // These values are plenty large enough.
+	float Tfar	= INT_MAX;
+
+	for(int p = 0; p < 3; p++) {
+		if( ray.dir[p] == 0 ) {
+			// Ray is parallel to this plane
+			if( ray.orig[p] < min[p] || ray.orig[p] > max[p] )
+			{
+				// Ray is outside of the planes of this axis, it can't intersect.
+				ray.hit = false; 
+				return ray;
+			}
+		}
+		else
+		{
+			float t1 = (min[p] - ray.orig[p]) / ray.dir[p];
+			float t2 = (max[p] - ray.orig[p]) / ray.dir[p];
+			if( t1 > t2 ) std::swap( t1, t2 );
+			if( t1 > Tnear ) Tnear = t1;
+			if( t2 < Tfar ) Tfar = t2;
+			if( Tnear > Tfar || Tfar < 0 ) {
+				ray.hit = false;
+				return ray;
+			}
+		}
+	}
+
+	ray.hit = true;
+	ray.i0 = Tnear;
+	ray.i1 = Tfar;
 	ray.worldHit = ray.orig + ( ray.dir * ray.i0 );
 	return ray;
 }
