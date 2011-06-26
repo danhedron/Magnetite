@@ -381,6 +381,12 @@ collision_r World::AABBCube(const collision_r& info)
 	return collision;
 }
 
+Vector3 normals[3] = {
+	Vector3(1.f, 0.f, 0.f), // X
+	Vector3(0.f, 1.f, 0.f), // Y
+	Vector3(0.f, 0.f, 1.f) // Z
+};
+
 raycast_r World::raycastCube(const raycast_r &inray, Vector3& min, Vector3& max)
 {
 	raycast_r ray(inray);
@@ -389,6 +395,7 @@ raycast_r World::raycastCube(const raycast_r &inray, Vector3& min, Vector3& max)
 	float Tfar	= INT_MAX;
 
 	for(int p = 0; p < 3; p++) {
+		Vector3 norm = normals[p]; 
 		if( ray.dir[p] == 0 ) {
 			// Ray is parallel to this plane
 			if( ray.orig[p] < min[p] || ray.orig[p] > max[p] )
@@ -402,8 +409,14 @@ raycast_r World::raycastCube(const raycast_r &inray, Vector3& min, Vector3& max)
 		{
 			float t1 = (min[p] - ray.orig[p]) / ray.dir[p];
 			float t2 = (max[p] - ray.orig[p]) / ray.dir[p];
-			if( t1 > t2 ) std::swap( t1, t2 );
-			if( t1 > Tnear ) Tnear = t1;
+			if( t1 > t2 ) {
+				std::swap( t1, t2 );
+			}
+			else { norm = -norm; }
+			if( t1 > Tnear ) {
+				Tnear = t1;
+				ray.hitNormal = norm;
+			}
 			if( t2 < Tfar ) Tfar = t2;
 			if( Tnear > Tfar || Tfar < 0 ) {
 				ray.hit = false;
@@ -411,6 +424,8 @@ raycast_r World::raycastCube(const raycast_r &inray, Vector3& min, Vector3& max)
 			}
 		}
 	}
+
+	ray.hitNormal = ray.hitNormal.normalize();
 
 	ray.hit = true;
 	ray.i0 = Tnear;
@@ -422,17 +437,17 @@ raycast_r World::raycastCube(const raycast_r &inray, Vector3& min, Vector3& max)
 Vector3 World::worldToChunks(const Vector3 &vec)
 {
 	Vector3 v;
-	v.x = (vec.x / CHUNK_WIDTH) - ( vec.x < 0 ? 1 : 0 );
-	v.y = (vec.y / CHUNK_HEIGHT) - ( vec.y < 0 ? 1 : 0 );
-	v.z = (vec.z / CHUNK_WIDTH) - ( vec.z < 0 ? 1 : 0 );
+	v.x = floor( vec.x / (float)CHUNK_WIDTH );
+	v.y = floor( vec.y / (float)CHUNK_HEIGHT );
+	v.z = floor( vec.z / (float)CHUNK_WIDTH );
 	return v;
 }
 
 Vector3 World::worldToBlock(const Vector3 &vec)
 {
 	Vector3 v;
-	v.x = ( vec.x < 0 ? CHUNK_WIDTH-1 : 0 ) + ( vec.x < 0 ? -1 : 1 ) * abs((int)vec.x)%CHUNK_WIDTH;
-	v.y = ( vec.y < 0 ? CHUNK_HEIGHT-1 : 0 ) + ( vec.y < 0 ? -1 : 1 ) * abs((int)vec.y)%CHUNK_HEIGHT;
-	v.z = ( vec.z < 0 ? CHUNK_WIDTH-1 : 0 ) + ( vec.z < 0 ? -1 : 1 ) * abs((int)vec.z)%CHUNK_WIDTH;
+	v.x = ((int)vec.x % CHUNK_WIDTH);// * ( vec.x < 0 ? -1.f : 1.f );
+	v.y = ((int)vec.y % CHUNK_HEIGHT);// * ( vec.y < 0 ? -1.f : 1.f );
+	v.z = ((int)vec.z % CHUNK_WIDTH);// * ( vec.z < 0 ? -1.f : 1.f );
 	return v;
 }

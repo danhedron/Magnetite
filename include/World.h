@@ -17,6 +17,7 @@ struct raycast_r
 	Vector3 orig;
 	Vector3 dir;
 	Vector3 worldHit;
+	Vector3 hitNormal;
 
 	BaseBlock* block;
 

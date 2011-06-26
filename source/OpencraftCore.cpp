@@ -255,13 +255,13 @@ void OpencraftCore::placeEyeBlock()
 {
 	raycast_r ray = mPlayer->getEyeCast();
 	ray = mWorld->raycastWorld(ray);
-	if(ray.hit)
+	if(ray.hit && ray.block)
 	{
-		Util::log("Ray Hit: " + Util::toString( ray.worldHit ) );
-		Vector3 cIndex = mWorld->worldToChunks( ray.worldHit );
-		Vector3 bIndex = mWorld->worldToBlock( ray.worldHit );
+		Util::log( Util::toString( ray.worldHit + ray.hitNormal ) );
+		Vector3 cIndex = mWorld->worldToChunks( ray.worldHit + ray.hitNormal );
+		Vector3 bIndex = Vector3( ray.block->getX(), ray.block->getY(), ray.block->getZ() ) + ray.hitNormal;
+		Util::log("Ray Hit: " + Util::toString( cIndex ) + " Normal: " + Util::toString( ray.hitNormal ) );
 		WorldChunk* chunk = mWorld->getChunk( cIndex.x, cIndex.y, cIndex.z );
-		//Util::log("Ray hit block: " + Util::toString(Vector3(bX,bY,bZ)) + " in chunk " +  Util::toString(cIndex));
 		if(chunk) {
 			BaseBlock* block = FactoryManager::createBlock(	mRenderer->blockType );
 			if( block != NULL ) {
