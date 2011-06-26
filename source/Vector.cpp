@@ -61,9 +61,9 @@ float Vector3::operator[] ( int index ) {
 		return z;
 	if( index == 3 )
 		return w;
-	return 0;
+	return 0.f;
 }
- 
+
 bool Vector3::operator < (const Vector3& right) {
 	return (this->x < right.x && this->y < right.y && this->z < right.z);
 }
