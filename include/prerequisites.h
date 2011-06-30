@@ -1,3 +1,6 @@
+/**
+ * Libaries
+ */
 #define NOMINMAX
 #include <GL/GLee.h>
 #include <GL/freeglut.h>
@@ -20,6 +23,9 @@
 #include "Vector.h"
 #include "Matrix.h"
 
+/**
+ * Define vector type
+ */
 typedef std::vector<std::string> stringvector;
 
 class BaseBlock;
