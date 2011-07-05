@@ -5,12 +5,19 @@
 #include "Camera.h"
 #include "StoneBlock.h"
 #include "ChunkGenerator.h"
+#include <iostream>
+#include <fstream>
+#include <stdio.h>
+#ifdef WIN32
+#include <direct.h>
+#else
+#include <unistd.h>
+#endif
 
 World::World()
 : mSky( NULL ),
 mPagingCamera( NULL )
 {	
-	createWorld();
 	mGenerator = new ChunkGenerator(1024);
 }
 
@@ -27,11 +34,45 @@ void _deleteTree( WorldNode* node )
 
 World::~World()
 {
+	destoryWorld();	
+}
 
-	for( NodeList::iterator it = mQuadTrees.begin(); it != mQuadTrees.end(); ++it) {
-		WorldNode* node = *it;
-		_deleteTree(node);
+void World::newWorld( std::string name )
+{
+	mWorldName = name;
+	createWorld();
+}
+
+void World::loadWorld( std::string name )
+{
+	mWorldName = name;
+	destoryWorld();
+
+	std::string svPath = getSavePath();
+
+#ifdef WIN32
+	size_t startTick = GetTickCount();
+#endif
+	
+	for( int x = -5; x < 5; x++ )
+	{
+		for( int z = -5; z < 5; z++ )
+		{
+			std::string chnkPath = svPath + "chunks\\" + Util::toString( x ) + "_0_" + Util::toString( z );	
+			std::ifstream stream(chnkPath.c_str() , std::ios_base::in | std::ios_base::binary );
+
+			createChunk( x, 0, z );
+			WorldChunk* c = getChunk( x, 0, z );
+			c->readFromStream( stream );
+
+		}
 	}
+
+#ifdef WIN32
+	size_t ticks = GetTickCount() - startTick;
+	Util::log("\tLoaded in: " + Util::toString(ticks) + "ms");
+#endif
+
 }
 
 void World::createWorld()
@@ -41,22 +82,38 @@ void World::createWorld()
 	createTestChunks( 5 );
 }
 
+std::string World::getName()
+{
+	return mWorldName;
+}
+
+std::string World::getSavePath()
+{
+	char currPath[FILENAME_MAX];
+	getcwd(currPath, sizeof currPath);
+	return std::string(currPath) + "\\worlds\\" + mWorldName + "\\";
+}
+
 void World::createTestChunks( int size )
 {
 	destoryWorld();
 	for(int i = -size; i < size; i++) {
 		for(int z = -size; z < size; z++) {
-			Util::log("New Chunk");
-			createChunk(i,0,z);
+			WorldChunk* c = createChunk(i,0,z);
+			mGenerator->fillChunk( c );
 		}
 	}
 }
 
 void World::destoryWorld()
 {
+	for( NodeList::iterator it = mQuadTrees.begin(); it != mQuadTrees.end(); ++it) {
+		WorldNode* node = *it;
+		_deleteTree(node);
+	}
+	mQuadTrees.clear();
 	for(ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); )
 	{
-		Util::log("Deleted Chunk");
 		delete (*it);
 		it = mChunks.erase( it );
 	}
@@ -199,11 +256,9 @@ std::string World::_printTree(WorldNode* node, int depth)
 	return buff;
 }
 
-void World::createChunk(long x, long y, long z)
+WorldChunk* World::createChunk(long x, long y, long z)
 {
-	Util::log( "Creating Chunk: " + Util::toString(x) + "," + Util::toString(y) + "," + Util::toString(z) );
 	WorldChunk* newChunk = new WorldChunk(x, y, z);
-	mGenerator->fillChunk( newChunk );
 	mChunks.push_back(newChunk);
 	WorldNode* node = getChunkNode(Vector3(x,y,z), true);
 	if( node == NULL ) 
@@ -211,7 +266,7 @@ void World::createChunk(long x, long y, long z)
 	else
 		node->children[0] = (WorldNode*)newChunk;
 	
-	Util::log( "Chunk Created" );
+	return newChunk;
 }
 
 void World::setPagingCamera( Camera* _c )
@@ -228,6 +283,53 @@ void World::activateChunk( long x, long y, long z )
 void World::deativateChunk( long x, long y, long z )
 {
 	removeChunk( x, y, z );
+}
+
+void World::createWorldFolder()
+{
+	char currPath[FILENAME_MAX];
+	getcwd(currPath, sizeof currPath);
+	std::string path = currPath;
+	if( mkdir( (path + "\\worlds\\").c_str() ) != ENOENT ) {
+		if( mkdir( (path + "\\worlds\\" + mWorldName + "\\").c_str() ) != ENOENT ) {
+			mkdir( (path + "\\worlds\\" + mWorldName + "\\chunks").c_str() );
+		}
+	}
+}
+
+void World::saveAllChunks()
+{
+	std::string svPath = getSavePath();
+	
+	Util::log("Saving chunks");
+
+	// Ensure that the chunks folder exists
+	createWorldFolder();
+	
+#ifdef WIN32
+	size_t startTick = GetTickCount();
+#endif
+
+	for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); it++ )
+	{
+		std::string chnkPath = svPath + "chunks\\" + Util::toString( (*it)->getX() ) + "_" + Util::toString( (*it)->getY() ) + "_" + Util::toString( (*it)->getZ() );
+		std::ofstream out( chnkPath.c_str(), std::ios_base::out | std::ios_base::binary | std::ios_base::trunc );
+		if( out && out.good() ) 
+		{
+			(*it)->appendToStream( out );
+			out.close();
+		}
+		else 
+		{
+			Util::log("Error Writing Chunk");
+		}
+	}
+
+#ifdef WIN32
+	size_t ticks = GetTickCount() - startTick;
+	Util::log("\tSaved in: " + Util::toString(ticks) + "ms");
+#endif
+
 }
 
 void World::update( float dt )

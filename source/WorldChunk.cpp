@@ -370,7 +370,7 @@ void WorldChunk::update( float dt )
 		for( BlockList::iterator block = mThinkingBlocks.begin(); block != mThinkingBlocks.end(); ++block )
 		{
 			if( block->second->isFluid() ) {
-				((WaterBlock*)(block->second))->flow( 0.1f );
+				((WaterBlock*)(block->second))->flow( dt );
 			}
 		}
 	}
@@ -390,6 +390,59 @@ void WorldChunk::requestGenerate()
 			generate();
 		mHasChanged = false;
 	}
+}
+
+void WorldChunk::appendToStream( std::ofstream& stream )
+{
+	size_t exportedBlocks = 0;
+	for( size_t b = 0; b < CHUNK_SIZE; b++ ) {
+		if( mBlockData[b] != 0 ) {
+			exportedBlocks++;
+		}
+	}
+
+	stream.write( (char *) &exportedBlocks, sizeof(exportedBlocks) );
+
+	for( size_t b = 0; b < CHUNK_SIZE; b++ ) {
+		if( mBlockData[b] != 0 ) {
+			std::string type = mBlockData[b]->getType();
+			stream.write( (char *) type.c_str(), type.length() );
+			char null = 0;
+			stream.write( (char *) &null, sizeof(null) );
+			mBlockData[b]->appendToStream( stream );
+		}
+	}
+}
+
+void WorldChunk::readFromStream( std::ifstream& stream )
+{
+	size_t blocksToRead = 0;
+
+	stream.read( (char *) &blocksToRead, sizeof(blocksToRead) );
+
+	std::string type = "";
+	char c = 0;
+
+	for( size_t b = 0; b < blocksToRead; b++ ) {
+		c = 0; type = "";
+		while( stream.read( &c, sizeof(c) ) && !stream.eof() ) {
+			if( (c < 32 || c > 126 ) && c != 20 ) break;
+			type += c;
+		}
+
+		//Try to create that block.
+		BaseBlock* block = FactoryManager::createBlock(type);
+		if( block ) {
+			block->readFromStream( stream );
+			addBlockToChunk( block );
+		}
+		else
+		{
+			Util::log( "Couldn't load block: " + type );
+		}
+		
+	}
+
 }
 
 long WorldChunk::getX()

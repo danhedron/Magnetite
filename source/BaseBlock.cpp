@@ -71,6 +71,16 @@ void BaseBlock::setPosition( const Vector3& vec)
 	setPosition( vec.x, vec.y, vec.z );
 }
 
+void BaseBlock::appendToStream( std::ofstream& stream )
+{
+	stream.write( (char *) &mDataFlags, sizeof( mDataFlags ) );	
+}
+
+void BaseBlock::readFromStream( std::ifstream& stream )
+{
+	stream.read( (char *) &mDataFlags, sizeof( mDataFlags ) );	
+}
+
 void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges)
 {
 	short x = 0, y = 0;
