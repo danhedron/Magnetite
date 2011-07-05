@@ -2,7 +2,8 @@
 #define _WORLDCHUNK_H_
 #include "prerequisites.h"
 #include <vector>
-#include <istream>
+#include <iostream>
+#include <fstream>
 
 class BaseBlock;
 struct GLgeometry;
@@ -144,6 +145,16 @@ public:
 	 * Requests that the chunk generate it's geometry if hasn't already been generated
 	 */
 	void requestGenerate();
+
+	/**
+	 * Appends this chunk's data to an ofstream
+	 */
+	void appendToStream( std::ofstream& stream );
+
+	/**
+	 * Reads blocks out of a stream.
+	 */
+	void readFromStream( std::ifstream& stream );
 
 	/**
 	 * Returns the X index of this chunk.

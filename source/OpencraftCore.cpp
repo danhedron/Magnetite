@@ -133,8 +133,12 @@ void OpencraftCore::go(int *argc, char **argv)
 					mRenderer->nextBlock();
 			}
 			if( (lEvt.Type == sf::Event::KeyPressed) &&
-				(lEvt.Key.Code == sf::Key::Subtract) ) {
-					mRenderer->lastBlock();
+				(lEvt.Key.Code == sf::Key::F6) ) {
+					mWorld->saveAllChunks();
+			}
+			if( (lEvt.Type == sf::Event::KeyPressed) &&
+				(lEvt.Key.Code == sf::Key::F7) ) {
+					mWorld->loadWorld("test");
 			}
 			if( (lEvt.Type == sf::Event::KeyPressed) &&
 				(lEvt.Key.Code == sf::Key::Num9) ) {
@@ -202,6 +206,7 @@ void OpencraftCore::newWorld( std::string name )
 	unloadWorld();
 
 	mWorld = new World();
+	mWorld->newWorld( name );
 	createCharacter();
 }
 

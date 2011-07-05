@@ -61,6 +61,7 @@ protected:
 	Sky*		mSky;
 	ChunkGenerator* mGenerator;
 	Camera*		mPagingCamera;
+	std::string mWorldName;
 
 public:
 	/** 
@@ -74,9 +75,24 @@ public:
 	~World( void );
 
 	/**
-	 * Loads a world from the specified location
+	 * Loads a world of the specified name
 	 */
-	void loadWorld( std::string location );
+	void loadWorld( std::string name );
+
+	/**
+	 * Makes a NEW WORLD!
+	 */
+	void newWorld( std::string name );
+
+	/**
+	 * Returns the name of the world
+	 */
+	std::string getName();
+
+	/**
+	 * Returns the path to the current world
+	 */
+	std::string getSavePath();
 
 	/**
 	 * Creates a new empty world.
@@ -125,7 +141,8 @@ public:
 	 * @param y Coordinate
 	 * @param z Coordinate
 	 */
-	void createChunk(long x, long y, long z);
+	WorldChunk* createChunk(long x, long y, long z);
+
 	/**
 	 * Removes the chunk at the given offset
 	 * @param x Coordinate
@@ -149,6 +166,16 @@ public:
 	 * Deactivates a chunk
 	 */
 	void deativateChunk( long x, long y, long z );
+
+	/**
+	 * Saves all chunks to disk
+	 */
+	void saveAllChunks();
+
+	/**
+	 * Creates the folder structure for the current world
+	 */
+	void createWorldFolder();
 
 	/**
 	 * Sets the camera used for paging chunks

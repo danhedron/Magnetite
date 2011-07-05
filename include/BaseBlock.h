@@ -1,6 +1,8 @@
 #ifndef _BASEBLOCK_H_
 #define _BASEBLOCK_H_
 #include "prerequisites.h"
+#include <iostream>
+#include <fstream>
 
 struct GLvertex;
 typedef unsigned short GLedge;
@@ -78,6 +80,16 @@ public:
 	 * Returns the viewflags for this block
 	 */
 	unsigned short getVisFlags();
+
+	/**
+	 * Appends this block's data to a stream.
+	 */
+	void appendToStream( std::ofstream& stream );
+
+	/**
+	 * Reads the data for this block from a stream
+	 */
+	void readFromStream( std::ifstream& stream );
 
 	/**
 	 * Returns the Verex Data for this block

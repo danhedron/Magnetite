@@ -25,7 +25,7 @@ void TextureManager::initalize()
 bool TextureManager::loadTexture(std::string textureName)
 {
 	TextureList::iterator lb = mTextures.lower_bound( textureName );
-
+	Util::log("Loading Texture:" + textureName);
 	if(lb != mTextures.end() && !(mTextures.key_comp()(textureName, lb->first)))
 	{
 		// Do Nothing
