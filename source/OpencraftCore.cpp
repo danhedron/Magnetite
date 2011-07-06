@@ -2,6 +2,7 @@
 #include "WorldChunk.h"
 #include "Renderer.h"
 #include "TextureManager.h"
+#include "InputManager.h"
 #include "StoneBlock.h"
 #include "World.h"
 #include "Character.h"
@@ -9,10 +10,44 @@
 
 OpencraftCore* OpencraftCore::Singleton = 0;
 
+/* Simple events */
+void globalEventHandler( const InputEvent& evt )
+{
+	if( evt.event == Inputs::FORWARD ) {
+		if( evt.down )
+			OpencraftCore::Singleton->getPlayer()->addMoveDelta( Vector3( 0.f, 0.f, -1.f ) );
+		else
+			OpencraftCore::Singleton->getPlayer()->addMoveDelta( Vector3( 0.f, 0.f, 1.f ) );
+	}
+	if( evt.event == Inputs::LEFT ) {
+		if( evt.down )
+			OpencraftCore::Singleton->getPlayer()->addMoveDelta( Vector3( -1.f, 0.f, 0.f ) );
+		else
+			OpencraftCore::Singleton->getPlayer()->addMoveDelta( Vector3( 1.f, 0.f, 0.f ) );
+	}
+	if( evt.event == Inputs::RIGHT ) {
+		if( evt.down )
+			OpencraftCore::Singleton->getPlayer()->addMoveDelta( Vector3( 1.f, 0.f, 0.f ) );
+		else
+			OpencraftCore::Singleton->getPlayer()->addMoveDelta( Vector3( -1.f, 0.f, 0.f ) );
+	}
+	if( evt.event == Inputs::BACK ) {
+		if( evt.down )
+			OpencraftCore::Singleton->getPlayer()->addMoveDelta( Vector3( 0.f, 0.f, 1.f ) );
+		else
+			OpencraftCore::Singleton->getPlayer()->addMoveDelta( Vector3( 0.f, 0.f, -1.f ) );
+	}
+	if( evt.event == Inputs::SPRINT ) {
+		OpencraftCore::Singleton->getPlayer()->enableSprint( evt.down );
+	}
+}
+
 OpencraftCore::OpencraftCore(void)
 : mContinue( true ),
 mWorld( NULL ),
 mPlayer( NULL ),
+mTextureManager( NULL ),
+mInputManager( NULL ),
 mTimescale( 1.f ),
 mLastX( 0.f ),
 mLastY( 0.f )
@@ -20,6 +55,12 @@ mLastY( 0.f )
 	OpencraftCore::Singleton = this;
 	mRenderer = new Renderer();
 	mTextureManager = new TextureManager();
+	mInputManager = new InputManager();
+	mInputManager->setEventCallback( Inputs::FORWARD, &globalEventHandler );
+	mInputManager->setEventCallback( Inputs::BACK, &globalEventHandler );
+	mInputManager->setEventCallback( Inputs::LEFT, &globalEventHandler );
+	mInputManager->setEventCallback( Inputs::RIGHT, &globalEventHandler );
+	mInputManager->setEventCallback( Inputs::SPRINT, &globalEventHandler );
 }
 
 OpencraftCore::~OpencraftCore(void)
@@ -28,6 +69,7 @@ OpencraftCore::~OpencraftCore(void)
 
 	delete mRenderer;
 	delete mTextureManager;
+	delete mInputManager;
 }
 
 void OpencraftCore::createWindow(int *argc, char **argv)
@@ -68,52 +110,18 @@ void OpencraftCore::go(int *argc, char **argv)
 				(lEvt.Key.Code == sf::Key::Escape) ) {
 				exit();
 			}
+
+			if( lEvt.Type == sf::Event::KeyPressed )
+				mInputManager->keyDown( lEvt.Key.Code );
+			if( lEvt.Type == sf::Event::KeyReleased )
+				mInputManager->keyUp( lEvt.Key.Code );
+
 			if( (lEvt.Type == sf::Event::KeyPressed) &&
 				(lEvt.Key.Code == sf::Key::R) ) {
 					if(mRenderer->getRenderMode() == Renderer::RENDER_SOLID)
 						mRenderer->setRenderMode(Renderer::RENDER_WIRE);
 					else
 						mRenderer->setRenderMode(Renderer::RENDER_SOLID);
-			}
-			if( (lEvt.Type == sf::Event::KeyPressed) &&
-				(lEvt.Key.Code == sf::Key::A) ) {
-					mPlayer->addMoveDelta( Vector3( -1.f, 0.f, 0.f ) );
-			}
-			if( (lEvt.Type == sf::Event::KeyReleased) &&
-				(lEvt.Key.Code == sf::Key::A) ) {
-					mPlayer->addMoveDelta( Vector3( 1.f, 0.f, 0.f ) );
-			}
-			if( (lEvt.Type == sf::Event::KeyPressed) &&
-				(lEvt.Key.Code == sf::Key::D) ) {
-					mPlayer->addMoveDelta( Vector3( 1.f, 0.f, 0.f ) );
-			}
-			if( (lEvt.Type == sf::Event::KeyReleased) &&
-				(lEvt.Key.Code == sf::Key::D) ) {
-					mPlayer->addMoveDelta( Vector3( -1.f, 0.f, 0.f ) );
-			}
-			if( (lEvt.Type == sf::Event::KeyPressed) &&
-				(lEvt.Key.Code == sf::Key::W) ) {
-					mPlayer->addMoveDelta( Vector3( 0.f, 0.f, -1.f ) );
-			}
-			if( (lEvt.Type == sf::Event::KeyReleased) &&
-				(lEvt.Key.Code == sf::Key::W) ) {
-					mPlayer->addMoveDelta( Vector3( 0.f, 0.f, 1.f ) );
-			}
-			if( (lEvt.Type == sf::Event::KeyPressed) &&
-				(lEvt.Key.Code == sf::Key::S) ) {
-					mPlayer->addMoveDelta( Vector3( 0.f, 0.f, 1.f ) );
-			}
-			if( (lEvt.Type == sf::Event::KeyReleased) &&
-				(lEvt.Key.Code == sf::Key::S) ) {
-					mPlayer->addMoveDelta( Vector3( 0.f, 0.f, -1.f ) );
-			}
-			if( (lEvt.Type == sf::Event::KeyPressed) &&
-				(lEvt.Key.Code == sf::Key::LShift) ) {
-					mPlayer->enableSprint( true );
-			}
-			if( (lEvt.Type == sf::Event::KeyReleased) &&
-				(lEvt.Key.Code == sf::Key::LShift) ) {
-					mPlayer->enableSprint( false );
 			}
 			if( (lEvt.Type == sf::Event::KeyReleased) &&
 				(lEvt.Key.Code == sf::Key::F3) ) {
@@ -238,6 +246,11 @@ Character* OpencraftCore::createCharacter()
 	mPlayer->setPosition( Vector3( 0.f, 150.f, 0.f )  );
 	if( mWorld )
 		mWorld->setPagingCamera( mPlayer->getCamera() );
+	return mPlayer;
+}
+
+Character* OpencraftCore::getPlayer()
+{
 	return mPlayer;
 }
 

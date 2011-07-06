@@ -4,6 +4,7 @@
 
 class Renderer;
 class TextureManager;
+class InputManager;
 class World;
 class Character;
 
@@ -17,6 +18,7 @@ protected:
 	sf::Clock	mClock;
 	Renderer*	mRenderer;
 	TextureManager* mTextureManager;
+	InputManager*	mInputManager;
 	World*		mWorld;
 	bool		mContinue;
 	Character*	mPlayer;
@@ -69,6 +71,11 @@ public:
 	 * Creates a character
 	 */
 	Character* createCharacter();
+
+	/**
+	 * Returns the player's character
+	 */
+	Character* getPlayer();
 
 	/** 
 	 * Returns the timescale

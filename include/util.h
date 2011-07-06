@@ -51,19 +51,29 @@ public:
 		std::cout << "| " << text << std::endl;
 	}
 
-	//static std::string toString(int number)
-	//{
-	//	return itoa(number, 10);
-	//}
+	static std::string toString(const size_t number)
+	{
+		return itoa(number, 10);
+	}
 
-	static std::string toString(float number)
+	static std::string toString(const int number)
+	{
+		return itoa(number, 10);
+	}
+
+	static std::string toString(const long number)
+	{
+		return itoa(number, 10);
+	}
+
+	static std::string toString(const float number)
 	{
 		std::stringstream ss;
 		ss << number;
 		return ss.str();
 	}
 
-	static std::string toString(Vector3 &vec)
+	static std::string toString(const Vector3 &vec)
 	{
 		return toString(vec.x) + "," + toString(vec.y) + "," + toString(vec.z);
 	}
