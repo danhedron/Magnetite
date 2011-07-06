@@ -23,6 +23,8 @@ void GrassBlock::getTextureCoords( short face, short &x, short &y )
 	x = 3;
 	if( face == FACE_TOP )
 		x = 0;
+	else if( face == FACE_BOTTOM )
+		x = 2;
 	y = 0;
 }
 
