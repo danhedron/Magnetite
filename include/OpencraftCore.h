@@ -9,7 +9,7 @@ class World;
 class Character;
 
 /** @class OpencraftCore
- * Responsible for managing stuff 
+ * Responsible for managing stuff
  */
 class OpencraftCore
 {
@@ -38,12 +38,12 @@ public:
 	TextureManager *getTextureManager();
 
 	/**
-	 * Removes the block the player is looking at.
+	 * Removes the block the player is looking at
 	 */
 	void removeEyeBlock();
 
 	/**
-	 * Places a block where the player is looking.
+	 * Places a block where the player is looking
 	 */
 	void placeEyeBlock();
 
@@ -53,12 +53,12 @@ public:
 	void newWorld( std::string name );
 
 	/**
-	 * loads an exsisting world.
+	 * Loads an exsisting world
 	*/
 	void loadWorld( std::string name );
 
 	/**
-	 * Retuns a pointer to the world.
+	 * Retuns a pointer to the world
 	 */
 	World* getWorld();
 
@@ -85,7 +85,6 @@ public:
 	float mLastX;
 	float mLastY;
 
-	
 	void createWindow(int *argc, char **argv);
 
 	void go(int *argc, char **argv);
