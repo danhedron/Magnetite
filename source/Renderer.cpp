@@ -163,9 +163,9 @@ void Renderer::toggleCameraFrustum()
 	}
 }
 
-GLvertex Renderer::vertex(float x, float y, float z, float nx, float ny, float nz, float u, float v, float w)
+GLvertex Renderer::vertex(float x, float y, float z, float nx, float ny, float nz, float u, float v, float r, float g, float b)
 {
-	GLvertex vert = { x, y, z, nx, ny, nz, u, v };
+	GLvertex vert = { x, y, z, nx, ny, nz, u, v, r, g, b };
 	return vert;
 }
 
@@ -358,6 +358,7 @@ void Renderer::render(double dt, World* world)
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_NORMAL_ARRAY);
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glEnableClientState(GL_COLOR_ARRAY);
 		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		if( tex != 0 )
@@ -379,6 +380,7 @@ void Renderer::render(double dt, World* world)
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
+		glDisableClientState(GL_COLOR_ARRAY);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 		glDisableClientState(GL_NORMAL_ARRAY);
 		glDisableClientState(GL_VERTEX_ARRAY);
@@ -444,6 +446,7 @@ void Renderer::_renderChunk( WorldChunk* chunk )
 		glVertexPointer( 3, GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(0) );
 		glNormalPointer( GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(12) );
 		glTexCoordPointer( 2, GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(24));
+		glColorPointer( 3, GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(32));
 
 		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, chunkGeom->indexBO );
 

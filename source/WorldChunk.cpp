@@ -5,6 +5,7 @@
 #include "Renderer.h"
 #include "OpencraftCore.h"
 #include "World.h"
+#include "LightingManager.h"
 
 WorldChunk::WorldChunk(long x, long y, long z)
 : mX( x ),
@@ -35,6 +36,21 @@ void WorldChunk::initalize()
 		mBlockData[i] = NULL;
 	}
 } 
+
+void WorldChunk::setLightLevel( short x, short y, short z, char level )
+{
+	mLightValues[BLOCK_INDEX_2( x, y, z )] = level;
+}
+
+LightIndex WorldChunk::getLightLevel( short x, short y, short z )
+{
+	WorldChunk* chnk = getRelativeChunk( x, y, z );
+	if( chnk != this )
+		return Sunlight;//chnk->getLightLevel( x, y, z );
+	else if( chnk != NULL )
+		return mLightValues[BLOCK_INDEX_2( x, y, z )];
+	return Sunlight;
+}
 
 void WorldChunk::fillWithTestData()
 {
@@ -113,11 +129,6 @@ void WorldChunk::_blockMoved( BaseBlock* block, short x, short y, short z )
 	markModified();
 }
 
-void WorldChunk::reserveBlocks( size_t count )
-{
-
-}
-
 void WorldChunk::removeBlockAt(long x, long y, long z)
 {
 	WorldChunk* chunk = getRelativeChunk( x, y, z );
@@ -159,7 +170,7 @@ void WorldChunk::_addBlockToRemoveList(BaseBlock* block)
 	mShouldDelete.insert( BlockList::value_type( BLOCK_INDEX( block ) , block ) );
 }
 
-WorldChunk* WorldChunk::getRelativeChunk(unsigned short x, unsigned short y, unsigned short z)
+WorldChunk* WorldChunk::getRelativeChunk(short x, short y, short z)
 {
 	if( ( x >= 0 && y >= 0 && z >= 0 ) && ( x < CHUNK_WIDTH && y < CHUNK_HEIGHT && z < CHUNK_WIDTH ) )
 		return this;
@@ -321,6 +332,9 @@ void WorldChunk::generate()
 
 	size_t ind = 0;
 	size_t edgeInd = 0;
+
+	// Re-light this chunk
+	LightingManager::lightChunk( this );
 
 	for( BlockList::iterator block = mVisibleBlocks.begin(); block != mVisibleBlocks.end(); ++block )
 	{

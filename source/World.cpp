@@ -37,6 +37,14 @@ World::~World()
 	destoryWorld();	
 }
 
+float World::getLightColor( LightIndex light )
+{
+	if( light == WorldChunk::Sunlight )
+		return 1.f;
+	else
+		return 0.1f;
+}
+
 void World::newWorld( std::string name )
 {
 	mWorldName = name;

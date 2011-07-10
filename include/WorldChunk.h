@@ -15,6 +15,7 @@ protected:
 	BlockList mVisibleBlocks; //< Used in Rendering
 	BlockList mThinkingBlocks; //< Used in updates
 	BlockList mShouldDelete; //< Used to allow blocks to remove themselves
+	LightIndex mLightValues[CHUNK_SIZE];
 	long mX;
 	long mY;
 	long mZ;
@@ -29,6 +30,13 @@ public:
 	~WorldChunk(void);
 
 	/**
+	 * Public Enumerators
+	 */
+	enum LightInfo {
+		Sunlight = ( 1<<(sizeof(char)*8 - 1))
+	};
+
+	/**
 	 * Resets all data in the chunk to air.
 	 */
 	void initalize();
@@ -39,10 +47,14 @@ public:
 	void fillWithTestData();
 
 	/**
-	 * Reserve items in the internal memory for large inserts.
-	 * @param count The Number of blocks you are going to insert.
+	 * Sets the light level for the index specifed.
 	 */
-	void reserveBlocks(size_t count);
+	void setLightLevel( short x, short y, short z, char level );
+
+	/**
+	 * Returns the lightlevel for the given index.
+	 */
+	LightIndex getLightLevel( short x, short y, short z );
 
 	/**
 	 * Adds an already created block to the chunk.
@@ -64,7 +76,7 @@ public:
 	/**
 	 * returns a relative chunk
 	 */
-	WorldChunk* getRelativeChunk( unsigned short x, unsigned short y, unsigned short z );
+	WorldChunk* getRelativeChunk( short x, short y, short z );
 
 	/**
 	 * Returns a block if one exsists at the given position.
