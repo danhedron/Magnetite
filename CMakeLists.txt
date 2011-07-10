@@ -36,6 +36,7 @@ set(OPENCRAFT_SOURCES
 	source/Main.cpp
 	source/Renderer.cpp
 	source/InputManager.cpp
+	source/LightingManager.cpp
 	source/Sky.cpp
 	source/Frustum.cpp
 	source/Camera.cpp
@@ -61,6 +62,7 @@ set(OPENCRAFT_HEADERS
 	include/prerequisites.h
 	include/BuildConfig.h
 	include/InputManager.h
+	include/LightingManager.h
 	include/Renderer.h
 	include/Sky.h
 	include/Frustum.h

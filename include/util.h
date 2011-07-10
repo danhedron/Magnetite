@@ -51,22 +51,22 @@ public:
 		std::cout << "| " << text << std::endl;
 	}
 
-	static std::string toString(const size_t number)
+	static std::string toString(size_t number)
 	{
 		return itoa(number, 10);
 	}
 
-	static std::string toString(const int number)
+	static std::string toString(int number)
 	{
 		return itoa(number, 10);
 	}
 
-	static std::string toString(const long number)
+	static std::string toString(long number)
 	{
 		return itoa(number, 10);
 	}
 
-	static std::string toString(const float number)
+	static std::string toString(float number)
 	{
 		std::stringstream ss;
 		ss << number;

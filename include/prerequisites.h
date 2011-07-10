@@ -34,6 +34,7 @@ typedef BaseBlock* BlockPtr;
 typedef BlockPtr* BlockArray;
 typedef std::map<size_t,BaseBlock*> BlockList;
 typedef std::pair<const size_t,BaseBlock*> BlockPosPair;
+typedef unsigned char LightIndex;
 
 typedef std::vector<WorldNode*> NodeList;
 
@@ -47,4 +48,5 @@ typedef std::vector<WorldChunk*> ChunkList;
 #define CHUNK_SIZE (CHUNK_WIDTH*CHUNK_WIDTH*CHUNK_HEIGHT)
 #define NODE_SIZE ((CHUNK_HEIGHT/CHUNK_WIDTH))
 
+#define BLOCK_INDEX_2( x, y, z ) ( z * CHUNK_WIDTH * CHUNK_HEIGHT + y * CHUNK_WIDTH + x )
 #define BLOCK_INDEX( block ) (block->getZ() * CHUNK_WIDTH * CHUNK_HEIGHT + block->getY() * CHUNK_WIDTH + block->getX())

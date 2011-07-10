@@ -1,4 +1,5 @@
 #include "InputManager.h"
+#include <fstream>
 
 InputManager::InputManager()
 {
@@ -14,6 +15,29 @@ InputManager::InputManager()
 InputManager::~InputManager()
 {
 
+}
+
+void InputManager::loadInputs()
+{
+	std::ifstream stream("../config/inputs");
+	if( stream && !stream.bad() )
+	{
+		size_t line_c = 1;
+		while( !stream.eof() ) 
+		{
+			std::string event = "";
+			std::getline( stream, event, ':' );
+			std::string key = "";
+			std::getline( stream, key );
+			size_t evtId = atoi( event.c_str() );
+			size_t keyId = atoi( key.c_str() );
+			for( InputList::iterator it = mInputs.begin(); it != mInputs.end(); it++ )
+			{
+				if( it->event == evtId )
+					it->key = (sf::Key::Code)keyId;
+			}
+		}
+	}
 }
 
 std::string InputManager::inputToString( Inputs::Event evt )

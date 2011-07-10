@@ -75,6 +75,11 @@ public:
 	~World( void );
 
 	/**
+	 * Returns the color of a brightness level
+	 */
+	static float getLightColor( LightIndex light );
+
+	/**
 	 * Loads a world of the specified name
 	 */
 	void loadWorld( std::string name );

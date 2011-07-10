@@ -14,6 +14,8 @@ struct GLvertex {
 	float x, y, z;
 	float nx, ny, nz;
 	float u0, v0;
+	float r, g, b;
+	int padding[5];
 };
 typedef unsigned short GLedge;
 
@@ -65,7 +67,7 @@ public:
 	Renderer(void);
 	~Renderer(void);
 
-	static GLvertex vertex( float x, float y, float z, float nx = 0.f, float ny = 0.f, float nz = 0.f, float u = 0.f, float v = 0.f, float w = 0.f );
+	static GLvertex vertex( float x, float y, float z, float nx = 0.f, float ny = 0.f, float nz = 0.f, float u = 0.f, float v = 0.f, float r = 0.f, float g = 0.f, float b = 0.f );
 
 	/**
 	 * Rendermode enum
