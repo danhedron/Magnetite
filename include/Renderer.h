@@ -61,6 +61,8 @@ protected:
 	bool mDrawFrustum;
 	bool mDrawWorld;
 	
+	sf::RenderWindow* mWindow;
+
 	//ChunkGeomList mWorldBuffers;
 
 public:
@@ -82,7 +84,7 @@ public:
 	 * @param argc The number of arguments passed.
 	 * @param argv char pointer array
 	 */
-	void initialize(int *argc, char **argv);
+	void initialize(sf::RenderWindow& window);
 
 	/**
 	 * Sets up OGL for the specifed viewport.

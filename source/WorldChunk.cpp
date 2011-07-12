@@ -23,7 +23,6 @@ mUpdateTimer( 0 )
 
 WorldChunk::~WorldChunk(void)
 {
-	//TODO: FIX MEMORY LEAK HERE
 	for( size_t i = 0; i < CHUNK_SIZE; i++ ) {
 		if( mBlockData[i] != NULL )
 			delete mBlockData[i];

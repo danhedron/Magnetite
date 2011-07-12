@@ -14,7 +14,7 @@ class Character;
 class OpencraftCore
 {
 protected:
-	sf::Window	mWindow;
+	sf::RenderWindow	mWindow;
 	sf::Clock	mClock;
 	Renderer*	mRenderer;
 	TextureManager* mTextureManager;

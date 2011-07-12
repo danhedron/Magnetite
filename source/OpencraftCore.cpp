@@ -81,7 +81,7 @@ void OpencraftCore::createWindow(int *argc, char **argv)
 	mWindow.Create(sf::VideoMode(800,600,32), "Opencraft", sf::Style::Close | sf::Style::Resize, wnds);
 	mWindow.EnableKeyRepeat( false );
 	//mWindow.UseVerticalSync(true);
-	mRenderer->initialize(argc, argv);
+	mRenderer->initialize(mWindow);
 	mTextureManager->initalize();
 	mRenderer->resizeViewport(0,0,800,600);
 }

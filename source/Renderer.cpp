@@ -57,8 +57,10 @@ Renderer::~Renderer(void)
 		glDeleteBuffersARB(1, &chunkVbo);
 }
 
-void Renderer::initialize(int *argc, char **argv)
+void Renderer::initialize(sf::RenderWindow& window)
 {
+	mWindow = &window;
+
 	// Set color and depth clear value
 	glClearDepth(1.f);
 	glClearColor(0.f, 0.f, 0.f, 0.f);
@@ -72,7 +74,6 @@ void Renderer::initialize(int *argc, char **argv)
 	glLoadIdentity();
 	gluPerspective(90.f, 1.f, 0.1f, 500.f);
 
-	glutInit( argc, argv );
 	Vector3 vec(0, 10.0f, 10.0f);
 
 	OpencraftCore::Singleton->getTextureManager()->loadTexture("../resources/ui/crosshair.png");
@@ -463,37 +464,25 @@ void Renderer::_renderChunk( WorldChunk* chunk )
 
 void Renderer::drawStats(double dt, size_t chunkCount, World* world)
 {
-	// Switch to 2D for overlays
-	enable2D();
-	/*size_t memCurrent,memPeak,pagedCurrent,pagedPeak,pageFaults;
-	Util::getMemoryUsage(memCurrent,memPeak,pagedCurrent,pagedPeak,pageFaults);*/
-
-	char buff[500];
 	size_t percent = ( mBlTotal > 0 ? (mBlRendered*100)/(mBlTotal) : 0 );
-	sprintf( buff,  "Opencraft Performance:\n dt: %f\n %f FPS\n Avg: %u\n"
-					" Timescale: %f\n"
-					"World Stats:\n Blocks: %u/%u - %u%%\n Rendered Chunks: %u\nI: %u"
-					" Time: %u ( %u )\n"
-					"Camera:\n Position: %f %f %f",
-					dt, (1/dt), mFpsAvg,
-					OpencraftCore::Singleton->getTimescale(),
-					mBlRendered, mBlTotal, percent, chunkCount, 0,
-					world->getSky()->getTime() % DAY_LENGTH, world->getSky()->getTime(),
-					mCamera->getPosition().x,mCamera->getPosition().y,mCamera->getPosition().z);
-	std::string stats(buff);
 
-	drawText( stats, 6, 15 );
+	std::stringstream ss;
+	ss << "Opencraft Performance:" << std::endl;
+	ss << "\tdt: " << dt << std::endl;
+	ss << "\tFPS: " << (1.f/dt) << std::endl;
+	ss << "\tTimescale: " << OpencraftCore::Singleton->getTimescale() << std::endl;
+	ss << "World Stats: " << std::endl;
+	ss << "\tBlocks: " << mBlRendered << "/" << mBlTotal << " - " << percent <<  std::endl;
+	ss << "\tRendered Chunks: " << chunkCount << std::endl;
+	ss << "\tTime: " << world->getSky()->getTime() % DAY_LENGTH << std::endl;
+	ss << "Camera: " << std::endl;
+	ss << "\tPosition: " << Util::toString(mCamera->getPosition()) << std::endl;
 
-	disable2D();
+	drawText( ss.str(), 6, 15 );
 }
 
 void Renderer::drawBlockChooser( double dt )
 {
-	// Switch to 2D for overlays
-	enable2D();
-	/*size_t memCurrent,memPeak,pagedCurrent,pagedPeak,pageFaults;
-	Util::getMemoryUsage(memCurrent,memPeak,pagedCurrent,pagedPeak,pageFaults);*/
-
 	BlockFactoryList::iterator iter = FactoryManager::blockFactoryList.find(blockType);
 	if( iter == FactoryManager::blockFactoryList.end() )
 	{
@@ -501,14 +490,9 @@ void Renderer::drawBlockChooser( double dt )
 		blockType = iter->first;
 	}
 	
-	char buff[500];
-	sprintf( buff,  "Current Block: %s",
-					(*iter).first.c_str());
-	std::string stats(buff);
-
-	drawText( stats, 6, 200);
-
-	disable2D();
+	std::stringstream ss;
+	ss << "Current Block: " << iter->first << std::endl;
+	drawText( ss.str(), 6, 200);
 }
 
 void Renderer::drawCrosshair( double dt )
@@ -575,17 +559,11 @@ void Renderer::lastBlock()
 
 void Renderer::drawText(std::string text, int x, int y)
 {
-	stringvector lines = Util::split(text, '\n');
-	glColor3f(0,1,0);
-	size_t line = 0;
-	void* fnt = GLUT_BITMAP_9_BY_15;
-	for(stringvector::iterator it = lines.begin(); it != lines.end(); ++it) {
-		glRasterPos2i( x, y + (line * 16) );
-		for( std::string::iterator i = (*it).begin(); i != (*it).end(); ++i )
-		{
-			glutBitmapCharacter(fnt, *i);
-		}
-		line++;
-	}
+	mWindow->PreserveOpenGLStates(true);
+	sf::String drawableString(text, sf::Font::GetDefaultFont(), 14.5f);
+	drawableString.SetColor(sf::Color::Color(0,255,0));
+	drawableString.SetPosition( x, y );
+	mWindow->Draw(drawableString);
+	mWindow->PreserveOpenGLStates(false);
 }
 

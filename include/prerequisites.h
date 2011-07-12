@@ -3,7 +3,6 @@
  */
 #define NOMINMAX
 #include <GL/GLee.h>
-#include <GL/freeglut.h>
 #undef None
 #include <SFML/Window.hpp>
 #include <SFML/Window/OpenGL.hpp>

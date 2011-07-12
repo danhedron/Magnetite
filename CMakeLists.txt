@@ -98,14 +98,14 @@ include_directories(${PROJECT_SOURCE_DIR}/depends/include/)
 if(WIN32)
 	# Include GLee + Freeglut
 	target_link_libraries(OpenCraft ${PROJECT_SOURCE_DIR}/depends/lib/GLee.lib)
-	target_link_libraries(OpenCraft ${PROJECT_SOURCE_DIR}/depends/lib/freeglut.lib)
+	#target_link_libraries(OpenCraft ${PROJECT_SOURCE_DIR}/depends/lib/freeglut.lib)
 	# Windows Memory Usage
 	target_link_libraries(OpenCraft psapi.lib)
 	# 'fix' LIBC.lib error
 	set(CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"LIBC.lib\")
 else(WIN32)
 	target_link_libraries(OpenCraft ${PROJECT_SOURCE_DIR}/depends/lib/libGLee.so)
-	target_link_libraries(OpenCraft /usr/local/lib/libglut.so)
+	#target_link_libraries(OpenCraft /usr/local/lib/libglut.so)
 endif(WIN32)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
