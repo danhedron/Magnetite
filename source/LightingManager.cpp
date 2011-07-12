@@ -42,11 +42,5 @@ void LightingManager::lightColumn( WorldChunk* chunk, size_t x, size_t z, LightI
 		{
 			chunk->setLightLevel( x, y, z, 0 );
 		}
-
-		// now check for cover on all sides.
-		if( chunk->getBlockAt( x, y, z ) )
-		{
-
-		}
 	}
 }
