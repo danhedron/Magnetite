@@ -79,6 +79,11 @@ public:
 	WorldChunk* getRelativeChunk( short x, short y, short z );
 
 	/**
+	 * Tells surrounding chunks they need to update if the given parameter is at the edge of the chunk
+	 */
+	void updateSurrounding( short x, short y, short z );
+
+	/**
 	 * Returns a block if one exsists at the given position.
 	 * @param x X coordinate.
 	 * @param y Y coordinate.

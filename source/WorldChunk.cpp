@@ -110,6 +110,7 @@ void WorldChunk::addBlockToChunk(BaseBlock* block)
 		delete lb;
 	}
 	mBlockData[ k ] = block;
+	updateSurrounding(block->getX(), block->getY(), block->getZ());
 
 	if(block->isThinking())
 		mThinkingBlocks.insert( BlockList::value_type( k, block ) );
@@ -124,6 +125,7 @@ void WorldChunk::_blockMoved( BaseBlock* block, short x, short y, short z )
 	long kn = z * CHUNK_WIDTH * CHUNK_HEIGHT + y * CHUNK_WIDTH + x;
 	BlockPtr lb = mBlockData[ k ];
 	removeBlockAt( x, y, z );
+	updateSurrounding(x,y,z);
 	mBlockData[ k ] = block;
 	markModified();
 }
@@ -155,6 +157,7 @@ void WorldChunk::removeBlockAt(long x, long y, long z)
 			if( thinker != mThinkingBlocks.end() )
 				mThinkingBlocks.erase( thinker );
 		}
+		updateSurrounding( x, y, z);
 		delete it;
 		_blockVisible( it, false );
 		mBlockData[ k ] = NULL;
@@ -190,6 +193,49 @@ WorldChunk* WorldChunk::getRelativeChunk(short x, short y, short z)
 	Vector3 chunk = World::worldToChunks( Vector3( ( mX * CHUNK_WIDTH ) + x , ( mY * CHUNK_HEIGHT ) + y , ( mZ * CHUNK_WIDTH ) + z ) );
 	return OpencraftCore::Singleton->getWorld()->getChunk( chunk.x, chunk.y, chunk.z );
 	//return chunk;
+}
+
+void WorldChunk::updateSurrounding( short x, short y, short z )
+{
+	WorldChunk* c = NULL;
+	if( x == 0 )
+	{
+		c = getRelativeChunk( -1, 0, 0 );
+	}
+	else if( x == 15 )
+	{
+		c = getRelativeChunk( 1, 0, 0 );
+	}
+	if( c != NULL )
+	{
+		c->markModified();
+	}
+
+	if( y == 0 )
+	{
+		c = getRelativeChunk( 0, -1, 0 );
+	}
+	else if( y == 15 )
+	{
+		c = getRelativeChunk( 0, 1, 0 );
+	}
+	if( c != NULL )
+	{
+		c->markModified();
+	}
+
+	if( z == 0 )
+	{
+		c = getRelativeChunk( 0, 0, -1 );
+	}
+	else if( z == 15 )
+	{
+		c = getRelativeChunk( 0, 0, 1 );
+	}
+	if( c != NULL )
+	{
+		c->markModified();
+	}
 }
 
 BaseBlock* WorldChunk::getBlockAt(long x, long y, long z)
@@ -318,7 +364,6 @@ void WorldChunk::_blockVisible( BlockPtr &block, bool v )
 
 void WorldChunk::generate()
 {
-	Util::log("Generating chunk mesh");
 	if( mGeometry != NULL ) {
 		mGeometry->releaseBuffer();
 		delete[] mGeometry->vertexData;
@@ -399,8 +444,9 @@ void WorldChunk::requestGenerate()
 {
 	if( mHasChanged || !mHasGenerated ) {
 		updateVisibility();
-		if( !mHasGenerated )
+		if( !mHasGenerated ) {
 			generate();
+		}
 		mHasChanged = false;
 	}
 }
