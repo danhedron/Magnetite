@@ -23,7 +23,7 @@ void LightingManager::lightChunk( WorldChunk* chunk )
 
 void LightingManager::lightColumn( WorldChunk* chunk, size_t x, size_t z, LightIndex light )
 {
-	size_t currentLight = WorldChunk::Sunlight;
+	LightIndex currentLight = WorldChunk::Sunlight;
 	char directionFlags = 0; // Stores directions in which take us under cover.
 	bool oh_my_its_dark_in_here = false; // Have we gone under-cover
 	for( short y = CHUNK_HEIGHT - 1; y >= 0; y-- )
@@ -43,58 +43,63 @@ void LightingManager::lightColumn( WorldChunk* chunk, size_t x, size_t z, LightI
 			chunk->setLightLevel( x, y, z, 0 );
 		}
 
-		//Check -X 
-		if( chunk->getBlockAt(x-1, y, z) )
-		{
-			directionFlags |= NEG_X;
-		}
-		else if( (directionFlags & NEG_X) == NEG_X )
-		{
-			// light shadow
-			lightUnderground( chunk, x - 1, y, z, NEG_X, WorldChunk::Sunlight & 1 );
-		}
+		if( !oh_my_its_dark_in_here ) {
+			//Check -X 
+			if( chunk->getBlockAt(x - 1, y, z) )
+			{
+				directionFlags |= NEG_X;
+			}
+			else if( (directionFlags & NEG_X) == NEG_X )
+			{
+				// light shadow
+				lightUnderground( chunk, x - 1, y, z, NEG_X, WorldChunk::Sunlight | 1 );
+			}
 
-		//Check +X 
-		if( chunk->getBlockAt(x+1, y, z) )
-		{
-			directionFlags |= POS_X;
-		}
-		else if( (directionFlags & POS_X) == POS_X )
-		{
-			// light shadow
-			lightUnderground( chunk, x + 1, y, z, POS_X, WorldChunk::Sunlight & 1 );
-		}
+			//Check +X 
+			if( chunk->getBlockAt(x+1, y, z) )
+			{
+				directionFlags |= POS_X;
+			}
+			else if( (directionFlags & POS_X) == POS_X )
+			{
+				// light shadow
+				lightUnderground( chunk, x + 1, y, z, POS_X, WorldChunk::Sunlight | 1 );
+			}
 
-		//Check -Z
-		if( chunk->getBlockAt(x, y, z-1) )
-		{
-			directionFlags |= NEG_Z;
-		}
-		else if( (directionFlags & NEG_Z) == NEG_Z )
-		{
-			// light shadow
-			lightUnderground( chunk, x, y, z - 1, NEG_Z, WorldChunk::Sunlight & 1 );
-		}
+			//Check -Z
+			if( chunk->getBlockAt(x, y, z-1) )
+			{
+				directionFlags |= NEG_Z;
+			}
+			else if( (directionFlags & NEG_Z) == NEG_Z )
+			{
+				// light shadow
+				lightUnderground( chunk, x, y, z - 1, NEG_Z, WorldChunk::Sunlight | 1 );
+			}
 
-		//Check +Z 
-		if( chunk->getBlockAt(x, y, z+1) )
-		{
-			directionFlags |= POS_Z;
-		}
-		else if( (directionFlags & POS_Z) == POS_Z )
-		{
-			// light shadow
-			lightUnderground( chunk, x, y, z+1, POS_Z, WorldChunk::Sunlight & 1 );
+			//Check +Z 
+			if( chunk->getBlockAt(x, y, z+1) )
+			{
+				directionFlags |= POS_Z;
+			}
+			else if( (directionFlags & POS_Z) == POS_Z )
+			{
+				// light shadow
+				lightUnderground( chunk, x, y, z + 1, POS_Z, WorldChunk::Sunlight | 1 );
+			}
 		}
 	}
 }
 
 void LightingManager::lightUnderground( WorldChunk* chunk, size_t x, size_t startY, size_t z, size_t dir, LightIndex light )
 {
-	size_t currentLight = light;
-	
+	LightIndex currentLight = light;
 	for( short y = startY; y >= 0; y-- )
 	{
-		
+		// if we hit a block, stop
+		if( chunk->getBlockAt( x, y, z ) )
+			return;
+		// Set the light level 
+		chunk->setLightLevel( x, y, z, currentLight );
 	}
 }

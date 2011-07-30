@@ -92,7 +92,7 @@ void OpencraftCore::go(int *argc, char **argv)
 
 	// Print factory list for testing
 	FactoryManager::logFactories();
-
+	
 	int lastX = mWindow.GetWidth()/2;
 	int lastY = mWindow.GetHeight()/2;
 
@@ -126,6 +126,10 @@ void OpencraftCore::go(int *argc, char **argv)
 			if( (lEvt.Type == sf::Event::KeyReleased) &&
 				(lEvt.Key.Code == sf::Key::F3) ) {
 					mRenderer->toggleCameraFrustum();
+			}
+			if( (lEvt.Type == sf::Event::KeyReleased ) &&
+				(lEvt.Key.Code == sf::Key::F4 ) ) {
+				Util::setLogLevel( Util::Verbose );
 			}
 			if( (lEvt.Type == sf::Event::KeyReleased) &&
 				(lEvt.Key.Code == sf::Key::F2) ) {
@@ -252,7 +256,6 @@ World* OpencraftCore::getWorld()
 
 Character* OpencraftCore::createCharacter()
 {
-	Util::log("Size Of Block: " + Util::toString(sizeof BaseBlock));
 	if( mPlayer == NULL )
 		mPlayer = new Character();
 	mWindow.SetSize(mWindow.GetWidth(), mWindow.GetHeight());

@@ -36,18 +36,35 @@ void WorldChunk::initalize()
 	}
 } 
 
-void WorldChunk::setLightLevel( short x, short y, short z, char level )
+void WorldChunk::setLightLevel( short x, short y, short z, LightIndex level )
 {
 	mLightValues[BLOCK_INDEX_2( x, y, z )] = level;
+	//if( isEdge( x, y, z ) )
+		//updateSurrounding();
 }
 
 LightIndex WorldChunk::getLightLevel( short x, short y, short z )
 {
-	WorldChunk* chnk = getRelativeChunk( x, y, z );
-	if( chnk != this )
-		return Sunlight;//chnk->getLightLevel( x, y, z );
-	else if( chnk != NULL )
+	WorldChunk* chunk = getRelativeChunk( x, y, z );
+	if( chunk == this ) {
 		return mLightValues[BLOCK_INDEX_2( x, y, z )];
+	}
+	else if( chunk != NULL) {
+		if( x < 0 )
+			x += CHUNK_WIDTH;
+		else if( x >= CHUNK_WIDTH )
+			x -= CHUNK_WIDTH;
+		if( y < 0 )
+			y += CHUNK_HEIGHT;
+		else if( y >= CHUNK_HEIGHT )
+			y -= CHUNK_HEIGHT;
+		if( z < 0 )
+			z += CHUNK_WIDTH;
+		else if( z >= CHUNK_WIDTH )
+			z -= CHUNK_WIDTH;
+		return chunk->getLightLevel( x, y, z );
+	}
+		
 	return Sunlight;
 }
 
@@ -110,7 +127,8 @@ void WorldChunk::addBlockToChunk(BaseBlock* block)
 		delete lb;
 	}
 	mBlockData[ k ] = block;
-	updateSurrounding(block->getX(), block->getY(), block->getZ());
+	if( isEdge( block->getX(), block->getY(), block->getZ() ) ) 
+		updateSurrounding();
 
 	if(block->isThinking())
 		mThinkingBlocks.insert( BlockList::value_type( k, block ) );
@@ -125,7 +143,8 @@ void WorldChunk::_blockMoved( BaseBlock* block, short x, short y, short z )
 	long kn = z * CHUNK_WIDTH * CHUNK_HEIGHT + y * CHUNK_WIDTH + x;
 	BlockPtr lb = mBlockData[ k ];
 	removeBlockAt( x, y, z );
-	updateSurrounding(x,y,z);
+	if( isEdge( x, y, z ) ) 
+		updateSurrounding();
 	mBlockData[ k ] = block;
 	markModified();
 }
@@ -157,7 +176,8 @@ void WorldChunk::removeBlockAt(long x, long y, long z)
 			if( thinker != mThinkingBlocks.end() )
 				mThinkingBlocks.erase( thinker );
 		}
-		updateSurrounding( x, y, z);
+		if( isEdge( x, y, z ) ) 
+			updateSurrounding();
 		delete it;
 		_blockVisible( it, false );
 		mBlockData[ k ] = NULL;
@@ -189,53 +209,32 @@ WorldChunk* WorldChunk::getRelativeChunk(short x, short y, short z)
 		z += CHUNK_WIDTH;
 	else if( z >= CHUNK_WIDTH )
 		z -= CHUNK_WIDTH;*/
-
-	Vector3 chunk = World::worldToChunks( Vector3( ( mX * CHUNK_WIDTH ) + x , ( mY * CHUNK_HEIGHT ) + y , ( mZ * CHUNK_WIDTH ) + z ) );
-	return OpencraftCore::Singleton->getWorld()->getChunk( chunk.x, chunk.y, chunk.z );
+	return OpencraftCore::Singleton->getWorld()->getChunk( mX + std::floorl( (float)x/CHUNK_WIDTH ) , mY + std::floorl( (float)y/CHUNK_HEIGHT ) , mZ + std::floorl( (float)z/CHUNK_WIDTH ) );
 	//return chunk;
 }
 
-void WorldChunk::updateSurrounding( short x, short y, short z )
+void WorldChunk::updateSurrounding( )
 {
 	WorldChunk* c = NULL;
-	if( x == 0 )
-	{
-		c = getRelativeChunk( -1, 0, 0 );
-	}
-	else if( x == 15 )
-	{
-		c = getRelativeChunk( 1, 0, 0 );
-	}
-	if( c != NULL )
-	{
-		c->markModified();
-	}
+	c = getRelativeChunk( -1, 0, 0 );
+	if( c ) c->markModified();
+	c = getRelativeChunk( 16, 0, 0 );
+	if( c ) c->markModified();
+	c = getRelativeChunk( 0, -1, 0 );
+	if( c ) c->markModified();
+	c = getRelativeChunk( 0, 16, 0 );
+	if( c ) c->markModified();
+	c = getRelativeChunk( 0, 0, -1 );
+	if( c ) c->markModified();
+	c = getRelativeChunk( 0, 0, 16 );
+	if( c ) c->markModified();
+}
 
-	if( y == 0 )
-	{
-		c = getRelativeChunk( 0, -1, 0 );
-	}
-	else if( y == 15 )
-	{
-		c = getRelativeChunk( 0, 1, 0 );
-	}
-	if( c != NULL )
-	{
-		c->markModified();
-	}
-
-	if( z == 0 )
-	{
-		c = getRelativeChunk( 0, 0, -1 );
-	}
-	else if( z == 15 )
-	{
-		c = getRelativeChunk( 0, 0, 1 );
-	}
-	if( c != NULL )
-	{
-		c->markModified();
-	}
+bool WorldChunk::isEdge( short x, short y, short z )
+{
+	if( x <= 0 || y <= 0 || z <= 0 ) return true;
+	if( x >= CHUNK_WIDTH-1 || y >= CHUNK_HEIGHT -1|| z >= CHUNK_WIDTH-1 ) return true;
+	return false;
 }
 
 BaseBlock* WorldChunk::getBlockAt(long x, long y, long z)
@@ -245,7 +244,6 @@ BaseBlock* WorldChunk::getBlockAt(long x, long y, long z)
 	WorldChunk* chunk = getRelativeChunk( x, y, z );
 	if( chunk != this ) {
 		// If the coordinates fall outside of this chunk, silently return the chunk containing that relative block.
-		WorldChunk* relChunk = getRelativeChunk( x, y, z );
 		if( x < 0 )
 			x += CHUNK_WIDTH;
 		else if( x >= CHUNK_WIDTH )
@@ -258,10 +256,12 @@ BaseBlock* WorldChunk::getBlockAt(long x, long y, long z)
 			z += CHUNK_WIDTH;
 		else if( z >= CHUNK_WIDTH )
 			z -= CHUNK_WIDTH;
-		if( relChunk )
-			return relChunk->getBlockAt(x, y, z);
-		else 
+		if( chunk ) {
+			return chunk->getBlockAt(x, y, z);
+		}
+		else {
 			return NULL;
+		}
 		//return NULL;
 	}
 	size_t k =  z * CHUNK_WIDTH * CHUNK_HEIGHT + y * CHUNK_WIDTH + x;
@@ -413,6 +413,11 @@ void WorldChunk::markModified()
 void WorldChunk::notifyGenerated()
 {
 	mHasGenerated = true;
+}
+
+void WorldChunk::forceGenerate()
+{
+	mHasGenerated = false;
 }
 
 GLgeometry* WorldChunk::getGeometry()

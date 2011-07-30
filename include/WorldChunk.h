@@ -49,7 +49,7 @@ public:
 	/**
 	 * Sets the light level for the index specifed.
 	 */
-	void setLightLevel( short x, short y, short z, char level );
+	void setLightLevel( short x, short y, short z, LightIndex level );
 
 	/**
 	 * Returns the lightlevel for the given index.
@@ -79,9 +79,14 @@ public:
 	WorldChunk* getRelativeChunk( short x, short y, short z );
 
 	/**
-	 * Tells surrounding chunks they need to update if the given parameter is at the edge of the chunk
+	 * Tells surrounding chunks they need to update
 	 */
-	void updateSurrounding( short x, short y, short z );
+	void updateSurrounding();
+
+	/**
+	 * Returns true if the given index is at the edge of the chunk
+	 */
+	bool isEdge( short x, short y, short z );
 
 	/**
 	 * Returns a block if one exsists at the given position.
@@ -136,6 +141,11 @@ public:
 	 * Returns wether or not this chunk has had it's geometry 
 	 */
 	bool hasGenerated();
+
+	/**
+	 * Force this chunk to re-cook it's geometry next update
+	 */
+	void forceGenerate();
 
 	/**
 	 * Tells the chunk it's geometry has been cooked.

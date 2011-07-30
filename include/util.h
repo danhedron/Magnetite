@@ -46,9 +46,26 @@ public:
 #endif
 	}
 
-	static void log(const std::string text)
+	enum LogLevel {
+		Verbose = 1,
+		Info = 2,
+		Warning = 3,
+		Error = 4
+	};
+
+private:
+	static LogLevel _loglevel;
+public:
+
+	static void setLogLevel( const LogLevel ll )
 	{
-		std::cout << "| " << text << std::endl;
+		_loglevel = ll;
+	}
+
+	static void log(const std::string text, const LogLevel ll = Info )
+	{
+		if( ll >= _loglevel )
+			std::cout << "| " << text << std::endl;
 	}
 
 	static std::string toString(size_t number)
