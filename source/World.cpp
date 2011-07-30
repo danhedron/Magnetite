@@ -41,6 +41,8 @@ float World::getLightColor( LightIndex light )
 {
 	if( light == WorldChunk::Sunlight )
 		return 1.f;
+	else if( light == (WorldChunk::Sunlight | 1) )
+		return (1.f * 0.9f);
 	else
 		return 0.1f;
 }
