@@ -33,6 +33,111 @@ void GLgeometry::bindToBuffer()
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+void GLshader::create()
+{
+	if( ref != 0 || source.length() == 0 )
+		return;
+
+	ref = glCreateShader( type );
+	if( ref == 0 )
+		return;
+
+	const char* src = source.c_str();
+	glShaderSource( ref, 1, &src, NULL );
+	glCompileShader( ref );
+
+	GLint success;
+	glGetObjectParameterivARB( ref, GL_COMPILE_STATUS, &success );
+	if( success ) {
+		Util::log("Shader Compiled OK");
+	}
+	else {
+		Util::log("Error compiling shader: ");
+		GLint blen = 0;	
+		GLsizei slen = 0;
+
+		glGetShaderiv(ref, GL_INFO_LOG_LENGTH , &blen);       
+		if (blen > 1)
+		{
+			GLchar* compiler_log = (GLchar*)malloc(blen);
+			glGetInfoLogARB(ref, blen, &slen, compiler_log);
+			Util::log("\t" + std::string(compiler_log));
+			free (compiler_log);
+		}
+	}
+}
+
+void GLprogram::link()
+{
+	if( ref != 0 ) {
+		Util::log("Program already linked");
+		return;
+	}
+	if( vertex == NULL ) {
+		Util::log("Vertex Shader missing");
+		return;
+	}
+	if( fragment == NULL ) {
+		Util::log("Fragment Shader missing");
+		return;
+	}
+	if( vertex->ref == 0 )
+	{
+		// Init vertex shader.
+		vertex->create();
+		if( vertex->ref == 0 ) {
+			return;
+		}
+	}
+	if( fragment->ref == 0 )
+	{
+		// Init fragment shader.
+		fragment->create();
+		if( fragment->ref == 0 ) {
+			return;
+		}
+	}
+
+	ref = glCreateProgram();
+
+	glAttachShader( ref, vertex->ref );
+	glAttachShader( ref, fragment->ref );
+
+	glLinkProgram( ref );
+
+	GLint linked;
+	glGetProgramiv(ref, GL_LINK_STATUS, &linked);
+	if (linked)
+	{
+	   Util::log("Program Linked OK");
+	}
+	else
+	{
+		Util::log("Error Linking Program:");
+		GLint blen = 0;	
+		GLsizei slen = 0;
+
+		glGetProgramiv(ref, GL_INFO_LOG_LENGTH , &blen);       
+		if (blen > 1)
+		{
+			GLchar* compiler_log = (GLchar*)malloc(blen);
+			glGetInfoLogARB(ref, blen, &slen, compiler_log);
+			Util::log("\t" + std::string(compiler_log));
+			free (compiler_log);
+		}
+	}
+}
+
+void GLprogram::bindUniformTexture( std::string var, GLint unit )
+{
+	//if( mUniforms.find( var ) != mUniforms.end() ) return;
+	const char* v = var.c_str();
+	GLuint loc = glGetUniformLocation( ref, v );
+	glUseProgram( ref );
+	glUniform1i( loc, unit );
+	mUniforms[var] = loc;
+}
+
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
 Renderer::Renderer(void)
@@ -55,6 +160,11 @@ Renderer::~Renderer(void)
 {
 	if( chunkVbo != 0 )
 		glDeleteBuffersARB(1, &chunkVbo);
+
+	for( std::map<std::string, GLshader*>::iterator it = mShaders.begin(); it != mShaders.end(); it++ ) {
+		glDeleteShader( it->second->ref );
+		mShaders.erase( it++ );
+	}
 }
 
 void Renderer::initialize(sf::RenderWindow& window)
@@ -77,6 +187,11 @@ void Renderer::initialize(sf::RenderWindow& window)
 	Vector3 vec(0, 10.0f, 10.0f);
 
 	OpencraftCore::Singleton->getTextureManager()->loadTexture("../resources/ui/crosshair.png");
+
+	// Test shader code.
+	mWorldProgram.vertex = loadShader("w_vertex.glsl", GL_VERTEX_SHADER);
+	mWorldProgram.fragment = loadShader("w_fragment.glsl", GL_FRAGMENT_SHADER);
+	mWorldProgram.link();
 }
 
 void Renderer::resizeViewport(size_t x, size_t y, size_t w, size_t h)
@@ -319,6 +434,43 @@ void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvert
 	//	ind += 4;
 	//}
 }
+
+GLshader* Renderer::loadShader( std::string filename, GLenum type )
+{
+	if( mShaders.find(filename) != mShaders.end() ) {
+		return mShaders[filename];
+	}
+
+	std::string shaderPath = "../resources/shaders/";
+	std::ifstream file( (shaderPath+filename).c_str() );
+	if( !file ) return NULL;
+
+	std::stringstream ss;
+	std::string s;
+	while( !file.eof() ) {
+		std::getline( file, s );
+		ss << s;
+	}
+
+	GLshader* shader = new GLshader();
+	shader->source = ss.str();
+	shader->filename = filename;
+	shader->type = type;
+
+	mShaders[filename] = shader;
+
+	return shader;
+}
+
+void Renderer::unloadShader( std::string filename )
+{
+	if( mShaders.find(filename) != mShaders.end() ) {
+		glDeleteShader( mShaders[filename]->ref );
+		mShaders.erase( mShaders.find(filename) );
+	}
+
+}
+
 static size_t rendered;
 void Renderer::render(double dt, World* world)
 {
@@ -335,16 +487,6 @@ void Renderer::render(double dt, World* world)
 
 	NodeList nodes = world->getTopNodes(); // world->getChunks();
 
-	// Testing 123
-	/*if( mCamera->getFrustum().intersectsAABB( Vector3(-1.f, 0.f, -1.f), Vector3(1.f, 128.f, 1.f) ) != Frustum::OUTSIDE )
-	{
-		Util::log("Observing Origin");
-	}
-	else
-	{
-		Util::log("Not Observing Origin");
-	}*/
-
 	GLtexture* tex = OpencraftCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/world.png");
 	if(mRenderMode == RENDER_WIRE)
 		tex = OpencraftCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/vistest.png");
@@ -353,6 +495,12 @@ void Renderer::render(double dt, World* world)
 	mCamera->applyMatrix( true, false );
 
 	world->getSky()->renderSky();
+
+	//mWorldProgram.bindUniformTexture( "worldDiffuse", tex->glID );
+	GLint texLoc = glGetUniformLocation( mWorldProgram.ref, "worldDiffuse");
+	glUseProgram( mWorldProgram.ref );
+
+	glUniform1i( texLoc, 0 );
 
 	if( mDrawWorld ) 
 	{
@@ -365,6 +513,7 @@ void Renderer::render(double dt, World* world)
 		if( tex != 0 )
 		{
 			glEnable(GL_TEXTURE_2D);
+			glActiveTexture( GL_TEXTURE0 );
 			glBindTexture(GL_TEXTURE_2D, tex->glID);
 		}
 
@@ -378,6 +527,7 @@ void Renderer::render(double dt, World* world)
 		if( tex != 0 )
 		{
 			glDisable(GL_TEXTURE_2D);
+			glActiveTexture( GL_TEXTURE0 );
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
@@ -387,6 +537,8 @@ void Renderer::render(double dt, World* world)
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisable(GL_CULL_FACE);
 	}
+
+	glUseProgram( 0 );
 
 	if( mDrawFrustum )
 	{

@@ -36,6 +36,27 @@ struct GLbuffer {
 	GLuint index;
 };
 
+struct GLshader {
+	GLuint ref;
+	GLenum type;
+	std::string source;
+	std::string filename;
+
+	GLshader() { ref = 0; type = 0; }
+	void create();
+};
+
+struct GLprogram {
+	GLuint ref;
+	GLshader* vertex;
+	GLshader* fragment;
+	std::map<std::string, GLuint> mUniforms;
+
+	GLprogram() { ref = 0; vertex = NULL; fragment = NULL; }
+	void link();
+	void bindUniformTexture( std::string var, GLint unit );
+};
+
 //typedef std::map<WorldChunk*,GLeometry> ChunkGeomList;
 //typedef std::map<WorldChunk*,GLbuffer> ChunkGeomList;
 
@@ -64,6 +85,10 @@ protected:
 	sf::RenderWindow* mWindow;
 
 	//ChunkGeomList mWorldBuffers;
+
+	std::map<std::string, GLshader*> mShaders;
+
+	GLprogram mWorldProgram;
 
 public:
 	Renderer(void);
@@ -112,6 +137,16 @@ public:
 	void setCamera( Camera* cam );
 	
 	Camera* getCamera();
+
+	/**
+	 * Loads a named shader from a file
+	 */
+	GLshader* loadShader( std::string filename, GLenum type );
+
+	/**
+	 * Unloads a named shader
+	 */
+	void unloadShader( std::string filename );
 
 	void render( double dt, World* world );
 
