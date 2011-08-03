@@ -33,7 +33,7 @@ public:
 	 * Public Enumerators
 	 */
 	enum LightInfo {
-		Sunlight = ( 1<<(sizeof(char)*8 - 1))
+		Sunlight = ( 1<<(sizeof(char) * 7))
 	};
 
 	/**
@@ -87,6 +87,11 @@ public:
 	 * Returns true if the given index is at the edge of the chunk
 	 */
 	bool isEdge( short x, short y, short z );
+
+	/**
+	 * Returns true if the given block has neighbours.
+	 */
+	bool hasNeighbours( short x, short y, short z );
 
 	/**
 	 * Returns a block if one exsists at the given position.

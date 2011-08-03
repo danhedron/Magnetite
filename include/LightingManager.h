@@ -22,6 +22,8 @@ public:
 	static void lightChunk( WorldChunk* chnk );
 	static void lightColumn( WorldChunk* chunk, size_t x, size_t z, LightIndex light );
 	static void lightUnderground( WorldChunk* chunk, size_t x, size_t startY, size_t z, size_t dir, LightIndex light );
+
+	static void gatherLight( WorldChunk* chunk );
 };
 
 #endif

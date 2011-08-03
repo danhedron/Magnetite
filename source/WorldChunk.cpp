@@ -230,6 +230,34 @@ void WorldChunk::updateSurrounding( )
 	if( c ) c->markModified();
 }
 
+bool WorldChunk::hasNeighbours( short x, short y, short z )
+{
+	WorldChunk* chunk = getRelativeChunk( x, y, z );
+	if( chunk != this && chunk != NULL ) {
+		if( x < 0 )
+			x += CHUNK_WIDTH;
+		else if( x >= CHUNK_WIDTH )
+			x -= CHUNK_WIDTH;
+		if( y < 0 )
+			y += CHUNK_HEIGHT;
+		else if( y >= CHUNK_HEIGHT )
+			y -= CHUNK_HEIGHT;
+		if( z < 0 )
+			z += CHUNK_WIDTH;
+		else if( z >= CHUNK_WIDTH )
+			z -= CHUNK_WIDTH;
+		return chunk->hasNeighbours( x, y, z );
+	}
+
+	if( getBlockAt(x - 1, y, z) ) return true;
+	if( getBlockAt(x + 1, y, z) ) return true;
+	if( getBlockAt(x, y - 1, z) ) return true;
+	if( getBlockAt(x, y + 1, z ) ) return true;
+	if( getBlockAt(x, y, z - 1) ) return true;
+	if( getBlockAt(x, y, z + 1) ) return true;
+	return false;
+}
+
 bool WorldChunk::isEdge( short x, short y, short z )
 {
 	if( x <= 0 || y <= 0 || z <= 0 ) return true;

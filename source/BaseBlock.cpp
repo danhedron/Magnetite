@@ -31,6 +31,11 @@ void BaseBlock::_setChunk( WorldChunk* chnk )
 	mChunk = chnk;
 }
 
+int BaseBlock::getLightLevel()
+{
+	return 0;
+}
+
 short BaseBlock::getX() {
 	return (mDataFlags & BMASK_XPOS);
 }

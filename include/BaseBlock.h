@@ -64,6 +64,11 @@ public:
 	virtual bool isThinking() { return false; }
 
 	/**
+	 * Returns the level of light emited by this block
+	 */
+	virtual int getLightLevel();
+
+	/**
 	 * Called when a nearby block changes.
 	 * @param face The direction of the changed block.
 	 */

@@ -89,6 +89,7 @@ protected:
 	std::map<std::string, GLshader*> mShaders;
 
 	GLprogram mWorldProgram;
+	GLprogram mLightingProgram;
 
 public:
 	Renderer(void);
@@ -101,7 +102,7 @@ public:
 	 */
 	enum {
 		RENDER_SOLID,
-		RENDER_WIRE
+		RENDER_LIGHTING
 	};
 
 	/**

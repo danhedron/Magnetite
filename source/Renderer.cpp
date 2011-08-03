@@ -192,6 +192,10 @@ void Renderer::initialize(sf::RenderWindow& window)
 	mWorldProgram.vertex = loadShader("w_vertex.glsl", GL_VERTEX_SHADER);
 	mWorldProgram.fragment = loadShader("w_fragment.glsl", GL_FRAGMENT_SHADER);
 	mWorldProgram.link();
+
+	mLightingProgram.vertex = loadShader("w_vertex.glsl", GL_VERTEX_SHADER);
+	mLightingProgram.fragment = loadShader("l_fragment.glsl", GL_FRAGMENT_SHADER);
+	mLightingProgram.link();
 }
 
 void Renderer::resizeViewport(size_t x, size_t y, size_t w, size_t h)
@@ -287,152 +291,7 @@ GLvertex Renderer::vertex(float x, float y, float z, float nx, float ny, float n
 
 void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges)
 {
-	short x = 0, y = 0;
-
-	// Calculate the UVs based on visibility.
-	/*float y = 0.f;
-	for( size_t f = 0; f < 6; f++ ) {
-		if( (block->mViewFlags & (1<<f)) == (1<<f) ) 
-			y += 0.0625f;
-	}
-
-	rect.x = 0;
-	rect.w = 0.0625f;
-	rect.y = y;
-	rect.h = 0.0625f;*/
-
-	/* Face -Z */
-	//if((block->mViewFlags & FACE_BACK) == FACE_BACK ) {
-	//	block->getTextureCoords( FACE_BACK, x, y );
-	//	GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
-
-	//	data[ind + 0] = vertex( block->getX() + 1.0f, block->getY() + 1.0f,	block->getZ() + 1.0f, // Coordinates
-	//							0.0f, 0.0f, -1.0f,
-	//							rect.x, rect.y );
-	//	data[ind + 1] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() + 1.0f, // Coordinates
-	//							0.0f, 0.0f, -1.0f,
-	//							rect.x + rect.w, rect.y );
-	//	data[ind + 2] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
-	//							0.0f, 0.0f, -1.0f,
-	//							rect.x + rect.w, rect.y + rect.h );
-	//	data[ind + 3] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
-	//							0.0f, 0.0f, -1.0f,
-	//							rect.x, rect.y + rect.h );
-	//	edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
-	//	edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
-	//	eInd += 6;
- //		ind += 4;
-	//}
-	///* Face +Z */
-	//if((block->mViewFlags & FACE_FORWARD) == FACE_FORWARD ) {
-	//	block->getTextureCoords( FACE_FORWARD, x, y );
-	//	GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
-
-	//	data[ind + 0] = vertex( block->getX() + 1.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
-	//							0.0f, 0.0f, 1.0f,
-	//							rect.x, rect.y );
-	//	data[ind + 1] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
-	//							0.0f, 0.0f, 1.0f,
-	//							rect.x + rect.w, rect.y );
-	//	data[ind + 2] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
-	//							0.0f, 0.0f, 1.0f,
-	//							rect.x + rect.w, rect.y + rect.h );
-	//	data[ind + 3] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
-	//							0.0f, 0.0f, 1.0f,
-	//							rect.x, rect.y + rect.h );
-	//	edges[eInd + 5] = ind + 2; edges[eInd + 4] = ind + 1; edges[eInd + 3] = ind + 0;
-	//	edges[eInd + 2] = ind + 2; edges[eInd + 1] = ind + 0; edges[eInd + 0] = ind + 3;
-	//	eInd += 6;
-	//	ind += 4;
-	//}
-	///* Face +X */
-	//if((block->mViewFlags & FACE_RIGHT) == FACE_RIGHT) {
-	//	block->getTextureCoords( FACE_RIGHT, x, y );
-	//	GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
-
-	//	data[ind + 0] = vertex( block->getX() + 1.0f, block->getY() + 1.0f, block->getZ() + 1.0f, // Coordinates
-	//							1.0f, 0.0f, 0.0f,
-	//							rect.x + rect.w, rect.y );
-	//	data[ind + 1] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
-	//							1.0f, 0.0f, 0.0f,
-	//							rect.x + rect.w, rect.y + rect.h );
-	//	data[ind + 2] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
-	//							1.0f, 0.0f, 0.0f,
-	//							rect.x, rect.y + rect.h );
-	//	data[ind + 3] = vertex( block->getX() + 1.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
-	//							1.0f, 0.0f, 0.0f,
-	//							rect.x, rect.y );
-	//	edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
-	//	edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
-	//	eInd += 6;
-	//	ind += 4;
-	//}
-	///* Face -Y */
-	//if((block->mViewFlags & FACE_BOTTOM) == FACE_BOTTOM) {
-	//	block->getTextureCoords( FACE_BOTTOM, x, y );
-	//	GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
-
-	//	data[ind + 0] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
-	//							0.0f, -1.0f, 0.0f,
-	//							rect.x, rect.y );
-	//	data[ind + 1] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
-	//							0.0f, -1.0f, 0.0f,
-	//							rect.x + rect.w, rect.y );
-	//	data[ind + 2] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
-	//							0.0f, -1.0f, 0.0f,
-	//							rect.x + rect.w, rect.y + rect.h );
-	//	data[ind + 3] = vertex( block->getX() + 1.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
-	//							0.0f, -1.0f, 0.0f,
-	//							rect.x, rect.y + rect.h );
-	//	edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
-	//	edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
-	//	eInd += 6;
-	//	ind += 4;
-	//}
-	///* Face +Y */
-	//if((block->mViewFlags & FACE_TOP) == FACE_TOP) {
-	//	block->getTextureCoords( FACE_TOP, x, y );
-	//	GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
-
-	//	data[ind + 0] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() + 1.0f, // Coordinates
-	//							0.0f, 1.0f, 0.0f,
-	//							rect.x, rect.y );
-	//	data[ind + 1] = vertex( block->getX() + 1.0f, block->getY() + 1.0f, block->getZ() + 1.0f, // Coordinates
-	//							0.0f, 1.0f, 0.0f,
-	//							rect.x + rect.w, rect.y );
-	//	data[ind + 2] = vertex( block->getX() + 1.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
-	//							0.0f, 1.0f, 0.0f,
-	//							rect.x + rect.w, rect.y + rect.h );
-	//	data[ind + 3] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
-	//							0.0f, 1.0f, 0.0f,
-	//							rect.x, rect.y + rect.h );
-	//	edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
-	//	edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
-	//	eInd += 6;
-	//	ind += 4;
-	//}
-	///* Face -X */
-	//if((block->mViewFlags & FACE_LEFT) == FACE_LEFT) {
-	//	block->getTextureCoords( FACE_LEFT, x, y );
-	//	GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
-
-	//	data[ind + 0] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() - 0.0f, // Coordinates
-	//							-1.0f, 0.0f, 0.0f,
-	//							rect.x + rect.w, rect.y );
-	//	data[ind + 1] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() - 0.0f, // Coordinates
-	//							-1.0f, 0.0f, 0.0f,
-	//							rect.x + rect.w, rect.y + rect.h );
-	//	data[ind + 2] = vertex( block->getX() - 0.0f, block->getY() - 0.0f, block->getZ() + 1.0f, // Coordinates
-	//							-1.0f, 0.0f, 0.0f,
-	//							rect.x, rect.y + rect.h );
-	//	data[ind + 3] = vertex( block->getX() - 0.0f, block->getY() + 1.0f, block->getZ() + 1.0f, // Coordinates
-	//							-1.0f, 0.0f, 0.0f,
-	//							rect.x, rect.y );
-	//	edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
-	//	edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
-	//	eInd += 6;
-	//	ind += 4;
-	//}
+	
 }
 
 GLshader* Renderer::loadShader( std::string filename, GLenum type )
@@ -488,19 +347,19 @@ void Renderer::render(double dt, World* world)
 	NodeList nodes = world->getTopNodes(); // world->getChunks();
 
 	GLtexture* tex = OpencraftCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/world.png");
-	if(mRenderMode == RENDER_WIRE)
-		tex = OpencraftCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/vistest.png");
-
 	
 	mCamera->applyMatrix( true, false );
 
 	world->getSky()->renderSky();
 
-	//mWorldProgram.bindUniformTexture( "worldDiffuse", tex->glID );
-	GLint texLoc = glGetUniformLocation( mWorldProgram.ref, "worldDiffuse");
-	glUseProgram( mWorldProgram.ref );
-
-	glUniform1i( texLoc, 0 );
+	if( mRenderMode == RENDER_SOLID ) {
+		GLint texLoc = glGetUniformLocation( mWorldProgram.ref, "worldDiffuse");
+		glUseProgram( mWorldProgram.ref );
+		glUniform1i( texLoc, 0 );
+	}
+	else if ( mRenderMode == RENDER_LIGHTING ) {
+		glUseProgram( mLightingProgram.ref );
+	}
 
 	if( mDrawWorld ) 
 	{

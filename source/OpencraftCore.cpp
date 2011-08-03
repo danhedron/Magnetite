@@ -119,7 +119,7 @@ void OpencraftCore::go(int *argc, char **argv)
 			if( (lEvt.Type == sf::Event::KeyPressed) &&
 				(lEvt.Key.Code == sf::Key::R) ) {
 					if(mRenderer->getRenderMode() == Renderer::RENDER_SOLID)
-						mRenderer->setRenderMode(Renderer::RENDER_WIRE);
+						mRenderer->setRenderMode(Renderer::RENDER_LIGHTING);
 					else
 						mRenderer->setRenderMode(Renderer::RENDER_SOLID);
 			}
