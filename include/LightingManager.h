@@ -7,7 +7,7 @@ class WorldChunk;
 class LightingManager
 {
 protected:
-	size_t litChunks;	
+	size_t litChunks;
 public:
 	LightingManager();
 	~LightingManager();

@@ -15,7 +15,7 @@ struct IntOffset {
 		int x, y, z;
 };
 
-#define point_count 64
+#define point_count 128
 
 struct IntRay {
 	float left, right, top, bottom, front, back;
@@ -26,7 +26,20 @@ struct IntRay {
 
 struct Sample {
 	float left, right, top, bottom, front, back;
-	IntRay rays[ray_count];
+	Sample() {
+		right = 0; left = 0; top = 0; bottom = 0; front = 0; back = 0;
+	}
+	float getSample( float right, float left, float top, float bottom, float front, float back) {
+		float t = 0;
+		t += ( left / this->left );
+		t += ( right / this->right );
+		t += ( top / this->top );
+		t += ( bottom / this->bottom );
+		t += ( front / this->front );
+		t += ( back / this->back );
+		t /= 6;
+		return t;
+	}
 };
 
 static int ry = 0;
@@ -34,57 +47,75 @@ static int ry = 0;
 void LightingManager::gatherLight( WorldChunk* chunk )
 {
 	BaseBlock* block = NULL;
+	static Sample smp;
+	static IntRay rays[ray_count];
+	static bool madeRays = false;
 
-	// Generate some useful rays.
-	int n = ray_count;
-	Vector3 pts[ray_count];
-	float inc = 3.141f * ( 3 - sqrt( 5.f ) );
-	float off = 2 / (float)n;
-	for( int k = 0; k < n; k++ ) {
-		float y = k * off - 1 + (off / 2);
-		float r = sqrt( 1 - y*y );
-		float phi = k * inc;
-		pts[k].x = std::cos(phi)*r;
-		pts[k].y = y;
-		pts[k].z = std::sin(phi)*r;
-	}
-
-	IntRay rays[ray_count];
-
-	size_t r = 0;
-
-	for( int i = 0; i < ray_count; i++ ) {
-		IntRay current;
-
-		float sx = pts[i].x * 0.2f;
-		float sy = pts[i].y * 0.2f;
-		float sz = pts[i].z * 0.2f;
-
-		float x = 0, y = 0, z = 0;
-
-		int cx = 0, cy = 0, cz = 0;
-
-		int p = 0;
-		while( p < point_count ) {
-			int nx = x;
-			int ny = y;
-			int nz = z;
-			if( nx != cx || ny != cy || nz != cz ) {
-				current.points[p].depth = sqrt( x*x + y*y + z*z );
-				current.points[p].x = nx;
-				current.points[p].y = ny;
-				current.points[p].z = nz;
-				cx = nx;
-				cy = ny;
-				cz = nz;
-				p++;
-			}
-			x += sx;
-			y += sy;
-			z += sz;
+	if( !madeRays ) {
+		// Generate some useful rays.
+		int n = ray_count;
+		Vector3 pts[ray_count];
+		float inc = 3.141f * ( 3 - sqrt( 5.f ) );
+		float off = 2 / (float)n;
+		for( int k = 0; k < n; k++ ) {
+			float y = k * off - 1 + (off / 2);
+			float r = sqrt( 1 - y*y );
+			float phi = k * inc;
+			pts[k].x = std::cos(phi)*r;
+			pts[k].y = y;
+			pts[k].z = std::sin(phi)*r;
 		}
 
-		rays[i] = current;
+		size_t r = 0;
+
+		for( int i = 0; i < ray_count; i++ ) {
+			IntRay current;
+
+			float sx = pts[i].x * 0.2f;
+			float sy = pts[i].y * 0.2f;
+			float sz = pts[i].z * 0.2f;
+
+			float x = 0, y = 0, z = 0;
+
+			int cx = 0, cy = 0, cz = 0;
+
+			int p = 0;
+			while( p < point_count ) {
+				int nx = x;
+				int ny = y;
+				int nz = z;
+				if( nx != cx || ny != cy || nz != cz ) {
+					current.points[p].depth = sqrt( x*x + y*y + z*z );
+					current.points[p].x = nx;
+					current.points[p].y = ny;
+					current.points[p].z = nz;
+					cx = nx;
+					cy = ny;
+					cz = nz;
+					p++;
+				}
+				x += sx;
+				y += sy;
+				z += sz;
+			}
+
+			current.right	= ( pts[i].x < 0 ? -pts[i].x : 0 );
+			current.left	= ( pts[i].x > 0 ? pts[i].x : 0 );
+			current.top		= ( pts[i].y < 0 ? -pts[i].y : 0 );
+			current.bottom	= ( pts[i].y > 0 ? pts[i].y : 0 );
+			current.front	= ( pts[i].z < 0 ? -pts[i].z : 0 );
+			current.back	= ( pts[i].z > 0 ? pts[i].z : 0 );
+
+			smp.right += current.right;
+			smp.left += current.left;
+			smp.top += current.top;
+			smp.bottom += current.bottom;
+			smp.front += current.front;
+			smp.back += current.back;
+
+			rays[i] = current;
+		}
+		madeRays = true;
 	}
 
 	IntRay *ray, *rayend;
@@ -92,18 +123,15 @@ void LightingManager::gatherLight( WorldChunk* chunk )
 	int xoff, yoff, zoff;
 	BaseBlock* obs = NULL;
 	bool collided;
+	bool outside;
 	int rt = 0;
 	int rc = 0;
-	float right = 0, left = 0, top = 0, bottom = 0, forward = 0, back = 0;
-
+	float right = 0, left = 0, top = 0, bottom = 0, front = 0, back = 0;
 	for( short x = 0; x < CHUNK_WIDTH; x++ ) {
 		for( short y = 0; y < CHUNK_HEIGHT; y++ ) {
 			for( short z = 0; z < CHUNK_WIDTH; z++ ) {
 				block = chunk->getBlockAt( x, y, z );
-				rt = 0;
-				rc = 0;
-				ry = 0;
-				right = 0; left = 0; top = 0; bottom = 0; forward = 0; back = 0;
+				right = 0; left = 0; top = 0; bottom = 0; front = 0; back = 0;
 				if( block == NULL && chunk->hasNeighbours( x, y, z ) ) {
 					for( ray = &rays[0], rayend = &rays[0 + ray_count]; ray < rayend; ray++ ) {
 						collided = false;
@@ -111,14 +139,13 @@ void LightingManager::gatherLight( WorldChunk* chunk )
 							xoff = x + offs->x;
 							yoff = y + offs->y;
 							zoff = z + offs->z;
-							if( xoff < x - CHUNK_WIDTH/2 || xoff >= x + CHUNK_WIDTH/2 ) {
+							if( xoff < x - CHUNK_WIDTH/4 || xoff >= x + CHUNK_WIDTH/4 ) {
 								break;
-							} else 
-							if( yoff < 0 || yoff >= CHUNK_HEIGHT ) {
-								// Reached the outside.
-								chunk->setLightLevel( x, y, z, WorldChunk::Sunlight );
+							} 
+							else if( yoff < 0 || yoff >= CHUNK_HEIGHT ) {
 								break;
-							} else if( zoff < z - CHUNK_WIDTH/2 || zoff >= z + CHUNK_WIDTH/2 ) {
+							} 
+							else if( zoff < z - CHUNK_WIDTH/4 || zoff >= z + CHUNK_WIDTH/4 ) {
 								break;
 							}
 							else {
@@ -130,18 +157,16 @@ void LightingManager::gatherLight( WorldChunk* chunk )
 							}
 						}
 						if( collided == false ) {
-							right += ( pts[rt].x < 0 ? -pts[rt].x : 0 );
-							left += ( pts[rt].x > 0 ? pts[rt].x : 0 );
-							top += ( pts[rt].y < 0 ? -pts[rt].y : 0 );
-							bottom += ( pts[rt].y > 0 ? pts[rt].y : 0 );
-							forward += ( pts[rt].z < 0 ? -pts[rt].z : 0 );
-							back += ( pts[rt].z > 0 ? pts[rt].z : 0 );
-							rc++;
+							right += ray->right;
+							left += ray->left;
+							top += ray->top;
+							bottom += ray->bottom;
+							front += ray->front;
+							back += ray->back;
 						}
-						rt++;
 					}
-					chunk->setLightLevel( x, y, z, (((right + left + top + bottom + forward + back) / ray_count)) * 256 );
-					//Util::log( Util::toString( (((right + left + top + bottom + forward + back) / ray_count)) * 256 ) );
+					chunk->setLightLevel( x, y, z, smp.getSample(right, left, top, bottom, front, back) * 256);
+					//Util::log( Util::toString( smp.getSample(right, left, top, bottom, front, back) ) );
 				}
 			}
 		}

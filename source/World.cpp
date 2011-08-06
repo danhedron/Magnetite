@@ -39,7 +39,7 @@ World::~World()
 
 float World::getLightColor( LightIndex light )
 {
-	return ( 0.1f + ( 0.9f * ( (float)light / 256.f ) ) );
+	return ( 0.1f + ( 0.9f * ( (float)light/256 ) ) );
 }
 
 void World::newWorld( std::string name )

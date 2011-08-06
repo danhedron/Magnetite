@@ -114,4 +114,6 @@ float ChunkGenerator::smooth( float x, float z )
 			}
 		}
 	}
+	chunk->generate();
+	chunk->forceGenerate();
 }
