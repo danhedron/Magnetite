@@ -295,11 +295,11 @@ void World::createWorldFolder()
 	char currPath[FILENAME_MAX];
 	getcwd(currPath, sizeof currPath);
 	std::string path = currPath;
-	if( mkdir( (path + "\\worlds\\").c_str() ) != ENOENT ) {
-		if( mkdir( (path + "\\worlds\\" + mWorldName + "\\").c_str() ) != ENOENT ) {
-			mkdir( (path + "\\worlds\\" + mWorldName + "\\chunks").c_str() );
-		}
-	}
+//	if( mkdir( (path + "\\worlds\\").c_str() ) != ENOENT ) {
+//		if( mkdir( (path + "\\worlds\\" + mWorldName + "\\").c_str() ) != ENOENT ) {
+//			mkdir( (path + "\\worlds\\" + mWorldName + "\\chunks").c_str() );
+//		}
+//	}
 }
 
 void World::saveAllChunks()
