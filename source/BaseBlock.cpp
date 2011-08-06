@@ -85,7 +85,7 @@ void BaseBlock::readFromStream( std::ifstream& stream )
 void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges)
 {
 	if( mChunk == NULL ) {
-		Util::log("Can't generate geometry without a chunk?");
+		Util::log("Can't generate geometry without a chunk?", Util::Error);
 		return;
 	}
 	short x = 0, y = 0;
