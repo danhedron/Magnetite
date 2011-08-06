@@ -110,7 +110,7 @@ void OpencraftCore::go(int *argc, char **argv)
 	createWindow(argc, argv);
 
 	// Print factory list for testing
-	FactoryManager::logFactories();
+	FactoryManager::getManager().logFactories();
 	
 	int lastX = mWindow.GetWidth()/2;
 	int lastY = mWindow.GetHeight()/2;
@@ -308,7 +308,7 @@ void OpencraftCore::placeEyeBlock()
 		Util::log("Ray Hit: " + Util::toString( cIndex ) + " Normal: " + Util::toString( ray.hitNormal ) );
 		WorldChunk* chunk = mWorld->getChunk( cIndex.x, cIndex.y, cIndex.z );
 		if(chunk) {
-			BaseBlock* block = FactoryManager::createBlock(	mRenderer->blockType );
+			BaseBlock* block = FactoryManager::getManager().createBlock(	mRenderer->blockType );
 			if( block != NULL ) {
 				block->setPosition( bIndex );
 				chunk->addBlockToChunk( block );
