@@ -7,6 +7,7 @@ class TextureManager;
 class InputManager;
 class World;
 class Character;
+class BaseGame;
 
 /** @class OpencraftCore
  * Responsible for managing stuff
@@ -21,8 +22,10 @@ protected:
 	InputManager*	mInputManager;
 	World*		mWorld;
 	bool		mContinue;
-	Character*	mPlayer;
+	std::vector<Character*>	mCharacters;
 	float		mTimescale;
+
+	BaseGame*	mGame;
 public:
 	OpencraftCore(void);
 	~OpencraftCore(void);
@@ -38,6 +41,16 @@ public:
 	TextureManager *getTextureManager();
 
 	/**
+	 * @return a pointer to the renderer
+	 */
+	Renderer* getRenderer();
+
+	/**
+	 * @return a pointer to the game object
+	 */
+	BaseGame* getGame();
+
+	/**
 	 * Removes the block the player is looking at
 	 */
 	void removeEyeBlock();
@@ -46,6 +59,11 @@ public:
 	 * Places a block where the player is looking
 	 */
 	void placeEyeBlock();
+
+	/**
+	 * Starts a new game of the specified type
+	 */
+	void startGame( const std::string& type );
 
 	/**
 	 * Creates a new world
@@ -73,9 +91,19 @@ public:
 	Character* createCharacter();
 
 	/**
-	 * Returns the player's character
+	 * Destroys a character
 	 */
-	Character* getPlayer();
+	void destroyCharacter( Character* c );
+
+	/**
+	 * Player Input - Movement
+	 */
+	void inputMovement( const Vector3 &v );
+
+	/**
+	 * Player Input - Mouse
+	 */
+	void mouseMoved( const float x, const float y );
 
 	/** 
 	 * Returns the timescale

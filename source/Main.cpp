@@ -69,7 +69,7 @@ int main( int argc, char** argv ) {
 	}
 	OpencraftCore core;
 
-	core.newWorld("test");
+	core.startGame("default");
 
 	core.go(&argc, argv);
 

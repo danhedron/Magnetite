@@ -90,6 +90,11 @@ public:
 		return ss.str();
 	}
 
+	static std::string toString( const bool b )
+	{
+		return b ? "True" : "False";
+	}
+
 	static std::string toString(const Vector3 &vec)
 	{
 		return toString(vec.x) + "," + toString(vec.y) + "," + toString(vec.z);
