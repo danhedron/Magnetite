@@ -561,7 +561,7 @@ void Renderer::drawText(std::string text, int x, int y)
 {
 	mWindow->PreserveOpenGLStates(true);
 	sf::String drawableString(text, sf::Font::GetDefaultFont(), 14.5f);
-	drawableString.SetColor(sf::Color::Color(0,255,0));
+	drawableString.SetColor(sf::Color(0,255,0));
 	drawableString.SetPosition( x, y );
 	mWindow->Draw(drawableString);
 	mWindow->PreserveOpenGLStates(false);
