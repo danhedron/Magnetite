@@ -1,5 +1,6 @@
 #include "LightingManager.h"
 #include "WorldChunk.h"
+#include "math.h"
 
 LightingManager::LightingManager()
 : litChunks(0)
@@ -61,9 +62,9 @@ void LightingManager::gatherLight( WorldChunk* chunk )
 			float y = k * off - 1 + (off / 2);
 			float r = sqrt( 1 - y*y );
 			float phi = k * inc;
-			pts[k].x = std::cos(phi)*r;
+			pts[k].x = cos(phi)*r;
 			pts[k].y = y;
-			pts[k].z = std::sin(phi)*r;
+			pts[k].z = sin(phi)*r;
 		}
 
 		size_t r = 0;
