@@ -7,6 +7,7 @@
 #include "World.h"
 #include "Character.h"
 #include "BlockFactory.h"
+#include <ctime>
 
 OpencraftCore* OpencraftCore::Singleton = 0;
 
@@ -40,6 +41,9 @@ void globalEventHandler( const InputEvent& evt )
 	if( evt.event == Inputs::SPRINT ) {
 		OpencraftCore::Singleton->getPlayer()->enableSprint( evt.down );
 	}
+	if( evt.event == Inputs::SCREENSHOT && evt.down == true ) {
+		OpencraftCore::Singleton->screenshot();
+	}
 }
 
 OpencraftCore::OpencraftCore(void)
@@ -61,6 +65,7 @@ mLastY( 0.f )
 	mInputManager->setEventCallback( Inputs::LEFT, &globalEventHandler );
 	mInputManager->setEventCallback( Inputs::RIGHT, &globalEventHandler );
 	mInputManager->setEventCallback( Inputs::SPRINT, &globalEventHandler );
+	mInputManager->setEventCallback( Inputs::SCREENSHOT, &globalEventHandler );
 }
 
 OpencraftCore::~OpencraftCore(void)
@@ -84,6 +89,20 @@ void OpencraftCore::createWindow(int *argc, char **argv)
 	mRenderer->initialize(mWindow);
 	mTextureManager->initalize();
 	mRenderer->resizeViewport(0,0,800,600);
+}
+
+void OpencraftCore::screenshot()
+{
+	sf::Image screen = mWindow.Capture();
+	time_t rawt = time( NULL );
+	tm* t = localtime( &rawt );
+	char tstr[80];
+	strftime(tstr, 80, "%Y-%m-%d_%H-%M-%S", t);
+	std::string fname("opencraft_");
+	fname.append( tstr );
+	fname.append(".png");
+	Util::log("Saving screenshot to: " + fname);
+	screen.SaveToFile(fname);
 }
 
 void OpencraftCore::go(int *argc, char **argv) 
@@ -132,10 +151,6 @@ void OpencraftCore::go(int *argc, char **argv)
 				Util::setLogLevel( Util::Verbose );
 			}
 			if( (lEvt.Type == sf::Event::KeyReleased) &&
-				(lEvt.Key.Code == sf::Key::F2) ) {
-					mRenderer->setWorldVisible( !mRenderer->isWorldVisible() );
-			}
-			if( (lEvt.Type == sf::Event::KeyReleased) &&
 				(lEvt.Key.Code == sf::Key::F) ) {
 					mPlayer->enableFlying( !mPlayer->isFlying() );
 					Util::log( (Util::toString(mPlayer->isFlying())) + " Flying");
@@ -143,10 +158,6 @@ void OpencraftCore::go(int *argc, char **argv)
 			if( (lEvt.Type == sf::Event::KeyReleased) &&
 				(lEvt.Key.Code == sf::Key::F3) ) {
 					mRenderer->toggleCameraFrustum();
-			}
-			if( (lEvt.Type == sf::Event::KeyReleased) &&
-				(lEvt.Key.Code == sf::Key::F2) ) {
-					mRenderer->setWorldVisible( !mRenderer->isWorldVisible() );
 			}
 			if( (lEvt.Type == sf::Event::KeyReleased) &&
 				(lEvt.Key.Code == sf::Key::F) ) {

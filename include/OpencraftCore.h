@@ -82,6 +82,11 @@ public:
 	 */
 	float getTimescale();
 
+	/**
+	 *
+	 */
+	void screenshot();
+
 	float mLastX;
 	float mLastY;
 

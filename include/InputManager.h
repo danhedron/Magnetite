@@ -17,7 +17,8 @@ namespace Inputs {
 		SPRINT,
 		JUMP,
 		PRIMARY,
-		SECONDARY
+		SECONDARY,
+		SCREENSHOT
 	};
 };
 
