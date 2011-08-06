@@ -34,6 +34,7 @@ configure_file(
 set(OPENCRAFT_SOURCES
 	source/OpencraftCore.cpp
 	source/Main.cpp
+	source/BaseGame.cpp
 	source/Renderer.cpp
 	source/InputManager.cpp
 	source/LightingManager.cpp
@@ -60,6 +61,7 @@ set(OPENCRAFT_SOURCES
 set(OPENCRAFT_HEADERS
 	include/OpencraftCore.h
 	include/prerequisites.h
+	include/BaseGame.h
 	include/BuildConfig.h
 	include/InputManager.h
 	include/LightingManager.h
