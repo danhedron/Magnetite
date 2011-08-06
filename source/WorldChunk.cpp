@@ -6,6 +6,7 @@
 #include "OpencraftCore.h"
 #include "World.h"
 #include "LightingManager.h"
+#include "math.h"
 
 WorldChunk::WorldChunk(long x, long y, long z)
 : mX( x ),
@@ -209,7 +210,7 @@ WorldChunk* WorldChunk::getRelativeChunk(short x, short y, short z)
 		z += CHUNK_WIDTH;
 	else if( z >= CHUNK_WIDTH )
 		z -= CHUNK_WIDTH;*/
-	return OpencraftCore::Singleton->getWorld()->getChunk( mX + std::floorl( (float)x/CHUNK_WIDTH ) , mY + std::floorl( (float)y/CHUNK_HEIGHT ) , mZ + std::floorl( (float)z/CHUNK_WIDTH ) );
+	return OpencraftCore::Singleton->getWorld()->getChunk( mX + floorl( (float)x/CHUNK_WIDTH ) , mY + floorl( (float)y/CHUNK_HEIGHT ) , mZ + floorl( (float)z/CHUNK_WIDTH ) );
 	//return chunk;
 }
 
