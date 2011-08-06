@@ -80,7 +80,7 @@ float ChunkGenerator::smooth( float x, float z )
 						type = "dirt";
 					if( y > total -1 )
 						type = "grass";
-					BaseBlock* block = FactoryManager::createBlock(type);
+					BaseBlock* block = FactoryManager::getManager().createBlock(type);
 					if( block ) {
 						block->setPosition( x, y, z );
 						chunk->addBlockToChunk( block );
@@ -105,7 +105,7 @@ float ChunkGenerator::smooth( float x, float z )
 			for( int z = 0; z < CHUNK_WIDTH; z++ ) {
 				std::string type = "stone";
 				for( int y = 0; y < CHUNK_HEIGHT; y++ ) {
-					BaseBlock* block = FactoryManager::createBlock(type);
+					BaseBlock* block = FactoryManager::getManager().createBlock(type);
 					if( block ) {
 						block->setPosition( x, y, z );
 						chunk->addBlockToChunk( block );

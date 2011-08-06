@@ -18,19 +18,24 @@ public:
 	/**
 	 * Contains the list of factories that can create blocks.
 	 */
-	static BlockFactoryList blockFactoryList;
+	BlockFactoryList blockFactoryList;
+	static FactoryManager& getManager()
+	{
+		static FactoryManager fmgr;
+		return fmgr;
+	}
 	/**
 	 * Registers a new factory 
 	 * @param factory Factory Object.
 	 */
-	static void registerFactory( BaseBlockFactory* factory )
+	void registerFactory( BaseBlockFactory* factory )
 	{
-		FactoryManager::blockFactoryList.insert( BlockFactoryList::value_type( factory->getType(), factory ) );
+		blockFactoryList.insert( BlockFactoryList::value_type( factory->getType(), factory ) );
 	}
 	/**
 	 * Logs available factories to the log
 	 */
-	static void logFactories()
+	void logFactories()
 	{
 		Util::log("Block Types:");
 		for( BlockFactoryList::iterator it = blockFactoryList.begin(); it != blockFactoryList.end(); ++it )
@@ -39,7 +44,7 @@ public:
 	/**
 	 * Creates a factory of the specifed type
 	 */
-	static BaseBlock* createBlock( std::string type ) {
+	BaseBlock* createBlock( std::string type ) {
 		BlockFactoryList::iterator it = blockFactoryList.find( type );
 		if( it != blockFactoryList.end() ) {
 			return (*it).second->create();

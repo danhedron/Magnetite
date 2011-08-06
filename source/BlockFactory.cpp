@@ -1,12 +1,10 @@
 #include "BlockFactory.h"
 
-BlockFactoryList FactoryManager::blockFactoryList = BlockFactoryList();
-
 BaseBlockFactory::BaseBlockFactory( std::string type )
 { 
 	typeName = type; 
 	// Register this factory with the factory manager.
-	FactoryManager::registerFactory( this );
+	FactoryManager::getManager().registerFactory( this );
 }
 
 std::string BaseBlockFactory::getType() 

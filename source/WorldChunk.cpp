@@ -81,11 +81,11 @@ void WorldChunk::fillWithTestData()
 				{
 					BaseBlock* block = NULL;
 					if( y == 9 )
-						block = FactoryManager::createBlock("grass");
+						block = FactoryManager::getManager().createBlock("grass");
 					else if( y == 8 || y == 7 )
-						block = FactoryManager::createBlock("dirt");
+						block = FactoryManager::getManager().createBlock("dirt");
 					else
-						block = FactoryManager::createBlock("stone");
+						block = FactoryManager::getManager().createBlock("stone");
 					block->setPosition( x, y, z );
 					addBlockToChunk( block );
 				}
@@ -523,7 +523,7 @@ void WorldChunk::readFromStream( std::ifstream& stream )
 		}
 
 		//Try to create that block.
-		BaseBlock* block = FactoryManager::createBlock(type);
+		BaseBlock* block = FactoryManager::getManager().createBlock(type);
 		if( block ) {
 			block->readFromStream( stream );
 			addBlockToChunk( block );

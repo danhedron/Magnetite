@@ -494,10 +494,10 @@ void Renderer::drawStats(double dt, size_t chunkCount, World* world)
 
 void Renderer::drawBlockChooser( double dt )
 {
-	BlockFactoryList::iterator iter = FactoryManager::blockFactoryList.find(blockType);
-	if( iter == FactoryManager::blockFactoryList.end() )
+	BlockFactoryList::iterator iter = FactoryManager::getManager().blockFactoryList.find(blockType);
+	if( iter == FactoryManager::getManager().blockFactoryList.end() )
 	{
-		iter = FactoryManager::blockFactoryList.begin();
+		iter =FactoryManager::getManager().blockFactoryList.begin();
 		blockType = iter->first;
 	}
 	
@@ -546,10 +546,10 @@ void Renderer::drawCrosshair( double dt )
 
 void Renderer::nextBlock()
 {
-	BlockFactoryList::iterator iter = FactoryManager::blockFactoryList.find(blockType);
-	if( iter == FactoryManager::blockFactoryList.end() || ++iter == FactoryManager::blockFactoryList.end() )
+	BlockFactoryList::iterator iter = FactoryManager::getManager().blockFactoryList.find(blockType);
+	if( iter == FactoryManager::getManager().blockFactoryList.end() || ++iter == FactoryManager::getManager().blockFactoryList.end() )
 	{
-		iter = FactoryManager::blockFactoryList.begin();
+		iter = FactoryManager::getManager().blockFactoryList.begin();
 	}
 
 	blockType = iter->first;
@@ -557,10 +557,10 @@ void Renderer::nextBlock()
 
 void Renderer::lastBlock()
 {
-	BlockFactoryList::iterator iter = FactoryManager::blockFactoryList.find(blockType);
-	if( iter == FactoryManager::blockFactoryList.begin() )
+	BlockFactoryList::iterator iter = FactoryManager::getManager().blockFactoryList.find(blockType);
+	if( iter == FactoryManager::getManager().blockFactoryList.begin() )
 	{
-		iter = FactoryManager::blockFactoryList.end();
+		iter = FactoryManager::getManager().blockFactoryList.end();
 	}
 	--iter;
 
