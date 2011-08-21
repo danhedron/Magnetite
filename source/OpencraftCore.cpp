@@ -8,9 +8,12 @@
 #include "Character.h"
 #include "BlockFactory.h"
 #include "BaseGame.h"
+#include "BulletDebug.h"
 #include <ctime>
 
 OpencraftCore* OpencraftCore::Singleton = 0;
+static GLDebugDrawer debug;
+
 
 /* Simple events */
 void globalEventHandler( const InputEvent& evt )
@@ -28,7 +31,12 @@ mTextureManager( NULL ),
 mInputManager( NULL ),
 mTimescale( 1.f ),
 mLastX( 0.f ),
-mLastY( 0.f )
+mLastY( 0.f ),
+mPBroadphase( NULL ),
+mPCConfig( NULL ),
+mCCDispatch ( NULL ),
+mSolver( NULL ),
+mPhysicsWorld( NULL )
 {
 	OpencraftCore::Singleton = this;
 	mRenderer = new Renderer();
@@ -38,8 +46,10 @@ mLastY( 0.f )
 	mInputManager->setEventCallback( Inputs::BACK, &globalEventHandler );
 	mInputManager->setEventCallback( Inputs::LEFT, &globalEventHandler );
 	mInputManager->setEventCallback( Inputs::RIGHT, &globalEventHandler );
+	mInputManager->setEventCallback( Inputs::JUMP, &globalEventHandler );
 	mInputManager->setEventCallback( Inputs::SPRINT, &globalEventHandler );
 	mInputManager->setEventCallback( Inputs::SCREENSHOT, &globalEventHandler );
+	mInputManager->setEventCallback( Inputs::FLY, &globalEventHandler );
 }
 
 OpencraftCore::~OpencraftCore(void)
@@ -49,9 +59,21 @@ OpencraftCore::~OpencraftCore(void)
 	delete mRenderer;
 	delete mTextureManager;
 	delete mInputManager;
+
+	mPhysicsWorld->removeRigidBody( mGroundBody );
+
+	delete mGroundBody;
+	delete mGroundShape;
+	delete mGroundState;
+
+	delete mPhysicsWorld;
+	delete mSolver;
+	delete mCCDispatch;
+	delete mPCConfig;
+	delete mPBroadphase;
 }
 
-void OpencraftCore::createWindow(int *argc, char **argv)
+void OpencraftCore::init(int *argc, char **argv)
 {
 	sf::WindowSettings wnds;
 	wnds.DepthBits = 24;
@@ -61,8 +83,33 @@ void OpencraftCore::createWindow(int *argc, char **argv)
 	mWindow.EnableKeyRepeat( false );
 	//mWindow.UseVerticalSync(true);
 	mRenderer->initialize(mWindow);
+	wglSwapIntervalEXT(1); // Enable VSYNC, for greater justice
 	mTextureManager->initalize();
 	mRenderer->resizeViewport(0,0,800,600);
+	initalizePhysics();
+}
+
+void OpencraftCore::initalizePhysics()
+{
+	mPBroadphase = new btDbvtBroadphase();
+	mPCConfig = new btDefaultCollisionConfiguration();
+	mCCDispatch = new btCollisionDispatcher(mPCConfig);
+	mSolver = new btSequentialImpulseConstraintSolver();
+	mPhysicsWorld = new btDiscreteDynamicsWorld( mCCDispatch, mPBroadphase, mSolver, mPCConfig );
+	mPhysicsWorld->setGravity( btVector3( 0.f, -9.81f, 0.f ) );
+
+	mGroundShape = new btStaticPlaneShape( btVector3(0, 1, 0), 0 );
+	mGroundState = new btDefaultMotionState;
+	btRigidBody::btRigidBodyConstructionInfo ci( 0, mGroundState, mGroundShape, btVector3(0,0,0) );
+	mGroundBody = new btRigidBody( ci );
+	mPhysicsWorld->addRigidBody( mGroundBody );
+	debug.setDebugMode( btIDebugDraw::DBG_DrawWireframe | btIDebugDraw::DBG_DrawAabb );
+	mPhysicsWorld->setDebugDrawer( &debug );
+}
+
+btDiscreteDynamicsWorld* OpencraftCore::getPhysicsWorld()
+{
+	return mPhysicsWorld;
 }
 
 void OpencraftCore::screenshot()
@@ -85,11 +132,11 @@ void OpencraftCore::startGame( const std::string& type )
 	if( mGame != NULL ) 
 		Util::log("Starting game: " + mGame->getName() );
 	mGame->_startGameSingle();
-
+	
+	newWorld("test");
+	
 	// No multiplayer yet so just force player join
 	mGame->_playerJoined();
-
-	newWorld("test");
 }
 
 void OpencraftCore::inputMovement( const Vector3 &v )
@@ -102,16 +149,15 @@ void OpencraftCore::mouseMoved( const float x, const float y )
 	mGame->_mouseMoved( x, y );
 }
 
-void OpencraftCore::go(int *argc, char **argv) 
+void OpencraftCore::go() 
 {
-	createWindow(argc, argv);
-
 	// Print factory list for testing
 	FactoryManager::getManager().logFactories();
 	
 	int lastX = mWindow.GetWidth()/2;
 	int lastY = mWindow.GetHeight()/2;
 
+	mClock.Reset();
 	while(mContinue && mWindow.IsOpened()) {
 		float lDelta = mClock.GetElapsedTime();
 		mClock.Reset();
@@ -139,22 +185,30 @@ void OpencraftCore::go(int *argc, char **argv)
 					else
 						mRenderer->setRenderMode(Renderer::RENDER_SOLID);
 			}
-			if( (lEvt.Type == sf::Event::KeyReleased) &&
-				(lEvt.Key.Code == sf::Key::F3) ) {
-					mRenderer->toggleCameraFrustum();
+
+			//==========
+			//= Debug Buttons
+			//==========
+			if( (lEvt.Type == sf::Event::KeyReleased ) &&
+				(lEvt.Key.Code == sf::Key::F1 ) ) {
+				mRenderer->setDebugMode( Renderer::DEBUG_OFF );
+			}
+			if( (lEvt.Type == sf::Event::KeyReleased ) &&
+				(lEvt.Key.Code == sf::Key::F3 ) ) {
+				mRenderer->setDebugMode( Renderer::DEBUG_STATS );
 			}
 			if( (lEvt.Type == sf::Event::KeyReleased ) &&
 				(lEvt.Key.Code == sf::Key::F4 ) ) {
+				mRenderer->setDebugMode( Renderer::DEBUG_PHYSICS );
+			}
+			if( (lEvt.Type == sf::Event::KeyReleased ) &&
+				(lEvt.Key.Code == sf::Key::F5 ) ) {
 				Util::setLogLevel( Util::Verbose );
 			}
 			if( (lEvt.Type == sf::Event::KeyReleased) &&
 				(lEvt.Key.Code == sf::Key::F) ) {
 					//mPlayer->enableFlying( !mPlayer->isFlying() );
 					//Util::log( (Util::toString(mPlayer->isFlying())) + " Flying");
-			}
-			if( (lEvt.Type == sf::Event::KeyReleased) &&
-				(lEvt.Key.Code == sf::Key::F3) ) {
-					mRenderer->toggleCameraFrustum();
 			}
 			if( (lEvt.Type == sf::Event::KeyReleased) &&
 				(lEvt.Key.Code == sf::Key::F) ) {
@@ -198,8 +252,12 @@ void OpencraftCore::go(int *argc, char **argv)
 			}
 		}
 
-		lDelta *= mTimescale;
+		Util::log("Beginning Step");
 
+		lDelta *= mTimescale;
+		
+		mPhysicsWorld->stepSimulation( lDelta );
+		
 		//Ensure each loaded chunk is updated before being sent to the GPU
 		mWorld->update( lDelta );
 
@@ -251,7 +309,6 @@ void OpencraftCore::newWorld( std::string name )
 
 	mWorld = new World();
 	mWorld->newWorld( name );
-	createCharacter();
 }
 
 void OpencraftCore::unloadWorld()

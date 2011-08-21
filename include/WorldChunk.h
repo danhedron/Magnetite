@@ -22,9 +22,14 @@ protected:
 	bool mHasChanged;
 	bool mHasGenerated;
 	long mVisibleFaces;
-	void _blockVisible( BlockPtr &block, bool v );
+	void _blockVisible( size_t index, bool v );
 	GLgeometry* mGeometry;
 	float mUpdateTimer;
+
+	btCollisionShape*	mPhysicsShape;
+	btDefaultMotionState*	mPhysicsState;
+	btTriangleMesh*			mPhysicsMesh;
+	btRigidBody*			mPhysicsBody;
 public:
 	WorldChunk(long x, long y, long z);
 	~WorldChunk(void);
@@ -60,13 +65,19 @@ public:
 	 * Adds an already created block to the chunk.
 	 * @param block pointer to block
 	 */
-	void addBlockToChunk(BaseBlock* block);
+	void addBlockToChunk(BaseBlock* block, short x, short y, short z);
 
 	/**
 	 * Removes the block at the specifed location
 	 *
 	 */
 	void removeBlockAt(long x, long y, long z);
+
+	/**
+	 * Removes the block at the specifed index
+	 *
+	 */
+	void removeBlockAt( long index );
 
 	/**
 	 * Adds a block to the delete list so that a block can delete itself
@@ -161,6 +172,11 @@ public:
 	 * Generate geometry for this CHUNK
 	 */
 	void generate();
+
+	/**
+	 * Generates the physics object for this chunk's geometry
+	 */
+	void generatePhysics();
 
 	/**
 	 * Returns this chunk's geometry data

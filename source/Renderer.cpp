@@ -148,6 +148,7 @@ mScrHeight( 0 ),
 mBlRendered( 0 ),
 mBlTotal( 0 ),
 mRenderMode( RENDER_SOLID ),
+mDebugMode( DEBUG_OFF ),
 mFpsAvg( 0 ),
 mCamera( NULL ),
 blockType( "" ),
@@ -255,6 +256,11 @@ size_t Renderer::getRenderMode()
 	return mRenderMode;
 }
 
+void Renderer::setDebugMode( size_t debugMode )
+{
+	mDebugMode = debugMode;
+}
+
 Camera* Renderer::getCamera()
 {
 	return mCamera;
@@ -285,7 +291,7 @@ void Renderer::toggleCameraFrustum()
 
 GLvertex Renderer::vertex(float x, float y, float z, float nx, float ny, float nz, float u, float v, float r, float g, float b)
 {
-	GLvertex vert = { x, y, z, nx, ny, nz, u, v, r, g, b };
+	GLvertex vert = { x, y, z, u, v, r, g, b }; //nx, ny, nz,
 	return vert;
 }
 
@@ -364,7 +370,7 @@ void Renderer::render(double dt, World* world)
 	if( mDrawWorld ) 
 	{
 		glEnableClientState(GL_VERTEX_ARRAY);
-		glEnableClientState(GL_NORMAL_ARRAY);
+		//glEnableClientState(GL_NORMAL_ARRAY);
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 		glEnableClientState(GL_COLOR_ARRAY);
 		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -392,7 +398,7 @@ void Renderer::render(double dt, World* world)
 
 		glDisableClientState(GL_COLOR_ARRAY);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		glDisableClientState(GL_NORMAL_ARRAY);
+		//glDisableClientState(GL_NORMAL_ARRAY);
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisable(GL_CULL_FACE);
 	}
@@ -410,7 +416,17 @@ void Renderer::render(double dt, World* world)
 		glDisableClientState(GL_VERTEX_ARRAY);
 	}
 
-	drawStats( dt, rendered, world );
+	glLoadIdentity();
+	mCamera->applyMatrix();
+
+	switch( mDebugMode ) {
+	case DEBUG_STATS:
+		drawStats( dt, rendered, world );
+		break;
+	case DEBUG_PHYSICS:
+		OpencraftCore::Singleton->getPhysicsWorld()->debugDrawWorld();
+		break;
+	};
 
 	drawBlockChooser( dt );
 
@@ -456,9 +472,9 @@ void Renderer::_renderChunk( WorldChunk* chunk )
 		glBindBuffer( GL_ARRAY_BUFFER, chunkGeom->vertexBO );
 
 		glVertexPointer( 3, GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(0) );
-		glNormalPointer( GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(12) );
-		glTexCoordPointer( 2, GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(24));
-		glColorPointer( 3, GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(32));
+		//glNormalPointer( GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(12) );
+		glTexCoordPointer( 2, GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(12));
+		glColorPointer( 3, GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(20));
 
 		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, chunkGeom->indexBO );
 
@@ -478,7 +494,7 @@ void Renderer::drawStats(double dt, size_t chunkCount, World* world)
 	size_t percent = ( mBlTotal > 0 ? (mBlRendered*100)/(mBlTotal) : 0 );
 
 	std::stringstream ss;
-	ss << "Opencraft Performance:" << std::endl;
+	ss << "Opencraft Info:" << std::endl;
 	ss << "\tdt: " << dt << std::endl;
 	ss << "\tFPS: " << (1.f/dt) << std::endl;
 	ss << "\tTimescale: " << OpencraftCore::Singleton->getTimescale() << std::endl;

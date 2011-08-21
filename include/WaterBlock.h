@@ -35,7 +35,7 @@ public:
 	/**
 	 * Returns the Verex Data for this block:- includes fluid height.
 	 */
-	virtual void buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges);
+	//virtual void buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges);
 
 	void created();
 	void hit();

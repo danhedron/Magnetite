@@ -2,6 +2,7 @@
 #define _WORLD_H_
 #include "prerequisites.h"
 #include "WorldNode.h"
+#include "Collision.h"
 
 /**
  * @struct Raycast result structure.
@@ -36,11 +37,7 @@ struct raycast_r
  */
 struct collision_r
 {
-	Vector3 min1;
-	Vector3 max1;
-
-	Vector3 min2;
-	Vector3 max2;
+	Vector3 response;
 
 	bool collision;
 
@@ -62,7 +59,6 @@ protected:
 	ChunkGenerator* mGenerator;
 	Camera*		mPagingCamera;
 	std::string mWorldName;
-
 public:
 	/** 
 	 * Constructor: -
@@ -218,9 +214,9 @@ public:
 	/**
 	 * Performs an AABB test against the world.
 	 */
-	collision_r AABBWorld(const collision_r& info );
+	CollisionResponse AABBWorld( Vector3& min, Vector3& max );
 
-	collision_r AABBCube(const collision_r& info );
+	collision_r AABBCube( Vector3& min, Vector3& max, Vector3& minb, Vector3& maxb );
 
 	/**
 	 * Creates a new sky object 

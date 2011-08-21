@@ -87,8 +87,14 @@ void BaseGame::_inputEvents( const InputEvent& e )
 		else
 			_inputMovement( Vector3( 0.f, 0.f, -1.f ) );
 	}
+	if( e.event == Inputs::JUMP && e.down ) {
+		if( getLocalPlayer() ) mPlayer->jump();
+	}
 	if( e.event == Inputs::SPRINT ) {
 		if( getLocalPlayer() ) mPlayer->enableSprint( e.down );
+	}
+	if( e.event == Inputs::FLY && e.down ) {
+		if( getLocalPlayer() ) mPlayer->enableFlying( !mPlayer->isFlying() );
 	}
 }
 
@@ -131,7 +137,7 @@ void BaseGame::playerSpawn( Character* player )
 {
 	if( player == mPlayer )
 		Util::log( "You just spawned!" );
-	player->setPosition( Vector3( 0.f, 150.f, 0.f )  );
+	player->setPosition( Vector3( 0.f, 120.f, 0.f )  );
 }
 
 void BaseGame::playerKilled( Character* player )
@@ -153,10 +159,10 @@ void BaseGame::playerPrimaryClick( Character* player )
 	if(ray.hit)
 	{
 		Vector3 cIndex = mEngine->getWorld()->worldToChunks( ray.worldHit );
-		//Vector3 bIndex = mWorld->worldToBlock( ray.worldHit );
+		Vector3 bIndex = mEngine->getWorld()->worldToBlock( ray.worldHit - (ray.hitNormal/2) );
 		WorldChunk* chunk = mEngine->getWorld()->getChunk( cIndex.x, cIndex.y, cIndex.z );
 		if(chunk && ray.block) {
-			chunk->removeBlockAt( ray.block->getX(), ray.block->getY(), ray.block->getZ() );
+			chunk->removeBlockAt( bIndex.x, bIndex.y, bIndex.z );
 		}
 	}
 }
@@ -169,14 +175,13 @@ void BaseGame::playerAltClick( Character* player )
 	{
 		Util::log( Util::toString( ray.worldHit + ray.hitNormal ) );
 		Vector3 cIndex = mEngine->getWorld()->worldToChunks( ray.worldHit + ray.hitNormal );
-		Vector3 bIndex = Vector3( ray.block->getX(), ray.block->getY(), ray.block->getZ() ) + ray.hitNormal;
+		Vector3 bIndex(ray.worldHit - (ray.hitNormal/2));
 		Util::log("Ray Hit: " + Util::toString( cIndex ) + " Normal: " + Util::toString( ray.hitNormal ) );
 		WorldChunk* chunk = mEngine->getWorld()->getChunk( cIndex.x, cIndex.y, cIndex.z );
 		if(chunk) {
 			BaseBlock* block = FactoryManager::getManager().createBlock( mEngine->getRenderer()->blockType );
 			if( block != NULL ) {
-				block->setPosition( bIndex );
-				chunk->addBlockToChunk( block );
+				chunk->addBlockToChunk( block, bIndex.x, bIndex.y, bIndex.z );
 			}
 		}
 	}

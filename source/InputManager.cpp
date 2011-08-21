@@ -10,6 +10,7 @@ InputManager::InputManager()
 	createInput( sf::Key::D, Inputs::RIGHT );
 	createInput( sf::Key::Space, Inputs::JUMP );
 	createInput( sf::Key::LShift, Inputs::SPRINT );
+	createInput( sf::Key::F, Inputs::FLY );
 	createInput( sf::Key::F2, Inputs::SCREENSHOT );
 }
 

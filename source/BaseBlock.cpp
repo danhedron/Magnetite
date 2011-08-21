@@ -7,8 +7,7 @@
 #include <string>
 
 BaseBlock::BaseBlock()
-: mDataFlags( 0 ),
-mChunk( NULL )
+: mDataFlags( 0 )
 {
 }
 
@@ -18,7 +17,7 @@ BaseBlock::~BaseBlock(void)
 
 void BaseBlock::_setPosition( unsigned short x, unsigned  short y, unsigned short z)
 {
-	mDataFlags = ( x | (z<<4) | (y<<8) );
+	//mDataFlags = ( x | (z<<4) | (y<<8) );
 }
 
 void BaseBlock::connectedChange( short face )
@@ -26,17 +25,12 @@ void BaseBlock::connectedChange( short face )
 
 }
 
-void BaseBlock::_setChunk( WorldChunk* chnk )
-{
-	mChunk = chnk;
-}
-
 int BaseBlock::getLightLevel()
 {
 	return 0;
 }
 
-short BaseBlock::getX() {
+/*short BaseBlock::getX() {
 	return (mDataFlags & BMASK_XPOS);
 }
 
@@ -46,17 +40,17 @@ short BaseBlock::getY() {
 
 short BaseBlock::getZ() {
 	return ((mDataFlags & BMASK_ZPOS)>>4);
-}
+}*/
 
 void BaseBlock::updateVisFlags(unsigned int flags)
 {
-	mDataFlags = (mDataFlags & ~BMASK_VISFLAGS) | (mDataFlags & ~(FACE_ALL<<15));
-	mDataFlags = mDataFlags | (flags<<15);
+	mDataFlags = (mDataFlags & ~BMASK_VISFLAGS) | (mDataFlags & ~(FACE_ALL<<0));
+	mDataFlags = mDataFlags | (flags<<0);
 }
 
 unsigned short BaseBlock::getVisFlags()
 {
-	return ((mDataFlags & BMASK_VISFLAGS)>>15);
+	return ((mDataFlags & BMASK_VISFLAGS)>>0);
 }
 
 void BaseBlock::getTextureCoords( short face, short &x, short &y )
@@ -65,17 +59,17 @@ void BaseBlock::getTextureCoords( short face, short &x, short &y )
 	y = 0;
 }
 
-void BaseBlock::setPosition( long x, long y, long z )
+/*void BaseBlock::setPosition( long x, long y, long z )
 {
-	if( mChunk )
-		mChunk->_blockMoved( this, x, y, z );
+	if( ctx.chunk )
+		ctx.chunk->_blockMoved( this, x, y, z );
 	_setPosition(x,y,z);
 }
 
 void BaseBlock::setPosition( const Vector3& vec)
 {
 	setPosition( vec.x, vec.y, vec.z );
-}
+}*/
 
 void BaseBlock::appendToStream( std::ofstream& stream )
 {
@@ -87,35 +81,36 @@ void BaseBlock::readFromStream( std::ifstream& stream )
 	stream.read( (char *) &mDataFlags, sizeof( mDataFlags ) );	
 }
 
-void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges)
+void BaseBlock::buildCubeData( BlockContext& ctx, size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges)
 {
-	if( mChunk == NULL ) {
+	if( ctx.chunk == NULL ) {
 		Util::log("Can't generate geometry without a chunk?", Util::Error);
 		return;
 	}
-	short x = 0, y = 0;
+	float x = ctx.worldX, y = ctx.worldY, z = ctx.worldZ;
+	short texX = 0, texY = 0;
 
 	short visFlags = getVisFlags();
 
 	/* Face -Z */
 	if((visFlags & FACE_BACK) == FACE_BACK ) {
-		this->getTextureCoords( FACE_BACK, x, y );
-		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
+		this->getTextureCoords( FACE_BACK, texX, texY );
+		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
-		float color = World::getLightColor( mChunk->getLightLevel( getX(), getY(), getZ()+1 ) );
-		data[ind + 0] = Renderer::vertex( this->getX() + 1.0f, this->getY() + 1.0f,	this->getZ() + 1.0f, // Coordinates
+		float color = World::getLightColor( ctx.chunk->getLightLevel( x, y, z+1 ) );
+		data[ind + 0] = Renderer::vertex( x + 1.0f, y + 1.0f,	z + 1.0f, // Coordinates
 								0.0f, 0.0f, -1.0f,
 								rect.x, rect.y,
 								color,color,color);
-		data[ind + 1] = Renderer::vertex( this->getX() - 0.0f, this->getY() + 1.0f, this->getZ() + 1.0f, // Coordinates
+		data[ind + 1] = Renderer::vertex( x - 0.0f, y + 1.0f, z + 1.0f, // Coordinates
 								0.0f, 0.0f, -1.0f,
 								rect.x + rect.w, rect.y,
 								color,color,color );
-		data[ind + 2] = Renderer::vertex( this->getX() - 0.0f, this->getY() - 0.0f, this->getZ() + 1.0f, // Coordinates
+		data[ind + 2] = Renderer::vertex( x - 0.0f, y - 0.0f, z + 1.0f, // Coordinates
 								0.0f, 0.0f, -1.0f,
 								rect.x + rect.w, rect.y + rect.h,
 								color,color,color );
-		data[ind + 3] = Renderer::vertex( this->getX() + 1.0f, this->getY() - 0.0f, this->getZ() + 1.0f, // Coordinates
+		data[ind + 3] = Renderer::vertex( x + 1.0f, y - 0.0f, z + 1.0f, // Coordinates
 								0.0f, 0.0f, -1.0f,
 								rect.x, rect.y + rect.h,
 								color,color,color );
@@ -126,23 +121,23 @@ void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge*
 	}
 	/* Face +Z */
 	if((visFlags & FACE_FORWARD) == FACE_FORWARD ) {
-		this->getTextureCoords( FACE_FORWARD, x, y );
-		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
+		this->getTextureCoords( FACE_FORWARD, texX, texY );
+		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
-		float color = World::getLightColor( mChunk->getLightLevel( getX(), getY(), getZ()-1 ) );
-		data[ind + 0] = Renderer::vertex( this->getX() + 1.0f, this->getY() + 1.0f, this->getZ() - 0.0f, // Coordinates
+		float color = World::getLightColor( ctx.chunk->getLightLevel( x, y, z-1 ) );
+		data[ind + 0] = Renderer::vertex( x + 1.0f, y + 1.0f, z - 0.0f, // Coordinates
 								0.0f, 0.0f, 1.0f,
 								rect.x, rect.y,
 								color,color,color );
-		data[ind + 1] = Renderer::vertex( this->getX() - 0.0f, this->getY() + 1.0f, this->getZ() - 0.0f, // Coordinates
+		data[ind + 1] = Renderer::vertex( x - 0.0f, y + 1.0f, z - 0.0f, // Coordinates
 								0.0f, 0.0f, 1.0f,
 								rect.x + rect.w, rect.y,
 								color,color,color );
-		data[ind + 2] = Renderer::vertex( this->getX() - 0.0f, this->getY() - 0.0f, this->getZ() - 0.0f, // Coordinates
+		data[ind + 2] = Renderer::vertex( x - 0.0f, y - 0.0f, z - 0.0f, // Coordinates
 								0.0f, 0.0f, 1.0f,
 								rect.x + rect.w, rect.y + rect.h,
 								color,color,color );
-		data[ind + 3] = Renderer::vertex( this->getX() + 1.0f, this->getY() - 0.0f, this->getZ() - 0.0f, // Coordinates
+		data[ind + 3] = Renderer::vertex( x + 1.0f, y - 0.0f, z - 0.0f, // Coordinates
 								0.0f, 0.0f, 1.0f,
 								rect.x, rect.y + rect.h,
 								color,color,color );
@@ -153,23 +148,23 @@ void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge*
 	}
 	/* Face +X */
 	if((visFlags & FACE_RIGHT) == FACE_RIGHT) {
-		this->getTextureCoords( FACE_RIGHT, x, y );
-		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
+		this->getTextureCoords( FACE_RIGHT, texX, texY );
+		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
-		float color = World::getLightColor( mChunk->getLightLevel( getX()+1, getY(), getZ() ) );
-		data[ind + 0] = Renderer::vertex( this->getX() + 1.0f, this->getY() + 1.0f, this->getZ() + 1.0f, // Coordinates
+		float color = World::getLightColor( ctx.chunk->getLightLevel( x+1, y, z ) );
+		data[ind + 0] = Renderer::vertex( x + 1.0f, y + 1.0f, z + 1.0f, // Coordinates
 								1.0f, 0.0f, 0.0f,
 								rect.x + rect.w, rect.y,
 								color,color,color );
-		data[ind + 1] = Renderer::vertex( this->getX() + 1.0f, this->getY() - 0.0f, this->getZ() + 1.0f, // Coordinates
+		data[ind + 1] = Renderer::vertex( x + 1.0f, y - 0.0f, z + 1.0f, // Coordinates
 								1.0f, 0.0f, 0.0f,
 								rect.x + rect.w, rect.y + rect.h,
 								color,color,color );
-		data[ind + 2] = Renderer::vertex( this->getX() + 1.0f, this->getY() - 0.0f, this->getZ() - 0.0f, // Coordinates
+		data[ind + 2] = Renderer::vertex( x + 1.0f, y - 0.0f, z - 0.0f, // Coordinates
 								1.0f, 0.0f, 0.0f,
 								rect.x, rect.y + rect.h,
 								color,color,color );
-		data[ind + 3] = Renderer::vertex( this->getX() + 1.0f, this->getY() + 1.0f, this->getZ() - 0.0f, // Coordinates
+		data[ind + 3] = Renderer::vertex( x + 1.0f, y + 1.0f, z - 0.0f, // Coordinates
 								1.0f, 0.0f, 0.0f,
 								rect.x, rect.y,
 								color,color,color );
@@ -180,23 +175,23 @@ void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge*
 	}
 	/* Face -Y */
 	if((visFlags & FACE_BOTTOM) == FACE_BOTTOM) {
-		this->getTextureCoords( FACE_BOTTOM, x, y );
-		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
+		this->getTextureCoords( FACE_BOTTOM, texX, texY );
+		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
-		float color = World::getLightColor( mChunk->getLightLevel( getX(), getY()-1, getZ() ) );
-		data[ind + 0] = Renderer::vertex( this->getX() - 0.0f, this->getY() - 0.0f, this->getZ() + 1.0f, // Coordinates
+		float color = World::getLightColor( ctx.chunk->getLightLevel( x, y-1, z ) );
+		data[ind + 0] = Renderer::vertex( x - 0.0f, y - 0.0f, z + 1.0f, // Coordinates
 								0.0f, -1.0f, 0.0f,
 								rect.x, rect.y,
 								color,color,color );
-		data[ind + 1] = Renderer::vertex( this->getX() - 0.0f, this->getY() - 0.0f, this->getZ() - 0.0f, // Coordinates
+		data[ind + 1] = Renderer::vertex( x - 0.0f, y - 0.0f, z - 0.0f, // Coordinates
 								0.0f, -1.0f, 0.0f,
 								rect.x + rect.w, rect.y,
 								color,color,color );
-		data[ind + 2] = Renderer::vertex( this->getX() + 1.0f, this->getY() - 0.0f, this->getZ() - 0.0f, // Coordinates
+		data[ind + 2] = Renderer::vertex( x + 1.0f, y - 0.0f, z - 0.0f, // Coordinates
 								0.0f, -1.0f, 0.0f,
 								rect.x + rect.w, rect.y + rect.h,
 								color,color,color );
-		data[ind + 3] = Renderer::vertex( this->getX() + 1.0f, this->getY() - 0.0f, this->getZ() + 1.0f, // Coordinates
+		data[ind + 3] = Renderer::vertex( x + 1.0f, y - 0.0f, z + 1.0f, // Coordinates
 								0.0f, -1.0f, 0.0f,
 								rect.x, rect.y + rect.h,
 								color,color,color );
@@ -207,23 +202,23 @@ void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge*
 	}
 	/* Face +Y */
 	if((visFlags & FACE_TOP) == FACE_TOP) {
-		this->getTextureCoords( FACE_TOP, x, y );
-		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
+		this->getTextureCoords( FACE_TOP, texX, texY );
+		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
-		float color = World::getLightColor( mChunk->getLightLevel( getX(), getY()+1, getZ() ) );
-		data[ind + 0] = Renderer::vertex( this->getX() - 0.0f, this->getY() + 1.0f, this->getZ() + 1.0f, // Coordinates
+		float color = World::getLightColor( ctx.chunk->getLightLevel( x, y+1, z ) );
+		data[ind + 0] = Renderer::vertex( x - 0.0f, y + 1.0f, z + 1.0f, // Coordinates
 								0.0f, 1.0f, 0.0f,
 								rect.x, rect.y,
 								color,color,color );
-		data[ind + 1] = Renderer::vertex( this->getX() + 1.0f, this->getY() + 1.0f, this->getZ() + 1.0f, // Coordinates
+		data[ind + 1] = Renderer::vertex( x + 1.0f, y + 1.0f, z + 1.0f, // Coordinates
 								0.0f, 1.0f, 0.0f,
 								rect.x + rect.w, rect.y,
 								color,color,color );
-		data[ind + 2] = Renderer::vertex( this->getX() + 1.0f, this->getY() + 1.0f, this->getZ() - 0.0f, // Coordinates
+		data[ind + 2] = Renderer::vertex( x + 1.0f, y + 1.0f, z - 0.0f, // Coordinates
 								0.0f, 1.0f, 0.0f,
 								rect.x + rect.w, rect.y + rect.h,
 								color,color,color );
-		data[ind + 3] = Renderer::vertex( this->getX() - 0.0f, this->getY() + 1.0f, this->getZ() - 0.0f, // Coordinates
+		data[ind + 3] = Renderer::vertex( x - 0.0f, y + 1.0f, z - 0.0f, // Coordinates
 								0.0f, 1.0f, 0.0f,
 								rect.x, rect.y + rect.h,
 								color,color,color );
@@ -234,23 +229,23 @@ void BaseBlock::buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge*
 	}
 	/* Face -X */
 	if((visFlags & FACE_LEFT) == FACE_LEFT) {
-		this->getTextureCoords( FACE_LEFT, x, y );
-		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
+		this->getTextureCoords( FACE_LEFT, texX, texY );
+		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
-		float color = World::getLightColor( mChunk->getLightLevel( getX()-1, getY(), getZ() ) );
-		data[ind + 0] = Renderer::vertex( this->getX() - 0.0f, this->getY() + 1.0f, this->getZ() - 0.0f, // Coordinates
+		float color = World::getLightColor( ctx.chunk->getLightLevel( x-1, y, z ) );
+		data[ind + 0] = Renderer::vertex( x - 0.0f, y + 1.0f, z - 0.0f, // Coordinates
 								-1.0f, 0.0f, 0.0f,
 								rect.x + rect.w, rect.y,
 								color,color,color );
-		data[ind + 1] = Renderer::vertex( this->getX() - 0.0f, this->getY() - 0.0f, this->getZ() - 0.0f, // Coordinates
+		data[ind + 1] = Renderer::vertex( x - 0.0f, y - 0.0f, z - 0.0f, // Coordinates
 								-1.0f, 0.0f, 0.0f,
 								rect.x + rect.w, rect.y + rect.h,
 								color,color,color );
-		data[ind + 2] = Renderer::vertex( this->getX() - 0.0f, this->getY() - 0.0f, this->getZ() + 1.0f, // Coordinates
+		data[ind + 2] = Renderer::vertex( x - 0.0f, y - 0.0f, z + 1.0f, // Coordinates
 								-1.0f, 0.0f, 0.0f,
 								rect.x, rect.y + rect.h,
 								color,color,color );
-		data[ind + 3] = Renderer::vertex( this->getX() - 0.0f, this->getY() + 1.0f, this->getZ() + 1.0f, // Coordinates
+		data[ind + 3] = Renderer::vertex( x - 0.0f, y + 1.0f, z + 1.0f, // Coordinates
 								-1.0f, 0.0f, 0.0f,
 								rect.x, rect.y,
 								color,color,color );

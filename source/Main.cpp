@@ -25,6 +25,7 @@
 Util::LogLevel Util::_loglevel = Util::Info;
 
 int main( int argc, char** argv ) {
+		
 	if( false ) {
 		Util::log("Opencraft - Not Quite Unit Testing");
 
@@ -34,7 +35,7 @@ int main( int argc, char** argv ) {
 
 		core.newWorld("test-world");
 
-		WorldChunk* origin = core.getWorld()->getChunk( 0, 0, 0 );
+		/*WorldChunk* origin = core.getWorld()->getChunk( 0, 0, 0 );
 		WorldChunk* left = core.getWorld()->getChunk( 0, 0, -1 );
 		WorldChunk* back = core.getWorld()->getChunk( -1, 0, 0 );
 
@@ -63,15 +64,17 @@ int main( int argc, char** argv ) {
 		else
 			Util::log("\t-X Jumps ERROR");
 		Util::setLogLevel( Util::Info );
-
+		*/
 
 		return 0;
 	}
 	OpencraftCore core;
 
+	core.init(&argc, argv);
+
 	core.startGame("default");
 
-	core.go(&argc, argv);
+	core.go();
 
 	return EXIT_SUCCESS;
 }

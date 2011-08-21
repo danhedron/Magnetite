@@ -7,6 +7,7 @@
 #include <SFML/Window.hpp>
 #include <SFML/Window/OpenGL.hpp>
 #include <SFML/Graphics.hpp>
+#include <btBulletDynamicsCommon.h>
 
 #include <string>
 #include <sstream>
@@ -47,5 +48,6 @@ typedef std::vector<WorldChunk*> ChunkList;
 #define CHUNK_SIZE (CHUNK_WIDTH*CHUNK_WIDTH*CHUNK_HEIGHT)
 #define NODE_SIZE ((CHUNK_HEIGHT/CHUNK_WIDTH))
 
+//#define BLOCK_POSITION( index ) index % CHUNK_WIDTH * CHUNK_HEIGHT , (index - std::floorf( index / CHUNK_WIDTH*CHUNK_HEIGHT ) - (index % CHUNK_WIDTH))   , std::floorf( index / CHUNK_WIDTH*CHUNK_HEIGHT ) 
 #define BLOCK_INDEX_2( x, y, z ) ( z * CHUNK_WIDTH * CHUNK_HEIGHT + y * CHUNK_WIDTH + x )
 #define BLOCK_INDEX( block ) (block->getZ() * CHUNK_WIDTH * CHUNK_HEIGHT + block->getY() * CHUNK_WIDTH + block->getX())

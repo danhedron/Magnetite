@@ -15,6 +15,10 @@ class BaseGame;
 class OpencraftCore
 {
 protected:
+
+	/**
+	 * Engine Variables
+	 */
 	sf::RenderWindow	mWindow;
 	sf::Clock	mClock;
 	Renderer*	mRenderer;
@@ -22,10 +26,26 @@ protected:
 	InputManager*	mInputManager;
 	World*		mWorld;
 	bool		mContinue;
-	std::vector<Character*>	mCharacters;
 	float		mTimescale;
 
+	/**
+	 * Physics
+	 */
+	btBroadphaseInterface* mPBroadphase;
+	btDefaultCollisionConfiguration* mPCConfig;
+	btCollisionDispatcher* mCCDispatch;
+	btSequentialImpulseConstraintSolver* mSolver;
+	btDiscreteDynamicsWorld* mPhysicsWorld;
+	btCollisionShape* mGroundShape;
+	btDefaultMotionState* mGroundState;
+	btRigidBody*		mGroundBody;
+
+	/**
+	 * Game stuff 
+	 */
+	std::vector<Character*>	mCharacters;
 	BaseGame*	mGame;
+
 public:
 	OpencraftCore(void);
 	~OpencraftCore(void);
@@ -81,6 +101,11 @@ public:
 	World* getWorld();
 
 	/**
+	 * retuns the physics world
+	 */
+	btDiscreteDynamicsWorld* getPhysicsWorld();
+
+	/**
 	 * Unloads the currently loaded world (if any)
 	 */
 	void unloadWorld();
@@ -118,9 +143,20 @@ public:
 	float mLastX;
 	float mLastY;
 
-	void createWindow(int *argc, char **argv);
+	/**
+	 * Initalizes the opencraft engine,
+	 * @param argc The programs' argument count
+	 * @param argv the argument list
+	 */
+	void init(int *argc, char **argv);
 
-	void go(int *argc, char **argv);
+	/**
+	 * Initalize the physics engine
+	 * This is called automatically.
+	 */
+	void initalizePhysics();
+
+	void go();
 
 	void exit();
 };

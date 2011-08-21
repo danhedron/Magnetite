@@ -14,18 +14,18 @@ SandBlock::~SandBlock(void)
 {
 }
 
-void SandBlock::connectedChange( short face )
+void SandBlock::connectedChange( BlockContext &ctx, short face )
 {
 	// If something around us changes, we may have to drop down.
-	for( long y = getY()-1; y >= 0; y-- ) {
-		BaseBlock* block = mChunk->getBlockAt(getX(), y, getZ());
-		if( block != NULL ) {
-			if( y != getY()-1 ) {
-				this->setPosition(getX(), y + 1, getZ());
-			}
-			break;
-		}
-	}
+	//for( long y = ctx.worldY-1; y >= 0; y-- ) {
+		//BaseBlock* block = mChunk->getBlockAt(ctx.worldX, y, ctx.worldZ);
+		//if( block != NULL ) {
+			//if( y != ctx.worldY-1 ) {
+			//	this->setPosition(ctx.worldX, y + 1, ctx.worldZ);
+			//}
+			//break;
+		//}
+	//}
 }
 
 void SandBlock::created()

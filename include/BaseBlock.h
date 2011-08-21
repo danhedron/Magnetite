@@ -18,27 +18,28 @@ enum {
 };
 
 enum {
-	BMASK_XPOS = ( 1 | (1<<1) | (1<<2) | (1<<3) ),
-	BMASK_ZPOS = ( (1<<4) | (1<<5) | (1<<6) | (1<<7) ),
-	BMASK_YPOS = ( (1<<8) | (1<<9) | (1<<10) | (1<<11) | (1<<12) | (1<<13)  | (1<<14) ),
-	BMASK_VISFLAGS = ( (1<<15) | (1<<16) | (1<<17) | (1<<18) | (1<<19) | (1<<20) )
+	BMASK_VISFLAGS = ( (1<<0) | (1<<1) | (1<<2) | (1<<3) | (1<<4) | (1<<5) )
 };
 
 class WorldChunk;
 
+struct BlockContext
+{
+	float worldX;
+	float worldY;
+	float worldZ;
+	WorldChunk* chunk;
+};
+
 class BaseBlock
 {
 protected:
-	unsigned int mDataFlags;
-
-	WorldChunk* mChunk;
-
+	unsigned char mDataFlags;
+	
 	void _setPosition( unsigned short x, unsigned  short y, unsigned short z );
 public:
 	BaseBlock();
 	~BaseBlock(void);
-
-	void _setChunk( WorldChunk* chnk );
 
 	virtual void created() = 0;
 	virtual void hit() = 0;
@@ -99,16 +100,16 @@ public:
 	/**
 	 * Returns the Verex Data for this block
 	 */
-	virtual void buildCubeData(size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges);
+	virtual void buildCubeData(BlockContext &ctx, size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges);
 
 	virtual std::string getType() = 0;
 
-	short getX();
+	/*short getX();
 	short getY();
 	short getZ();
 
 	void setPosition( long x, long y, long z );
-	void setPosition( const Vector3& vec );
+	void setPosition( const Vector3& vec );*/
 };
 
 #endif
