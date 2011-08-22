@@ -10,6 +10,7 @@
 #include <fstream>
 #include <stdio.h>
 #include <math.h>
+#include <ppl.h>
 
 #ifdef WIN32
 #include <direct.h>
@@ -19,7 +20,8 @@
 
 World::World()
 : mSky( NULL ),
-mPagingCamera( NULL )
+mPagingCamera( NULL ),
+mWorldStage( WORLD_NORMAL )
 {	
 	mGenerator = new ChunkGenerator(1024);
 }
@@ -38,6 +40,11 @@ void _deleteTree( WorldNode* node )
 World::~World()
 {
 	destoryWorld();	
+}
+
+WorldStage World::getCurrentStage()
+{
+	return mWorldStage;
 }
 
 float World::getLightColor( LightIndex light )
@@ -85,17 +92,31 @@ void World::loadWorld( std::string name )
 
 void World::createWorld()
 {
+	mWorldStage = WORLD_GEN;
 	createSky(200);
 	//Create some testing chunks
-	createTestChunks( 10 );
-	
-	for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
-		(*it)->update(0.f);
-	}
+	createTestChunks( 5 );
 
+#ifdef WIN32
+	size_t startTick = GetTickCount();
+
+	// Attempt to use VS 'threading'
+	auto genChunk = [](WorldChunk* c) {
+		c->requestGenerate();
+	};
+
+	// Let the Windows Concurency API handle threading on Windows
+	Concurrency::parallel_for_each( mChunks.begin(), mChunks.end(), genChunk );
+#else
+	// Perform a standard loop over the chunk list. - need to speed this up on linux/non-windows systems
 	for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
 		(*it)->requestGenerate();
 	}
+#endif
+#ifdef WIN32
+	Util::log( "T: " + Util::toString( (long)(GetTickCount() - startTick) ) );
+#endif
+	mWorldStage = WORLD_NORMAL;
 }
 
 std::string World::getName()
@@ -113,11 +134,28 @@ std::string World::getSavePath()
 void World::createTestChunks( int size )
 {
 	destoryWorld();
-	for(int i = -size; i < size; i++) {
-		for(int z = -size; z < size; z++) {
+
+	int xSize = size*2;
+	int zSize = size*2;
+
+	int total = zSize*xSize;
+	int nc = 0;
+	int i = -size; 
+
+	for(i = -size; i < size; i++) {
+#ifdef WIN32
+		Concurrency::parallel_for( -size, size, [&] (int z) {
+#else
+		for(int z = -size; z < size; z++) { // Fallback for platforms without threading support
+#endif
 			WorldChunk* c = createChunk(i,0,z);
-			mGenerator->fillChunk( c );
+			mGenerator->fillChunk( c ); // This should run in O(n) time.
+			nc++;
 		}
+#ifdef WIN32
+		);
+#endif
+		Util::log("Created Row; - " + Util::toString( (nc*100) / total ) + "%");
 	}
 }
 
@@ -277,10 +315,7 @@ WorldChunk* World::createChunk(long x, long y, long z)
 	WorldChunk* newChunk = new WorldChunk(x, y, z);
 	mChunks.push_back(newChunk);
 	WorldNode* node = getChunkNode(Vector3(x,y,z), true);
-	if( node == NULL ) 
-		Util::log( "NULL node" );
-	else
-		node->children[0] = (WorldNode*)newChunk;
+	node->children[0] = (WorldNode*)newChunk;
 	
 	return newChunk;
 }

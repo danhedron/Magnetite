@@ -468,6 +468,11 @@ void Renderer::_renderChunk( WorldChunk* chunk )
 	
 	if( chunk->hasGenerated() ) {
 		GLgeometry* chunkGeom = chunk->getGeometry();
+
+		if( chunkGeom->vertexBO == 0 || chunkGeom->indexBO == 0 )
+		{
+			chunkGeom->bindToBuffer();
+		}
 		
 		glBindBuffer( GL_ARRAY_BUFFER, chunkGeom->vertexBO );
 

@@ -50,6 +50,15 @@ class Sky;
 class ChunkGenerator;
 class Camera;
 
+/**
+* World Stage ENUM, used for determining certain behaviours
+* During WORLD_GEN, adjacent chunks are NOT updated if an edge update occurs
+*/
+enum WorldStage {
+	WORLD_GEN = 1, // World is being mass-generated
+	WORLD_NORMAL = 2 // World is being run as normal
+};
+
 class World
 {
 protected:
@@ -59,6 +68,7 @@ protected:
 	ChunkGenerator* mGenerator;
 	Camera*		mPagingCamera;
 	std::string mWorldName;
+	WorldStage mWorldStage;
 public:
 	/** 
 	 * Constructor: -
@@ -69,6 +79,11 @@ public:
 	 * Destructor:- 
 	 */
 	~World( void );
+
+	/**
+	 * Returns the world's current stage
+	 */
+	WorldStage getCurrentStage();
 
 	/**
 	 * Returns the color of a brightness level

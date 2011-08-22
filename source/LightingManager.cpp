@@ -22,7 +22,7 @@ struct IntRay {
 	IntOffset points[point_count];
 };
 
-#define ray_count 12
+#define ray_count 24
 
 struct Sample {
 	float left, right, top, bottom, front, back;

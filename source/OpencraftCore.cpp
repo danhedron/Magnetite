@@ -252,8 +252,6 @@ void OpencraftCore::go()
 			}
 		}
 
-		Util::log("Beginning Step");
-
 		lDelta *= mTimescale;
 		
 		mPhysicsWorld->stepSimulation( lDelta );

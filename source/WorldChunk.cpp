@@ -234,19 +234,21 @@ WorldChunk* WorldChunk::getRelativeChunk(short x, short y, short z)
 
 void WorldChunk::updateSurrounding( )
 {
-	WorldChunk* c = NULL;
-	c = getRelativeChunk( -1, 0, 0 );
-	if( c ) c->markModified();
-	c = getRelativeChunk( 16, 0, 0 );
-	if( c ) c->markModified();
-	c = getRelativeChunk( 0, -1, 0 );
-	if( c ) c->markModified();
-	c = getRelativeChunk( 0, 16, 0 );
-	if( c ) c->markModified();
-	c = getRelativeChunk( 0, 0, -1 );
-	if( c ) c->markModified();
-	c = getRelativeChunk( 0, 0, 16 );
-	if( c ) c->markModified();
+	if( OpencraftCore::Singleton->getWorld()->getCurrentStage() != WORLD_GEN ) {
+		WorldChunk* c = NULL;
+		c = getRelativeChunk( -1, 0, 0 );
+		if( c ) c->markModified();
+		c = getRelativeChunk( 16, 0, 0 );
+		if( c ) c->markModified();
+		c = getRelativeChunk( 0, -1, 0 );
+		if( c ) c->markModified();
+		c = getRelativeChunk( 0, 16, 0 );
+		if( c ) c->markModified();
+		c = getRelativeChunk( 0, 0, -1 );
+		if( c ) c->markModified();
+		c = getRelativeChunk( 0, 0, 16 );
+		if( c ) c->markModified();
+	}
 }
 
 bool WorldChunk::hasNeighbours( short x, short y, short z )
@@ -386,13 +388,13 @@ void WorldChunk::updateVisibility()
 					visFlags = visFlags | FACE_FORWARD;
 				}
 				b->updateVisFlags(visFlags);
-				for( size_t f = 0; f < 6; f++ ) {
+				/*for( size_t f = 0; f < 6; f++ ) {
 					if( ((1<<f) & visOrig ) == (1<<f) ) {
 						if( ( visOrig & visFlags ) != (1<<f) ) {
 							b->connectedChange( (1<<f) );
 						}
 					}
-				}
+				}*/
 				if( visFlags == 0 )
 					_blockVisible( BLOCK_INDEX_2( x, y, z), false );
 				else
@@ -442,14 +444,14 @@ void WorldChunk::generate()
 		block->second->buildCubeData(bContext, ind, edgeInd, vertexData, edgeData);
 	}
 	
-	// Chunk has been defined, store it's data
+	// If there's already a geometry object; recycle it.
 	if( mGeometry == NULL )
 		mGeometry = new GLgeometry;
 	mGeometry->edgeData = edgeData;
 	mGeometry->vertexData = vertexData;
 	mGeometry->edgeCount = edgeCount;
 	mGeometry->vertexCount = vertexCount;
-	mGeometry->bindToBuffer();
+	//mGeometry->bindToBuffer();
 
 	generatePhysics();
 
