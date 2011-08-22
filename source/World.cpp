@@ -5,7 +5,7 @@
 #include "Camera.h"
 #include "StoneBlock.h"
 #include "ChunkGenerator.h"
-#include "OpencraftCore.h"
+#include "MagnetiteCore.h"
 #include <iostream>
 #include <fstream>
 #include <stdio.h>

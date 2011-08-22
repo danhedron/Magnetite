@@ -1,5 +1,5 @@
 #include "Character.h"
-#include "OpencraftCore.h"
+#include "MagnetiteCore.h"
 #include "World.h"
 #include "PhysicsState.h"
 
@@ -89,9 +89,9 @@ void Character::_initPhysics()
 	mPhysicsBody->setCollisionFlags( mPhysicsBody->getCollisionFlags() | btCollisionObject::CF_CHARACTER_OBJECT);
 
 	mPhysicsController = new btKinematicCharacterController(mPhysicsBody, mPhysicsShape, 0.5);
-	OpencraftCore::Singleton->getPhysicsWorld()->getBroadphase()->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
-	OpencraftCore::Singleton->getPhysicsWorld()->addCollisionObject(mPhysicsBody,btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter | btBroadphaseProxy::AllFilter);
-	OpencraftCore::Singleton->getPhysicsWorld()->addAction( mPhysicsController );
+	MagnetiteCore::Singleton->getPhysicsWorld()->getBroadphase()->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
+	MagnetiteCore::Singleton->getPhysicsWorld()->addCollisionObject(mPhysicsBody,btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter | btBroadphaseProxy::AllFilter);
+	MagnetiteCore::Singleton->getPhysicsWorld()->addAction( mPhysicsController );
 }
 
 void Character::addMoveDelta(const Vector3 &dp)

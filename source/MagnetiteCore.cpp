@@ -1,4 +1,4 @@
-#include "OpencraftCore.h"
+#include "MagnetiteCore.h"
 #include "WorldChunk.h"
 #include "Renderer.h"
 #include "TextureManager.h"
@@ -11,20 +11,20 @@
 #include "BulletDebug.h"
 #include <ctime>
 
-OpencraftCore* OpencraftCore::Singleton = 0;
+MagnetiteCore* MagnetiteCore::Singleton = 0;
 static GLDebugDrawer debug;
 
 
 /* Simple events */
 void globalEventHandler( const InputEvent& evt )
 {
-	OpencraftCore::Singleton->getGame()->_inputEvents( evt );
+	MagnetiteCore::Singleton->getGame()->_inputEvents( evt );
 	if( evt.event == Inputs::SCREENSHOT && evt.down == true ) {
-		OpencraftCore::Singleton->screenshot();
+		MagnetiteCore::Singleton->screenshot();
 	}
 }
 
-OpencraftCore::OpencraftCore(void)
+MagnetiteCore::MagnetiteCore(void)
 : mContinue( true ),
 mWorld( NULL ),
 mTextureManager( NULL ),
@@ -38,7 +38,7 @@ mCCDispatch ( NULL ),
 mSolver( NULL ),
 mPhysicsWorld( NULL )
 {
-	OpencraftCore::Singleton = this;
+	MagnetiteCore::Singleton = this;
 	mRenderer = new Renderer();
 	mTextureManager = new TextureManager();
 	mInputManager = new InputManager();
@@ -52,7 +52,7 @@ mPhysicsWorld( NULL )
 	mInputManager->setEventCallback( Inputs::FLY, &globalEventHandler );
 }
 
-OpencraftCore::~OpencraftCore(void)
+MagnetiteCore::~MagnetiteCore(void)
 {
 	unloadWorld();
 
@@ -73,13 +73,13 @@ OpencraftCore::~OpencraftCore(void)
 	delete mPBroadphase;
 }
 
-void OpencraftCore::init(int *argc, char **argv)
+void MagnetiteCore::init(int *argc, char **argv)
 {
 	sf::WindowSettings wnds;
 	wnds.DepthBits = 24;
 	wnds.DepthBits = 8;
 	//wnds.AntialiasingLevel = 2;
-	mWindow.Create(sf::VideoMode(800,600,32), "Opencraft", sf::Style::Close | sf::Style::Resize, wnds);
+	mWindow.Create(sf::VideoMode(800,600,32), "Magnetite", sf::Style::Close | sf::Style::Resize, wnds);
 	mWindow.EnableKeyRepeat( false );
 	//mWindow.UseVerticalSync(true);
 	mRenderer->initialize(mWindow);
@@ -89,7 +89,7 @@ void OpencraftCore::init(int *argc, char **argv)
 	initalizePhysics();
 }
 
-void OpencraftCore::initalizePhysics()
+void MagnetiteCore::initalizePhysics()
 {
 	mPBroadphase = new btDbvtBroadphase();
 	mPCConfig = new btDefaultCollisionConfiguration();
@@ -107,12 +107,12 @@ void OpencraftCore::initalizePhysics()
 	mPhysicsWorld->setDebugDrawer( &debug );
 }
 
-btDiscreteDynamicsWorld* OpencraftCore::getPhysicsWorld()
+btDiscreteDynamicsWorld* MagnetiteCore::getPhysicsWorld()
 {
 	return mPhysicsWorld;
 }
 
-void OpencraftCore::screenshot()
+void MagnetiteCore::screenshot()
 {
 	sf::Image screen = mWindow.Capture();
 	time_t rawt = time( NULL );
@@ -126,7 +126,7 @@ void OpencraftCore::screenshot()
 	screen.SaveToFile(fname);
 }
 
-void OpencraftCore::startGame( const std::string& type )
+void MagnetiteCore::startGame( const std::string& type )
 {
 	mGame = FactoryManager::getManager().createGame(type);
 	if( mGame != NULL ) 
@@ -139,17 +139,17 @@ void OpencraftCore::startGame( const std::string& type )
 	mGame->_playerJoined();
 }
 
-void OpencraftCore::inputMovement( const Vector3 &v )
+void MagnetiteCore::inputMovement( const Vector3 &v )
 {
 	mGame->_inputMovement( v );
 }
 
-void OpencraftCore::mouseMoved( const float x, const float y )
+void MagnetiteCore::mouseMoved( const float x, const float y )
 {
 	mGame->_mouseMoved( x, y );
 }
 
-void OpencraftCore::go() 
+void MagnetiteCore::go() 
 {
 	// Print factory list for testing
 	FactoryManager::getManager().logFactories();
@@ -276,32 +276,32 @@ void OpencraftCore::go()
 
 }
 
-void OpencraftCore::exit()
+void MagnetiteCore::exit()
 {
 	mContinue = false;
 }
 
-TextureManager* OpencraftCore::getTextureManager()
+TextureManager* MagnetiteCore::getTextureManager()
 {
 	return mTextureManager;
 }
 
-Renderer* OpencraftCore::getRenderer()
+Renderer* MagnetiteCore::getRenderer()
 {
 	return mRenderer;
 }
 
-BaseGame* OpencraftCore::getGame()
+BaseGame* MagnetiteCore::getGame()
 {
 	return mGame;
 }
 
-float OpencraftCore::getTimescale()
+float MagnetiteCore::getTimescale()
 {
 	return mTimescale;
 }
 
-void OpencraftCore::newWorld( std::string name )
+void MagnetiteCore::newWorld( std::string name )
 {
 	unloadWorld();
 
@@ -309,7 +309,7 @@ void OpencraftCore::newWorld( std::string name )
 	mWorld->newWorld( name );
 }
 
-void OpencraftCore::unloadWorld()
+void MagnetiteCore::unloadWorld()
 {
 	if( mWorld != NULL ) {
 		// world handles saving.
@@ -318,19 +318,19 @@ void OpencraftCore::unloadWorld()
 	mWorld = NULL;
 }
 
-World* OpencraftCore::getWorld()
+World* MagnetiteCore::getWorld()
 {
 	return mWorld;
 }
 
-Character* OpencraftCore::createCharacter()
+Character* MagnetiteCore::createCharacter()
 {
 	Character* c = new Character();
 	mCharacters.push_back( c );
 	return c;
 }
 
-void OpencraftCore::destroyCharacter( Character* c )
+void MagnetiteCore::destroyCharacter( Character* c )
 {
 	for( std::vector<Character*>::iterator it = mCharacters.begin(); it != mCharacters.end(); it++ ) {
 		if( c == (*it) )

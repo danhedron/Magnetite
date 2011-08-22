@@ -1,5 +1,5 @@
 #include "BaseBlock.h"
-#include "OpencraftCore.h"
+#include "MagnetiteCore.h"
 #include "TextureManager.h"
 #include "Renderer.h"
 #include "WorldChunk.h"
@@ -95,7 +95,7 @@ void BaseBlock::buildCubeData( BlockContext& ctx, size_t& ind, size_t& eInd, GLv
 	/* Face -Z */
 	if((visFlags & FACE_BACK) == FACE_BACK ) {
 		this->getTextureCoords( FACE_BACK, texX, texY );
-		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
+		GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
 		float color = World::getLightColor( ctx.chunk->getLightLevel( x, y, z+1 ) );
 		data[ind + 0] = Renderer::vertex( x + 1.0f, y + 1.0f,	z + 1.0f, // Coordinates
@@ -122,7 +122,7 @@ void BaseBlock::buildCubeData( BlockContext& ctx, size_t& ind, size_t& eInd, GLv
 	/* Face +Z */
 	if((visFlags & FACE_FORWARD) == FACE_FORWARD ) {
 		this->getTextureCoords( FACE_FORWARD, texX, texY );
-		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
+		GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
 		float color = World::getLightColor( ctx.chunk->getLightLevel( x, y, z-1 ) );
 		data[ind + 0] = Renderer::vertex( x + 1.0f, y + 1.0f, z - 0.0f, // Coordinates
@@ -149,7 +149,7 @@ void BaseBlock::buildCubeData( BlockContext& ctx, size_t& ind, size_t& eInd, GLv
 	/* Face +X */
 	if((visFlags & FACE_RIGHT) == FACE_RIGHT) {
 		this->getTextureCoords( FACE_RIGHT, texX, texY );
-		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
+		GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
 		float color = World::getLightColor( ctx.chunk->getLightLevel( x+1, y, z ) );
 		data[ind + 0] = Renderer::vertex( x + 1.0f, y + 1.0f, z + 1.0f, // Coordinates
@@ -176,7 +176,7 @@ void BaseBlock::buildCubeData( BlockContext& ctx, size_t& ind, size_t& eInd, GLv
 	/* Face -Y */
 	if((visFlags & FACE_BOTTOM) == FACE_BOTTOM) {
 		this->getTextureCoords( FACE_BOTTOM, texX, texY );
-		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
+		GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
 		float color = World::getLightColor( ctx.chunk->getLightLevel( x, y-1, z ) );
 		data[ind + 0] = Renderer::vertex( x - 0.0f, y - 0.0f, z + 1.0f, // Coordinates
@@ -203,7 +203,7 @@ void BaseBlock::buildCubeData( BlockContext& ctx, size_t& ind, size_t& eInd, GLv
 	/* Face +Y */
 	if((visFlags & FACE_TOP) == FACE_TOP) {
 		this->getTextureCoords( FACE_TOP, texX, texY );
-		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
+		GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
 		float color = World::getLightColor( ctx.chunk->getLightLevel( x, y+1, z ) );
 		data[ind + 0] = Renderer::vertex( x - 0.0f, y + 1.0f, z + 1.0f, // Coordinates
@@ -230,7 +230,7 @@ void BaseBlock::buildCubeData( BlockContext& ctx, size_t& ind, size_t& eInd, GLv
 	/* Face -X */
 	if((visFlags & FACE_LEFT) == FACE_LEFT) {
 		this->getTextureCoords( FACE_LEFT, texX, texY );
-		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
+		GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
 		float color = World::getLightColor( ctx.chunk->getLightLevel( x-1, y, z ) );
 		data[ind + 0] = Renderer::vertex( x - 0.0f, y + 1.0f, z - 0.0f, // Coordinates

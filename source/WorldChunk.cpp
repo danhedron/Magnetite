@@ -3,7 +3,7 @@
 #include "WaterBlock.h"
 #include "BlockFactory.h"
 #include "Renderer.h"
-#include "OpencraftCore.h"
+#include "MagnetiteCore.h"
 #include "World.h"
 #include "LightingManager.h"
 #include "math.h"
@@ -229,13 +229,13 @@ WorldChunk* WorldChunk::getRelativeChunk(short x, short y, short z)
 		z += CHUNK_WIDTH;
 	else if( z >= CHUNK_WIDTH )
 		z -= CHUNK_WIDTH;*/
-	return OpencraftCore::Singleton->getWorld()->getChunk( mX + floorl( (float)x/CHUNK_WIDTH ) , mY + floorl( (float)y/CHUNK_HEIGHT ) , mZ + floorl( (float)z/CHUNK_WIDTH ) );
+	return MagnetiteCore::Singleton->getWorld()->getChunk( mX + floorl( (float)x/CHUNK_WIDTH ) , mY + floorl( (float)y/CHUNK_HEIGHT ) , mZ + floorl( (float)z/CHUNK_WIDTH ) );
 	//return chunk;
 }
 
 void WorldChunk::updateSurrounding( )
 {
-	if( OpencraftCore::Singleton->getWorld()->getCurrentStage() != WORLD_GEN ) {
+	if( MagnetiteCore::Singleton->getWorld()->getCurrentStage() != WORLD_GEN ) {
 		WorldChunk* c = NULL;
 		c = getRelativeChunk( -1, 0, 0 );
 		if( c ) c->markModified();
@@ -464,7 +464,7 @@ void WorldChunk::generate()
 void WorldChunk::generatePhysics()
 {
 	if( mPhysicsBody != NULL ) {
-		OpencraftCore::Singleton->getPhysicsWorld()->removeRigidBody( mPhysicsBody );
+		MagnetiteCore::Singleton->getPhysicsWorld()->removeRigidBody( mPhysicsBody );
 		delete mPhysicsState;
 		delete mPhysicsBody;
 		delete mPhysicsShape;
@@ -495,7 +495,7 @@ void WorldChunk::generatePhysics()
 		btRigidBody::btRigidBodyConstructionInfo ci( 0, mPhysicsState, mPhysicsShape, btVector3(0,0,0) );
 		mPhysicsBody = new btRigidBody( ci );
 		mPhysicsBody->setCollisionFlags( mPhysicsBody->getCollisionFlags() | btRigidBody::CF_STATIC_OBJECT );
-		OpencraftCore::Singleton->getPhysicsWorld()->addRigidBody( mPhysicsBody );
+		MagnetiteCore::Singleton->getPhysicsWorld()->addRigidBody( mPhysicsBody );
 	}
 }
 

@@ -1,7 +1,7 @@
 #include "BaseGame.h"
 #include "BlockFactory.h"
 #include "Character.h"
-#include "OpencraftCore.h"
+#include "MagnetiteCore.h"
 #include "WorldChunk.h"
 #include "BaseBlock.h"
 #include "Camera.h"
@@ -11,7 +11,7 @@ REG_GAME_TYPE( "default", BaseGame )
 
 BaseGame::BaseGame()
 {
-	mEngine = OpencraftCore::Singleton; // Bad design they say? Humbug!
+	mEngine = MagnetiteCore::Singleton; // Bad design they say? Humbug!
 	mPlayer = NULL;
 }
 

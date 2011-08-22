@@ -16,7 +16,7 @@
 */
 
 #include "prerequisites.h"
-#include "OpencraftCore.h"
+#include "MagnetiteCore.h"
 #include "World.h"
 #include "BaseBlock.h"
 #include "WorldChunk.h"
@@ -27,11 +27,11 @@ Util::LogLevel Util::_loglevel = Util::Info;
 int main( int argc, char** argv ) {
 		
 	if( false ) {
-		Util::log("Opencraft - Not Quite Unit Testing");
+		Util::log("Magnetite - Not Quite Unit Testing");
 
 		Util::log("== Chunk Tests");
 
-		OpencraftCore core;
+		MagnetiteCore core;
 
 		core.newWorld("test-world");
 
@@ -68,7 +68,7 @@ int main( int argc, char** argv ) {
 
 		return 0;
 	}
-	OpencraftCore core;
+	MagnetiteCore core;
 
 	core.init(&argc, argv);
 

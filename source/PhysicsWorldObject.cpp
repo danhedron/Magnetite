@@ -1,6 +1,6 @@
 #include "PhysicsWorldObject.h"
 #include "PhysicsState.h"
-#include "OpencraftCore.h"
+#include "MagnetiteCore.h"
 
 PhysicsWorldObject::PhysicsWorldObject() :
 	mPhysicsState( NULL ),
@@ -38,7 +38,7 @@ void PhysicsWorldObject::_initPhysics()
 	btRigidBody::btRigidBodyConstructionInfo ci( mass, mPhysicsState, mPhysicsShape, inertia );
 	mPhysicsBody = new btRigidBody( ci );
 	//mPhysicsBody->setActivationState(DISABLE_DEACTIVATION);
-	OpencraftCore::Singleton->getPhysicsWorld()->addRigidBody( mPhysicsBody );
+	MagnetiteCore::Singleton->getPhysicsWorld()->addRigidBody( mPhysicsBody );
 }
 
 void PhysicsWorldObject::_physicsUpdateTransform( const Vector3 &v )

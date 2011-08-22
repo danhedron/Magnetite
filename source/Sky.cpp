@@ -1,6 +1,6 @@
 #include "Sky.h"
 #include "Renderer.h"
-#include "OpencraftCore.h"
+#include "MagnetiteCore.h"
 #include "TextureManager.h"
 
 Sky::Sky()
@@ -99,13 +99,13 @@ Sky::~Sky()
 
 void Sky::renderSky()
 {
-	if( OpencraftCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/sky.png") == NULL )
-		OpencraftCore::Singleton->getTextureManager()->loadTexture("../resources/sprites/sky.png");
+	if( MagnetiteCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/sky.png") == NULL )
+		MagnetiteCore::Singleton->getTextureManager()->loadTexture("../resources/sprites/sky.png");
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	//glEnableClientState(GL_NORMAL_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	GLtexture* tex = OpencraftCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/sky.png");
+	GLtexture* tex = MagnetiteCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/sky.png");
 	
 	if(tex != 0) {
 		glEnable(GL_TEXTURE_2D);

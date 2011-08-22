@@ -1,5 +1,5 @@
 #include "ChunkGenerator.h"
-#include "OpencraftCore.h"
+#include "MagnetiteCore.h"
 #include "WorldChunk.h"
 #include "BlockFactory.h"
 #include "BaseBlock.h"

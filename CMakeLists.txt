@@ -1,4 +1,4 @@
-### Open Craft CMake build scripts ~
+### Magnetite CMake build scripts ~
 #
 # Written By Daniel `Haribo' Evans
 # Copyright (C) 2011 Daniel Lloyd Evans
@@ -21,18 +21,18 @@
 # THE SOFTWARE.
 
 cmake_minimum_required(VERSION 2.6)
-project(OpenCraft)
+project(Magnetite)
 #Versions
-set (OPENCRAFT_VERSION_MAJOR 0)
-set (OPENCRAFT_VERSION_MINOR 1)
+set (MAGNETITE_VERSION_MAJOR 0)
+set (MAGNETITE_VERSION_MINOR 1)
 #Pass important things to Code
 configure_file(
 	"${PROJECT_SOURCE_DIR}/include/BuildConfig.h.in"
 	"${PROJECT_SOURCE_DIR}/include/BuildConfig.h"
 )
 
-set(OPENCRAFT_SOURCES
-	source/OpencraftCore.cpp
+set(MAGNETITE_SOURCES
+	source/MagnetiteCore.cpp
 	source/Main.cpp
 	source/BaseGame.cpp
 	source/Collision.cpp
@@ -65,8 +65,8 @@ set(OPENCRAFT_SOURCES
 	source/WorldChunk.cpp
 	source/TextureManager.cpp
 )
-set(OPENCRAFT_HEADERS
-	include/OpencraftCore.h
+set(MAGNETITE_HEADERS
+	include/MagnetiteCore.h
 	include/prerequisites.h
 	include/BaseGame.h
 	include/BulletDebug.h
@@ -102,10 +102,10 @@ set(OPENCRAFT_HEADERS
 	include/TextureManager.h
 	include/util.h
 )
-source_group("Header Files" FILES ${OPENCRAFT_HEADERS})
-source_group("Source Files" FILES ${OPENCRAFT_SOURCES})
+source_group("Header Files" FILES ${MAGNETITE_HEADERS})
+source_group("Source Files" FILES ${MAGNETITE_SOURCES})
 
-add_executable(OpenCraft ${OPENCRAFT_SOURCES} ${OPENCRAFT_HEADERS})
+add_executable(Magnetite ${MAGNETITE_SOURCES} ${MAGNETITE_HEADERS})
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/depends/include/)
@@ -113,41 +113,41 @@ include_directories(${PROJECT_SOURCE_DIR}/depends/include/)
 # Windows only
 if(WIN32)
 	# Include GLee + Freeglut
-	target_link_libraries(OpenCraft ${PROJECT_SOURCE_DIR}/depends/lib/GLee.lib)
-	#target_link_libraries(OpenCraft ${PROJECT_SOURCE_DIR}/depends/lib/freeglut.lib)
+	target_link_libraries(Magnetite ${PROJECT_SOURCE_DIR}/depends/lib/GLee.lib)
+	#target_link_libraries(Magnetite ${PROJECT_SOURCE_DIR}/depends/lib/freeglut.lib)
 	# Windows Memory Usage
-	target_link_libraries(OpenCraft psapi.lib)
+	target_link_libraries(Magnetite psapi.lib)
 	# 'fix' LIBC.lib error
 	set(CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"LIBC.lib\")
 else(WIN32)
-	target_link_libraries(OpenCraft ${PROJECT_SOURCE_DIR}/depends/lib/libGLee.so)
-	#target_link_libraries(OpenCraft /usr/local/lib/libglut.so)
+	target_link_libraries(Magnetite ${PROJECT_SOURCE_DIR}/depends/lib/libGLee.so)
+	#target_link_libraries(Magnetite /usr/local/lib/libglut.so)
 endif(WIN32)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 #Find SFML
 find_package(SFML REQUIRED)
 if(SFML_FOUND)
-	target_link_libraries(OpenCraft ${SFML_LIBRARY})
+	target_link_libraries(Magnetite ${SFML_LIBRARY})
 	include_directories(${SFML_INCLUDE_DIR})
 endif(SFML_FOUND)
 
 # Find BULLET
 find_package(BULLET REQUIRED)
 if(BULLET_FOUND)
-	target_link_libraries(OpenCraft ${BULLET_LIBRARY})
+	target_link_libraries(Magnetite ${BULLET_LIBRARY})
 	include_directories(${BULLET_INCLUDE_DIR})
 endif(BULLET_FOUND)
 
 #Find OpenGl Under Linux
 find_package(OpenGL REQUIRED)
 if(OpenGL_FOUND)
-	target_link_libraries(OpenCraft ${OpenGL_LIBRARY})
+	target_link_libraries(Magnetite ${OpenGL_LIBRARY})
 	include_directories(${OpenGL_INCLUDE_DIR})
 endif(OpenGL_FOUND)
 #FindOpenGL doesn't seem to work under windows
 if(WIN32)
-	target_link_libraries(OpenCraft opengl32.lib glu32.lib winmm.lib)
+	target_link_libraries(Magnetite opengl32.lib glu32.lib winmm.lib)
 endif(WIN32)
 
 # Bin = ${OPEN_BINARY_DIR}

@@ -4,13 +4,13 @@
 #include "InputManager.h"
 
 class Character;
-class OpencraftCore;
+class MagnetiteCore;
 
 class BaseGame
 {
 protected:
 	//< Reference to the engine object
-	OpencraftCore* mEngine;
+	MagnetiteCore* mEngine;
 	//< Reference to the local player ( Or NULL if this is a dedicated server )
 	Character* mPlayer;
 	//< Keeps track of singleplayer ness

@@ -9,10 +9,10 @@ class World;
 class Character;
 class BaseGame;
 
-/** @class OpencraftCore
+/** @class MagnetiteCore
  * Responsible for managing stuff
  */
-class OpencraftCore
+class MagnetiteCore
 {
 protected:
 
@@ -47,13 +47,13 @@ protected:
 	BaseGame*	mGame;
 
 public:
-	OpencraftCore(void);
-	~OpencraftCore(void);
+	MagnetiteCore(void);
+	~MagnetiteCore(void);
 
 	/**
-	 * Singleton instance of the OpencraftCore
+	 * Singleton instance of the MagnetiteCore
 	 */
-	static OpencraftCore *Singleton;
+	static MagnetiteCore *Singleton;
 
 	/**
 	 * @return a pointer to the Texture Manager

@@ -3,7 +3,7 @@
 #include "World.h"
 #include "Sky.h"
 #include "BaseBlock.h"
-#include "OpencraftCore.h"
+#include "MagnetiteCore.h"
 #include "TextureManager.h"
 #include "Camera.h"
 #include "BlockFactory.h"
@@ -187,7 +187,7 @@ void Renderer::initialize(sf::RenderWindow& window)
 
 	Vector3 vec(0, 10.0f, 10.0f);
 
-	OpencraftCore::Singleton->getTextureManager()->loadTexture("../resources/ui/crosshair.png");
+	MagnetiteCore::Singleton->getTextureManager()->loadTexture("../resources/ui/crosshair.png");
 
 	// Test shader code.
 	mWorldProgram.vertex = loadShader("w_vertex.glsl", GL_VERTEX_SHADER);
@@ -352,7 +352,7 @@ void Renderer::render(double dt, World* world)
 
 	NodeList nodes = world->getTopNodes(); // world->getChunks();
 
-	GLtexture* tex = OpencraftCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/world.png");
+	GLtexture* tex = MagnetiteCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/world.png");
 	
 	mCamera->applyMatrix( true, false );
 
@@ -424,7 +424,7 @@ void Renderer::render(double dt, World* world)
 		drawStats( dt, rendered, world );
 		break;
 	case DEBUG_PHYSICS:
-		OpencraftCore::Singleton->getPhysicsWorld()->debugDrawWorld();
+		MagnetiteCore::Singleton->getPhysicsWorld()->debugDrawWorld();
 		break;
 	};
 
@@ -499,10 +499,10 @@ void Renderer::drawStats(double dt, size_t chunkCount, World* world)
 	size_t percent = ( mBlTotal > 0 ? (mBlRendered*100)/(mBlTotal) : 0 );
 
 	std::stringstream ss;
-	ss << "Opencraft Info:" << std::endl;
+	ss << "Magnetite Info:" << std::endl;
 	ss << "\tdt: " << dt << std::endl;
 	ss << "\tFPS: " << (1.f/dt) << std::endl;
-	ss << "\tTimescale: " << OpencraftCore::Singleton->getTimescale() << std::endl;
+	ss << "\tTimescale: " << MagnetiteCore::Singleton->getTimescale() << std::endl;
 	ss << "World Stats: " << std::endl;
 	ss << "\tBlocks: " << mBlRendered << "/" << mBlTotal << " - " << percent <<  std::endl;
 	ss << "\tRendered Chunks: " << chunkCount << std::endl;
@@ -532,7 +532,7 @@ void Renderer::drawCrosshair( double dt )
 	// Switch to 2D for overlays
 	enable2D();
 
-	GLtexture* tex = OpencraftCore::Singleton->getTextureManager()->fetchTexture("../resources/ui/crosshair.png");
+	GLtexture* tex = MagnetiteCore::Singleton->getTextureManager()->fetchTexture("../resources/ui/crosshair.png");
 	
 	if( tex != 0 )
 	{

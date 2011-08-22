@@ -2,7 +2,7 @@
 #include "BlockFactory.h"
 #include "WorldChunk.h"
 #include "TextureManager.h"
-#include "OpencraftCore.h"
+#include "MagnetiteCore.h"
 #include "Renderer.h"
 
 //REGISTER_BLOCK_TYPE( "stone", StoneBlock )
@@ -202,7 +202,7 @@ std::string WaterBlock::getType()
 //	/* Face -Z */
 //	if((visFlags & FACE_BACK) == FACE_BACK ) {
 //		this->getTextureCoords( FACE_BACK, x, y );
-//		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
+//		GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 //
 //		data[ind + 0] = Renderer::vertex( this->getX() + 1.0f, this->getY() + fluidHeight,	this->getZ() + 1.0f, // Coordinates
 //								0.0f, 0.0f, -1.0f,
@@ -224,7 +224,7 @@ std::string WaterBlock::getType()
 //	/* Face +Z */
 //	if((visFlags & FACE_FORWARD) == FACE_FORWARD ) {
 //		this->getTextureCoords( FACE_FORWARD, x, y );
-//		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
+//		GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 //
 //		data[ind + 0] = Renderer::vertex( this->getX() + 1.0f, this->getY() + fluidHeight, this->getZ() - 0.0f, // Coordinates
 //								0.0f, 0.0f, 1.0f,
@@ -246,7 +246,7 @@ std::string WaterBlock::getType()
 //	/* Face +X */
 //	if((visFlags & FACE_RIGHT) == FACE_RIGHT) {
 //		this->getTextureCoords( FACE_RIGHT, x, y );
-//		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
+//		GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 //
 //		data[ind + 0] = Renderer::vertex( this->getX() + 1.0f, this->getY() + fluidHeight, this->getZ() + 1.0f, // Coordinates
 //								1.0f, 0.0f, 0.0f,
@@ -268,7 +268,7 @@ std::string WaterBlock::getType()
 //	/* Face -Y */
 //	if((visFlags & FACE_BOTTOM) == FACE_BOTTOM) {
 //		this->getTextureCoords( FACE_BOTTOM, x, y );
-//		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
+//		GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 //
 //		data[ind + 0] = Renderer::vertex( this->getX() - 0.0f, this->getY() - 0.0f, this->getZ() + 1.0f, // Coordinates
 //								0.0f, -1.0f, 0.0f,
@@ -290,7 +290,7 @@ std::string WaterBlock::getType()
 //	/* Face +Y */
 //	if((visFlags & FACE_TOP) == FACE_TOP) {
 //		this->getTextureCoords( FACE_TOP, x, y );
-//		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
+//		GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 //
 //		data[ind + 0] = Renderer::vertex( this->getX() - 0.0f, this->getY() + fluidHeight, this->getZ() + 1.0f, // Coordinates
 //								0.0f, 1.0f, 0.0f,
@@ -312,7 +312,7 @@ std::string WaterBlock::getType()
 //	/* Face -X */
 //	if((visFlags & FACE_LEFT) == FACE_LEFT) {
 //		this->getTextureCoords( FACE_LEFT, x, y );
-//		GLuvrect rect = OpencraftCore::Singleton->getTextureManager()->getBlockUVs( x, y );
+//		GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( x, y );
 //
 //		data[ind + 0] = Renderer::vertex( this->getX() - 0.0f, this->getY() + fluidHeight, this->getZ() - 0.0f, // Coordinates
 //								-1.0f, 0.0f, 0.0f,
