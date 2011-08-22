@@ -7,40 +7,18 @@
 #include "World.h"
 #include "Character.h"
 #include "BlockFactory.h"
+#include "BaseGame.h"
+#include "BulletDebug.h"
 #include <ctime>
 
 OpencraftCore* OpencraftCore::Singleton = 0;
+static GLDebugDrawer debug;
+
 
 /* Simple events */
 void globalEventHandler( const InputEvent& evt )
 {
-	if( evt.event == Inputs::FORWARD ) {
-		if( evt.down )
-			OpencraftCore::Singleton->getPlayer()->addMoveDelta( Vector3( 0.f, 0.f, -1.f ) );
-		else
-			OpencraftCore::Singleton->getPlayer()->addMoveDelta( Vector3( 0.f, 0.f, 1.f ) );
-	}
-	if( evt.event == Inputs::LEFT ) {
-		if( evt.down )
-			OpencraftCore::Singleton->getPlayer()->addMoveDelta( Vector3( -1.f, 0.f, 0.f ) );
-		else
-			OpencraftCore::Singleton->getPlayer()->addMoveDelta( Vector3( 1.f, 0.f, 0.f ) );
-	}
-	if( evt.event == Inputs::RIGHT ) {
-		if( evt.down )
-			OpencraftCore::Singleton->getPlayer()->addMoveDelta( Vector3( 1.f, 0.f, 0.f ) );
-		else
-			OpencraftCore::Singleton->getPlayer()->addMoveDelta( Vector3( -1.f, 0.f, 0.f ) );
-	}
-	if( evt.event == Inputs::BACK ) {
-		if( evt.down )
-			OpencraftCore::Singleton->getPlayer()->addMoveDelta( Vector3( 0.f, 0.f, 1.f ) );
-		else
-			OpencraftCore::Singleton->getPlayer()->addMoveDelta( Vector3( 0.f, 0.f, -1.f ) );
-	}
-	if( evt.event == Inputs::SPRINT ) {
-		OpencraftCore::Singleton->getPlayer()->enableSprint( evt.down );
-	}
+	OpencraftCore::Singleton->getGame()->_inputEvents( evt );
 	if( evt.event == Inputs::SCREENSHOT && evt.down == true ) {
 		OpencraftCore::Singleton->screenshot();
 	}
@@ -49,12 +27,16 @@ void globalEventHandler( const InputEvent& evt )
 OpencraftCore::OpencraftCore(void)
 : mContinue( true ),
 mWorld( NULL ),
-mPlayer( NULL ),
 mTextureManager( NULL ),
 mInputManager( NULL ),
 mTimescale( 1.f ),
 mLastX( 0.f ),
-mLastY( 0.f )
+mLastY( 0.f ),
+mPBroadphase( NULL ),
+mPCConfig( NULL ),
+mCCDispatch ( NULL ),
+mSolver( NULL ),
+mPhysicsWorld( NULL )
 {
 	OpencraftCore::Singleton = this;
 	mRenderer = new Renderer();
@@ -64,8 +46,10 @@ mLastY( 0.f )
 	mInputManager->setEventCallback( Inputs::BACK, &globalEventHandler );
 	mInputManager->setEventCallback( Inputs::LEFT, &globalEventHandler );
 	mInputManager->setEventCallback( Inputs::RIGHT, &globalEventHandler );
+	mInputManager->setEventCallback( Inputs::JUMP, &globalEventHandler );
 	mInputManager->setEventCallback( Inputs::SPRINT, &globalEventHandler );
 	mInputManager->setEventCallback( Inputs::SCREENSHOT, &globalEventHandler );
+	mInputManager->setEventCallback( Inputs::FLY, &globalEventHandler );
 }
 
 OpencraftCore::~OpencraftCore(void)
@@ -75,9 +59,21 @@ OpencraftCore::~OpencraftCore(void)
 	delete mRenderer;
 	delete mTextureManager;
 	delete mInputManager;
+
+	mPhysicsWorld->removeRigidBody( mGroundBody );
+
+	delete mGroundBody;
+	delete mGroundShape;
+	delete mGroundState;
+
+	delete mPhysicsWorld;
+	delete mSolver;
+	delete mCCDispatch;
+	delete mPCConfig;
+	delete mPBroadphase;
 }
 
-void OpencraftCore::createWindow(int *argc, char **argv)
+void OpencraftCore::init(int *argc, char **argv)
 {
 	sf::WindowSettings wnds;
 	wnds.DepthBits = 24;
@@ -87,8 +83,33 @@ void OpencraftCore::createWindow(int *argc, char **argv)
 	mWindow.EnableKeyRepeat( false );
 	//mWindow.UseVerticalSync(true);
 	mRenderer->initialize(mWindow);
+	wglSwapIntervalEXT(1); // Enable VSYNC, for greater justice
 	mTextureManager->initalize();
 	mRenderer->resizeViewport(0,0,800,600);
+	initalizePhysics();
+}
+
+void OpencraftCore::initalizePhysics()
+{
+	mPBroadphase = new btDbvtBroadphase();
+	mPCConfig = new btDefaultCollisionConfiguration();
+	mCCDispatch = new btCollisionDispatcher(mPCConfig);
+	mSolver = new btSequentialImpulseConstraintSolver();
+	mPhysicsWorld = new btDiscreteDynamicsWorld( mCCDispatch, mPBroadphase, mSolver, mPCConfig );
+	mPhysicsWorld->setGravity( btVector3( 0.f, -9.81f, 0.f ) );
+
+	mGroundShape = new btStaticPlaneShape( btVector3(0, 1, 0), 0 );
+	mGroundState = new btDefaultMotionState;
+	btRigidBody::btRigidBodyConstructionInfo ci( 0, mGroundState, mGroundShape, btVector3(0,0,0) );
+	mGroundBody = new btRigidBody( ci );
+	mPhysicsWorld->addRigidBody( mGroundBody );
+	debug.setDebugMode( btIDebugDraw::DBG_DrawWireframe | btIDebugDraw::DBG_DrawAabb );
+	mPhysicsWorld->setDebugDrawer( &debug );
+}
+
+btDiscreteDynamicsWorld* OpencraftCore::getPhysicsWorld()
+{
+	return mPhysicsWorld;
 }
 
 void OpencraftCore::screenshot()
@@ -105,16 +126,38 @@ void OpencraftCore::screenshot()
 	screen.SaveToFile(fname);
 }
 
-void OpencraftCore::go(int *argc, char **argv) 
+void OpencraftCore::startGame( const std::string& type )
 {
-	createWindow(argc, argv);
+	mGame = FactoryManager::getManager().createGame(type);
+	if( mGame != NULL ) 
+		Util::log("Starting game: " + mGame->getName() );
+	mGame->_startGameSingle();
+	
+	newWorld("test");
+	
+	// No multiplayer yet so just force player join
+	mGame->_playerJoined();
+}
 
+void OpencraftCore::inputMovement( const Vector3 &v )
+{
+	mGame->_inputMovement( v );
+}
+
+void OpencraftCore::mouseMoved( const float x, const float y )
+{
+	mGame->_mouseMoved( x, y );
+}
+
+void OpencraftCore::go() 
+{
 	// Print factory list for testing
 	FactoryManager::getManager().logFactories();
 	
 	int lastX = mWindow.GetWidth()/2;
 	int lastY = mWindow.GetHeight()/2;
 
+	mClock.Reset();
 	while(mContinue && mWindow.IsOpened()) {
 		float lDelta = mClock.GetElapsedTime();
 		mClock.Reset();
@@ -142,27 +185,35 @@ void OpencraftCore::go(int *argc, char **argv)
 					else
 						mRenderer->setRenderMode(Renderer::RENDER_SOLID);
 			}
-			if( (lEvt.Type == sf::Event::KeyReleased) &&
-				(lEvt.Key.Code == sf::Key::F3) ) {
-					mRenderer->toggleCameraFrustum();
+
+			//==========
+			//= Debug Buttons
+			//==========
+			if( (lEvt.Type == sf::Event::KeyReleased ) &&
+				(lEvt.Key.Code == sf::Key::F1 ) ) {
+				mRenderer->setDebugMode( Renderer::DEBUG_OFF );
+			}
+			if( (lEvt.Type == sf::Event::KeyReleased ) &&
+				(lEvt.Key.Code == sf::Key::F3 ) ) {
+				mRenderer->setDebugMode( Renderer::DEBUG_STATS );
 			}
 			if( (lEvt.Type == sf::Event::KeyReleased ) &&
 				(lEvt.Key.Code == sf::Key::F4 ) ) {
+				mRenderer->setDebugMode( Renderer::DEBUG_PHYSICS );
+			}
+			if( (lEvt.Type == sf::Event::KeyReleased ) &&
+				(lEvt.Key.Code == sf::Key::F5 ) ) {
 				Util::setLogLevel( Util::Verbose );
 			}
 			if( (lEvt.Type == sf::Event::KeyReleased) &&
 				(lEvt.Key.Code == sf::Key::F) ) {
-					mPlayer->enableFlying( !mPlayer->isFlying() );
-					Util::log( (Util::toString(mPlayer->isFlying())) + " Flying");
-			}
-			if( (lEvt.Type == sf::Event::KeyReleased) &&
-				(lEvt.Key.Code == sf::Key::F3) ) {
-					mRenderer->toggleCameraFrustum();
+					//mPlayer->enableFlying( !mPlayer->isFlying() );
+					//Util::log( (Util::toString(mPlayer->isFlying())) + " Flying");
 			}
 			if( (lEvt.Type == sf::Event::KeyReleased) &&
 				(lEvt.Key.Code == sf::Key::F) ) {
-					mPlayer->enableFlying( !mPlayer->isFlying() );
-					Util::log( (Util::toString(mPlayer->isFlying())) + " Flying");
+					//mPlayer->enableFlying( !mPlayer->isFlying() );
+					//Util::log( (Util::toString(mPlayer->isFlying())) + " Flying");
 			}
 			if( (lEvt.Type == sf::Event::KeyPressed) &&
 				(lEvt.Key.Code == sf::Key::Add) ) {
@@ -185,18 +236,16 @@ void OpencraftCore::go(int *argc, char **argv)
 					mTimescale *= 2.f;
 			}
 			if( (lEvt.Type == sf::Event::MouseMoved) ) {
-					mPlayer->getCamera()->pitch( -(lEvt.MouseMove.Y  - lastY) );
-					mPlayer->getCamera()->yaw( -(lEvt.MouseMove.X - lastX) );
+					mGame->_mouseMoved( -(lEvt.MouseMove.X - lastX), -(lEvt.MouseMove.Y  - lastY));
 					lastX = mWindow.GetWidth()/2;
 					lastY = mWindow.GetHeight()/2;
-					
 					mWindow.SetCursorPosition( mWindow.GetWidth() / 2, mWindow.GetHeight() / 2 );
 			}
 			if( lEvt.Type == sf::Event::MouseButtonPressed && lEvt.MouseButton.Button == sf::Mouse::Left ) {
-				placeEyeBlock();
+				mGame->_primary();
 			}
 			if( lEvt.Type == sf::Event::MouseButtonPressed && lEvt.MouseButton.Button == sf::Mouse::Right ) {
-				removeEyeBlock();
+				mGame->_secondary();
 			}
 			if( lEvt.Type == sf::Event::Resized ) {
 				mRenderer->resizeViewport( 0, 0, lEvt.Size.Width, lEvt.Size.Height );
@@ -204,15 +253,20 @@ void OpencraftCore::go(int *argc, char **argv)
 		}
 
 		lDelta *= mTimescale;
-
+		
+		mPhysicsWorld->stepSimulation( lDelta );
+		
 		//Ensure each loaded chunk is updated before being sent to the GPU
 		mWorld->update( lDelta );
 
-		// Update the player once the world update has finished.
-		mPlayer->update( lDelta );
-
+		// Update all the characters
+		for( std::vector<Character*>::iterator it = mCharacters.begin(); it != mCharacters.end(); it++ )
+		{
+			(*it)->update( lDelta );
+		}
+	
 		//Ensure the renderer has the correct camera
-		mRenderer->setCamera(mPlayer->getCamera());
+		mRenderer->setCamera( mGame->getLocalPlayer()->getCamera() );
 		mRenderer->render(lDelta, mWorld);
 
 		mWindow.Display();
@@ -232,6 +286,16 @@ TextureManager* OpencraftCore::getTextureManager()
 	return mTextureManager;
 }
 
+Renderer* OpencraftCore::getRenderer()
+{
+	return mRenderer;
+}
+
+BaseGame* OpencraftCore::getGame()
+{
+	return mGame;
+}
+
 float OpencraftCore::getTimescale()
 {
 	return mTimescale;
@@ -243,7 +307,6 @@ void OpencraftCore::newWorld( std::string name )
 
 	mWorld = new World();
 	mWorld->newWorld( name );
-	createCharacter();
 }
 
 void OpencraftCore::unloadWorld()
@@ -251,12 +314,7 @@ void OpencraftCore::unloadWorld()
 	if( mWorld != NULL ) {
 		// world handles saving.
 		delete mWorld;
-		// If the player still exists, delete it.
-		if( mPlayer != NULL ) {
-			delete mPlayer;
-		}
 	}
-	mPlayer = NULL;
 	mWorld = NULL;
 }
 
@@ -267,52 +325,16 @@ World* OpencraftCore::getWorld()
 
 Character* OpencraftCore::createCharacter()
 {
-	if( mPlayer == NULL )
-		mPlayer = new Character();
-	mWindow.SetSize(mWindow.GetWidth(), mWindow.GetHeight());
-	mPlayer->setPosition( Vector3( 0.f, 150.f, 0.f )  );
-	if( mWorld )
-		mWorld->setPagingCamera( mPlayer->getCamera() );
-	return mPlayer;
+	Character* c = new Character();
+	mCharacters.push_back( c );
+	return c;
 }
 
-Character* OpencraftCore::getPlayer()
+void OpencraftCore::destroyCharacter( Character* c )
 {
-	return mPlayer;
-}
-
-void OpencraftCore::removeEyeBlock()
-{
-	raycast_r ray = mPlayer->getEyeCast();
-	ray = mWorld->raycastWorld(ray);
-	if(ray.hit)
-	{
-		Vector3 cIndex = mWorld->worldToChunks( ray.worldHit );
-		//Vector3 bIndex = mWorld->worldToBlock( ray.worldHit );
-		WorldChunk* chunk = mWorld->getChunk( cIndex.x, cIndex.y, cIndex.z );
-		if(chunk && ray.block) {
-			chunk->removeBlockAt( ray.block->getX(), ray.block->getY(), ray.block->getZ() );
-		}
+	for( std::vector<Character*>::iterator it = mCharacters.begin(); it != mCharacters.end(); it++ ) {
+		if( c == (*it) )
+			mCharacters.erase( it++ );
 	}
 }
 
-void OpencraftCore::placeEyeBlock()
-{
-	raycast_r ray = mPlayer->getEyeCast();
-	ray = mWorld->raycastWorld(ray);
-	if(ray.hit && ray.block)
-	{
-		Util::log( Util::toString( ray.worldHit + ray.hitNormal ) );
-		Vector3 cIndex = mWorld->worldToChunks( ray.worldHit + ray.hitNormal );
-		Vector3 bIndex = Vector3( ray.block->getX(), ray.block->getY(), ray.block->getZ() ) + ray.hitNormal;
-		Util::log("Ray Hit: " + Util::toString( cIndex ) + " Normal: " + Util::toString( ray.hitNormal ) );
-		WorldChunk* chunk = mWorld->getChunk( cIndex.x, cIndex.y, cIndex.z );
-		if(chunk) {
-			BaseBlock* block = FactoryManager::getManager().createBlock(	mRenderer->blockType );
-			if( block != NULL ) {
-				block->setPosition( bIndex );
-				chunk->addBlockToChunk( block );
-			}
-		}
-	}
-}

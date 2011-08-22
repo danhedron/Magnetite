@@ -1,19 +1,22 @@
 #include "Character.h"
 #include "OpencraftCore.h"
 #include "World.h"
+#include "PhysicsState.h"
 
-Character::Character( void )
+Character::Character( void ) :
+mPhysicsController( NULL )
 {
 	setHeight( 1.9f );
 	setMoveSpeed( 2.f );
 	setSprintSpeed( 4.f );
 	enableSprint( false );
 	enableFlying( false );
+	this->_initPhysics();
 }
 
 Character::~Character( void )
 {
-
+	PhysicsWorldObject::~PhysicsWorldObject();
 }
 
 void Character::setSkin(std::string name)
@@ -62,7 +65,7 @@ raycast_r Character::getEyeCast()
 	ray.orig = getPosition() + Vector3( 0.f, mHeight * 0.9f, 0.f );
 	ray.dir = mCamera.getForward();
 	return ray;
-}
+} 
 
 raycast_r Character::getFeetCast()
 {
@@ -72,12 +75,23 @@ raycast_r Character::getFeetCast()
 	return ray;
 }
 
-collision_r Character::getCollision()
+void Character::_initPhysics()
 {
-	collision_r col;
-	col.min1 = getPosition() + Vector3( -.4f, 0.f, -.4f );
-	col.max1 = getPosition() + Vector3( .4f, mHeight, .4f );
-	return col;
+	//btTransform spawn;
+	//spawn.setIdentity();
+	//spawn.setOrigin( btVector3( 0, 150, 0 ) );
+	//mPhysicsState = new PhysicsState( spawn, this );
+	mPhysicsShape = new btCapsuleShape( 0.45, mHeight );//btBoxShape( btVector3( 4, 4, 4 ) );//
+	
+	//btRigidBody::btRigidBodyConstructionInfo ci( mass, mPhysicsState, mPhysicsShape, inertia );
+	mPhysicsBody = new btPairCachingGhostObject();
+	mPhysicsBody->setCollisionShape( mPhysicsShape );
+	mPhysicsBody->setCollisionFlags( mPhysicsBody->getCollisionFlags() | btCollisionObject::CF_CHARACTER_OBJECT);
+
+	mPhysicsController = new btKinematicCharacterController(mPhysicsBody, mPhysicsShape, 0.5);
+	OpencraftCore::Singleton->getPhysicsWorld()->getBroadphase()->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
+	OpencraftCore::Singleton->getPhysicsWorld()->addCollisionObject(mPhysicsBody,btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter | btBroadphaseProxy::AllFilter);
+	OpencraftCore::Singleton->getPhysicsWorld()->addAction( mPhysicsController );
 }
 
 void Character::addMoveDelta(const Vector3 &dp)
@@ -85,48 +99,42 @@ void Character::addMoveDelta(const Vector3 &dp)
 	mMoveVector += dp;
 }
 
-void Character::setPosition(const Vector3 &vec)
+void Character::setPosition( const Vector3& v )
 {
-	mPosition = vec;
+	btTransform t = mPhysicsBody->getWorldTransform();
+	t.setOrigin( btVector3( v.x, v.y, v.z ) );
+	mPhysicsBody->setWorldTransform( t );
 }
 
-Vector3 Character::getPosition()
+void Character::jump()
 {
-	return mPosition;
+	mPhysicsController->jump();
 }
 
 void Character::update(float dt)
 {
-	Matrix4 yaw = Matrix4::rotateY( -(mCamera.getYaw()*3.141f)/180 );
-	Vector3 newDir = yaw * mMoveVector;
+	//Matrix4 yaw = Matrix4::rotateY( -(mCamera.getYaw()*3.141f)/180 );
 
-	mPosition += ( newDir * ( mSprint ? mSprintSpeed : mMoveSpeed ) * dt);
-	if( !mFlying )
-	{
-		raycast_r feetRay = getFeetCast();
-		raycast_r gRay[4];
-		// Perform 4 raycasts for edges of player since AABB collision testing doesn't work.
-		feetRay.orig += Vector3(0.49f, 0.f, 0.49f);
-		gRay[0] = OpencraftCore::Singleton->getWorld()->raycastWorld( feetRay, true );
-		feetRay.orig += Vector3(0.f, 0.f, -0.98f);
-		gRay[1] = OpencraftCore::Singleton->getWorld()->raycastWorld( feetRay, true );
-		feetRay.orig += Vector3(-0.98f, 0.f, 0.f);
-		gRay[2] = OpencraftCore::Singleton->getWorld()->raycastWorld( feetRay, true );
-		feetRay.orig += Vector3(0.0f, 0.f, 0.98f);
-		gRay[3] = OpencraftCore::Singleton->getWorld()->raycastWorld( feetRay, true );
+	if( !mFlying ) {
+		Vector3 walkDir = Matrix4::rotateY( -(mCamera.getYaw()*3.141f)/180) * mMoveVector * (mSprint ? mSprintSpeed : mMoveSpeed) * dt;
+		mPhysicsController->setWalkDirection( btVector3( walkDir.x, walkDir.y, walkDir.z ) );
 		
-		float smallestRay = 10000;
-		bool hit = false;
-		for( int i = 0; i < 4; i++ ) {
-			if( gRay[i].hit == true ) {
-				hit = true;
-				smallestRay = std::min( smallestRay, gRay[i].i0 );
-			}
-		}
-		if( hit )
-			mPosition.y -= smallestRay -= mHeight;
+		btTransform t = mPhysicsBody->getWorldTransform();
+		mPosition = Vector3( t.getOrigin().x(), t.getOrigin().y(), t.getOrigin().z() );
+
+	}
+	else
+	{
+		Vector3 delty = Matrix4::rotateX( -(mCamera.getPitch()*3.141f)/180) * -mMoveVector * 5;
+		Vector3 delt = Matrix4::rotateY( -(mCamera.getYaw()*3.141f)/180) * delty * 5;
+		mPosition -= delt * dt;
 	}
 
-	// Offset camera by eye height.
-	mCamera.setPosition( mPosition + Vector3( 0.f, mHeight * 0.9f, 0.f) );
+	mCamera.setPosition( mPosition + Vector3( 0.f, (mHeight/2) * 0.9f, 0.f) );
+}
+
+void Character::_physicsUpdateTransform( const Vector3& v )
+{
+	if( !mFlying )
+		mPosition = v;
 }

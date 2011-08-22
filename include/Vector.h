@@ -21,7 +21,7 @@ public:
 	Vector3 operator* ( float scal );
 	Vector3 operator/ ( float scal );
 
-	Vector3 operator* ( Vector3& rhs );
+	Vector3 operator* ( const Vector3& rhs );
 
 	float length();
 	Vector3 normalize();

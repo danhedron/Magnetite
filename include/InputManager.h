@@ -16,6 +16,7 @@ namespace Inputs {
 		BACK,
 		SPRINT,
 		JUMP,
+		FLY,
 		PRIMARY,
 		SECONDARY,
 		SCREENSHOT

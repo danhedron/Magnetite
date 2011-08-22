@@ -12,10 +12,9 @@ class World;
  */
 struct GLvertex {
 	float x, y, z;
-	float nx, ny, nz;
+	/*float nx, ny, nz;*/ // Normals are undeeded at the moment.
 	float u0, v0;
 	float r, g, b;
-	int padding[5];
 };
 typedef unsigned short GLedge;
 
@@ -74,6 +73,7 @@ protected:
 	size_t mBlTotal;
 
 	size_t mRenderMode;
+	size_t mDebugMode;
 
 	Camera* mCamera;
 
@@ -103,6 +103,17 @@ public:
 	enum {
 		RENDER_SOLID,
 		RENDER_LIGHTING
+	};
+
+	/**
+	 * Debug options
+	 */
+	enum {
+		DEBUG_OFF,
+		DEBUG_STATS,
+		DEBUG_PERF,
+		DEBUG_TERRAIN,
+		DEBUG_PHYSICS
 	};
 
 	/**
@@ -217,6 +228,11 @@ public:
 	void setRenderMode( size_t rendermode );
 
 	size_t getRenderMode();
+
+	/**
+	 * Sets the Debug mode
+	 */
+	void setDebugMode( size_t debugMode );
 };
 
 #endif

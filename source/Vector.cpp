@@ -40,7 +40,7 @@ Vector3 Vector3::operator *( float scal ) {
 	return Vector3(x*scal,y*scal,z*scal);
 }
 
-Vector3 Vector3::operator *( Vector3& rhs ) {
+Vector3 Vector3::operator *(  const Vector3& rhs ) {
 	Vector3 res;
 	res.x = y * rhs.z - z * rhs.y;
 	res.y = z * rhs.x - x * rhs.z;

@@ -103,7 +103,7 @@ void Sky::renderSky()
 		OpencraftCore::Singleton->getTextureManager()->loadTexture("../resources/sprites/sky.png");
 
 	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
+	//glEnableClientState(GL_NORMAL_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	GLtexture* tex = OpencraftCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/sky.png");
 	
@@ -113,11 +113,11 @@ void Sky::renderSky()
 	}
 
 	glVertexPointer(3, GL_FLOAT, sizeof(GLvertex), &(mGeom->vertexData[0].x));
-	glNormalPointer(GL_FLOAT, sizeof(GLvertex), &(mGeom->vertexData[0].nx));
+	//glNormalPointer(GL_FLOAT, sizeof(GLvertex), &(mGeom->vertexData[0].nx));
 	glTexCoordPointer(2, GL_FLOAT, sizeof(GLvertex), &(mGeom->vertexData[0].u0));
 	glClientActiveTexture(GL_TEXTURE0);
 
-	glDrawRangeElements(GL_TRIANGLES, 0, mGeom->vertexCount, mGeom->edgeCount, GL_UNSIGNED_SHORT, mGeom->edgeData);
+	//glDrawRangeElements(GL_TRIANGLES, 0, mGeom->vertexCount, mGeom->edgeCount, GL_UNSIGNED_SHORT, mGeom->edgeData);
 
 	if(tex) {
 		glDisable(GL_TEXTURE_2D);
@@ -125,7 +125,7 @@ void Sky::renderSky()
 	}
 
 	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_NORMAL_ARRAY);
+	//glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 

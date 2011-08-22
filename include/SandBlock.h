@@ -11,7 +11,7 @@ public:
 	SandBlock();
 	~SandBlock(void);
 	
-	void connectedChange( short face );
+	void connectedChange( BlockContext &ctx, short face );
 
 	std::string getType();
 	void getTextureCoords( short face, short &x, short &y );

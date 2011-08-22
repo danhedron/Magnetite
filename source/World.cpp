@@ -5,9 +5,13 @@
 #include "Camera.h"
 #include "StoneBlock.h"
 #include "ChunkGenerator.h"
+#include "OpencraftCore.h"
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
+#include <math.h>
+#include <ppl.h>
+
 #ifdef WIN32
 #include <direct.h>
 #else
@@ -16,7 +20,8 @@
 
 World::World()
 : mSky( NULL ),
-mPagingCamera( NULL )
+mPagingCamera( NULL ),
+mWorldStage( WORLD_NORMAL )
 {	
 	mGenerator = new ChunkGenerator(1024);
 }
@@ -35,6 +40,11 @@ void _deleteTree( WorldNode* node )
 World::~World()
 {
 	destoryWorld();	
+}
+
+WorldStage World::getCurrentStage()
+{
+	return mWorldStage;
 }
 
 float World::getLightColor( LightIndex light )
@@ -82,9 +92,31 @@ void World::loadWorld( std::string name )
 
 void World::createWorld()
 {
+	mWorldStage = WORLD_GEN;
 	createSky(200);
 	//Create some testing chunks
 	createTestChunks( 5 );
+
+#ifdef WIN32
+	size_t startTick = GetTickCount();
+
+	// Attempt to use VS 'threading'
+	auto genChunk = [](WorldChunk* c) {
+		c->requestGenerate();
+	};
+
+	// Let the Windows Concurency API handle threading on Windows
+	Concurrency::parallel_for_each( mChunks.begin(), mChunks.end(), genChunk );
+#else
+	// Perform a standard loop over the chunk list. - need to speed this up on linux/non-windows systems
+	for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
+		(*it)->requestGenerate();
+	}
+#endif
+#ifdef WIN32
+	Util::log( "T: " + Util::toString( (long)(GetTickCount() - startTick) ) );
+#endif
+	mWorldStage = WORLD_NORMAL;
 }
 
 std::string World::getName()
@@ -102,11 +134,28 @@ std::string World::getSavePath()
 void World::createTestChunks( int size )
 {
 	destoryWorld();
-	for(int i = -size; i < size; i++) {
-		for(int z = -size; z < size; z++) {
+
+	int xSize = size*2;
+	int zSize = size*2;
+
+	int total = zSize*xSize;
+	int nc = 0;
+	int i = -size; 
+
+	for(i = -size; i < size; i++) {
+#ifdef WIN32
+		Concurrency::parallel_for( -size, size, [&] (int z) {
+#else
+		for(int z = -size; z < size; z++) { // Fallback for platforms without threading support
+#endif
 			WorldChunk* c = createChunk(i,0,z);
-			mGenerator->fillChunk( c );
+			mGenerator->fillChunk( c ); // This should run in O(n) time.
+			nc++;
 		}
+#ifdef WIN32
+		);
+#endif
+		Util::log("Created Row; - " + Util::toString( (nc*100) / total ) + "%");
 	}
 }
 
@@ -266,10 +315,7 @@ WorldChunk* World::createChunk(long x, long y, long z)
 	WorldChunk* newChunk = new WorldChunk(x, y, z);
 	mChunks.push_back(newChunk);
 	WorldNode* node = getChunkNode(Vector3(x,y,z), true);
-	if( node == NULL ) 
-		Util::log( "NULL node" );
-	else
-		node->children[0] = (WorldNode*)newChunk;
+	node->children[0] = (WorldNode*)newChunk;
 	
 	return newChunk;
 }
@@ -343,7 +389,9 @@ void World::update( float dt )
 		mSky->update( dt );
 
 	for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
+		
 		(*it)->update(dt);
+
 	}
 
 	for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
@@ -405,12 +453,13 @@ raycast_r World::raycastWorld(const raycast_r &inray, bool solidOnly)
 		for(BlockList::iterator block = blocks->begin(); block != blocks->end(); ++block) {
 			if( solidOnly && !(*block).second->isSolid() )
 				continue;
-			min = Vector3( (*it)->getX() * CHUNK_WIDTH + (*block).second->getX() - 0.0f,
-							(*it)->getY() * CHUNK_HEIGHT + (*block).second->getY() - 0.0f,
-							(*it)->getZ() * CHUNK_WIDTH + (*block).second->getZ() - 0.0f );
-			max = Vector3( (*it)->getX() * CHUNK_WIDTH + (*block).second->getX() + 1.0f,
-							(*it)->getY() * CHUNK_HEIGHT + (*block).second->getY() + 1.0f,
-							(*it)->getZ() * CHUNK_WIDTH + (*block).second->getZ() + 1.0f );
+			Vector3 bPos = Util::indexToPosition( (*block).first );
+			min = Vector3( (*it)->getX() * CHUNK_WIDTH - 0.0f,
+							(*it)->getY() * CHUNK_HEIGHT - 0.0f,
+							(*it)->getZ() * CHUNK_WIDTH - 0.0f ) + bPos;
+			max = Vector3( (*it)->getX() * CHUNK_WIDTH + 1.0f,
+							(*it)->getY() * CHUNK_HEIGHT + 1.0f,
+							(*it)->getZ() * CHUNK_WIDTH + 1.0f ) + bPos;
 			raycast_r r = inray;
 			r = raycastCube(r, min, max);
 			if( r.hit == true ) {
@@ -433,59 +482,61 @@ raycast_r World::raycastWorld(const raycast_r &inray, bool solidOnly)
 	return closest;
 }
 
-collision_r World::AABBWorld(const collision_r& info)
+CollisionResponse World::AABBWorld( Vector3& min, Vector3& max )
 {
 	ChunkList hitChunks;
+	AABB targetBB;
+	targetBB.center = (min + (max-min)/2);
+	targetBB.extents = (max-min);
+	CollisionResponse r;
 	for(ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it)
 	{
-		collision_r col = info;
-		col.min2 = Vector3( (*it)->getX() * CHUNK_WIDTH, (*it)->getY() * CHUNK_HEIGHT,  (*it)->getZ() * CHUNK_WIDTH );
-		col.max2 = Vector3( (*it)->getX() * CHUNK_WIDTH + CHUNK_WIDTH, (*it)->getY() * CHUNK_HEIGHT + CHUNK_HEIGHT,  (*it)->getZ() * CHUNK_WIDTH + CHUNK_WIDTH );
-		col = AABBCube( col );
-		if( col.collision )
+		AABB chunkAABB;
+		chunkAABB.center = Vector3( (*it)->getX() * CHUNK_WIDTH + CHUNK_WIDTH/2, (*it)->getY() * CHUNK_HEIGHT + CHUNK_HEIGHT/2, (*it)->getZ() * CHUNK_WIDTH + CHUNK_WIDTH/2 );
+		chunkAABB.extents = Vector3( CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_WIDTH );
+		Collision::AABBvsAABB( chunkAABB, targetBB, r );
+		if( r.collision ) {
 			hitChunks.push_back( *it );
+		}
 	}
+	r.response = Vector3();
+
 	BlockList* blocks = NULL;
-	collision_r coll;
+	AABB bb;
+	CollisionResponse final;
+	final.collision = false;
+	Vector3 ofs( 0,0,0 );
+
 	for(ChunkList::iterator it = hitChunks.begin(); it != hitChunks.end(); ++it)
 	{
 		blocks = (*it)->getVisibleBlocks();
+		Vector3 chunkPos( (*it)->getX() * CHUNK_WIDTH, (*it)->getY() * CHUNK_HEIGHT, (*it)->getZ() * CHUNK_WIDTH );
 		for(BlockList::iterator block = blocks->begin(); block != blocks->end(); ++block) {
-			collision_r bcol = info;
-			bcol.min2 = Vector3( (*it)->getX() * CHUNK_WIDTH + (*block).second->getX() - 0.0f,
-							(*it)->getY() * CHUNK_HEIGHT + (*block).second->getY() - 0.0f,
-							(*it)->getZ() * CHUNK_WIDTH + (*block).second->getZ() - 0.0f );
-			bcol.max2 = Vector3( (*it)->getX() * CHUNK_WIDTH + (*block).second->getX() + 1.0f,
-							(*it)->getY() * CHUNK_HEIGHT + (*block).second->getY() + 1.0f,
-							(*it)->getZ() * CHUNK_WIDTH + (*block).second->getZ() + 1.0f );
-			bcol = AABBCube( bcol );
-			if( bcol.collision )
-				coll.collision = true;
+			bb.center = chunkPos + Util::indexToPosition( block->first )
+						+ Vector3( 0.5f, -1.5f, 0.5f );
+			bb.extents = Vector3( 1.0f, 1.0f, 1.0f );
+			Collision::AABBvsAABB( bb, targetBB, r );
+			if( r.collision ) {
+				final.collision = true;
+				ofs.x = std::max( ofs.x, r.response.x );
+				ofs.y = std::max( ofs.y, r.response.y );
+				ofs.z = std::max( ofs.z, r.response.z );
+			}
 		}	
 	}
-
-	return coll;
-}
-
-collision_r World::AABBCube(const collision_r& info)
-{
-	collision_r collision = info;
 	
-	if( collision.max1.x < collision.min2.x )
-		collision.collision = false;
-	if( collision.max1.y < collision.min2.y )
-		collision.collision = false;
-	if( collision.max1.z < collision.min2.z )
-		collision.collision = false;
+	if( ( ofs.x > ofs.y ) && ( ofs.x > ofs.z ) ) {
+		final.response.x = ofs.x;
+	}
+	else if( ( ofs.y > ofs.x ) && ( ofs.y > ofs.z ) ) {
+		final.response.y = ofs.y;
+	}
+	else if( ( ofs.z > ofs.x ) && ( ofs.z > ofs.y ) ) {
+		final.response.z = ofs.z;
+	}
 
-	if( collision.min1.x > collision.max2.x )
-		collision.collision = false;
-	if( collision.min1.y > collision.max2.y )
-		collision.collision = false;
-	if( collision.min1.z > collision.max2.z )
-		collision.collision = false;
 
-	return collision;
+	return final;
 }
 
 Vector3 normals[3] = {

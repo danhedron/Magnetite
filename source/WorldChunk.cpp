@@ -16,7 +16,11 @@ mHasChanged( false ),
 mHasGenerated( false ),
 mGeometry( NULL ),
 mVisibleFaces( 0 ),
-mUpdateTimer( 0 )
+mUpdateTimer( 0 ),
+mPhysicsShape( NULL ),
+mPhysicsBody( NULL ),
+mPhysicsMesh( NULL ),
+mPhysicsState( NULL )
 {
 	mBlockData = new BlockPtr[CHUNK_SIZE];
 	initalize();
@@ -87,48 +91,45 @@ void WorldChunk::fillWithTestData()
 						block = FactoryManager::getManager().createBlock("dirt");
 					else
 						block = FactoryManager::getManager().createBlock("stone");
-					block->setPosition( x, y, z );
-					addBlockToChunk( block );
+					addBlockToChunk( block, x, y, z  );
 				}
 			}
 		}
 	}
 }
 
-void WorldChunk::addBlockToChunk(BaseBlock* block)
+void WorldChunk::addBlockToChunk(BaseBlock* block, short x, short y, short z)
 {
-	WorldChunk* chunk = getRelativeChunk( block->getX(), block->getY(), block->getZ() );
+	WorldChunk* chunk = getRelativeChunk( x, y, z );
 	if( chunk != this ) {
 		if( chunk == NULL ) {
 			delete block;
 			return;
 		}
-		if( block->getX() < 0 )
-			block->setPosition( Vector3( block->getX() + CHUNK_WIDTH, block->getY(), block->getZ() ) );
-		else if( block->getX() >= CHUNK_WIDTH )
-			block->setPosition( Vector3( block->getX() - CHUNK_WIDTH, block->getY(), block->getZ() ) );
-		if( block->getY() < 0 )
-			block->setPosition( Vector3( block->getX(), block->getY() + CHUNK_HEIGHT, block->getZ() ) );
-		else if( block->getY() >= CHUNK_HEIGHT )
-			block->setPosition( Vector3( block->getX(), block->getY() - CHUNK_HEIGHT, block->getZ() ) );
-		if( block->getZ() < 0 )
-			block->setPosition( Vector3( block->getX(), block->getY(), block->getZ() + CHUNK_WIDTH ) );
-		else if( block->getZ() >= CHUNK_WIDTH )
-			block->setPosition( Vector3( block->getX(), block->getY(), block->getZ() - CHUNK_WIDTH ) );
-		chunk->addBlockToChunk( block );
+		if( x < 0 )
+			x = x + CHUNK_WIDTH;
+		else if( x >= CHUNK_WIDTH )
+			x = x - CHUNK_WIDTH;
+		if( y < 0 )
+			y = y + CHUNK_HEIGHT;
+		else if( y >= CHUNK_HEIGHT )
+			y = y - CHUNK_HEIGHT;
+		if( z < 0 )
+			z = z + CHUNK_WIDTH;
+		else if( z >= CHUNK_WIDTH )
+			z = z - CHUNK_WIDTH;
+		chunk->addBlockToChunk( block, x, y, z );
 		return;
 	}
-
-	block->_setChunk( this );
-
-	long k = BLOCK_INDEX( block );
+	
+	long k = BLOCK_INDEX_2( x, y, z );
 	BlockPtr lb = mBlockData[ k ];
 
 	if(lb != NULL) {
 		delete lb;
 	}
 	mBlockData[ k ] = block;
-	if( isEdge( block->getX(), block->getY(), block->getZ() ) ) 
+	if( isEdge( x, y, z ) ) 
 		updateSurrounding();
 
 	if(block->isThinking())
@@ -140,7 +141,7 @@ void WorldChunk::addBlockToChunk(BaseBlock* block)
 
 void WorldChunk::_blockMoved( BaseBlock* block, short x, short y, short z )
 {
-	long k = BLOCK_INDEX( block );
+	long k = BLOCK_INDEX_2( x, y, z );
 	long kn = z * CHUNK_WIDTH * CHUNK_HEIGHT + y * CHUNK_WIDTH + x;
 	BlockPtr lb = mBlockData[ k ];
 	removeBlockAt( x, y, z );
@@ -180,7 +181,7 @@ void WorldChunk::removeBlockAt(long x, long y, long z)
 		if( isEdge( x, y, z ) ) 
 			updateSurrounding();
 		delete it;
-		_blockVisible( it, false );
+		_blockVisible( k, false );
 		mBlockData[ k ] = NULL;
 
 	}
@@ -188,9 +189,27 @@ void WorldChunk::removeBlockAt(long x, long y, long z)
 	mHasGenerated = false;
 }
 
+void WorldChunk::removeBlockAt( long index )
+{
+	long k = index;
+	BlockPtr it = mBlockData[ k ];
+	if( it != NULL )  {
+		if( it->isThinking() ) {
+			BlockList::iterator thinker = mThinkingBlocks.find( k );
+			if( thinker != mThinkingBlocks.end() )
+				mThinkingBlocks.erase( thinker );
+		}
+		delete it;
+		_blockVisible( k, false );
+		mBlockData[ k ] = NULL;
+	}
+	mHasChanged = true;
+	mHasGenerated = false;
+}
+
 void WorldChunk::_addBlockToRemoveList(BaseBlock* block)
 {
-	mShouldDelete.insert( BlockList::value_type( BLOCK_INDEX( block ) , block ) );
+	//mShouldDelete.insert( BlockList::value_type( BLOCK_INDEX( block ) , block ) );
 }
 
 WorldChunk* WorldChunk::getRelativeChunk(short x, short y, short z)
@@ -216,19 +235,21 @@ WorldChunk* WorldChunk::getRelativeChunk(short x, short y, short z)
 
 void WorldChunk::updateSurrounding( )
 {
-	WorldChunk* c = NULL;
-	c = getRelativeChunk( -1, 0, 0 );
-	if( c ) c->markModified();
-	c = getRelativeChunk( 16, 0, 0 );
-	if( c ) c->markModified();
-	c = getRelativeChunk( 0, -1, 0 );
-	if( c ) c->markModified();
-	c = getRelativeChunk( 0, 16, 0 );
-	if( c ) c->markModified();
-	c = getRelativeChunk( 0, 0, -1 );
-	if( c ) c->markModified();
-	c = getRelativeChunk( 0, 0, 16 );
-	if( c ) c->markModified();
+	if( OpencraftCore::Singleton->getWorld()->getCurrentStage() != WORLD_GEN ) {
+		WorldChunk* c = NULL;
+		c = getRelativeChunk( -1, 0, 0 );
+		if( c ) c->markModified();
+		c = getRelativeChunk( 16, 0, 0 );
+		if( c ) c->markModified();
+		c = getRelativeChunk( 0, -1, 0 );
+		if( c ) c->markModified();
+		c = getRelativeChunk( 0, 16, 0 );
+		if( c ) c->markModified();
+		c = getRelativeChunk( 0, 0, -1 );
+		if( c ) c->markModified();
+		c = getRelativeChunk( 0, 0, 16 );
+		if( c ) c->markModified();
+	}
 }
 
 bool WorldChunk::hasNeighbours( short x, short y, short z )
@@ -329,62 +350,66 @@ void WorldChunk::updateVisibility()
 	mVisibleFaces = 0;
 	mVisibleBlocks.clear();
 	// Just a brute force Occlusion test: perhaps this could be optimized?
-	for( size_t i = 0; i < CHUNK_SIZE; i++ ) {
-		if( mBlockData[i] == NULL ) continue;
-		BaseBlock* b = mBlockData[i];
-		short visFlags = 0;
-		short visOrig = b->getVisFlags();
-		//Check All axes for adjacent blocks.
-		BaseBlock* cb = getBlockAt( b->getX() + 1, b->getY(), b->getZ() );
-		if( cb == NULL || !cb->isOpaque() ) {
-			mVisibleFaces++;
-			visFlags = visFlags | FACE_RIGHT;
-		}
-		cb = getBlockAt( b->getX() - 1, b->getY(), b->getZ() );
-		if( cb == NULL || !cb->isOpaque() ) {
-			mVisibleFaces++;
-			visFlags = visFlags | FACE_LEFT;
-		}
-		cb = getBlockAt( b->getX(), b->getY() + 1, b->getZ() );
-		if( cb == NULL || !cb->isOpaque() ) {
-			mVisibleFaces++;
-			visFlags = visFlags | FACE_TOP;
-		}
-		cb = getBlockAt( b->getX(), b->getY() - 1, b->getZ() );
-		if( cb == NULL || !cb->isOpaque() ) {
-			mVisibleFaces++;
-			visFlags = visFlags | FACE_BOTTOM;
-		}
-		cb = getBlockAt( b->getX(), b->getY(), b->getZ() + 1 );
-		if( cb == NULL || !cb->isOpaque() ) {
-			mVisibleFaces++;
-			visFlags = visFlags | FACE_BACK;
-		}
-		cb = getBlockAt( b->getX(), b->getY(), b->getZ() - 1 );
-		if( cb == NULL || !cb->isOpaque() ) {
-			mVisibleFaces++;
-			visFlags = visFlags | FACE_FORWARD;
-		}
-		b->updateVisFlags(visFlags);
-		for( size_t f = 0; f < 6; f++ ) {
-			if( ((1<<f) & visOrig ) == (1<<f) ) {
-				if( ( visOrig & visFlags ) != (1<<f) ) {
-					b->connectedChange( (1<<f) );
+	for( size_t x = 0; x < CHUNK_WIDTH; x++ ) {
+		for( size_t y = 0; y < CHUNK_HEIGHT; y++ ) {
+			for( size_t z = 0; z < CHUNK_WIDTH; z++ ) {
+				if( mBlockData[BLOCK_INDEX_2( x, y, z)] == NULL ) continue;
+				BaseBlock* b = mBlockData[BLOCK_INDEX_2( x, y, z)];
+				short visFlags = 0;
+				short visOrig = b->getVisFlags();
+				//Check All axes for adjacent blocks.
+				BaseBlock* cb = getBlockAt( x + 1, y, z );
+				if( cb == NULL || !cb->isOpaque() ) {
+					mVisibleFaces++;
+					visFlags = visFlags | FACE_RIGHT;
 				}
+				cb = getBlockAt( x - 1, y, z );
+				if( cb == NULL || !cb->isOpaque() ) {
+					mVisibleFaces++;
+					visFlags = visFlags | FACE_LEFT;
+				}
+				cb = getBlockAt( x, y + 1, z );
+				if( cb == NULL || !cb->isOpaque() ) {
+					mVisibleFaces++;
+					visFlags = visFlags | FACE_TOP;
+				}
+				cb = getBlockAt( x, y - 1, z );
+				if( cb == NULL || !cb->isOpaque() ) {
+					mVisibleFaces++;
+					visFlags = visFlags | FACE_BOTTOM;
+				}
+				cb = getBlockAt( x, y, z + 1 );
+				if( cb == NULL || !cb->isOpaque() ) {
+					mVisibleFaces++;
+					visFlags = visFlags | FACE_BACK;
+				}
+				cb = getBlockAt( x, y, z - 1 );
+				if( cb == NULL || !cb->isOpaque() ) {
+					mVisibleFaces++;
+					visFlags = visFlags | FACE_FORWARD;
+				}
+				b->updateVisFlags(visFlags);
+				/*for( size_t f = 0; f < 6; f++ ) {
+					if( ((1<<f) & visOrig ) == (1<<f) ) {
+						if( ( visOrig & visFlags ) != (1<<f) ) {
+							b->connectedChange( (1<<f) );
+						}
+					}
+				}*/
+				if( visFlags == 0 )
+					_blockVisible( BLOCK_INDEX_2( x, y, z), false );
+				else
+					_blockVisible( BLOCK_INDEX_2( x, y, z), true);
 			}
 		}
-		if( visFlags == 0 )
-			_blockVisible( b, false );
-		else
-			_blockVisible( b, true);
 	}
 }
 
-void WorldChunk::_blockVisible( BlockPtr &block, bool v )
+void WorldChunk::_blockVisible( size_t index, bool v )
 {
-	BlockList::iterator it = mVisibleBlocks.find( BLOCK_INDEX( block ) );
+	BlockList::iterator it = mVisibleBlocks.find( index );
 	if( v && it == mVisibleBlocks.end() ) {
-		mVisibleBlocks.insert( BlockList::value_type( BLOCK_INDEX( block ), block ) );
+		mVisibleBlocks.insert( BlockList::value_type( index, mBlockData[index] ) );
 	}
 	else if( !v && it != mVisibleBlocks.end() )  {
 		mVisibleBlocks.erase( it++ );
@@ -408,24 +433,70 @@ void WorldChunk::generate()
 
 	// Re-light this chunk
 	LightingManager::lightChunk( this );
+	BlockContext bContext;
 
 	for( BlockList::iterator block = mVisibleBlocks.begin(); block != mVisibleBlocks.end(); ++block )
 	{
-		block->second->buildCubeData(ind, edgeInd, vertexData, edgeData);
+		Vector3 pos = Util::indexToPosition( block->first );
+		bContext.worldX = pos.x;
+		bContext.worldY = pos.y;
+		bContext.worldZ = pos.z;
+		bContext.chunk = this;
+		block->second->buildCubeData(bContext, ind, edgeInd, vertexData, edgeData);
 	}
 	
-	// Chunk has been defined, store it's data
+	// If there's already a geometry object; recycle it.
 	if( mGeometry == NULL )
 		mGeometry = new GLgeometry;
 	mGeometry->edgeData = edgeData;
 	mGeometry->vertexData = vertexData;
 	mGeometry->edgeCount = edgeCount;
 	mGeometry->vertexCount = vertexCount;
-	mGeometry->bindToBuffer();
+	//mGeometry->bindToBuffer();
+
+	generatePhysics();
 
 	notifyGenerated();
 	// Delete the chunk's previous data
 	//mWorldBuffers.insert( ChunkGeomList::value_type( chunk, geom ) );
+}
+
+void WorldChunk::generatePhysics()
+{
+	if( mPhysicsBody != NULL ) {
+		OpencraftCore::Singleton->getPhysicsWorld()->removeRigidBody( mPhysicsBody );
+		delete mPhysicsState;
+		delete mPhysicsBody;
+		delete mPhysicsShape;
+		delete mPhysicsMesh;
+	}
+
+	// Only re-build physics mesh if there is actually any mesh data.
+	if( mGeometry->vertexCount > 0 && mGeometry->edgeCount > 0 ) {
+		btTriangleIndexVertexArray* meshInterface = new btTriangleIndexVertexArray;
+		btIndexedMesh part;
+
+		int vertSize = sizeof( GLvertex );
+		int indexSize = sizeof( GLedge );
+
+		part.m_vertexBase = (const unsigned char*)&mGeometry->vertexData[0].x;
+		part.m_vertexStride = vertSize;
+		part.m_numVertices = mGeometry->vertexCount;
+		part.m_vertexType = PHY_FLOAT;
+		part.m_triangleIndexBase = (const unsigned char*)&mGeometry->edgeData[0];
+		part.m_triangleIndexStride = indexSize * 3;
+		part.m_numTriangles = mGeometry->edgeCount / 3;
+		part.m_indexType = PHY_SHORT;
+
+		meshInterface->addIndexedMesh( part, PHY_SHORT );
+
+		mPhysicsShape = new btBvhTriangleMeshShape( meshInterface, true );//new btConvexTriangleMeshShape( meshInterface );////new btBoxShape( btVector3(8, 64, 8) );
+		mPhysicsState = new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3( getX() * CHUNK_WIDTH, getY() * CHUNK_HEIGHT, getZ() * CHUNK_WIDTH)));
+		btRigidBody::btRigidBodyConstructionInfo ci( 0, mPhysicsState, mPhysicsShape, btVector3(0,0,0) );
+		mPhysicsBody = new btRigidBody( ci );
+		mPhysicsBody->setCollisionFlags( mPhysicsBody->getCollisionFlags() | btRigidBody::CF_STATIC_OBJECT );
+		OpencraftCore::Singleton->getPhysicsWorld()->addRigidBody( mPhysicsBody );
+	}
 }
 
 bool WorldChunk::hasGenerated()
@@ -469,7 +540,7 @@ void WorldChunk::update( float dt )
 	mUpdateTimer += dt;
 
 	for( BlockList::iterator it = mShouldDelete.begin(); it != mShouldDelete.end(); ) {
-		removeBlockAt( it->second->getX(), it->second->getY(), it->second->getZ() );
+		removeBlockAt( it->first );
 		mShouldDelete.erase( it++ );
 	}
 }
@@ -527,7 +598,7 @@ void WorldChunk::readFromStream( std::ifstream& stream )
 		BaseBlock* block = FactoryManager::getManager().createBlock(type);
 		if( block ) {
 			block->readFromStream( stream );
-			addBlockToChunk( block );
+			//addBlockToChunk( block );
 		}
 		else
 		{

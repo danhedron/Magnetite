@@ -82,8 +82,8 @@ float ChunkGenerator::smooth( float x, float z )
 						type = "grass";
 					BaseBlock* block = FactoryManager::getManager().createBlock(type);
 					if( block ) {
-						block->setPosition( x, y, z );
-						chunk->addBlockToChunk( block );
+						//block->setPosition( x, y, z );
+						chunk->addBlockToChunk( block, x, y, z );
 					}
 				}
 	/*			if( 64 + total < 64 )
@@ -107,13 +107,12 @@ float ChunkGenerator::smooth( float x, float z )
 				for( int y = 0; y < CHUNK_HEIGHT; y++ ) {
 					BaseBlock* block = FactoryManager::getManager().createBlock(type);
 					if( block ) {
-						block->setPosition( x, y, z );
-						chunk->addBlockToChunk( block );
+						chunk->addBlockToChunk( block, x, y, z );
 					}
 				}
 			}
 		}
 	}
-	chunk->generate();
-	chunk->forceGenerate();
+	//chunk->generate();
+	//chunk->forceGenerate();
 }

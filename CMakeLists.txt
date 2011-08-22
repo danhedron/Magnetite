@@ -34,9 +34,17 @@ configure_file(
 set(OPENCRAFT_SOURCES
 	source/OpencraftCore.cpp
 	source/Main.cpp
+	source/BaseGame.cpp
+	source/Collision.cpp
 	source/Renderer.cpp
 	source/InputManager.cpp
+	source/BulletDebug.cpp
 	source/LightingManager.cpp
+	source/PhysicsState.cpp
+	source/ChunkPhysicsState.cpp
+	source/WorldObject.cpp
+	source/PhysicsWorldObject.cpp
+	source/WorldItem.cpp
 	source/Sky.cpp
 	source/Frustum.cpp
 	source/Camera.cpp
@@ -60,10 +68,18 @@ set(OPENCRAFT_SOURCES
 set(OPENCRAFT_HEADERS
 	include/OpencraftCore.h
 	include/prerequisites.h
+	include/BaseGame.h
+	include/BulletDebug.h
+	include/Collision.h
 	include/BuildConfig.h
 	include/InputManager.h
 	include/LightingManager.h
 	include/Renderer.h
+	include/PhysicsState.h
+	include/ChunkPhysicsState.h
+	include/WorldObject.h
+	include/PhysicsWorldObject.h
+	include/WorldItem.h
 	include/Sky.h
 	include/Frustum.h
 	include/Camera.h
@@ -115,6 +131,13 @@ if(SFML_FOUND)
 	target_link_libraries(OpenCraft ${SFML_LIBRARY})
 	include_directories(${SFML_INCLUDE_DIR})
 endif(SFML_FOUND)
+
+# Find BULLET
+find_package(BULLET REQUIRED)
+if(BULLET_FOUND)
+	target_link_libraries(OpenCraft ${BULLET_LIBRARY})
+	include_directories(${BULLET_INCLUDE_DIR})
+endif(BULLET_FOUND)
 
 #Find OpenGl Under Linux
 find_package(OpenGL REQUIRED)

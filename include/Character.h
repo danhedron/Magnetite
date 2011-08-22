@@ -3,19 +3,25 @@
 #include "prerequisites.h"
 #include "Camera.h"
 #include "World.h"
+#include "PhysicsWorldObject.h"
+#include "BulletDynamics/Character/btKinematicCharacterController.h"
+#include "BulletCollision/CollisionDispatch/btGhostObject.h"
 
-class Character
+class Character : public PhysicsWorldObject
 {
 protected:
-	Vector3 mPosition;
 	Vector3 mMoveVector;
-	Vector3 mGravity;
 	bool mFlying;
 	float mMoveSpeed;
 	float mSprintSpeed;
 	bool mSprint;
 	Camera mCamera; //< Camera angles used for character rotation.
 	float mHeight; //< Height of the player in world units.
+
+	btKinematicCharacterController* mPhysicsController;
+	btPairCachingGhostObject*		mPhysicsBody;
+
+	virtual void _initPhysics();
 public:
 	
 	Character( void );
@@ -75,18 +81,7 @@ public:
 	/**
 	 * Gets the collision test for this character
 	 */
-	collision_r getCollision();
-
-	/**
-	 * Sets the characer's position immediatley.
-	 * @param vec World coordinates.
-	 */
-	void setPosition( const Vector3& vec );
-
-	/**
-	 * Returns the player's world coordinates
-	 */
-	Vector3 getPosition();
+	void getCollision( Vector3& min, Vector3& max );
 
 	/**
 	 * Adds move delta to character's move delta
@@ -95,10 +90,22 @@ public:
 	void addMoveDelta( const Vector3& dp );
 
 	/**
-	 * Updates the position and other gubbins.
+	 * Update camera poisition and stuff.
 	 * @param dt delta time
 	 */
-	void update( float dt );
+	virtual void update( float dt );
+
+	virtual void jump();
+
+	/**
+	 * Set position
+	 */
+	virtual void setPosition( const Vector3& v );
+
+	/**
+	 * Callback for physics - overriden for flying magic
+	 */
+	virtual void _physicsUpdateTransform( const Vector3& v );
 
 };
 

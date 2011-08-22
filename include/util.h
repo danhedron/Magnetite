@@ -18,9 +18,26 @@ public:
 		}
 		return elems;
 	}
+
 	static stringvector split(const std::string &s, char delim) {
 		stringvector elems;
 		return Util::split(s, delim, elems);
+	}
+
+	static Vector3 indexToPosition( unsigned int index )
+	{
+		Vector3 v;
+		v.x = index % CHUNK_WIDTH;
+		v.z = std::floorf(index / (CHUNK_WIDTH * CHUNK_HEIGHT));
+		v.y = (index - v.x - ( v.z * (CHUNK_WIDTH * CHUNK_HEIGHT)))/CHUNK_WIDTH;	
+		return v;
+	}
+
+	static int clamp( int v, int m )
+	{
+		if( v < 0 ) return 0;
+		if( v >= m ) return m - 1;
+		return v;
 	}
 
 	static void getMemoryUsage(size_t &mainCurrent, size_t &mainMax, size_t &pagedCurrent, size_t &pagedMax, size_t &pageFault)
@@ -88,6 +105,11 @@ public:
 		std::stringstream ss;
 		ss << number;
 		return ss.str();
+	}
+
+	static std::string toString( const bool b )
+	{
+		return b ? "True" : "False";
 	}
 
 	static std::string toString(const Vector3 &vec)

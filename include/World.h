@@ -2,6 +2,7 @@
 #define _WORLD_H_
 #include "prerequisites.h"
 #include "WorldNode.h"
+#include "Collision.h"
 
 /**
  * @struct Raycast result structure.
@@ -36,11 +37,7 @@ struct raycast_r
  */
 struct collision_r
 {
-	Vector3 min1;
-	Vector3 max1;
-
-	Vector3 min2;
-	Vector3 max2;
+	Vector3 response;
 
 	bool collision;
 
@@ -53,6 +50,15 @@ class Sky;
 class ChunkGenerator;
 class Camera;
 
+/**
+* World Stage ENUM, used for determining certain behaviours
+* During WORLD_GEN, adjacent chunks are NOT updated if an edge update occurs
+*/
+enum WorldStage {
+	WORLD_GEN = 1, // World is being mass-generated
+	WORLD_NORMAL = 2 // World is being run as normal
+};
+
 class World
 {
 protected:
@@ -62,7 +68,7 @@ protected:
 	ChunkGenerator* mGenerator;
 	Camera*		mPagingCamera;
 	std::string mWorldName;
-
+	WorldStage mWorldStage;
 public:
 	/** 
 	 * Constructor: -
@@ -73,6 +79,11 @@ public:
 	 * Destructor:- 
 	 */
 	~World( void );
+
+	/**
+	 * Returns the world's current stage
+	 */
+	WorldStage getCurrentStage();
 
 	/**
 	 * Returns the color of a brightness level
@@ -218,9 +229,9 @@ public:
 	/**
 	 * Performs an AABB test against the world.
 	 */
-	collision_r AABBWorld(const collision_r& info );
+	CollisionResponse AABBWorld( Vector3& min, Vector3& max );
 
-	collision_r AABBCube(const collision_r& info );
+	collision_r AABBCube( Vector3& min, Vector3& max, Vector3& minb, Vector3& maxb );
 
 	/**
 	 * Creates a new sky object 
