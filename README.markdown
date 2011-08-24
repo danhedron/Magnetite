@@ -1,4 +1,13 @@
-Opencraft is an Open Source Cube based adventure, have fun removing and placing blocks in your own 3D cube world.
+# Magnetite
+Magnetite is an Open Source voxel game & engine, it is powered by:
+
+  * OpenGL
+  * SFML
+  * Bullet Physics
+  * C++
+  * CMake
+  
+It is crafted with love and care by (Daniel Evans)[http://bytecove.co.uk], (Samuel Clements)[http://borntyping.couk] and also Howell Duggan
 
 Licence
 -------
