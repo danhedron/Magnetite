@@ -96,6 +96,9 @@ void BaseGame::_inputEvents( const InputEvent& e )
 	if( e.event == Inputs::FLY && e.down ) {
 		if( getLocalPlayer() ) mPlayer->enableFlying( !mPlayer->isFlying() );
 	}
+	if( e.event == Inputs::RESPAWN && e.down ) {
+		if( getLocalPlayer() ) mPlayer->setPosition( Vector3( 0, 150.f, 0 ) );
+	}
 }
 
 void BaseGame::_inputMovement( const Vector3& v )
@@ -161,6 +164,7 @@ void BaseGame::playerPrimaryClick( Character* player )
 		Vector3 cIndex = mEngine->getWorld()->worldToChunks( ray.worldHit );
 		Vector3 bIndex = mEngine->getWorld()->worldToBlock( ray.worldHit - (ray.hitNormal/2) );
 		WorldChunk* chunk = mEngine->getWorld()->getChunk( cIndex.x, cIndex.y, cIndex.z );
+		Util::log("Ray Hit: " + Util::toString( cIndex ) + " Normal: " + Util::toString( ray.hitNormal ) + " block: " + Util::toString(bIndex) );
 		if(chunk && ray.block) {
 			chunk->removeBlockAt( bIndex.x, bIndex.y, bIndex.z );
 		}
@@ -175,8 +179,8 @@ void BaseGame::playerAltClick( Character* player )
 	{
 		Util::log( Util::toString( ray.worldHit + ray.hitNormal ) );
 		Vector3 cIndex = mEngine->getWorld()->worldToChunks( ray.worldHit + ray.hitNormal );
-		Vector3 bIndex(ray.worldHit - (ray.hitNormal/2));
-		Util::log("Ray Hit: " + Util::toString( cIndex ) + " Normal: " + Util::toString( ray.hitNormal ) );
+		Vector3 bIndex = mEngine->getWorld()->worldToBlock( ray.worldHit + (ray.hitNormal/2) );
+		Util::log("Ray Hit: " + Util::toString( cIndex ) + " Normal: " + Util::toString( ray.hitNormal ) + " block: " + Util::toString(bIndex) );
 		WorldChunk* chunk = mEngine->getWorld()->getChunk( cIndex.x, cIndex.y, cIndex.z );
 		if(chunk) {
 			BaseBlock* block = FactoryManager::getManager().createBlock( mEngine->getRenderer()->blockType );

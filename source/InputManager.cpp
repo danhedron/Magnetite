@@ -12,6 +12,7 @@ InputManager::InputManager()
 	createInput( sf::Key::LShift, Inputs::SPRINT );
 	createInput( sf::Key::F, Inputs::FLY );
 	createInput( sf::Key::F2, Inputs::SCREENSHOT );
+	createInput( sf::Key::R, Inputs::RESPAWN );
 }
 
 InputManager::~InputManager()

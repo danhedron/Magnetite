@@ -50,6 +50,7 @@ mPhysicsWorld( NULL )
 	mInputManager->setEventCallback( Inputs::SPRINT, &globalEventHandler );
 	mInputManager->setEventCallback( Inputs::SCREENSHOT, &globalEventHandler );
 	mInputManager->setEventCallback( Inputs::FLY, &globalEventHandler );
+	mInputManager->setEventCallback( Inputs::RESPAWN, &globalEventHandler );
 }
 
 MagnetiteCore::~MagnetiteCore(void)
@@ -119,7 +120,7 @@ void MagnetiteCore::screenshot()
 	tm* t = localtime( &rawt );
 	char tstr[80];
 	strftime(tstr, 80, "%Y-%m-%d_%H-%M-%S", t);
-	std::string fname("opencraft_");
+	std::string fname("screenshot_");
 	fname.append( tstr );
 	fname.append(".png");
 	Util::log("Saving screenshot to: " + fname);

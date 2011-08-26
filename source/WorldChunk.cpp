@@ -213,24 +213,25 @@ void WorldChunk::_addBlockToRemoveList(BaseBlock* block)
 }
 
 WorldChunk* WorldChunk::getRelativeChunk(short x, short y, short z)
-{
+{	
 	if( ( x >= 0 && y >= 0 && z >= 0 ) && ( x < CHUNK_WIDTH && y < CHUNK_HEIGHT && z < CHUNK_WIDTH ) )
 		return this;
-
-	/*if( x < 0 )
-		x += CHUNK_WIDTH;
-	else if( x >= CHUNK_WIDTH ) 
-		x -= CHUNK_WIDTH;
-	if( y < 0 )
-		y += CHUNK_HEIGHT;
-	else if( y >= CHUNK_HEIGHT )
-		y -= CHUNK_HEIGHT;
-	if( z < 0 )
-		z += CHUNK_WIDTH;
-	else if( z >= CHUNK_WIDTH )
-		z -= CHUNK_WIDTH;*/
-	return MagnetiteCore::Singleton->getWorld()->getChunk( mX + floorl( (float)x/CHUNK_WIDTH ) , mY + floorl( (float)y/CHUNK_HEIGHT ) , mZ + floorl( (float)z/CHUNK_WIDTH ) );
-	//return chunk;
+	if( MagnetiteCore::Singleton->getWorld()->getCurrentStage() != WORLD_GEN ) {
+		/*if( x < 0 )
+			x += CHUNK_WIDTH;
+		else if( x >= CHUNK_WIDTH ) 
+			x -= CHUNK_WIDTH;
+		if( y < 0 )
+			y += CHUNK_HEIGHT;
+		else if( y >= CHUNK_HEIGHT )
+			y -= CHUNK_HEIGHT;
+		if( z < 0 )
+			z += CHUNK_WIDTH;
+		else if( z >= CHUNK_WIDTH )
+			z -= CHUNK_WIDTH;*/
+		return MagnetiteCore::Singleton->getWorld()->getChunk( mX + floorl( (float)x/CHUNK_WIDTH ) , mY + floorl( (float)y/CHUNK_HEIGHT ) , mZ + floorl( (float)z/CHUNK_WIDTH ) );
+	}
+	return NULL;
 }
 
 void WorldChunk::updateSurrounding( )

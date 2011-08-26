@@ -20,12 +20,13 @@
 #include "World.h"
 #include "BaseBlock.h"
 #include "WorldChunk.h"
+#include "Renderer.h"
 
 // Don't mind this.
 Util::LogLevel Util::_loglevel = Util::Info;
 
 int main( int argc, char** argv ) {
-		
+	
 	if( false ) {
 		Util::log("Magnetite - Not Quite Unit Testing");
 

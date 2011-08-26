@@ -7,8 +7,13 @@
 #include "TextureManager.h"
 #include "Camera.h"
 #include "BlockFactory.h"
-
 #include "util.h"
+
+#define BUFFER_OFFSET(i) ((char*)NULL + (i))
+
+// Shader paremater indexes.
+size_t attrTC = 0; 
+size_t attrL = 0;
 
 void GLgeometry::releaseBuffer()
 {
@@ -21,12 +26,14 @@ void GLgeometry::releaseBuffer()
 		this->indexBO = 0;
 	}
 }
+
 void GLgeometry::bindToBuffer()
 {
 	glGenBuffers(1, &this->vertexBO);
 	glBindBuffer( GL_ARRAY_BUFFER, this->vertexBO);
 	glBufferData( GL_ARRAY_BUFFER, sizeof(GLvertex)*this->vertexCount+1, this->vertexData, GL_STATIC_DRAW );
 	glGenBuffers(1, &this->indexBO);
+
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, this->indexBO );
 	glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(GLedge)*this->edgeCount+1, this->edgeData, GL_STATIC_DRAW );
 	glBindBuffer( GL_ARRAY_BUFFER, 0);
@@ -45,25 +52,26 @@ void GLshader::create()
 	const char* src = source.c_str();
 	glShaderSource( ref, 1, &src, NULL );
 	glCompileShader( ref );
-
+	
 	GLint success;
 	glGetObjectParameterivARB( ref, GL_COMPILE_STATUS, &success );
 	if( success ) {
-		Util::log("Shader Compiled OK");
+		Util::log("Shader Compiled OK: " + Util::toString(ref));
 	}
 	else {
 		Util::log("Error compiling shader: ");
-		GLint blen = 0;	
-		GLsizei slen = 0;
+	}
 
-		glGetShaderiv(ref, GL_INFO_LOG_LENGTH , &blen);       
-		if (blen > 1)
-		{
-			GLchar* compiler_log = (GLchar*)malloc(blen);
-			glGetInfoLogARB(ref, blen, &slen, compiler_log);
-			Util::log("\t" + std::string(compiler_log));
-			free (compiler_log);
-		}
+	GLint blen = 0;	
+	GLsizei slen = 0;
+
+	glGetShaderiv(ref, GL_INFO_LOG_LENGTH , &blen);       
+	if (blen > 1)
+	{
+		GLchar* compiler_log = (GLchar*)malloc(blen);
+		glGetInfoLogARB(ref, blen, &slen, compiler_log);
+		Util::log("\t" + std::string(compiler_log));
+		free (compiler_log);
 	}
 }
 
@@ -86,7 +94,7 @@ void GLprogram::link()
 		// Init vertex shader.
 		vertex->create();
 		if( vertex->ref == 0 ) {
-			return;
+			//return;
 		}
 	}
 	if( fragment->ref == 0 )
@@ -94,14 +102,30 @@ void GLprogram::link()
 		// Init fragment shader.
 		fragment->create();
 		if( fragment->ref == 0 ) {
-			return;
+			//return;
+		}
+	}
+	if( geometry != NULL ) {
+		if( geometry->ref == 0 ) {
+			geometry->create();
+			//return;
 		}
 	}
 
 	ref = glCreateProgram();
 
 	glAttachShader( ref, vertex->ref );
+	if( geometry != NULL ) {
+		glAttachShader( ref, geometry->ref );
+	}
 	glAttachShader( ref, fragment->ref );
+
+
+	// deal with attributes n stuff
+	for( auto it = mAttributes.begin(); it != mAttributes.end(); it++ )
+	{
+		glBindAttribLocation(ref, it->first, it->second.c_str());
+	}
 
 	glLinkProgram( ref );
 
@@ -114,17 +138,18 @@ void GLprogram::link()
 	else
 	{
 		Util::log("Error Linking Program:");
-		GLint blen = 0;	
-		GLsizei slen = 0;
+	}
 
-		glGetProgramiv(ref, GL_INFO_LOG_LENGTH , &blen);       
-		if (blen > 1)
-		{
-			GLchar* compiler_log = (GLchar*)malloc(blen);
-			glGetInfoLogARB(ref, blen, &slen, compiler_log);
-			Util::log("\t" + std::string(compiler_log));
-			free (compiler_log);
-		}
+	GLint blen = 0;	
+	GLsizei slen = 0;
+
+	glGetProgramiv(ref, GL_INFO_LOG_LENGTH , &blen);       
+	if (blen > 1)
+	{
+		GLchar* compiler_log = (GLchar*)malloc(blen);
+		glGetInfoLogARB(ref, blen, &slen, compiler_log);
+		Util::log("\t" + std::string(compiler_log));
+		free (compiler_log);
 	}
 }
 
@@ -138,7 +163,10 @@ void GLprogram::bindUniformTexture( std::string var, GLint unit )
 	mUniforms[var] = loc;
 }
 
-#define BUFFER_OFFSET(i) ((char*)NULL + (i))
+void GLprogram::bindAttribute( int index, std::string attribute )
+{
+	mAttributes[index] = attribute;
+}
 
 Renderer::Renderer(void)
 : totalTime( 0 ),
@@ -148,6 +176,7 @@ mScrHeight( 0 ),
 mBlRendered( 0 ),
 mBlTotal( 0 ),
 mRenderMode( RENDER_SOLID ),
+mGeomType( GEOM_FALLBACK ),
 mDebugMode( DEBUG_OFF ),
 mFpsAvg( 0 ),
 mCamera( NULL ),
@@ -185,18 +214,38 @@ void Renderer::initialize(sf::RenderWindow& window)
 	glLoadIdentity();
 	gluPerspective(90.f, 1.f, 0.1f, 500.f);
 
-	Vector3 vec(0, 10.0f, 10.0f);
-
+	// Detect Geometry shader support
+	/*if( !GL_EXT_geometry_shader4 ) {
+		Util::log("=========== Warning ===========");
+		Util::log("Your GPU doesn't support geometry shaders");
+		Util::log("We will fall back to normal polygons for now");
+		Util::log("but seriously it's 2011, you should upgrade");
+		Util::log("===============================");
+		mGeomType = GEOM_FALLBACK;
+	}
+	else
+	{*/
+		// k
+		mGeomType = GEOM_GEOMSHADER;
+	//}
+	
 	MagnetiteCore::Singleton->getTextureManager()->loadTexture("../resources/ui/crosshair.png");
 
 	// Test shader code.
 	mWorldProgram.vertex = loadShader("w_vertex.glsl", GL_VERTEX_SHADER);
 	mWorldProgram.fragment = loadShader("w_fragment.glsl", GL_FRAGMENT_SHADER);
+	if( getGeometryType() == GEOM_GEOMSHADER ) {
+		//mWorldProgram.geometry = loadShader("w_geometry.glsl", GL_GEOMETRY_SHADER_EXT);
+	}
 	mWorldProgram.link();
 
-	mLightingProgram.vertex = loadShader("w_vertex.glsl", GL_VERTEX_SHADER);
-	mLightingProgram.fragment = loadShader("l_fragment.glsl", GL_FRAGMENT_SHADER);
-	mLightingProgram.link();
+	// Find the shader parameters.
+	attrTC = glGetAttribLocation( mWorldProgram.ref, "in_p" );
+	//attrL = glGetAttribLocation( mWorldProgram.ref, "in_light" );
+
+	//mLightingProgram.vertex = loadShader("w_vertex.glsl", GL_VERTEX_SHADER);
+	//mLightingProgram.fragment = loadShader("l_fragment.glsl", GL_FRAGMENT_SHADER);
+	//mLightingProgram.link();
 }
 
 void Renderer::resizeViewport(size_t x, size_t y, size_t w, size_t h)
@@ -256,6 +305,11 @@ size_t Renderer::getRenderMode()
 	return mRenderMode;
 }
 
+GeomType Renderer::getGeometryType()
+{
+	return mGeomType;
+}
+
 void Renderer::setDebugMode( size_t debugMode )
 {
 	mDebugMode = debugMode;
@@ -291,7 +345,10 @@ void Renderer::toggleCameraFrustum()
 
 GLvertex Renderer::vertex(float x, float y, float z, float nx, float ny, float nz, float u, float v, float r, float g, float b)
 {
-	GLvertex vert = { x, y, z, u, v, r, g, b }; //nx, ny, nz,
+	size_t u0 = u;
+	size_t v0 = v;
+	size_t l0 = r * 255;
+	GLvertex vert = { x, y, z, u0, v0, l0 }; //nx, ny, nz,
 	return vert;
 }
 
@@ -314,7 +371,7 @@ GLshader* Renderer::loadShader( std::string filename, GLenum type )
 	std::string s;
 	while( !file.eof() ) {
 		std::getline( file, s );
-		ss << s;
+		ss << s << '\n';
 	}
 
 	GLshader* shader = new GLshader();
@@ -362,9 +419,6 @@ void Renderer::render(double dt, World* world)
 		GLint texLoc = glGetUniformLocation( mWorldProgram.ref, "worldDiffuse");
 		glUseProgram( mWorldProgram.ref );
 		glUniform1i( texLoc, 0 );
-	}
-	else if ( mRenderMode == RENDER_LIGHTING ) {
-		glUseProgram( mLightingProgram.ref );
 	}
 
 	if( mDrawWorld ) 
@@ -475,19 +529,26 @@ void Renderer::_renderChunk( WorldChunk* chunk )
 		}
 		
 		glBindBuffer( GL_ARRAY_BUFFER, chunkGeom->vertexBO );
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, chunkGeom->indexBO );
+
+		glVertexAttribPointer( attrTC, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(12) );
+		//glVertexAttribPointer( attrL, 1, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(15) );
+		//glEnableVertexAttribArray(attrL);
+		glEnableVertexAttribArray(attrTC);
+
 
 		glVertexPointer( 3, GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(0) );
 		//glNormalPointer( GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(12) );
-		glTexCoordPointer( 2, GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(12));
-		glColorPointer( 3, GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(20));
+		//glTexCoordPointer( 2, GL_UNSIGNED_SHORT, sizeof(GLvertex), BUFFER_OFFSET(12));
+		//glColorPointer( 1, GL_UNSIGNED_SHORT, sizeof(GLvertex), BUFFER_OFFSET(15));
 
-		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, chunkGeom->indexBO );
-
-		//glDrawArrays( GL_TRIANGLES, 0, chunkGeom->vertexCount );
 		glDrawRangeElements( GL_TRIANGLES, 0, chunkGeom->vertexCount, chunkGeom->edgeCount, GL_UNSIGNED_SHORT, 0);
 	
+		glDisableVertexAttribArray(attrTC);
+		//glDisableVertexAttribArray(attrL);
 		glBindBuffer( GL_ARRAY_BUFFER, 0 );
 		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+
 	}
 	else {
 		Util::log("Warning: Ungenerated Chunk in render queue. ~ Grab a developer and complain");

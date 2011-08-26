@@ -65,9 +65,13 @@ GLtexture* TextureManager::fetchTexture(std::string textureName)
 GLuvrect TextureManager::getBlockUVs(int x, int y)
 {
 	GLuvrect rect;
-	rect.x = (((float)x)*16.f)/mBlockWidth;
+	/*rect.x = (((float)x)*16.f)/mBlockWidth;
 	rect.y = (((float)y)*16.f)/mBlockHeight;
 	rect.w = 16.f/mBlockWidth;
-	rect.h = 16.f/mBlockHeight;
+	rect.h = 16.f/mBlockHeight;*/
+	rect.x = x;
+	rect.y = y;
+	rect.w = 1;
+	rect.h = 1;
 	return rect;
 }

@@ -1,8 +1,12 @@
+#version 150 core 
 uniform sampler2D worldDiffuse;
-varying vec4 vCoord;
-varying vec4 vColour;
+
+smooth in float f_light;
+smooth in vec2 f_coords;
 
 void main (void)  
-{     
-	gl_FragColor = texture2D( worldDiffuse, vCoord.xy ) * vColour;
+{
+	vec4 col = texture2D( worldDiffuse, f_coords * 0.25 ) * f_light / 255;
+	col.a = 1;
+	gl_FragColor = col;
 } 

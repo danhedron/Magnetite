@@ -62,7 +62,7 @@ Camera* Character::getCamera()
 raycast_r Character::getEyeCast()
 {
 	raycast_r ray;
-	ray.orig = getPosition() + Vector3( 0.f, mHeight * 0.9f, 0.f );
+	ray.orig = getPosition() + Vector3( 0.f, mHeight /2, 0.f );
 	ray.dir = mCamera.getForward();
 	return ray;
 } 
@@ -81,7 +81,7 @@ void Character::_initPhysics()
 	//spawn.setIdentity();
 	//spawn.setOrigin( btVector3( 0, 150, 0 ) );
 	//mPhysicsState = new PhysicsState( spawn, this );
-	mPhysicsShape = new btCapsuleShape( 0.45, mHeight );//btBoxShape( btVector3( 4, 4, 4 ) );//
+	mPhysicsShape = new btCapsuleShape( 0.45, mHeight - ( 0.45 * 2 ) );//btBoxShape( btVector3( 4, 4, 4 ) );//
 	
 	//btRigidBody::btRigidBodyConstructionInfo ci( mass, mPhysicsState, mPhysicsShape, inertia );
 	mPhysicsBody = new btPairCachingGhostObject();

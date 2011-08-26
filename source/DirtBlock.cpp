@@ -23,13 +23,11 @@ void DirtBlock::hit()
 
 }
 
-
 void DirtBlock::getTextureCoords( short face, short &x, short &y )
 {
 	x = 2;
 	y = 0;
 }
-
 
 std::string DirtBlock::getType()
 {

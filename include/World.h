@@ -50,6 +50,13 @@ class Sky;
 class ChunkGenerator;
 class Camera;
 
+struct ChunkRequest
+{
+	int x, y, z;
+};
+
+typedef std::vector<ChunkRequest> ChunkLoadList;
+
 /**
 * World Stage ENUM, used for determining certain behaviours
 * During WORLD_GEN, adjacent chunks are NOT updated if an edge update occurs
@@ -69,6 +76,7 @@ protected:
 	Camera*		mPagingCamera;
 	std::string mWorldName;
 	WorldStage mWorldStage;
+	ChunkLoadList mChunksToLoad;
 public:
 	/** 
 	 * Constructor: -
@@ -119,6 +127,11 @@ public:
 	 * Returns a reference to the chunk list.
 	 */
 	ChunkList& getChunks();
+
+	/**
+	 * Requests that the engine load or generate the chunk at the given index
+	 */
+	void requestChunk( int x, int y, int z );
 	
 	/**
 	 *	Converts world coordinates into chunk indexes.

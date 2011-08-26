@@ -13,8 +13,9 @@ class World;
 struct GLvertex {
 	float x, y, z;
 	/*float nx, ny, nz;*/ // Normals are undeeded at the moment.
-	float u0, v0;
-	float r, g, b;
+	GLubyte u0, v0;
+	GLubyte l;
+	GLubyte b; // Is this even?
 };
 typedef unsigned short GLedge;
 
@@ -30,6 +31,7 @@ struct GLgeometry {
 	void releaseBuffer();
 	void bindToBuffer();
 };
+
 struct GLbuffer {
 	GLuint vertex;
 	GLuint index;
@@ -49,15 +51,28 @@ struct GLprogram {
 	GLuint ref;
 	GLshader* vertex;
 	GLshader* fragment;
+	GLshader* geometry;
+	// These aren't used properly at the moment, I'd like to clean up the usage of this class 
 	std::map<std::string, GLuint> mUniforms;
+	std::map<int, std::string> mAttributes;
 
-	GLprogram() { ref = 0; vertex = NULL; fragment = NULL; }
+	GLprogram() { ref = 0; vertex = NULL; fragment = NULL; geometry = NULL; }
 	void link();
 	void bindUniformTexture( std::string var, GLint unit );
+	void bindAttribute( int index, std::string attribute );
 };
 
 //typedef std::map<WorldChunk*,GLeometry> ChunkGeomList;
 //typedef std::map<WorldChunk*,GLbuffer> ChunkGeomList;
+
+/**
+ * Geometry types, used to dermine wether the renderer should use Geometry shaders or push the finished vertex data to the GPU
+ * Rational being that if the GPU doesn't support Geometry shaders then it probably couldn't fill all the triangles anyway, so it'll probably have reduced draw distance.
+ */
+enum GeomType {
+	GEOM_FALLBACK = 1,
+	GEOM_GEOMSHADER = 2
+};
 
 class Renderer
 {
@@ -90,6 +105,8 @@ protected:
 
 	GLprogram mWorldProgram;
 	GLprogram mLightingProgram;
+
+	GeomType mGeomType;
 
 public:
 	Renderer(void);
@@ -228,6 +245,11 @@ public:
 	void setRenderMode( size_t rendermode );
 
 	size_t getRenderMode();
+
+	/**
+	 * Returns the current geometry type
+	 */
+	GeomType getGeometryType();
 
 	/**
 	 * Sets the Debug mode

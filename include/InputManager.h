@@ -19,7 +19,8 @@ namespace Inputs {
 		FLY,
 		PRIMARY,
 		SECONDARY,
-		SCREENSHOT
+		SCREENSHOT,
+		RESPAWN
 	};
 };
 

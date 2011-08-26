@@ -25,8 +25,8 @@ void StoneBlock::hit()
 
 void StoneBlock::getTextureCoords( short face, short &x, short &y )
 {
-	x = 1;
-	y = 0;
+	x = 0;
+	y = 1;
 }
 
 

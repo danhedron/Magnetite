@@ -52,6 +52,12 @@ float World::getLightColor( LightIndex light )
 	return ( 0.1f + ( 0.9f * ( (float)light/256 ) ) );
 }
 
+void World::requestChunk( int x, int y, int z )
+{
+	ChunkRequest req = { x, y, z};
+	mChunksToLoad.push_back( req );
+}
+
 void World::newWorld( std::string name )
 {
 	mWorldName = name;
@@ -105,7 +111,7 @@ void World::createWorld()
 		c->requestGenerate();
 	};
 
-	// Let the Windows Concurency API handle threading on Windows
+	// Let the Windows Concurency API handle threading on Windowcs
 	Concurrency::parallel_for_each( mChunks.begin(), mChunks.end(), genChunk );
 #else
 	// Perform a standard loop over the chunk list. - need to speed this up on linux/non-windows systems
@@ -114,7 +120,7 @@ void World::createWorld()
 	}
 #endif
 #ifdef WIN32
-	Util::log( "T: " + Util::toString( (long)(GetTickCount() - startTick) ) );
+	Util::log( "Generation: " + Util::toString( (long)(GetTickCount() - startTick) ) + " Ticks" );
 #endif
 	mWorldStage = WORLD_NORMAL;
 }
@@ -143,6 +149,17 @@ void World::createTestChunks( int size )
 	int i = -size; 
 
 	for(i = -size; i < size; i++) {
+		for(int z = -size; z < size; z++) {
+			// Add chunks to the request queue
+			requestChunk( i, 0, z );
+		}
+	}
+	
+
+/*#ifdef WIN32
+	size_t startTick = GetTickCount();
+#endif
+	for(i = -size; i < size; i++) {
 #ifdef WIN32
 		Concurrency::parallel_for( -size, size, [&] (int z) {
 #else
@@ -155,8 +172,11 @@ void World::createTestChunks( int size )
 #ifdef WIN32
 		);
 #endif
-		Util::log("Created Row; - " + Util::toString( (nc*100) / total ) + "%");
+		Util::log(Util::toString( (nc*100) / total ) + "%");
 	}
+#ifdef WIN32
+	Util::log( "Terrain: " + Util::toString( (long)(GetTickCount() - startTick) ) + " Ticks" );
+#endif*/
 }
 
 void World::destoryWorld()
@@ -388,15 +408,35 @@ void World::update( float dt )
 	if( mSky != NULL )
 		mSky->update( dt );
 
-	for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
+	// Proccess the chunk loading queue
+	int c = 0;
+	if( mChunksToLoad.size() > 0 ) {
+		mWorldStage = WORLD_GEN;
+		for( int i = 0; mChunksToLoad.size() > 0 && i < 10; i++ ) {
+			ChunkRequest req = mChunksToLoad.back();
+			WorldChunk* c = createChunk( req.x, req.y, req.z);
+			c->fillWithTestData();
+			//mGenerator->fillChunk( c ); // This should run in O(n) time.
+			c->requestGenerate();
+			mChunksToLoad.pop_back();
+		}
+	
+		//for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
+		//	(*it)->requestGenerate();
+		//}
+		mWorldStage = WORLD_NORMAL;
+	}
+	else
+	{
+		for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
+			(*it)->update(dt);
+		}
 		
-		(*it)->update(dt);
-
+		for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
+			(*it)->requestGenerate();
+		}
 	}
 
-	for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
-		(*it)->requestGenerate();
-	}
 }
 
 void World::createSky( size_t time )
@@ -455,7 +495,7 @@ raycast_r World::raycastWorld(const raycast_r &inray, bool solidOnly)
 				continue;
 			Vector3 bPos = Util::indexToPosition( (*block).first );
 			min = Vector3( (*it)->getX() * CHUNK_WIDTH - 0.0f,
-							(*it)->getY() * CHUNK_HEIGHT - 0.0f,
+							(*it)->getY() * CHUNK_HEIGHT + 0.0f,
 							(*it)->getZ() * CHUNK_WIDTH - 0.0f ) + bPos;
 			max = Vector3( (*it)->getX() * CHUNK_WIDTH + 1.0f,
 							(*it)->getY() * CHUNK_HEIGHT + 1.0f,
@@ -513,7 +553,7 @@ CollisionResponse World::AABBWorld( Vector3& min, Vector3& max )
 		Vector3 chunkPos( (*it)->getX() * CHUNK_WIDTH, (*it)->getY() * CHUNK_HEIGHT, (*it)->getZ() * CHUNK_WIDTH );
 		for(BlockList::iterator block = blocks->begin(); block != blocks->end(); ++block) {
 			bb.center = chunkPos + Util::indexToPosition( block->first )
-						+ Vector3( 0.5f, -1.5f, 0.5f );
+						+ Vector3( 0.5f, 0.5f, 0.5f );
 			bb.extents = Vector3( 1.0f, 1.0f, 1.0f );
 			Collision::AABBvsAABB( bb, targetBB, r );
 			if( r.collision ) {
@@ -604,8 +644,11 @@ Vector3 World::worldToChunks(const Vector3 &vec)
 Vector3 World::worldToBlock(const Vector3 &vec)
 {
 	Vector3 v;
-	v.x = ((int)vec.x % CHUNK_WIDTH);// * ( vec.x < 0 ? -1.f : 1.f );
-	v.y = ((int)vec.y % CHUNK_HEIGHT);// * ( vec.y < 0 ? -1.f : 1.f );
-	v.z = ((int)vec.z % CHUNK_WIDTH);// * ( vec.z < 0 ? -1.f : 1.f );
+	v.x = abs((int)vec.x % CHUNK_WIDTH);// * ( vec.x < 0 ? -1.f : 1.f );
+	v.x = vec.x < 0 ? CHUNK_WIDTH - v.x - 1: v.x;
+	v.y = abs((int)vec.y % CHUNK_HEIGHT);// * ( vec.y < 0 ? -1.f : 1.f );
+	v.y = vec.y < 0 ? CHUNK_HEIGHT - v.y - 1 : v.y;
+	v.z = abs((int)vec.z % CHUNK_WIDTH);// * ( vec.z < 0 ? -1.f : 1.f );
+	v.z = vec.z < 0 ? CHUNK_WIDTH - v.z - 1: v.z;
 	return v;
 }

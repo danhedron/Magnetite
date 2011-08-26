@@ -54,6 +54,8 @@ set(MAGNETITE_SOURCES
 	source/BlockFactory.cpp
 	source/BaseBlock.cpp
 	source/StoneBlock.cpp
+	source/CobbleBlock.cpp
+	source/MossCobbleBlock.cpp
 	source/DirtBlock.cpp
 	source/GrassBlock.cpp
 	source/SandBlock.cpp
@@ -88,6 +90,8 @@ set(MAGNETITE_HEADERS
 	include/Character.h
 	include/BlockFactory.h
 	include/StoneBlock.h
+	include/CobbleBlock.h
+	include/MossCobbleBlock.h
 	include/DirtBlock.h
 	include/GrassBlock.h
 	include/SandBlock.h

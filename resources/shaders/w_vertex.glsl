@@ -1,11 +1,15 @@
+#version 150 core 
 uniform sampler2D worldDiffuse;
-varying vec4 vCoord;
-varying vec4 vColour;
+
+in vec4 in_p;
+
+smooth out float f_light;
+smooth out vec2 f_coords;
 
 void main(void)
 {
-	vec4 a = gl_Vertex;
-	vCoord = gl_MultiTexCoord0;
-	vColour = gl_Color;
-	gl_Position = gl_ModelViewProjectionMatrix * a;
-}    
+	f_light = in_p.z;
+	f_coords = in_p.xy;
+	
+	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+}
