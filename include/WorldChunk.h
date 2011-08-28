@@ -8,6 +8,15 @@
 class BaseBlock;
 struct GLgeometry;
 
+enum Direction {
+	DIR_FRONT,
+	DIR_BACK,
+	DIR_LEFT,
+	DIR_RIGHT,
+	DIR_TOP,
+	DIR_BOTTOM
+};
+
 class WorldChunk
 {
 protected:
@@ -26,6 +35,9 @@ protected:
 	GLgeometry* mGeometry;
 	float mUpdateTimer;
 
+	// Pointers to speed up adjacent chunk queries.
+	WorldChunk *mFront, *mBack, *mLeft, *mRight, *mTop, *mBottom;
+
 	btCollisionShape*	mPhysicsShape;
 	btDefaultMotionState*	mPhysicsState;
 	btTriangleMesh*			mPhysicsMesh;
@@ -40,6 +52,11 @@ public:
 	enum LightInfo {
 		Sunlight = ( 1<<(sizeof(char) * 7))
 	};
+
+	/**
+	 * Sets the adjacent chunk pointer.
+	 */
+	void _setAdjacentChunk( Direction dir, WorldChunk* ptr );
 
 	/**
 	 * Resets all data in the chunk to air.

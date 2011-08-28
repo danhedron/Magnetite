@@ -7,7 +7,14 @@ Magnetite is an Open Source voxel game & engine, it is powered by:
   * C++
   * CMake
   
-It is crafted with love and care by Daniel Evans - http://bytecove.co.uk, Samuel Clements - http://borntyping.co.uk and also Howell Duggan
+It is crafted with love and care by:
+	
+	* Daniel Evans - http://bytecove.co.uk
+		* Programming, 'Art'
+	* Samuel Clements - http://borntyping.co.uk
+		* Linux 
+	* Howell Duggan
+		* Art
 
 Licence
 -------

@@ -20,7 +20,13 @@ mUpdateTimer( 0 ),
 mPhysicsShape( NULL ),
 mPhysicsBody( NULL ),
 mPhysicsMesh( NULL ),
-mPhysicsState( NULL )
+mPhysicsState( NULL ),
+mFront( NULL ),
+mBack( NULL ),
+mLeft( NULL ),
+mRight( NULL ),
+mBottom( NULL ),
+mTop( NULL )
 {
 	mBlockData = new BlockPtr[CHUNK_SIZE];
 	initalize();
@@ -32,6 +38,11 @@ WorldChunk::~WorldChunk(void)
 		if( mBlockData[i] != NULL )
 			delete mBlockData[i];
 	}
+}
+
+void WorldChunk::_setAdjacentChunk( Direction dir, WorldChunk* ptr ) 
+{
+	
 }
 
 void WorldChunk::initalize()

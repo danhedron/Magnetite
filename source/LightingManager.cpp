@@ -32,8 +32,8 @@ struct Sample {
 	}
 	float getSample( float right, float left, float top, float bottom, float front, float back) {
 		float t = 0;
-		t += ( left / this->left );
 		t += ( right / this->right );
+		t += ( left / this->left );
 		t += ( top / this->top );
 		t += ( bottom / this->bottom );
 		t += ( front / this->front );
