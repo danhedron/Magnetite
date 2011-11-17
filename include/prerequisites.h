@@ -1,11 +1,12 @@
 /**
  * Libaries
  */
-#define NOMINMAX
+//#define NOMINMAX
+#include <limits.h>
 #include <GL/GLee.h>
 #undef None
 #include <SFML/Window.hpp>
-#include <SFML/Window/OpenGL.hpp>
+#include <SFML/OpenGL.hpp>
 #include <SFML/Graphics.hpp>
 #include <btBulletDynamicsCommon.h>
 

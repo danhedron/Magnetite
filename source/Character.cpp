@@ -3,7 +3,7 @@
 #include "World.h"
 #include "PhysicsState.h"
 
-Character::Character( void ) :
+Character::Character( ) :
 mPhysicsController( NULL )
 {
 	setHeight( 1.9f );
@@ -14,9 +14,9 @@ mPhysicsController( NULL )
 	this->_initPhysics();
 }
 
-Character::~Character( void )
+Character::~Character( )
 {
-	PhysicsWorldObject::~PhysicsWorldObject();
+	//PhysicsWorldObject::~PhysicsWorldObject();
 }
 
 void Character::setSkin(std::string name)

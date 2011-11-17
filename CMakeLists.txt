@@ -124,7 +124,7 @@ if(WIN32)
 	# 'fix' LIBC.lib error
 	set(CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"LIBC.lib\")
 else(WIN32)
-	target_link_libraries(Magnetite ${PROJECT_SOURCE_DIR}/depends/lib/libGLee.so)
+	target_link_libraries(Magnetite /usr/lib/libGLee.so)
 	#target_link_libraries(Magnetite /usr/local/lib/libglut.so)
 endif(WIN32)
 

@@ -1,9 +1,9 @@
 #include "Collision.h"
 #include "Vector.h"
 
-bool overlap(Vector3& mina, Vector3& maxa, Vector3& minb, Vector3& maxb)
+bool overlap(const Vector3& mina, const Vector3& maxa, const Vector3& minb, const Vector3& maxb)
 {
-	Vector3 dir = (minb)-mina;
+	Vector3 dir = Vector3(minb)-Vector3(mina);
 	return abs(dir.x) <= ((maxa.x-mina.x) + (maxb.x-minb.x)) 
 		&& abs(dir.y) <= ((maxa.y-mina.y) + (maxb.y-minb.y)) 
 		&& abs(dir.z) <= ((maxa.z-mina.z) + (maxb.z-minb.z));

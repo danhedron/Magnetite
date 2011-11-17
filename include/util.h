@@ -28,7 +28,7 @@ public:
 	{
 		Vector3 v;
 		v.x = index % CHUNK_WIDTH;
-		v.z = std::floorf(index / (CHUNK_WIDTH * CHUNK_HEIGHT));
+		v.z = floorf(index / (CHUNK_WIDTH * CHUNK_HEIGHT));
 		v.y = (index - v.x - ( v.z * (CHUNK_WIDTH * CHUNK_HEIGHT)))/CHUNK_WIDTH;	
 		return v;
 	}
@@ -96,6 +96,11 @@ public:
 	}
 
 	static std::string toString(long number)
+	{
+		return itoa(number, 10);
+	}
+
+	static std::string toString(GLuint& number)
 	{
 		return itoa(number, 10);
 	}

@@ -24,8 +24,8 @@ protected:
 	virtual void _initPhysics();
 public:
 	
-	Character( void );
-	~Character( void );
+	Character( );
+	~Character( );
 
 	/**
 	 * Sets the player's texture to another.

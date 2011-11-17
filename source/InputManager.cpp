@@ -4,15 +4,15 @@
 InputManager::InputManager()
 {
 	/* Setup some default input events, this is a good a place as any. */
-	createInput( sf::Key::W, Inputs::FORWARD );
-	createInput( sf::Key::S, Inputs::BACK );
-	createInput( sf::Key::A, Inputs::LEFT );
-	createInput( sf::Key::D, Inputs::RIGHT );
-	createInput( sf::Key::Space, Inputs::JUMP );
-	createInput( sf::Key::LShift, Inputs::SPRINT );
-	createInput( sf::Key::F, Inputs::FLY );
-	createInput( sf::Key::F2, Inputs::SCREENSHOT );
-	createInput( sf::Key::R, Inputs::RESPAWN );
+	createInput( sf::Keyboard::W, Inputs::FORWARD );
+	createInput( sf::Keyboard::S, Inputs::BACK );
+	createInput( sf::Keyboard::A, Inputs::LEFT );
+	createInput( sf::Keyboard::D, Inputs::RIGHT );
+	createInput( sf::Keyboard::Space, Inputs::JUMP );
+	createInput( sf::Keyboard::LShift, Inputs::SPRINT );
+	createInput( sf::Keyboard::F, Inputs::FLY );
+	createInput( sf::Keyboard::F2, Inputs::SCREENSHOT );
+	createInput( sf::Keyboard::R, Inputs::RESPAWN );
 }
 
 InputManager::~InputManager()
@@ -37,7 +37,7 @@ void InputManager::loadInputs()
 			for( InputList::iterator it = mInputs.begin(); it != mInputs.end(); it++ )
 			{
 				if( it->event == evtId )
-					it->key = (sf::Key::Code)keyId;
+					it->key = (sf::Keyboard::Key)keyId;
 			}
 		}
 	}
@@ -62,7 +62,7 @@ std::string InputManager::inputToString( Inputs::Event evt )
 	return "";
 }
 
-void InputManager::createInput( sf::Key::Code key, Inputs::Event event )
+void InputManager::createInput( sf::Keyboard::Key key, Inputs::Event event )
 {
 	InputBinding input;
 	input.event = event;
@@ -80,7 +80,7 @@ void InputManager::setEventCallback( Inputs::Event event, InputCallback callback
 	}
 }
 
-void InputManager::keyDown( sf::Key::Code key )
+void InputManager::keyDown( sf::Keyboard::Key key )
 {
 	for(InputList::iterator it = mInputs.begin(); it != mInputs.end(); it++)
 	{
@@ -94,7 +94,7 @@ void InputManager::keyDown( sf::Key::Code key )
 	}
 }
 
-void InputManager::keyUp( sf::Key::Code key )
+void InputManager::keyUp( sf::Keyboard::Key key )
 {
 	for(InputList::iterator it = mInputs.begin(); it != mInputs.end(); it++)
 	{

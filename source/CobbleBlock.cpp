@@ -2,7 +2,7 @@
 #include "BlockFactory.h"
 
 //REGISTER_BLOCK_TYPE( "stone", StoneBlock )
-GenericBlockFactory<CobbleBlock> stoneFactory("cobble");
+GenericBlockFactory<CobbleBlock> cobbleFactory("cobble");
 
 CobbleBlock::CobbleBlock()
 : BaseBlock()

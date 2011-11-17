@@ -2,7 +2,7 @@
 #include "BlockFactory.h"
 
 //REGISTER_BLOCK_TYPE( "stone", StoneBlock )
-GenericBlockFactory<MossCobbleBlock> stoneFactory("mossycobble");
+GenericBlockFactory<MossCobbleBlock> mossCobleFactory("mossycobble");
 
 MossCobbleBlock::MossCobbleBlock()
 : BaseBlock()

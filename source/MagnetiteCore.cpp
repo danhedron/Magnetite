@@ -76,15 +76,13 @@ MagnetiteCore::~MagnetiteCore(void)
 
 void MagnetiteCore::init(int *argc, char **argv)
 {
-	sf::WindowSettings wnds;
+	sf::ContextSettings wnds;
 	wnds.DepthBits = 24;
-	wnds.DepthBits = 8;
 	//wnds.AntialiasingLevel = 2;
 	mWindow.Create(sf::VideoMode(800,600,32), "Magnetite", sf::Style::Close | sf::Style::Resize, wnds);
 	mWindow.EnableKeyRepeat( false );
 	//mWindow.UseVerticalSync(true);
 	mRenderer->initialize(mWindow);
-	wglSwapIntervalEXT(1); // Enable VSYNC, for greater justice
 	mTextureManager->initalize();
 	mRenderer->resizeViewport(0,0,800,600);
 	initalizePhysics();
@@ -160,17 +158,21 @@ void MagnetiteCore::go()
 
 	mClock.Reset();
 	while(mContinue && mWindow.IsOpened()) {
+#ifdef WIN32
 		float lDelta = mClock.GetElapsedTime();
+#else
+		float lDelta = mClock.GetElapsedTime()*0.001;
+#endif
 		mClock.Reset();
 
 		// Handle Events before we render.
 		sf::Event lEvt;
-		while( mWindow.GetEvent(lEvt) ) {
+		while( mWindow.PollEvent(lEvt) ) {
 			if( lEvt.Type == sf::Event::Closed ) {
 				exit();
 			}
 			if( (lEvt.Type == sf::Event::KeyPressed) &&
-				(lEvt.Key.Code == sf::Key::Escape) ) {
+				(lEvt.Key.Code == sf::Keyboard::Escape) ) {
 				exit();
 			}
 
@@ -180,7 +182,7 @@ void MagnetiteCore::go()
 				mInputManager->keyUp( lEvt.Key.Code );
 
 			if( (lEvt.Type == sf::Event::KeyPressed) &&
-				(lEvt.Key.Code == sf::Key::R) ) {
+				(lEvt.Key.Code == sf::Keyboard::R) ) {
 					if(mRenderer->getRenderMode() == Renderer::RENDER_SOLID)
 						mRenderer->setRenderMode(Renderer::RENDER_LIGHTING);
 					else
@@ -191,56 +193,56 @@ void MagnetiteCore::go()
 			//= Debug Buttons
 			//==========
 			if( (lEvt.Type == sf::Event::KeyReleased ) &&
-				(lEvt.Key.Code == sf::Key::F1 ) ) {
+				(lEvt.Key.Code == sf::Keyboard::F1 ) ) {
 				mRenderer->setDebugMode( Renderer::DEBUG_OFF );
 			}
 			if( (lEvt.Type == sf::Event::KeyReleased ) &&
-				(lEvt.Key.Code == sf::Key::F3 ) ) {
+				(lEvt.Key.Code == sf::Keyboard::F3 ) ) {
 				mRenderer->setDebugMode( Renderer::DEBUG_STATS );
 			}
 			if( (lEvt.Type == sf::Event::KeyReleased ) &&
-				(lEvt.Key.Code == sf::Key::F4 ) ) {
+				(lEvt.Key.Code == sf::Keyboard::F4 ) ) {
 				mRenderer->setDebugMode( Renderer::DEBUG_PHYSICS );
 			}
 			if( (lEvt.Type == sf::Event::KeyReleased ) &&
-				(lEvt.Key.Code == sf::Key::F5 ) ) {
+				(lEvt.Key.Code == sf::Keyboard::F5 ) ) {
 				Util::setLogLevel( Util::Verbose );
 			}
 			if( (lEvt.Type == sf::Event::KeyReleased) &&
-				(lEvt.Key.Code == sf::Key::F) ) {
+				(lEvt.Key.Code == sf::Keyboard::F) ) {
 					//mPlayer->enableFlying( !mPlayer->isFlying() );
 					//Util::log( (Util::toString(mPlayer->isFlying())) + " Flying");
 			}
 			if( (lEvt.Type == sf::Event::KeyReleased) &&
-				(lEvt.Key.Code == sf::Key::F) ) {
+				(lEvt.Key.Code == sf::Keyboard::F) ) {
 					//mPlayer->enableFlying( !mPlayer->isFlying() );
 					//Util::log( (Util::toString(mPlayer->isFlying())) + " Flying");
 			}
 			if( (lEvt.Type == sf::Event::KeyPressed) &&
-				(lEvt.Key.Code == sf::Key::Add) ) {
+				(lEvt.Key.Code == sf::Keyboard::Add) ) {
 					mRenderer->nextBlock();
 			}
 			if( (lEvt.Type == sf::Event::KeyPressed) &&
-				(lEvt.Key.Code == sf::Key::F6) ) {
+				(lEvt.Key.Code == sf::Keyboard::F6) ) {
 					mWorld->saveAllChunks();
 			}
 			if( (lEvt.Type == sf::Event::KeyPressed) &&
-				(lEvt.Key.Code == sf::Key::F7) ) {
+				(lEvt.Key.Code == sf::Keyboard::F7) ) {
 					mWorld->loadWorld("test");
 			}
 			if( (lEvt.Type == sf::Event::KeyPressed) &&
-				(lEvt.Key.Code == sf::Key::Num9) ) {
+				(lEvt.Key.Code == sf::Keyboard::Num9) ) {
 					mTimescale *= 0.5f;
 			}
 			if( (lEvt.Type == sf::Event::KeyPressed) &&
-				(lEvt.Key.Code == sf::Key::Num0) ) {
+				(lEvt.Key.Code == sf::Keyboard::Num0) ) {
 					mTimescale *= 2.f;
 			}
 			if( (lEvt.Type == sf::Event::MouseMoved) ) {
 					mGame->_mouseMoved( -(lEvt.MouseMove.X - lastX), -(lEvt.MouseMove.Y  - lastY));
 					lastX = mWindow.GetWidth()/2;
 					lastY = mWindow.GetHeight()/2;
-					mWindow.SetCursorPosition( mWindow.GetWidth() / 2, mWindow.GetHeight() / 2 );
+					sf::Mouse::SetPosition( sf::Vector2i( mWindow.GetWidth() / 2, mWindow.GetHeight() / 2), mWindow );
 			}
 			if( lEvt.Type == sf::Event::MouseButtonPressed && lEvt.MouseButton.Button == sf::Mouse::Left ) {
 				mGame->_primary();

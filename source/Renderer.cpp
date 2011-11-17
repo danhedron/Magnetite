@@ -59,7 +59,7 @@ void GLshader::create()
 		Util::log("Shader Compiled OK: " + Util::toString(ref));
 	}
 	else {
-		Util::log("Error compiling shader: ");
+		Util::log("Error compiling shader (" + filename + "): ");
 	}
 
 	GLint blen = 0;	
@@ -122,7 +122,7 @@ void GLprogram::link()
 
 
 	// deal with attributes n stuff
-	for( auto it = mAttributes.begin(); it != mAttributes.end(); it++ )
+	for( std::map<int, std::string>::iterator it = mAttributes.begin(); it != mAttributes.end(); it++ )
 	{
 		glBindAttribLocation(ref, it->first, it->second.c_str());
 	}
@@ -133,11 +133,13 @@ void GLprogram::link()
 	glGetProgramiv(ref, GL_LINK_STATUS, &linked);
 	if (linked)
 	{
-	   Util::log("Program Linked OK");
+		Util::log("Program Linked OK");
+		valid = true;
 	}
 	else
 	{
 		Util::log("Error Linking Program:");
+		valid = false;
 	}
 
 	GLint blen = 0;	
@@ -417,8 +419,13 @@ void Renderer::render(double dt, World* world)
 
 	if( mRenderMode == RENDER_SOLID ) {
 		GLint texLoc = glGetUniformLocation( mWorldProgram.ref, "worldDiffuse");
-		glUseProgram( mWorldProgram.ref );
-		glUniform1i( texLoc, 0 );
+		if( mWorldProgram.valid == false ) {
+			Util::log("Using Invalid Program :(");
+		}
+		else {
+			glUseProgram( mWorldProgram.ref );
+			glUniform1i( texLoc, 0 );
+		}
 	}
 
 	if( mDrawWorld ) 
@@ -652,11 +659,11 @@ void Renderer::lastBlock()
 
 void Renderer::drawText(std::string text, int x, int y)
 {
-	mWindow->PreserveOpenGLStates(true);
-	sf::String drawableString(text, sf::Font::GetDefaultFont(), 14.5f);
+	mWindow->SaveGLStates();
+	sf::Text drawableString(text, sf::Font::GetDefaultFont(), 14.5f);
 	drawableString.SetColor(sf::Color(0,255,0));
 	drawableString.SetPosition( x, y );
 	mWindow->Draw(drawableString);
-	mWindow->PreserveOpenGLStates(false);
+	mWindow->RestoreGLStates();
 }
 

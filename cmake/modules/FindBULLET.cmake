@@ -5,6 +5,7 @@ SET( BULLETDIR $ENV{BULLETDIR} )
 FIND_PATH(BULLET_INCLUDE_DIR btBulletDynamicsCommon.h
 	/usr/include
 	/usr/local/include
+	/usr/include/bullet
 	$ENV{INCLUDE}
 	${BULLETDIR}/src
 )

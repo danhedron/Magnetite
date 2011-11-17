@@ -10,10 +10,10 @@
 #include <fstream>
 #include <stdio.h>
 #include <math.h>
-#include <ppl.h>
 
 #ifdef WIN32
 #include <direct.h>
+#include <ppl.h>
 #else
 #include <unistd.h>
 #endif

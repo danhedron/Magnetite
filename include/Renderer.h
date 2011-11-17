@@ -52,11 +52,12 @@ struct GLprogram {
 	GLshader* vertex;
 	GLshader* fragment;
 	GLshader* geometry;
+	bool valid;
 	// These aren't used properly at the moment, I'd like to clean up the usage of this class 
 	std::map<std::string, GLuint> mUniforms;
 	std::map<int, std::string> mAttributes;
 
-	GLprogram() { ref = 0; vertex = NULL; fragment = NULL; geometry = NULL; }
+	GLprogram() { ref = 0; vertex = NULL; fragment = NULL; geometry = NULL; valid = false;}
 	void link();
 	void bindUniformTexture( std::string var, GLint unit );
 	void bindAttribute( int index, std::string attribute );

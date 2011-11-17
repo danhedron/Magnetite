@@ -1,6 +1,7 @@
 #ifndef _INPUTMANAGER_H_
 #define _INPUTMANAGER_H_
 #include "prerequisites.h"
+#include <Window/Event.hpp>
 
 /**
  todo:
@@ -32,7 +33,7 @@ struct InputEvent {
 typedef void (*InputCallback)(const InputEvent&);
 struct InputBinding {
 	Inputs::Event event;
-	sf::Key::Code key;
+	sf::Keyboard::Key key;
 	InputCallback callback;
 };
 
@@ -49,11 +50,11 @@ public:
 
 	void loadInputs();
 
-	void createInput( sf::Key::Code key, Inputs::Event event );
+	void createInput( sf::Keyboard::Key key, Inputs::Event event );
 	void setEventCallback( Inputs::Event event, InputCallback callback );
 
-	void keyDown( sf::Key::Code key );
-	void keyUp( sf::Key::Code key );
+	void keyDown( sf::Keyboard::Key key );
+	void keyUp( sf::Keyboard::Key key );
 
 	void beginInput( Inputs::Event evt );
 	void endInput( Inputs::Event evt );
