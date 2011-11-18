@@ -1,10 +1,10 @@
-#version 150 core 
+#version 120 
 uniform sampler2D worldDiffuse;
 
-in vec4 in_p;
+attribute vec4 in_p;
 
-smooth out float f_light;
-smooth out vec2 f_coords;
+varying float f_light;
+varying vec2 f_coords;
 
 void main(void)
 {
