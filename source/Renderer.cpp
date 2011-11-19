@@ -5,6 +5,9 @@
 #include "BaseBlock.h"
 #include "MagnetiteCore.h"
 #include "TextureManager.h"
+#include "ProgramResource.h"
+#include "ResourceManager.h"
+#include "ShaderResource.h"
 #include "Camera.h"
 #include "BlockFactory.h"
 #include "util.h"
@@ -184,7 +187,8 @@ mFpsAvg( 0 ),
 mCamera( NULL ),
 blockType( "" ),
 mDrawFrustum( false ),
-mDrawWorld( true )
+mDrawWorld( true ),
+mWorldProgram( NULL )
 {
 }
 
@@ -233,16 +237,14 @@ void Renderer::initialize(sf::RenderWindow& window)
 	
 	MagnetiteCore::Singleton->getTextureManager()->loadTexture("../resources/ui/crosshair.png");
 
-	// Test shader code.
-	mWorldProgram.vertex = loadShader("w_vertex.glsl", GL_VERTEX_SHADER);
-	mWorldProgram.fragment = loadShader("w_fragment.glsl", GL_FRAGMENT_SHADER);
-	if( getGeometryType() == GEOM_GEOMSHADER ) {
-		//mWorldProgram.geometry = loadShader("w_geometry.glsl", GL_GEOMETRY_SHADER_EXT);
+	mWorldProgram = MagnetiteCore::Singleton->getResourceManager()->getResource<ProgramResource>("world.prog");
+	if( mWorldProgram == NULL ) {
+		Util::log("World Program Missing!");
 	}
-	mWorldProgram.link();
+	mWorldProgram->link();
 
 	// Find the shader parameters.
-	attrTC = glGetAttribLocation( mWorldProgram.ref, "in_p" );
+	attrTC = glGetAttribLocation( mWorldProgram->getName(), "in_p" );
 	//attrL = glGetAttribLocation( mWorldProgram.ref, "in_light" );
 
 	//mLightingProgram.vertex = loadShader("w_vertex.glsl", GL_VERTEX_SHADER);
@@ -418,12 +420,12 @@ void Renderer::render(double dt, World* world)
 	world->getSky()->renderSky();
 
 	if( mRenderMode == RENDER_SOLID ) {
-		GLint texLoc = glGetUniformLocation( mWorldProgram.ref, "worldDiffuse");
-		if( mWorldProgram.valid == false ) {
+		GLint texLoc = glGetUniformLocation( mWorldProgram->getName(), "worldDiffuse");
+		if( mWorldProgram->getName() == 0 ) {
 			Util::log("Using Invalid Program :(");
 		}
 		else {
-			glUseProgram( mWorldProgram.ref );
+			glUseProgram( mWorldProgram->getName() );
 			glUniform1i( texLoc, 0 );
 		}
 	}

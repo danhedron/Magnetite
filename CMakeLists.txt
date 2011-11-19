@@ -45,6 +45,10 @@ set(MAGNETITE_SOURCES
 	source/WorldObject.cpp
 	source/PhysicsWorldObject.cpp
 	source/WorldItem.cpp
+	source/BaseResource.cpp
+	source/ShaderResource.cpp
+	source/ProgramResource.cpp
+	source/ResourceManager.cpp
 	source/Sky.cpp
 	source/Frustum.cpp
 	source/Camera.cpp
@@ -82,6 +86,10 @@ set(MAGNETITE_HEADERS
 	include/WorldObject.h
 	include/PhysicsWorldObject.h
 	include/WorldItem.h
+	include/BaseResource.h
+	include/ResourceManager.h
+	include/ShaderResource.h
+	include/ProgramResource.h
 	include/Sky.h
 	include/Frustum.h
 	include/Camera.h

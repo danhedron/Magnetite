@@ -1,0 +1,4 @@
+#world shader program
+vertex:w_vertex.glsl
+fragment:w_fragment.glsl
+#end of shader

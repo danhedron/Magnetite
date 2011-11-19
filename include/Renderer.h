@@ -6,6 +6,7 @@ class WorldChunk;
 class BaseBlock;
 class Camera;
 class World;
+class ProgramResource;
 
 /**
  * @struct Struct to represent a vertex, memory aligned for easy array-xing
@@ -104,8 +105,8 @@ protected:
 
 	std::map<std::string, GLshader*> mShaders;
 
-	GLprogram mWorldProgram;
 	GLprogram mLightingProgram;
+	ProgramResource* mWorldProgram;
 
 	GeomType mGeomType;
 

@@ -9,6 +9,7 @@
 #include "BlockFactory.h"
 #include "BaseGame.h"
 #include "BulletDebug.h"
+#include "ResourceManager.h"
 #include <ctime>
 
 MagnetiteCore* MagnetiteCore::Singleton = 0;
@@ -27,6 +28,7 @@ void globalEventHandler( const InputEvent& evt )
 MagnetiteCore::MagnetiteCore(void)
 : mContinue( true ),
 mWorld( NULL ),
+mResourceManager( NULL ),
 mTextureManager( NULL ),
 mInputManager( NULL ),
 mTimescale( 1.f ),
@@ -58,6 +60,7 @@ MagnetiteCore::~MagnetiteCore(void)
 	unloadWorld();
 
 	delete mRenderer;
+	delete mResourceManager;
 	delete mTextureManager;
 	delete mInputManager;
 
@@ -76,6 +79,10 @@ MagnetiteCore::~MagnetiteCore(void)
 
 void MagnetiteCore::init(int *argc, char **argv)
 {
+	mResourceManager = new ResourceManager();
+	mResourceManager->addLocation("../resources/shaders/");
+	mResourceManager->addLocation("../resources/sprites/");
+	mResourceManager->addLocation("../resources/ui/");
 	sf::ContextSettings wnds;
 	wnds.DepthBits = 24;
 	//wnds.AntialiasingLevel = 2;
@@ -287,6 +294,11 @@ void MagnetiteCore::exit()
 TextureManager* MagnetiteCore::getTextureManager()
 {
 	return mTextureManager;
+}
+
+ResourceManager* MagnetiteCore::getResourceManager()
+{
+	return mResourceManager;
 }
 
 Renderer* MagnetiteCore::getRenderer()

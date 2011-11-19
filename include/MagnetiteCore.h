@@ -8,6 +8,7 @@ class InputManager;
 class World;
 class Character;
 class BaseGame;
+class ResourceManager;
 
 /** @class MagnetiteCore
  * Responsible for managing stuff
@@ -22,6 +23,7 @@ protected:
 	sf::RenderWindow	mWindow;
 	sf::Clock	mClock;
 	Renderer*	mRenderer;
+	ResourceManager* mResourceManager;
 	TextureManager* mTextureManager;
 	InputManager*	mInputManager;
 	World*		mWorld;
@@ -59,6 +61,11 @@ public:
 	 * @return a pointer to the Texture Manager
 	 */
 	TextureManager *getTextureManager();
+
+	/**
+	 * Returns a pointer to the Resource Manager
+	 */
+	ResourceManager* getResourceManager();
 
 	/**
 	 * @return a pointer to the renderer

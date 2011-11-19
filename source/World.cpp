@@ -101,7 +101,7 @@ void World::createWorld()
 	mWorldStage = WORLD_GEN;
 	createSky(200);
 	//Create some testing chunks
-	createTestChunks( 5 );
+	createTestChunks( 2 );
 
 #ifdef WIN32
 	size_t startTick = GetTickCount();
