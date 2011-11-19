@@ -31,11 +31,6 @@ public:
 	void load();	
 	
 	/**
-	 * Makes this shader active (for rendering and shit)
-	 */
-	void makeActive();
-
-	/**
 	 * Compiles the shader on the GPU
 	 */
 	void compile( GLenum type );

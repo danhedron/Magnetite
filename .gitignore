@@ -2,3 +2,4 @@ build/
 include/BuildConfig.h
 .geany
 *~
+*.swp
