@@ -247,8 +247,10 @@ void MagnetiteCore::go()
 			}
 			if( (lEvt.Type == sf::Event::MouseMoved) ) {
 					mGame->_mouseMoved( -(lEvt.MouseMove.X - lastX), -(lEvt.MouseMove.Y  - lastY));
-					lastX = mWindow.GetWidth()/2;
-					lastY = mWindow.GetHeight()/2;
+					lastX = lEvt.MouseMove.X;
+					lastY = lEvt.MouseMove.Y;
+			}
+			if( (lEvt.Type == sf::Event::MouseLeft) ) {
 					sf::Mouse::SetPosition( sf::Vector2i( mWindow.GetWidth() / 2, mWindow.GetHeight() / 2), mWindow );
 			}
 			if( lEvt.Type == sf::Event::MouseButtonPressed && lEvt.MouseButton.Button == sf::Mouse::Left ) {

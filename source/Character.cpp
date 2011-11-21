@@ -8,7 +8,7 @@ mPhysicsController( NULL )
 {
 	setHeight( 1.9f );
 	setMoveSpeed( 2.f );
-	setSprintSpeed( 4.f );
+	setSprintSpeed( 8.f );
 	enableSprint( false );
 	enableFlying( false );
 	this->_initPhysics();
