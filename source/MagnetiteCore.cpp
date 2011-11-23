@@ -88,6 +88,7 @@ void MagnetiteCore::init(int *argc, char **argv)
 	//wnds.AntialiasingLevel = 2;
 	mWindow.Create(sf::VideoMode(800,600,32), "Magnetite", sf::Style::Close | sf::Style::Resize, wnds);
 	mWindow.EnableKeyRepeat( false );
+	mWindow.EnableVerticalSync( false );
 	//mWindow.UseVerticalSync(true);
 	mRenderer->initialize(mWindow);
 	mTextureManager->initalize();

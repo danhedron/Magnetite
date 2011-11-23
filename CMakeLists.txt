@@ -69,6 +69,7 @@ set(MAGNETITE_SOURCES
 	source/ChunkLoader.cpp
 	source/World.cpp
 	source/WorldChunk.cpp
+	source/Explosion.cpp
 	source/TextureManager.cpp
 )
 set(MAGNETITE_HEADERS
@@ -111,6 +112,7 @@ set(MAGNETITE_HEADERS
 	include/World.h
 	include/WorldNode.h
 	include/WorldChunk.h
+	include/Explosion.h
 	include/TextureManager.h
 	include/util.h
 )

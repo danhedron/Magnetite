@@ -6,6 +6,7 @@
 #include "BaseBlock.h"
 #include "Camera.h"
 #include "World.h"
+#include "Explosion.h"
 
 REG_GAME_TYPE( "default", BaseGame )
 
@@ -161,6 +162,7 @@ void BaseGame::playerPrimaryClick( Character* player )
 	ray = mEngine->getWorld()->raycastWorld(ray);
 	if(ray.hit)
 	{
+		/*	
 		Vector3 cIndex = mEngine->getWorld()->worldToChunks( ray.worldHit );
 		Vector3 bIndex = mEngine->getWorld()->worldToBlock( ray.worldHit - (ray.hitNormal/2) );
 		WorldChunk* chunk = mEngine->getWorld()->getChunk( cIndex.x, cIndex.y, cIndex.z );
@@ -168,6 +170,11 @@ void BaseGame::playerPrimaryClick( Character* player )
 		if(chunk && ray.block) {
 			chunk->removeBlockAt( bIndex.x, bIndex.y, bIndex.z );
 		}
+		*/
+		explosion_t info;
+		info.center = ray.worldHit;
+		Explosion expl(info);
+		expl.explode();
 	}
 }
 
