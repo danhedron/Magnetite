@@ -161,20 +161,17 @@ void BaseGame::playerPrimaryClick( Character* player )
 	raycast_r ray = player->getEyeCast();
 	ray = mEngine->getWorld()->raycastWorld(ray);
 	if(ray.hit)
-	{
-		/*	
+	{	
 		Vector3 cIndex = mEngine->getWorld()->worldToChunks( ray.worldHit );
 		Vector3 bIndex = mEngine->getWorld()->worldToBlock( ray.worldHit - (ray.hitNormal/2) );
 		WorldChunk* chunk = mEngine->getWorld()->getChunk( cIndex.x, cIndex.y, cIndex.z );
-		Util::log("Ray Hit: " + Util::toString( cIndex ) + " Normal: " + Util::toString( ray.hitNormal ) + " block: " + Util::toString(bIndex) );
 		if(chunk && ray.block) {
 			chunk->removeBlockAt( bIndex.x, bIndex.y, bIndex.z );
 		}
-		*/
-		explosion_t info;
+		/*explosion_t info;
 		info.center = ray.worldHit;
 		Explosion expl(info);
-		expl.explode();
+		expl.explode();*/
 	}
 }
 
