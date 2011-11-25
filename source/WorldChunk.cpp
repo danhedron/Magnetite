@@ -93,12 +93,12 @@ void WorldChunk::fillWithTestData()
 		{
 			for(int z = 0; z < CHUNK_WIDTH; z++)
 			{
-				for(int y = 0; y < 10; y++)
+				for(int y = 0; y < 60; y++)
 				{
 					BaseBlock* block = NULL;
-					if( y == 9 )
+					if( y == 59 )
 						block = FactoryManager::getManager().createBlock("grass");
-					else if( y == 8 || y == 7 )
+					else if( y < 59 && y > 50 )
 						block = FactoryManager::getManager().createBlock("dirt");
 					else
 						block = FactoryManager::getManager().createBlock("stone");
