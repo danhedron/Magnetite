@@ -168,10 +168,10 @@ void BaseGame::playerPrimaryClick( Character* player )
 		if(chunk && ray.block) {
 			chunk->removeBlockAt( bIndex.x, bIndex.y, bIndex.z );
 		}
-		/*explosion_t info;
-		info.center = ray.worldHit;
+		explosion_t info;
+		info.center = ray.worldHit - ray.hitNormal/2;
 		Explosion expl(info);
-		expl.explode();*/
+		expl.explode();
 	}
 }
 

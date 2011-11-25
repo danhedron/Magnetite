@@ -76,6 +76,12 @@ enum GeomType {
 	GEOM_GEOMSHADER = 2
 };
 
+/**
+ * Debug typedefs
+ */
+typedef std::pair<Vector3,Vector3> Line;
+typedef std::vector<Line> LineList;
+
 class Renderer
 {
 protected:
@@ -109,6 +115,11 @@ protected:
 	ProgramResource* mWorldProgram;
 
 	GeomType mGeomType;
+
+	/**
+	 * Stores a list of debuging points
+	 */
+	LineList mDebugLines;
 
 public:
 	Renderer(void);
@@ -160,6 +171,11 @@ public:
 	 * Sets OpenGL back up for 3D rendering.
 	 */
 	void disable2D();
+
+	/**
+	 * Adds a line to the debug drawing list
+	 */
+	void addDebugLine( const Vector3& start, const Vector3& end );
 
 	/**
 	 * Sets the active rendering camera

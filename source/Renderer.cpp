@@ -324,6 +324,11 @@ Camera* Renderer::getCamera()
 	return mCamera;
 }
 
+void Renderer::addDebugLine( const Vector3& start, const Vector3& end )
+{
+	mDebugLines.push_back( Line( start, end ) );
+}
+
 void Renderer::setWorldVisible( bool vis )
 {
 	mDrawWorld = vis;
@@ -405,6 +410,17 @@ void Renderer::render(double dt, World* world)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glColor3f(1,1,1);
 
+	for( LineList::iterator it = mDebugLines.begin(); it != mDebugLines.end(); it++ ) 
+	{
+		Line l = *it;
+		glBegin(GL_LINES);
+		glColor3f(1, 1, 1);
+		glVertex3d(l.first.x, l.first.y, l.first.z);
+		glVertex3d(l.second.x, l.second.y, l.second.z);
+		glEnd();
+
+	}
+
 	glMatrixMode(GL_MODELVIEW);
 
 	glEnable(GL_CULL_FACE);
@@ -446,8 +462,8 @@ void Renderer::render(double dt, World* world)
 		}
 
 		for(NodeList::iterator node = nodes.begin();
-			node != nodes.end();
-			++node)
+				node != nodes.end();
+				++node)
 		{
 			_renderNode( *node, 0 );
 		}
@@ -483,12 +499,12 @@ void Renderer::render(double dt, World* world)
 	mCamera->applyMatrix();
 
 	switch( mDebugMode ) {
-	case DEBUG_STATS:
-		drawStats( dt, rendered, world );
-		break;
-	case DEBUG_PHYSICS:
-		MagnetiteCore::Singleton->getPhysicsWorld()->debugDrawWorld();
-		break;
+		case DEBUG_STATS:
+			drawStats( dt, rendered, world );
+			break;
+		case DEBUG_PHYSICS:
+			MagnetiteCore::Singleton->getPhysicsWorld()->debugDrawWorld();
+			break;
 	};
 
 	drawBlockChooser( dt );
@@ -504,7 +520,7 @@ void Renderer::_renderNode(WorldNode *node, int depth)
 	Vector3 max = Vector3( min.x + nodeWorldSize, min.y + CHUNK_HEIGHT, min.z + nodeWorldSize );
 
 	size_t pos = Frustum::INSIDE;
-	
+
 	for( int i = 0; i < 4; i++ ) {
 		WorldNode* child = node->children[i];
 		if( child == NULL ) continue;
@@ -528,7 +544,7 @@ void Renderer::_renderChunk( WorldChunk* chunk )
 	float y = chunk->getY() * CHUNK_HEIGHT;
 	float z = chunk->getZ() * CHUNK_WIDTH;
 	glTranslatef(x,y,z);
-	
+
 	if( chunk->hasGenerated() ) {
 		GLgeometry* chunkGeom = chunk->getGeometry();
 
@@ -536,7 +552,7 @@ void Renderer::_renderChunk( WorldChunk* chunk )
 		{
 			chunkGeom->bindToBuffer();
 		}
-		
+
 		glBindBuffer( GL_ARRAY_BUFFER, chunkGeom->vertexBO );
 		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, chunkGeom->indexBO );
 
@@ -552,7 +568,7 @@ void Renderer::_renderChunk( WorldChunk* chunk )
 		//glColorPointer( 1, GL_UNSIGNED_SHORT, sizeof(GLvertex), BUFFER_OFFSET(15));
 
 		glDrawRangeElements( GL_TRIANGLES, 0, chunkGeom->vertexCount, chunkGeom->edgeCount, GL_UNSIGNED_SHORT, 0);
-	
+
 		glDisableVertexAttribArray(attrTC);
 		//glDisableVertexAttribArray(attrL);
 		glBindBuffer( GL_ARRAY_BUFFER, 0 );
@@ -591,7 +607,7 @@ void Renderer::drawBlockChooser( double dt )
 		iter =FactoryManager::getManager().blockFactoryList.begin();
 		blockType = iter->first;
 	}
-	
+
 	std::stringstream ss;
 	ss << "Current Block: " << iter->first << std::endl;
 	drawText( ss.str(), 6, 200);
@@ -603,7 +619,7 @@ void Renderer::drawCrosshair( double dt )
 	enable2D();
 
 	GLtexture* tex = MagnetiteCore::Singleton->getTextureManager()->fetchTexture("../resources/ui/crosshair.png");
-	
+
 	if( tex != 0 )
 	{
 		glEnable(GL_TEXTURE_2D);
@@ -613,16 +629,16 @@ void Renderer::drawCrosshair( double dt )
 	glEnable (GL_BLEND);
 
 	glColor3f(1,1,1);
-	
+
 	glBegin(GL_QUADS);
-		glTexCoord2f(0.f,0.f);
-		glVertex2i( (mScrWidth/2) + 8, (mScrHeight/2) + 8);
-		glTexCoord2f(0.f,1.f);
-		glVertex2i( (mScrWidth/2) - 8, (mScrHeight/2) + 8);
-		glTexCoord2f(1.f,1.f);
-		glVertex2i( (mScrWidth/2) - 8, (mScrHeight/2) - 8);
-		glTexCoord2f(1.f,0.f);
-		glVertex2i( (mScrWidth/2) + 8, (mScrHeight/2) - 8);
+	glTexCoord2f(0.f,0.f);
+	glVertex2i( (mScrWidth/2) + 8, (mScrHeight/2) + 8);
+	glTexCoord2f(0.f,1.f);
+	glVertex2i( (mScrWidth/2) - 8, (mScrHeight/2) + 8);
+	glTexCoord2f(1.f,1.f);
+	glVertex2i( (mScrWidth/2) - 8, (mScrHeight/2) - 8);
+	glTexCoord2f(1.f,0.f);
+	glVertex2i( (mScrWidth/2) + 8, (mScrHeight/2) - 8);
 	glEnd();
 
 	glDisable (GL_BLEND);
