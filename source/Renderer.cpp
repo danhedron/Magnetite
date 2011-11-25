@@ -410,15 +410,17 @@ void Renderer::render(double dt, World* world)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glColor3f(1,1,1);
 
-	for( LineList::iterator it = mDebugLines.begin(); it != mDebugLines.end(); it++ ) 
-	{
-		Line l = *it;
-		glBegin(GL_LINES);
-		glColor3f(1, 1, 1);
-		glVertex3d(l.first.x, l.first.y, l.first.z);
-		glVertex3d(l.second.x, l.second.y, l.second.z);
-		glEnd();
+	if( mDebugMode == DEBUG_LINES ) {
+		for( LineList::iterator it = mDebugLines.begin(); it != mDebugLines.end(); it++ ) 
+		{
+			Line l = *it;
+			glBegin(GL_LINES);
+			glColor3f(1, 1, 1);
+			glVertex3d(l.first.x, l.first.y, l.first.z);
+			glVertex3d(l.second.x, l.second.y, l.second.z);
+			glEnd();
 
+		}
 	}
 
 	glMatrixMode(GL_MODELVIEW);
@@ -430,7 +432,7 @@ void Renderer::render(double dt, World* world)
 	NodeList nodes = world->getTopNodes(); // world->getChunks();
 
 	GLtexture* tex = MagnetiteCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/world.png");
-	
+
 	mCamera->applyMatrix( true, false );
 
 	world->getSky()->renderSky();

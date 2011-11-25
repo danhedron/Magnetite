@@ -198,11 +198,17 @@ ChunkList& World::getChunks()
 	return mChunks;
 }
 
+static WorldChunk* lastChunk = NULL;
 WorldChunk* World::getChunk(const long x, const long y, const long z)
 {
+	// Optimization hack
+	if(lastChunk != NULL && lastChunk->getX() == x && lastChunk->getY() == y && lastChunk->getZ() == z) {
+		return lastChunk;
+	}
 	for(ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it)
 	{
 		if( x == (*it)->getX() && y == (*it)->getY() && z == (*it)->getZ() ) {
+			lastChunk = (*it);
 			return (*it);
 		}
 	}
@@ -484,22 +490,24 @@ raycast_r World::raycastWorld(const raycast_r &inray, bool solidOnly)
 		if(ray.hit)
 			hitChunks.push_back((*it));
 	}
-	BlockList* blocks = NULL;
+	BlockList* blocks;
 	ray.hit = false;
 	std::vector<raycast_r> raycasts;
-	for(ChunkList::iterator it = hitChunks.begin(); it != hitChunks.end(); ++it)
+	for(unsigned int c = 0; c < hitChunks.size(); c++)
 	{
-		blocks = (*it)->getVisibleBlocks();
-		for(BlockList::iterator block = blocks->begin(); block != blocks->end(); ++block) {
+		blocks = hitChunks[c]->getVisibleBlocks();
+		WorldChunk* chnk = hitChunks[c];
+		for(BlockList::iterator block = blocks->begin(); block != blocks->end(); ++block) 
+		{
 			if( solidOnly && !(*block).second->isSolid() )
 				continue;
 			Vector3 bPos = Util::indexToPosition( (*block).first );
-			min = Vector3( (*it)->getX() * CHUNK_WIDTH - 0.0f,
-							(*it)->getY() * CHUNK_HEIGHT + 0.0f,
-							(*it)->getZ() * CHUNK_WIDTH - 0.0f ) + bPos;
-			max = Vector3( (*it)->getX() * CHUNK_WIDTH + 1.0f,
-							(*it)->getY() * CHUNK_HEIGHT + 1.0f,
-							(*it)->getZ() * CHUNK_WIDTH + 1.0f ) + bPos;
+			min = Vector3( chnk->getX() * CHUNK_WIDTH - 0.0f,
+					chnk->getY() * CHUNK_HEIGHT + 0.0f,
+					chnk->getZ() * CHUNK_WIDTH - 0.0f ) + bPos;
+			max = Vector3( chnk->getX() * CHUNK_WIDTH + 1.0f,
+					chnk->getY() * CHUNK_HEIGHT + 1.0f,
+					chnk->getZ() * CHUNK_WIDTH + 1.0f ) + bPos;
 			raycast_r r = inray;
 			r = raycastCube(r, min, max);
 			if( r.hit == true ) {

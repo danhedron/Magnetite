@@ -169,7 +169,7 @@ void BaseGame::playerPrimaryClick( Character* player )
 			chunk->removeBlockAt( bIndex.x, bIndex.y, bIndex.z );
 		}
 		explosion_t info;
-		info.center = ray.worldHit - ray.hitNormal/2;
+		info.center = ray.worldHit + ray.hitNormal * 1.5;
 		Explosion expl(info);
 		expl.explode();
 	}

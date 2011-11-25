@@ -214,6 +214,10 @@ void MagnetiteCore::go()
 			}
 			if( (lEvt.Type == sf::Event::KeyReleased ) &&
 				(lEvt.Key.Code == sf::Keyboard::F5 ) ) {
+				mRenderer->setDebugMode( Renderer::DEBUG_LINES );
+			}
+			if( (lEvt.Type == sf::Event::KeyReleased ) &&
+				(lEvt.Key.Code == sf::Keyboard::F6 ) ) {
 				Util::setLogLevel( Util::Verbose );
 			}
 			if( (lEvt.Type == sf::Event::KeyReleased) &&
@@ -229,14 +233,6 @@ void MagnetiteCore::go()
 			if( (lEvt.Type == sf::Event::KeyPressed) &&
 				(lEvt.Key.Code == sf::Keyboard::Add) ) {
 					mRenderer->nextBlock();
-			}
-			if( (lEvt.Type == sf::Event::KeyPressed) &&
-				(lEvt.Key.Code == sf::Keyboard::F6) ) {
-					mWorld->saveAllChunks();
-			}
-			if( (lEvt.Type == sf::Event::KeyPressed) &&
-				(lEvt.Key.Code == sf::Keyboard::F7) ) {
-					mWorld->loadWorld("test");
 			}
 			if( (lEvt.Type == sf::Event::KeyPressed) &&
 				(lEvt.Key.Code == sf::Keyboard::Num9) ) {

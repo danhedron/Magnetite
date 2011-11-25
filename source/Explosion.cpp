@@ -23,14 +23,17 @@ void Explosion::explode()
 	int totalRays = 0;
 	int totalInMXZ = 0;;
 
+	Util::log("Explosion begin");
 	for( float heading = 0; heading <= 2*M_PI; heading += M_PI/20.f ) {
+		Util::log("Slice");
 		for( float pitch = -M_PI/2.f; pitch <= M_PI; pitch += M_PI/10.f ) {
 			Matrix4 headingMat = Matrix4::rotateY(heading);
 			raycast_r ray;
 			ray.orig = mInfo.center;
-			ray.dir = headingMat * Vector3(0,0,1);
+			ray.dir = headingMat * Vector3(1,0,0);
 			ray.dir = Matrix4::rotateX(pitch) * ray.dir;
-			raycast_r res = world->raycastWorld(ray);
+			raycast_r res = world->raycastWorld(ray, true);
+			renderer->addDebugLine( res.orig, res.orig + (res.dir * res.i0));
 			if( res.hit && res.block != NULL && res.i0 < 4.f ) {
 				Vector3 chunkIndex = world->worldToChunks( res.worldHit );	
 				Vector3 blockIndex = world->worldToBlock( res.worldHit - (res.hitNormal/2) );
@@ -38,8 +41,10 @@ void Explosion::explode()
 				if( chunk != NULL ) 
 				{
 					chunk->removeBlockAt( blockIndex.x, blockIndex.y, blockIndex.z );
+					chunk->updateVisibility();
 				}
 			}
 		}
 	}
+	Util::log("Explosion end");
 }
