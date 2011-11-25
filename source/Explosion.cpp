@@ -31,9 +31,7 @@ void Explosion::explode()
 			ray.dir = headingMat * Vector3(0,0,1);
 			ray.dir = Matrix4::rotateX(pitch) * ray.dir;
 			raycast_r res = world->raycastWorld(ray);
-			//renderer->addDebugLine(mInfo.center, res.worldHit);	
 			if( res.hit && res.block != NULL && res.i0 < 4.f ) {
-				Util::log("dir: " + Util::toString( ray.dir ) + "\tworld: " + Util::toString(res.worldHit) + "\tlength: " + Util::toString(res.i0));
 				Vector3 chunkIndex = world->worldToChunks( res.worldHit );	
 				Vector3 blockIndex = world->worldToBlock( res.worldHit - (res.hitNormal/2) );
 				WorldChunk* chunk = world->getChunk( chunkIndex.x, chunkIndex.y, chunkIndex.z );
@@ -44,27 +42,4 @@ void Explosion::explode()
 			}
 		}
 	}
-	/*	for( float y = 0; y <= 2*M_PI; y += M_PI/12.f ) {
-		Matrix4 heading = Matrix4::rotateY(y); 
-		for( float x = -M_PI; x <= M_PI; x += M_PI/6.f ) {
-	//Matrix4 mat = heading; //* Matrix4::rotateX(x);
-	raycast_r ray;
-	ray.dir = Vector3(0,0,1);
-	//ray.dir = Matrix4::rotateX(x) * ray.dir;
-	ray.dir = heading * ray.dir;
-	ray.orig = mInfo.center;
-	raycast_r res = world->raycastWorld(ray);
-	if( res.hit && res.block != NULL && res.i0 < 5.f ) {
-	Util::log("dir: " + Util::toString( ray.dir ) + "\tworld: " + Util::toString(res.worldHit) + "\tlength: " + Util::toString(res.i0));
-	Vector3 chunkIndex = world->worldToChunks( res.worldHit );	
-	Vector3 blockIndex = world->worldToBlock( res.worldHit );
-	WorldChunk* chunk = world->getChunk( chunkIndex.x, chunkIndex.y, chunkIndex.z );
-	if( chunk != NULL ) 
-	{
-	chunk->removeBlockAt( blockIndex.x, blockIndex.y, blockIndex.z );
-	}
-	}
-	}
-	}
-	*/
 }
