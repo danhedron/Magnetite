@@ -21,28 +21,22 @@ void Explosion::explode()
 	Renderer* renderer = MagnetiteCore::Singleton->getRenderer();
 	
 	int totalRays = 0;
-	int totalInMXZ = 0;;
+	int totalInMXZ = 0;
 
 	Util::log("Explosion begin");
-	for( float heading = 0; heading <= 2*M_PI; heading += M_PI/20.f ) {
-		Util::log("Slice");
-		for( float pitch = -M_PI/2.f; pitch <= M_PI; pitch += M_PI/10.f ) {
-			Matrix4 headingMat = Matrix4::rotateY(heading);
+	for( float heading = 0; heading <= 2*M_PI; heading += M_PI/12.f ) {
+		Matrix4 headingMat = Matrix4::rotateY(heading);
+		Vector3 hdg = headingMat * Vector3(1,0,0);
+		for( float pitch = -M_PI/2.f; pitch <= M_PI; pitch += M_PI/6.f ) {
 			raycast_r ray;
 			ray.orig = mInfo.center;
-			ray.dir = headingMat * Vector3(1,0,0);
+			ray.maxDistance = 4.f;
+			ray.dir = hdg;
 			ray.dir = Matrix4::rotateX(pitch) * ray.dir;
 			raycast_r res = world->raycastWorld(ray, true);
-			renderer->addDebugLine( res.orig, res.orig + (res.dir * res.i0));
-			if( res.hit && res.block != NULL && res.i0 < 4.f ) {
-				Vector3 chunkIndex = world->worldToChunks( res.worldHit );	
-				Vector3 blockIndex = world->worldToBlock( res.worldHit - (res.hitNormal/2) );
-				WorldChunk* chunk = world->getChunk( chunkIndex.x, chunkIndex.y, chunkIndex.z );
-				if( chunk != NULL ) 
-				{
-					chunk->removeBlockAt( blockIndex.x, blockIndex.y, blockIndex.z );
-					chunk->updateVisibility();
-				}
+			if( res.hit && res.block != NULL ) {
+				res.chunk->removeBlockAt( res.blockPosition.x, res.blockPosition.y, res.blockPosition.z );
+				res.chunk->updateVisibility();
 			}
 		}
 	}

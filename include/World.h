@@ -9,18 +9,60 @@
  */
 struct raycast_r
 {
+	/**
+	 * First intersection length
+	 */
 	float i0;
+	/**
+	 * Second intersection length
+	 */
 	float i1;
+	/**
+	 * Maximum ray length
+	 */
 	float maxDistance;
+	/**
+	 * Unused
+	 */
 	float length;
+	/**
+	 * True if the ray hit something
+	 */
 	bool  hit;
 
+	/**
+	 * Origin position of the ray
+	 */
 	Vector3 orig;
+	/**
+	 * Ray Direction
+	 */
 	Vector3 dir;
+	/**
+	 * World Hit Position
+	 */
 	Vector3 worldHit;
+	/**
+	 * Hit normal
+	 */
 	Vector3 hitNormal;
 
+	/**
+	 * pointer to block the ray hit, if applicable
+	 */
 	BaseBlock* block;
+	/**
+	 * Index of the block that was hit (relative to it's chunk)
+	 */
+	size_t blockIndex;
+	/**
+	 * Position of the block, relative to the chunk
+	 */
+	Vector3 blockPosition;
+	/**
+	 * Chunk containing the hit block
+	 */
+	WorldChunk* chunk;
 
 	raycast_r(void) { 
 		i0 = std::numeric_limits<float>::max();
@@ -29,6 +71,8 @@ struct raycast_r
 		length = std::numeric_limits<float>::max();
 		hit = false;
 		block = NULL;
+		chunk = NULL;
+		blockIndex = 0;
 	}
 };
 

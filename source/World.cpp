@@ -487,7 +487,7 @@ raycast_r World::raycastWorld(const raycast_r &inray, bool solidOnly)
 		min = Vector3( (*it)->getX() * CHUNK_WIDTH, (*it)->getY() * CHUNK_HEIGHT,  (*it)->getZ() * CHUNK_WIDTH );
 		max = Vector3( (*it)->getX() * CHUNK_WIDTH + CHUNK_WIDTH, (*it)->getY() * CHUNK_HEIGHT + CHUNK_HEIGHT,  (*it)->getZ() * CHUNK_WIDTH + CHUNK_WIDTH );
 		ray = raycastCube(ray, min, max);
-		if(ray.hit)
+		if(ray.hit && ray.i0 <= inray.maxDistance )
 			hitChunks.push_back((*it));
 	}
 	BlockList* blocks;
@@ -510,8 +510,11 @@ raycast_r World::raycastWorld(const raycast_r &inray, bool solidOnly)
 					chnk->getZ() * CHUNK_WIDTH + 1.0f ) + bPos;
 			raycast_r r = inray;
 			r = raycastCube(r, min, max);
-			if( r.hit == true ) {
+			if( r.hit == true && r.i0 <= inray.maxDistance ) {
 				r.block = block->second;
+				r.blockPosition = bPos;
+				r.blockIndex = block->first;
+				r.chunk = chnk;
 				raycasts.push_back( r );
 			}
 		}	
