@@ -536,8 +536,6 @@ void Renderer::_renderChunk( Chunk* chunk )
 	if( !chunk->_hasChunkFlag( Chunk::MeshInvalid ) ) {
 		GLgeometry* chunkGeom = chunk->getGeometry();
 		
-		Util::log( Util::toString( chunkGeom->vertexCount ) );
-
 		if( chunkGeom->vertexBO == 0 || chunkGeom->indexBO == 0 )
 		{
 			chunkGeom->bindToBuffer();
