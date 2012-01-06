@@ -83,6 +83,8 @@ void Chunk::setBlockAt( BlockPtr block, short index )
 
 BlockPtr Chunk::getBlockAt( short x, short y, short z )
 {
+	if( x < 0 || x >= CHUNK_WIDTH || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_WIDTH )
+		return NULL;
 	return getBlockAt( BLOCK_INDEX_2( x, y, z ) );
 }
 

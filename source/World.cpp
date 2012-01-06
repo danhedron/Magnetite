@@ -30,8 +30,8 @@ mWorldStage( WORLD_NORMAL )
 	mChunks = new ChunkPtr[edgeSize*edgeSize*edgeSize];
 	memset( mChunks, 0, sizeof( ChunkPtr ) * edgeSize*edgeSize*edgeSize); 
 	
-	for( size_t x = 0; x < edgeSize; x++ ) {
-		for( size_t z = 0; z < edgeSize; z++ ) {
+	for( size_t x = 0; x < 1; x++ ) {
+		for( size_t z = 0; z < 1; z++ ) {
 			createChunk( x, 0, z );
 		}
 	}
@@ -65,7 +65,10 @@ void World::destoryWorld()
 	for( int i = 0; i < mWorldSize*mWorldSize*mWorldSize; i++ )
 	{
 		if(mChunks[i])
+		{
 			delete mChunks;
+			mChunks[i] = NULL;
+		}
 	}
 }
 
