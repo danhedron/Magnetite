@@ -57,6 +57,16 @@ WorldStage World::getCurrentStage()
 	return mWorldStage;
 }
 
+BlockPtr World::getBlockAt( long x, long y, long z )
+{
+	size_t cx = floor( ((float) x)/CHUNK_WIDTH );
+	size_t cy = floor( ((float) y)/CHUNK_HEIGHT );
+	size_t cz = floor( ((float) z)/CHUNK_WIDTH );
+	Chunk* c = getChunk( cx, cy, cz );
+	if( c == NULL ) return NULL;
+	else return c->getBlockAt( x % CHUNK_WIDTH, y % CHUNK_HEIGHT, z % CHUNK_WIDTH );
+}
+
 float World::getLightColor( LightIndex light )
 {
 	return ( 0.1f + ( 0.9f * ( (float)light/256 ) ) );
@@ -87,7 +97,7 @@ size_t World::getChunkCount()
 Chunk* World::getChunk(const long x, const long y, const long z)
 {
 	size_t index = coordsToIndex( x, y, z );
-	if( index < 0 || index > mWorldSize*mWorldSize*mWorldSize-1 )
+	if( x < 0 || x > mWorldSize-1 || y < 0 || y > mWorldSize-1 || z < 0 || z > mWorldSize-1 )
 		return NULL;
 
 	return mChunks[index];

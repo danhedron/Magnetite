@@ -4,6 +4,7 @@
 #include "LightingManager.h"
 
 #include "MagnetiteCore.h"
+#include "World.h"
 #include "Renderer.h"
 
 Chunk::Chunk( ChunkIndex index )
@@ -124,43 +125,44 @@ bool Chunk::hasNeighbours( short x, short y, short z )
 void Chunk::updateVisibility( )
 {
 	MagnetiteCore* core = CoreSingleton;
+	World* w = core->getWorld();
 	
 	if( _hasChunkFlag( DataUpdated ) )
 	{
-		for( size_t x = 0; x < CHUNK_WIDTH; x++ ) {
-			for( size_t y = 0; y < CHUNK_HEIGHT; y++ ) {
-				for( size_t z = 0; z < CHUNK_WIDTH; z++ ) {
+		for( long x = 0; x < CHUNK_WIDTH; x++ ) {
+			for( long y = 0; y < CHUNK_HEIGHT; y++ ) {
+				for( long z = 0; z < CHUNK_WIDTH; z++ ) {
 					if( mBlocks[BLOCK_INDEX_2( x, y, z)] == NULL ) continue;
 					BaseBlock* b = mBlocks[BLOCK_INDEX_2( x, y, z)];
 					short visFlags = 0;
 					short visOrig = b->getVisFlags();
 					//Check All axes for adjacent blocks.
-					BaseBlock* cb = getBlockAt( x + 1, y, z );
+					BaseBlock* cb = w->getBlockAt( getX() + x + 1, getY() + y, getZ() + z );
 					if( cb == NULL || !cb->isOpaque() ) {
 						mVisibleFaces++;
 						visFlags = visFlags | FACE_RIGHT;
 					}
-					cb = getBlockAt( x - 1, y, z );
+					cb = w->getBlockAt( getX() + x - 1, getY() + y, getZ() + z );
 					if( cb == NULL || !cb->isOpaque() ) {
 						mVisibleFaces++;
 						visFlags = visFlags | FACE_LEFT;
 					}
-					cb = getBlockAt( x, y + 1, z );
+					cb = w->getBlockAt( getX() + x, getY() + y + 1, getZ() + z );
 					if( cb == NULL || !cb->isOpaque() ) {
 						mVisibleFaces++;
 						visFlags = visFlags | FACE_TOP;
 					}
-					cb = getBlockAt( x, y - 1, z );
+					cb = w->getBlockAt( getX() + x, getY() + y - 1, getZ() + z );
 					if( cb == NULL || !cb->isOpaque() ) {
 						mVisibleFaces++;
 						visFlags = visFlags | FACE_BOTTOM;
 					}
-					cb = getBlockAt( x, y, z + 1 );
+					cb = w->getBlockAt( getX() + x, getY() + y, getZ() + z + 1 );
 					if( cb == NULL || !cb->isOpaque() ) {
 						mVisibleFaces++;
 						visFlags = visFlags | FACE_BACK;
 					}
-					cb = getBlockAt( x, y, z - 1 );
+					cb = w->getBlockAt( getX() + x, getY() + y, getZ() + z - 1 );
 					if( cb == NULL || !cb->isOpaque() ) {
 						mVisibleFaces++;
 						visFlags = visFlags | FACE_FORWARD;

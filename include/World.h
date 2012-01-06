@@ -165,6 +165,11 @@ public:
 	 * Returns the color of a brightness level
 	 */
 	static float getLightColor( LightIndex light );
+	
+	/**
+	 * Returns the block at the world index specified
+	 */
+	BlockPtr getBlockAt( long x, long y, long z );
 
 	/**
 	 * Loads a world of the specified name
