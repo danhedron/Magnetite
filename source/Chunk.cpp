@@ -15,7 +15,8 @@ mPhysicsState( NULL )
 {
 	mVisibleFaces = 0;
 	mWorldIndex = index;
-	// Allocate block memory
+	
+	// Allocates the internal block array 
 	_allocateArray( CHUNK_SIZE );
 	
 	for(int x = 0; x < CHUNK_WIDTH; x++)
@@ -122,6 +123,8 @@ bool Chunk::hasNeighbours( short x, short y, short z )
 
 void Chunk::updateVisibility( )
 {
+	MagnetiteCore* core = CoreSingleton;
+	
 	if( _hasChunkFlag( DataUpdated ) )
 	{
 		for( size_t x = 0; x < CHUNK_WIDTH; x++ ) {
