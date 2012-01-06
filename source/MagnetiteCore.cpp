@@ -319,7 +319,7 @@ void MagnetiteCore::newWorld( std::string name )
 {
 	unloadWorld();
 
-	mWorld = new World( 20 );
+	mWorld = new World( 40 );
 	//mWorld->newWorld( name );
 }
 

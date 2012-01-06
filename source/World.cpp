@@ -30,11 +30,13 @@ mWorldStage( WORLD_NORMAL )
 	mChunks = new ChunkPtr[edgeSize*edgeSize*edgeSize];
 	memset( mChunks, 0, sizeof( ChunkPtr ) * edgeSize*edgeSize*edgeSize); 
 	
-	for( size_t x = 0; x < 1; x++ ) {
-		for( size_t z = 0; z < 1; z++ ) {
+	for( size_t x = 0; x < edgeSize; x++ ) {
+		for( size_t z = 0; z < edgeSize; z++ ) {
 			createChunk( x, 0, z );
 		}
 	}
+	
+	createSky( 0 );
 
 	mGenerator = new ChunkGenerator(1024);
 	printDbg = false;
