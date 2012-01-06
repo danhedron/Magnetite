@@ -8,20 +8,22 @@ public:
 	
 	Vector3( float _x = 0.0f, float _y = 0.0f, float _z = 0.0f, float _w = 0.0f );
 	
-	Vector3 operator- ();
-	Vector3 operator+ (const Vector3& right);
-	Vector3 operator- (const Vector3& right);
-	Vector3 operator/ (const Vector3& right);
+	Vector3 operator- () const;
+	Vector3 operator+ (const Vector3& right) const;
+	Vector3 operator- (const Vector3& right) const;
+	Vector3 operator/ (const Vector3& right) const;
 
 	bool operator < (const Vector3& right);
 
 	Vector3& operator += (const Vector3& right);
 	Vector3& operator -= (const Vector3& right);
 	
-	Vector3 operator* ( float scal );
-	Vector3 operator/ ( float scal );
+	Vector3 operator* ( float scal ) const;
+	Vector3 operator/ ( float scal ) const;
 
-	Vector3 operator* ( const Vector3& rhs );
+	Vector3 operator* ( const Vector3& rhs ) const;
+
+	bool operator== ( const Vector3& rhs ) const;
 
 	float length();
 	Vector3 normalize();

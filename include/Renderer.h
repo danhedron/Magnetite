@@ -2,7 +2,6 @@
 #define _RENDERER_H_
 #include "prerequisites.h"
 
-class WorldChunk;
 class BaseBlock;
 class Camera;
 class World;
@@ -201,8 +200,9 @@ public:
 	/**
 	 * Finds out if the given node is in the view frustum, and if so continues to children or draws the chunk on the node
 	 */
+	void _renderTree( WorldTree* tree );
 	void _renderNode( WorldNode* node, int depth  );
-	void _renderChunk( WorldChunk* chunk );
+	void _renderChunk( Chunk* chunk );
 
 	/**
 	 * Draws debug statistics onto the screen
@@ -253,7 +253,7 @@ public:
 	 * Notify the renderer that a chunk has been unloaded from the engine and it is ok to release it's graphics buffer.
 	 * @param chunk pointer to the unloaded chunk
 	 */
-	void notifyChunkUnloaded( WorldChunk* chunk );
+	void notifyChunkUnloaded( Chunk* chunk );
 
 	/**
 	 * Sets the internal rendermode:-

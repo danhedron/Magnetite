@@ -1,6 +1,6 @@
 #include "ChunkGenerator.h"
 #include "MagnetiteCore.h"
-#include "WorldChunk.h"
+#include "Chunk.h"
 #include "BlockFactory.h"
 #include "BaseBlock.h"
 
@@ -56,7 +56,7 @@ float ChunkGenerator::smooth( float x, float z )
 	return center + sides + corners;
 }
 
- void ChunkGenerator::fillChunk(WorldChunk *chunk)
+ void ChunkGenerator::fillChunk(Chunk *chunk)
 {
 	if( chunk->getY() > 0 ) return; //Don't fill chunks above ground yet (supermountains yet to come)
 	if( chunk->getY() == 0 ) {
@@ -82,8 +82,7 @@ float ChunkGenerator::smooth( float x, float z )
 						type = "grass";
 					BaseBlock* block = FactoryManager::getManager().createBlock(type);
 					if( block ) {
-						//block->setPosition( x, y, z );
-						chunk->addBlockToChunk( block, x, y, z );
+						chunk->setBlockAt( block, x, y, z );
 					}
 				}
 	/*			if( 64 + total < 64 )
@@ -107,7 +106,7 @@ float ChunkGenerator::smooth( float x, float z )
 				for( int y = 0; y < CHUNK_HEIGHT; y++ ) {
 					BaseBlock* block = FactoryManager::getManager().createBlock(type);
 					if( block ) {
-						chunk->addBlockToChunk( block, x, y, z );
+						chunk->setBlockAt( block, x, y, z );
 					}
 				}
 			}

@@ -1,6 +1,6 @@
 #include "Renderer.h"
-#include "WorldChunk.h"
 #include "World.h"
+#include "WorldTree.h"
 #include "Sky.h"
 #include "BaseBlock.h"
 #include "MagnetiteCore.h"
@@ -357,7 +357,7 @@ GLvertex Renderer::vertex(float x, float y, float z, float nx, float ny, float n
 	size_t u0 = u;
 	size_t v0 = v;
 	size_t l0 = r * 255;
-	GLvertex vert = { x, y, z, u0, v0, l0 }; //nx, ny, nz,
+	GLvertex vert = { x, y, z, (GLubyte)u0, (GLubyte)v0, (GLubyte)l0 }; //nx, ny, nz,
 	return vert;
 }
 
@@ -429,13 +429,13 @@ void Renderer::render(double dt, World* world)
 	glFrontFace(GL_CW);
 	rendered = 0;
 
-	NodeList nodes = world->getTopNodes(); // world->getChunks();
+	ChunkArray chunks = world->getChunks();
 
 	GLtexture* tex = MagnetiteCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/world.png");
 
 	mCamera->applyMatrix( true, false );
 
-	world->getSky()->renderSky();
+	//world->getSky()->renderSky();
 
 	if( mRenderMode == RENDER_SOLID ) {
 		GLint texLoc = glGetUniformLocation( mWorldProgram->getName(), "worldDiffuse");
@@ -463,11 +463,10 @@ void Renderer::render(double dt, World* world)
 			glBindTexture(GL_TEXTURE_2D, tex->glID);
 		}
 
-		for(NodeList::iterator node = nodes.begin();
-				node != nodes.end();
-				++node)
+		for( size_t c = 0; c < world->getChunkCount(); c++ )
 		{
-			_renderNode( *node, 0 );
+			if( chunks[c] )
+				_renderChunk( chunks[c] );
 		}
 
 		if( tex != 0 )
@@ -514,28 +513,15 @@ void Renderer::render(double dt, World* world)
 	drawCrosshair( dt );
 }
 
-void Renderer::_renderNode(WorldNode *node, int depth)
+void Renderer::_renderTree(WorldTree* tree)
 {
-	float nodeWorldSize = NODE_SIZE/pow(2.f, depth);
-
-	Vector3 min = Vector3( node->index.x * CHUNK_WIDTH, node->index.y * CHUNK_HEIGHT, node->index.z * CHUNK_WIDTH );
-	Vector3 max = Vector3( min.x + nodeWorldSize, min.y + CHUNK_HEIGHT, min.z + nodeWorldSize );
-
-	size_t pos = Frustum::INSIDE;
-
-	for( int i = 0; i < 4; i++ ) {
-		WorldNode* child = node->children[i];
-		if( child == NULL ) continue;
-		if( child->isChunk && child->children[0] != NULL ) {
-			_renderChunk( (WorldChunk*)child->children[0] ); // I am *So* sorry.
-		}
-		else
-			_renderNode( child, depth + 1 );
-	}
-
 }
 
-void Renderer::_renderChunk( WorldChunk* chunk )
+void Renderer::_renderNode(WorldNode *node, int depth)
+{
+}
+
+void Renderer::_renderChunk( Chunk* chunk )
 {
 	rendered++;
 	// Sort out view Matrix.
@@ -546,9 +532,11 @@ void Renderer::_renderChunk( WorldChunk* chunk )
 	float y = chunk->getY() * CHUNK_HEIGHT;
 	float z = chunk->getZ() * CHUNK_WIDTH;
 	glTranslatef(x,y,z);
-
-	if( chunk->hasGenerated() ) {
+	
+	if( !chunk->_hasChunkFlag( Chunk::MeshInvalid ) ) {
 		GLgeometry* chunkGeom = chunk->getGeometry();
+		
+		Util::log( Util::toString( chunkGeom->vertexCount ) );
 
 		if( chunkGeom->vertexBO == 0 || chunkGeom->indexBO == 0 )
 		{

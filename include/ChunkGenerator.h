@@ -2,7 +2,7 @@
 #define _CHUNKGENERATOR_H_
 #include "prerequisites.h"
 
-class WorldChunk;
+class Chunk;
 
 class ChunkGenerator
 {
@@ -19,7 +19,7 @@ public:
 	float interpolatedNoise( float x, float y );
 	float smooth( float x, float y );
 
-	void fillChunk( WorldChunk* chunk );
+	void fillChunk( Chunk* chunk );
 };
 
 

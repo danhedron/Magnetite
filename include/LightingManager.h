@@ -2,7 +2,7 @@
 #define _LIGHTINGMANAGER_H_
 #include "prerequisites.h"
 
-class WorldChunk;
+class Chunk;
 
 class LightingManager
 {
@@ -19,11 +19,11 @@ public:
 		NEG_Z = 8
 	};
 
-	static void lightChunk( WorldChunk* chnk );
-	static void lightColumn( WorldChunk* chunk, size_t x, size_t z, LightIndex light );
-	static void lightUnderground( WorldChunk* chunk, size_t x, size_t startY, size_t z, size_t dir, LightIndex light );
+	static void lightChunk( Chunk* chnk );
+	static void lightColumn( Chunk* chunk, size_t x, size_t z, LightIndex light );
+	static void lightUnderground( Chunk* chunk, size_t x, size_t startY, size_t z, size_t dir, LightIndex light );
 
-	static void gatherLight( WorldChunk* chunk );
+	static void gatherLight( Chunk* chunk );
 };
 
 #endif

@@ -4,6 +4,10 @@
 #include "WorldNode.h"
 #include "Collision.h"
 
+class Chunk;
+typedef Chunk* ChunkPtr;
+typedef Chunk** ChunkArray;
+
 /**
  * @struct Raycast result structure.
  */
@@ -62,7 +66,7 @@ struct raycast_r
 	/**
 	 * Chunk containing the hit block
 	 */
-	WorldChunk* chunk;
+	Chunk* chunk;
 
 	raycast_r(void) { 
 		i0 = std::numeric_limits<float>::max();
@@ -110,11 +114,21 @@ enum WorldStage {
 	WORLD_NORMAL = 2 // World is being run as normal
 };
 
+
+/**
+ * ChunkArray - an array of Chunks
+ */
+typedef Chunk** ChunkArray;
+
 class World
 {
 protected:
-	ChunkList	mChunks;
-	NodeList	mQuadTrees;
+	//ChunkList	mChunks;
+	//TreeList	mOctrees;
+	ChunkArray	mChunks;
+	// length of one edge of the world, in chunks
+	size_t 		mWorldSize;
+
 	Sky*		mSky;
 	ChunkGenerator* mGenerator;
 	Camera*		mPagingCamera;
@@ -125,12 +139,22 @@ public:
 	/** 
 	 * Constructor: -
 	 */
-	World( void );
+	World( size_t edgeSize );
 	
 	/**
 	 * Destructor:- 
 	 */
 	~World( void );
+
+	/**
+	 * Converts coordinates into indexes 
+	 */
+	size_t coordsToIndex( int x, int y, int z );
+	
+	/**
+	 * Returns the current world size.
+	 */
+	size_t getChunkCount();
 
 	/**
 	 * Returns the world's current stage
@@ -166,11 +190,8 @@ public:
 	 * Creates a new empty world.
 	 */
 	void createWorld();
-
-	/**
-	 * Returns a reference to the chunk list.
-	 */
-	ChunkList& getChunks();
+	
+	bool printDbg;
 
 	/**
 	 * Requests that the engine load or generate the chunk at the given index
@@ -195,6 +216,13 @@ public:
 	WorldNode* getWorldNode( const Vector3& pos, bool safe = false );
 
 	/**
+	 * Returns the WorldTree containing the given chunk index
+	 * @param Vector3 index The Index being searched for
+	 * @param bool create if true then the tree required to store a chunk at this point is created.
+	 */
+	WorldTree* getWorldTree( const Vector3& index, bool create = false );
+
+	/**
 	 * Returns the chunk node at the given position
 	 */
 	WorldNode* getChunkNode( const Vector3& pos, bool safe = false );
@@ -206,7 +234,7 @@ public:
 	/**
 	 * Returns the list of top-level nodes
 	 */
-	NodeList& getTopNodes();
+	TreeList& getTopNodes();
 
 	/**
 	 * Creates a chunk at the given coordinates and fills it with test data
@@ -214,7 +242,7 @@ public:
 	 * @param y Coordinate
 	 * @param z Coordinate
 	 */
-	WorldChunk* createChunk(long x, long y, long z);
+	Chunk* createChunk(long x, long y, long z);
 
 	/**
 	 * Removes the chunk at the given offset
@@ -223,6 +251,11 @@ public:
 	 * @param z Coordinate
 	 */
 	void removeChunk(long x, long y, long z);
+	
+	/**
+	 * Returns the chunks in the world
+	 */
+	ChunkArray getChunks();
 
 	/**
 	 * Creates a series of test chunks of radius size.
@@ -281,7 +314,7 @@ public:
 	/**
 	 * Returns the chunk at the given indexes.
 	 */
-	WorldChunk* getChunk(const long x, const long y, const long z);
+	Chunk* getChunk(const long x, const long y, const long z);
 
 	/**
 	 * Performs an AABB test against the world.

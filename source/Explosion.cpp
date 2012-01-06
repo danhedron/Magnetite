@@ -1,6 +1,6 @@
 #include "Explosion.h"
 #include "World.h"
-#include "WorldChunk.h"
+#include "Chunk.h"
 #include "MagnetiteCore.h"
 #include "Vector.h"
 #include <math.h>
@@ -23,7 +23,10 @@ void Explosion::explode()
 	int totalRays = 0;
 	int totalInMXZ = 0;
 
+	world->printDbg = true;
+
 	Util::log("Explosion begin");
+	std::map <Chunk*, int> chunkCount;
 	for( float heading = 0; heading <= 2*M_PI; heading += M_PI/12.f ) {
 		Matrix4 headingMat = Matrix4::rotateY(heading);
 		Vector3 hdg = headingMat * Vector3(1,0,0);
@@ -31,14 +34,21 @@ void Explosion::explode()
 			raycast_r ray;
 			ray.orig = mInfo.center;
 			ray.maxDistance = 4.f;
-			ray.dir = hdg;
-			ray.dir = Matrix4::rotateX(pitch) * ray.dir;
+			ray.dir = Matrix4::rotateX(pitch) * hdg;
 			raycast_r res = world->raycastWorld(ray, true);
 			if( res.hit && res.block != NULL ) {
+				if( chunkCount.find( res.chunk ) == chunkCount.end() ) {
+					chunkCount[res.chunk] = 0;
+				}
+				else
+				{
+					chunkCount[res.chunk] = chunkCount[res.chunk]+1;
+				}
 				res.chunk->removeBlockAt( res.blockPosition.x, res.blockPosition.y, res.blockPosition.z );
 				res.chunk->updateVisibility();
 			}
 		}
 	}
+	Util::log("hit chunks: " + Util::toString(chunkCount.size()));
 	Util::log("Explosion end");
 }

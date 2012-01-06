@@ -1,5 +1,5 @@
 #include "LightingManager.h"
-#include "WorldChunk.h"
+#include "Chunk.h"
 #include "math.h"
 
 LightingManager::LightingManager()
@@ -45,7 +45,7 @@ struct Sample {
 
 static int ry = 0;
 
-void LightingManager::gatherLight( WorldChunk* chunk )
+void LightingManager::gatherLight( Chunk* chunk )
 {
 	BaseBlock* block = NULL;
 	static Sample smp;
@@ -166,15 +166,14 @@ void LightingManager::gatherLight( WorldChunk* chunk )
 							back += ray->back;
 						}
 					}
-					chunk->setLightLevel( x, y, z, smp.getSample(right, left, top, bottom, front, back) * 256);
-					//Util::log( Util::toString( smp.getSample(right, left, top, bottom, front, back) ) );
+					//chunk->setLightLevel( x, y, z, smp.getSample(right, left, top, bottom, front, back) * 256);
 				}
 			}
 		}
 	}
 }
 
-void LightingManager::lightChunk( WorldChunk* chunk )
+void LightingManager::lightChunk( Chunk* chunk )
 {
 	/*for( size_t x = 0; x < CHUNK_WIDTH; x++ ) 
 	{
@@ -185,8 +184,8 @@ void LightingManager::lightChunk( WorldChunk* chunk )
 	}*/
 	gatherLight( chunk );
 }
-
-void LightingManager::lightColumn( WorldChunk* chunk, size_t x, size_t z, LightIndex light )
+/*
+void LightingManager::lightColumn( Chunk* chunk, size_t x, size_t z, LightIndex light )
 {
 	LightIndex currentLight = WorldChunk::Sunlight;
 	char directionFlags = 0; // Stores directions in which take us under cover.
@@ -256,7 +255,7 @@ void LightingManager::lightColumn( WorldChunk* chunk, size_t x, size_t z, LightI
 	}
 }
 
-void LightingManager::lightUnderground( WorldChunk* chunk, size_t x, size_t startY, size_t z, size_t dir, LightIndex light )
+void LightingManager::lightUnderground( Chunk* chunk, size_t x, size_t startY, size_t z, size_t dir, LightIndex light )
 {
 	LightIndex currentLight = light;
 	for( short y = startY; y >= 0; y-- )
@@ -268,3 +267,4 @@ void LightingManager::lightUnderground( WorldChunk* chunk, size_t x, size_t star
 		chunk->setLightLevel( x, y, z, currentLight );
 	}
 }
+*/

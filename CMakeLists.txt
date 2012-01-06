@@ -25,6 +25,9 @@ project(Magnetite)
 #Versions
 set (MAGNETITE_VERSION_MAJOR 0)
 set (MAGNETITE_VERSION_MINOR 1)
+
+set(CMAKE_CXX_FLAGS "-std=c++0x")
+
 #Pass important things to Code
 configure_file(
 	"${PROJECT_SOURCE_DIR}/include/BuildConfig.h.in"
@@ -34,6 +37,8 @@ configure_file(
 set(MAGNETITE_SOURCES
 	source/MagnetiteCore.cpp
 	source/Main.cpp
+	source/Tests.cpp
+	source/Chunk.cpp
 	source/BaseGame.cpp
 	source/Collision.cpp
 	source/Renderer.cpp
@@ -68,13 +73,18 @@ set(MAGNETITE_SOURCES
 	source/ChunkGenerator.cpp
 	source/ChunkLoader.cpp
 	source/World.cpp
-	source/WorldChunk.cpp
+	#source/WorldChunk.cpp
+	source/WorldNode.cpp
+	source/WorldTree.cpp
 	source/Explosion.cpp
 	source/TextureManager.cpp
+	source/ScriptWrapper.cpp
 )
 set(MAGNETITE_HEADERS
 	include/MagnetiteCore.h
 	include/prerequisites.h
+	include/Tests.h
+	include/Chunk.h
 	include/BaseGame.h
 	include/BulletDebug.h
 	include/Collision.h
@@ -110,10 +120,12 @@ set(MAGNETITE_HEADERS
 	include/ChunkGenerator.h
 	include/ChunkLoader.h
 	include/World.h
+	#include/WorldChunk.h
 	include/WorldNode.h
-	include/WorldChunk.h
+	include/WorldTree.h
 	include/Explosion.h
 	include/TextureManager.h
+	include/ScriptWrapper.h
 	include/util.h
 )
 source_group("Header Files" FILES ${MAGNETITE_HEADERS})
@@ -152,6 +164,13 @@ if(BULLET_FOUND)
 	target_link_libraries(Magnetite ${BULLET_LIBRARY})
 	include_directories(${BULLET_INCLUDE_DIR})
 endif(BULLET_FOUND)
+
+# Find V8
+find_package(V8 REQUIRED)
+if(V8_FOUND)
+	target_link_libraries(Magnetite ${V8_LIBRARIES})
+	include_directories(${V8_INCLUDE_DIR})
+endif(V8_FOUND)
 
 #Find OpenGl Under Linux
 find_package(OpenGL REQUIRED)

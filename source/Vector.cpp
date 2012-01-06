@@ -6,19 +6,19 @@ Vector3::Vector3( float _x, float _y, float _z, float _w )
 	x = _x; y = _y; z = _z; w = _w;
 }
 
-Vector3 Vector3::operator -() {
+Vector3 Vector3::operator -() const {
 	return Vector3(-x,-y,-z);
 }
 
-Vector3 Vector3::operator -(const Vector3& right) {
+Vector3 Vector3::operator -(const Vector3& right) const {
 	return Vector3(x - right.x, y - right.y, z - right.z);
 }
 
-Vector3 Vector3::operator +(const Vector3& right) {
+Vector3 Vector3::operator +(const Vector3& right) const {
 	return Vector3(x + right.x, y + right.y, z + right.z);
 }
 
-Vector3 Vector3::operator /(const Vector3& right) {
+Vector3 Vector3::operator /(const Vector3& right) const {
 	return Vector3(x / right.x, y / right.y, z / right.z);
 }
 
@@ -36,11 +36,11 @@ Vector3& Vector3::operator -=(const Vector3& right) {
 	return *this;
 }
 
-Vector3 Vector3::operator *( float scal ) {
+Vector3 Vector3::operator *( float scal ) const {
 	return Vector3(x*scal,y*scal,z*scal);
 }
 
-Vector3 Vector3::operator *(  const Vector3& rhs ) {
+Vector3 Vector3::operator *(  const Vector3& rhs ) const {
 	Vector3 res;
 	res.x = y * rhs.z - z * rhs.y;
 	res.y = z * rhs.x - x * rhs.z;
@@ -48,7 +48,7 @@ Vector3 Vector3::operator *(  const Vector3& rhs ) {
 	return res;
 }
 
-Vector3 Vector3::operator /( float scal ) {
+Vector3 Vector3::operator /( float scal ) const {
 	return Vector3(x/scal,y/scal,z/scal);
 }
  
@@ -66,6 +66,11 @@ float Vector3::operator[] ( int index ) {
 
 bool Vector3::operator < (const Vector3& right) {
 	return (this->x < right.x && this->y < right.y && this->z < right.z);
+}
+
+bool Vector3::operator== (const Vector3& rhs ) const 
+{
+	return x == rhs.x && y == rhs.y && rhs.z == z;
 }
 
 float Vector3::dotProduct(const Vector3 &rhs)

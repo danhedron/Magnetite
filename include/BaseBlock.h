@@ -21,14 +21,14 @@ enum {
 	BMASK_VISFLAGS = ( (1<<0) | (1<<1) | (1<<2) | (1<<3) | (1<<4) | (1<<5) )
 };
 
-class WorldChunk;
+class Chunk;
 
 struct BlockContext
 {
 	float worldX;
 	float worldY;
 	float worldZ;
-	WorldChunk* chunk;
+	Chunk* chunk;
 };
 
 class BaseBlock

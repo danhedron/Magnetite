@@ -2,7 +2,7 @@
 #include "BlockFactory.h"
 #include "Character.h"
 #include "MagnetiteCore.h"
-#include "WorldChunk.h"
+#include "Chunk.h"
 #include "BaseBlock.h"
 #include "Camera.h"
 #include "World.h"
@@ -160,13 +160,12 @@ void BaseGame::playerPrimaryClick( Character* player )
 {
 	raycast_r ray = player->getEyeCast();
 	ray = mEngine->getWorld()->raycastWorld(ray);
+	ray.maxDistance = 10;
 	if(ray.hit)
 	{	
-		Vector3 cIndex = mEngine->getWorld()->worldToChunks( ray.worldHit );
-		Vector3 bIndex = mEngine->getWorld()->worldToBlock( ray.worldHit - (ray.hitNormal/2) );
-		WorldChunk* chunk = mEngine->getWorld()->getChunk( cIndex.x, cIndex.y, cIndex.z );
-		if(chunk && ray.block) {
-			chunk->removeBlockAt( bIndex.x, bIndex.y, bIndex.z );
+		if(ray.chunk && ray.block) 
+		{
+			ray.chunk->removeBlockAt( ray.blockIndex );
 		}
 		explosion_t info;
 		info.center = ray.worldHit + ray.hitNormal * 1.5;
@@ -185,11 +184,11 @@ void BaseGame::playerAltClick( Character* player )
 		Vector3 cIndex = mEngine->getWorld()->worldToChunks( ray.worldHit + ray.hitNormal );
 		Vector3 bIndex = mEngine->getWorld()->worldToBlock( ray.worldHit + (ray.hitNormal/2) );
 		Util::log("Ray Hit: " + Util::toString( cIndex ) + " Normal: " + Util::toString( ray.hitNormal ) + " block: " + Util::toString(bIndex) );
-		WorldChunk* chunk = mEngine->getWorld()->getChunk( cIndex.x, cIndex.y, cIndex.z );
+		Chunk* chunk = mEngine->getWorld()->getChunk( cIndex.x, cIndex.y, cIndex.z );
 		if(chunk) {
 			BaseBlock* block = FactoryManager::getManager().createBlock( mEngine->getRenderer()->blockType );
 			if( block != NULL ) {
-				chunk->addBlockToChunk( block, bIndex.x, bIndex.y, bIndex.z );
+				chunk->setBlockAt( block, bIndex.x, bIndex.y, bIndex.z );
 			}
 		}
 	}

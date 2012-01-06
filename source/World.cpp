@@ -1,5 +1,7 @@
 #include "World.h"
-#include "WorldChunk.h"
+#include "Chunk.h"
+#include "WorldTree.h"
+#include "WorldNode.h"
 #include "Renderer.h"
 #include "Sky.h"
 #include "Camera.h"
@@ -18,28 +20,34 @@
 #include <unistd.h>
 #endif
 
-World::World()
+World::World( size_t edgeSize )
 : mSky( NULL ),
 mPagingCamera( NULL ),
 mWorldStage( WORLD_NORMAL )
 {	
-	mGenerator = new ChunkGenerator(1024);
-}
 
-void _deleteTree( WorldNode* node )
-{
-	for( int c = 0; c < 4; c++ ) {
-		if( node->children[c]->isChunk )
-			delete node->children[c];
-		else
-			_deleteTree(node->children[c]);
+	mWorldSize = edgeSize;
+	mChunks = new ChunkPtr[edgeSize*edgeSize*edgeSize];
+	memset( mChunks, 0, sizeof( ChunkPtr ) * edgeSize*edgeSize*edgeSize); 
+	
+	for( size_t x = 0; x < edgeSize; x++ ) {
+		for( size_t z = 0; z < edgeSize; z++ ) {
+			createChunk( x, 0, z );
+		}
 	}
-	delete node;
+
+	mGenerator = new ChunkGenerator(1024);
+	printDbg = false;
 }
 
 World::~World()
 {
 	destoryWorld();	
+}
+
+size_t World::coordsToIndex( int x, int y, int z )
+{
+	return ( z * mWorldSize * mWorldSize + y * mWorldSize + x );
 }
 
 WorldStage World::getCurrentStage()
@@ -52,298 +60,51 @@ float World::getLightColor( LightIndex light )
 	return ( 0.1f + ( 0.9f * ( (float)light/256 ) ) );
 }
 
-void World::requestChunk( int x, int y, int z )
-{
-	ChunkRequest req = { x, y, z};
-	mChunksToLoad.push_back( req );
-}
-
-void World::newWorld( std::string name )
-{
-	mWorldName = name;
-	createWorld();
-}
-
-void World::loadWorld( std::string name )
-{
-	mWorldName = name;
-	destoryWorld();
-
-	std::string svPath = getSavePath();
-
-#ifdef WIN32
-	size_t startTick = GetTickCount();
-#endif
-	
-	for( int x = -5; x < 5; x++ )
-	{
-		for( int z = -5; z < 5; z++ )
-		{
-			std::string chnkPath = svPath + "chunks\\" + Util::toString( x ) + "_0_" + Util::toString( z );	
-			std::ifstream stream(chnkPath.c_str() , std::ios_base::in | std::ios_base::binary );
-
-			createChunk( x, 0, z );
-			WorldChunk* c = getChunk( x, 0, z );
-			c->readFromStream( stream );
-
-		}
-	}
-
-#ifdef WIN32
-	size_t ticks = GetTickCount() - startTick;
-	Util::log("\tLoaded in: " + Util::toString(ticks) + "ms");
-#endif
-
-}
-
-void World::createWorld()
-{
-	mWorldStage = WORLD_GEN;
-	createSky(200);
-	//Create some testing chunks
-	createTestChunks( 2 );
-
-#ifdef WIN32
-	size_t startTick = GetTickCount();
-
-	// Attempt to use VS 'threading'
-	auto genChunk = [](WorldChunk* c) {
-		c->requestGenerate();
-	};
-
-	// Let the Windows Concurency API handle threading on Windowcs
-	Concurrency::parallel_for_each( mChunks.begin(), mChunks.end(), genChunk );
-#else
-	// Perform a standard loop over the chunk list. - need to speed this up on linux/non-windows systems
-	for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
-		(*it)->requestGenerate();
-	}
-#endif
-#ifdef WIN32
-	Util::log( "Generation: " + Util::toString( (long)(GetTickCount() - startTick) ) + " Ticks" );
-#endif
-	mWorldStage = WORLD_NORMAL;
-}
-
-std::string World::getName()
-{
-	return mWorldName;
-}
-
-std::string World::getSavePath()
-{
-	char currPath[FILENAME_MAX];
-	getcwd(currPath, sizeof currPath);
-	return std::string(currPath) + "\\worlds\\" + mWorldName + "\\";
-}
-
-void World::createTestChunks( int size )
-{
-	destoryWorld();
-
-	int xSize = size*2;
-	int zSize = size*2;
-
-	int total = zSize*xSize;
-	int nc = 0;
-	int i = -size; 
-
-	for(i = -size; i < size; i++) {
-		for(int z = -size; z < size; z++) {
-			// Add chunks to the request queue
-			requestChunk( i, 0, z );
-		}
-	}
-	
-
-/*#ifdef WIN32
-	size_t startTick = GetTickCount();
-#endif
-	for(i = -size; i < size; i++) {
-#ifdef WIN32
-		Concurrency::parallel_for( -size, size, [&] (int z) {
-#else
-		for(int z = -size; z < size; z++) { // Fallback for platforms without threading support
-#endif
-			WorldChunk* c = createChunk(i,0,z);
-			mGenerator->fillChunk( c ); // This should run in O(n) time.
-			nc++;
-		}
-#ifdef WIN32
-		);
-#endif
-		Util::log(Util::toString( (nc*100) / total ) + "%");
-	}
-#ifdef WIN32
-	Util::log( "Terrain: " + Util::toString( (long)(GetTickCount() - startTick) ) + " Ticks" );
-#endif*/
-}
-
 void World::destoryWorld()
 {
-	for( NodeList::iterator it = mQuadTrees.begin(); it != mQuadTrees.end(); ++it) {
-		WorldNode* node = *it;
-		_deleteTree(node);
-	}
-	mQuadTrees.clear();
-	for(ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); )
+	for( int i = 0; i < mWorldSize*mWorldSize*mWorldSize; i++ )
 	{
-		delete (*it);
-		it = mChunks.erase( it );
+		if(mChunks[i])
+			delete mChunks;
 	}
 }
 
-ChunkList& World::getChunks()
+ChunkArray World::getChunks()
 {
 	return mChunks;
 }
 
-static WorldChunk* lastChunk = NULL;
-WorldChunk* World::getChunk(const long x, const long y, const long z)
+size_t World::getChunkCount()
 {
-	// Optimization hack
-	if(lastChunk != NULL && lastChunk->getX() == x && lastChunk->getY() == y && lastChunk->getZ() == z) {
-		return lastChunk;
-	}
-	for(ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it)
-	{
-		if( x == (*it)->getX() && y == (*it)->getY() && z == (*it)->getZ() ) {
-			lastChunk = (*it);
-			return (*it);
-		}
-	}
-	return NULL;
+	return mWorldSize*mWorldSize*mWorldSize;
 }
 
-NodeList& World::getTopNodes()
+Chunk* World::getChunk(const long x, const long y, const long z)
 {
-	return mQuadTrees;
-}
-
-void World::_populateTree(WorldNode* parent, const NodeIndex& ppos, int depth )
-{
-	if(depth > 8 ) return; // End of recursion
-
-	NodeIndex ind = ppos;
-	WorldNode* node = new WorldNode();
-	node->index = ind;
-	node->isChunk = (depth==8 ? true : false);
-	_populateTree(node, ind, depth*2);
-	parent->children[0] = node;
-
-	NodeIndex ind2 = { ppos.x + NODE_SIZE/depth, ppos.y, ppos.z };
-	node = new WorldNode();
-	node->index = ind2;
-	node->isChunk = (depth==8 ? true : false);
-	_populateTree(node, ind2, depth*2);
-	parent->children[1] = node;
-
-	NodeIndex ind3 = { ppos.x + NODE_SIZE/depth, ppos.y, ppos.z + NODE_SIZE/depth };
-	node = new WorldNode();
-	node->index = ind3;
-	node->isChunk = (depth==8 ? true : false);
-	_populateTree(node, ind3, depth*2);
-	parent->children[2] = node;
-	
-	NodeIndex ind4 = { ppos.x, ppos.y, ppos.z + NODE_SIZE/depth };
-	node = new WorldNode();
-	node->index = ind4;
-	node->isChunk = (depth==8 ? true : false);
-	_populateTree(node, ind4, depth*2);
-	parent->children[3] = node;
-}
-
-WorldNode* World::getWorldNode( const Vector3& pos, bool safe )
-{
-	Vector3 nodepos = Vector3( (int)(floor(pos.x/NODE_SIZE))*NODE_SIZE,  (int)(pos.y),  (int)(floor(pos.z/NODE_SIZE))*NODE_SIZE );
-	NodeIndex index = { nodepos.x, nodepos.y, nodepos.z };
-	for( NodeList::iterator it = mQuadTrees.begin(); it != mQuadTrees.end(); ++it) {
-		if( (*it)->index == index ) return *it;
-	}
-	if(!safe) { 
+	size_t index = coordsToIndex( x, y, z );
+	if( index < 0 || index > mWorldSize*mWorldSize*mWorldSize-1 )
 		return NULL;
-	}
 
-
-	WorldNode* node = new WorldNode();
-	node->isChunk = false;
-	node->index = index;
-	mQuadTrees.push_back(node);
-
-	// Populate tree
-	_populateTree(node, index, 2);
-
-	return node;
+	return mChunks[index];
 }
 
-WorldNode* World::getChunkNode( const Vector3& pos, bool safe )
+Chunk* World::createChunk(long x, long y, long z)
 {
-	// Find root level node.
-	WorldNode* node = getWorldNode( pos, safe );
-	Vector3 rootpos = Vector3( (int)(floor(pos.x/NODE_SIZE))*NODE_SIZE,  (int)(pos.y),  (int)(floor(pos.z/NODE_SIZE))*NODE_SIZE );
-
-	for( int i = 2; i <= 8; i*=2 ) {
-		int depthSize = NODE_SIZE/i;
-		Vector3 nodepos = Vector3( (int)(floor(pos.x/depthSize))*depthSize,  (int)(pos.y), (int)(floor(pos.z/depthSize))*depthSize );
-		NodeIndex index = { nodepos.x, nodepos.y, nodepos.z };
-		WorldNode* child;
-		for( int c = 0; c < 4; c++ ) {
-			child = node->children[c];
-			if( child->index == index ) {
-				if( child->isChunk ) return child;
-				else { node = child; break; }
-			}
-		}
-	}
+	size_t index = coordsToIndex( x, y, z );
+	if( index < 0 || index > mWorldSize*mWorldSize*mWorldSize-1 )
+		return NULL;
+	mChunks[index] = new Chunk( ChunkIndex{ x, y, z } );
 	
-	return NULL;
+	return mChunks[index];
 }
 
-std::string World::printTree()
+void World::removeChunk( long x, long y, long z )
 {
-	std::string buff = "";
-	for( NodeList::iterator it = mQuadTrees.begin(); it != mQuadTrees.end(); ++it) {
-		buff += _printTree(*it, 0);
-	}
-	return buff;
-}
-
-std::string World::_printTree(WorldNode* node, int depth)
-{
-	std::string buff = "";
-	for(int i = 0; i < depth; i++ ) { buff += "\t"; }
-	if( node->isChunk )
-		buff += "[Chunk]";
-	else
-		buff += "[Node]";
-	buff += " " + Util::toString(node->index.x) + " " + Util::toString(node->index.y) + " " + Util::toString(node->index.z);
-	if( !node->isChunk )
-		buff += " =>";
-	else {
-		std::stringstream ss;
-		ss << (size_t)node->children[0];
-		buff += " 0x" + ss.str();
-
-	}
-	buff += "\n";
-	if(!node->isChunk) {
-		for(int c = 0; c < 4; c++) {
-			for(int i = 0; i < depth; i++ ) { buff += "\t"; }
-			if( node->children[0] != NULL )
-			buff += _printTree(node->children[c], depth+1);
-		}
-	}
-	return buff;
-}
-
-WorldChunk* World::createChunk(long x, long y, long z)
-{
-	WorldChunk* newChunk = new WorldChunk(x, y, z);
-	mChunks.push_back(newChunk);
-	WorldNode* node = getChunkNode(Vector3(x,y,z), true);
-	node->children[0] = (WorldNode*)newChunk;
-	
-	return newChunk;
+	size_t index = coordsToIndex( x, y, z );
+	if( index < 0 || index > mWorldSize*mWorldSize*mWorldSize )
+		return;
+	delete mChunks[index];
+	mChunks[index] = NULL;
 }
 
 void World::setPagingCamera( Camera* _c )
@@ -374,41 +135,6 @@ void World::createWorldFolder()
 //	}
 }
 
-void World::saveAllChunks()
-{
-	std::string svPath = getSavePath();
-	
-	Util::log("Saving chunks");
-
-	// Ensure that the chunks folder exists
-	createWorldFolder();
-	
-#ifdef WIN32
-	size_t startTick = GetTickCount();
-#endif
-
-	for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); it++ )
-	{
-		std::string chnkPath = svPath + "chunks\\" + Util::toString( (*it)->getX() ) + "_" + Util::toString( (*it)->getY() ) + "_" + Util::toString( (*it)->getZ() );
-		std::ofstream out( chnkPath.c_str(), std::ios_base::out | std::ios_base::binary | std::ios_base::trunc );
-		if( out && out.good() ) 
-		{
-			(*it)->appendToStream( out );
-			out.close();
-		}
-		else 
-		{
-			Util::log("Error Writing Chunk");
-		}
-	}
-
-#ifdef WIN32
-	size_t ticks = GetTickCount() - startTick;
-	Util::log("\tSaved in: " + Util::toString(ticks) + "ms");
-#endif
-
-}
-
 void World::update( float dt )
 {
 	if( mSky != NULL )
@@ -420,9 +146,7 @@ void World::update( float dt )
 		mWorldStage = WORLD_GEN;
 		for( int i = 0; mChunksToLoad.size() > 0 && i < 10; i++ ) {
 			ChunkRequest req = mChunksToLoad.back();
-			WorldChunk* c = createChunk( req.x, req.y, req.z);
-			c->fillWithTestData();
-			//mGenerator->fillChunk( c ); // This should run in O(n) time.
+			Chunk* c = createChunk( req.x, req.y, req.z);
 			c->requestGenerate();
 			mChunksToLoad.pop_back();
 		}
@@ -434,12 +158,17 @@ void World::update( float dt )
 	}
 	else
 	{
-		for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
-			(*it)->update(dt);
+		auto wcube = mWorldSize*mWorldSize*mWorldSize;
+
+		for( int i = 0; i < wcube; i++ )
+		{
+			if( mChunks[i] )
+				mChunks[i]->update(dt);
 		}
-		
-		for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
-			(*it)->requestGenerate();
+		for( int i = 0; i < wcube; i++ )
+		{
+			if( mChunks[i] )
+				mChunks[i]->requestGenerate();
 		}
 	}
 
@@ -458,84 +187,71 @@ Sky* World::getSky()
 	return mSky;
 }
 
-void World::removeChunk(long x, long y, long z)
-{
-	for(ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it)
-	{
-		if( x == (*it)->getX() && y == (*it)->getY() && z == (*it)->getZ() ) {
-			Util::log("Deleted Chunk");
-			delete (*it);
-			mChunks.erase( it );
-
-			WorldNode* node = getChunkNode(Vector3(x,y,z), true);
-			if( node == NULL ) 
-				Util::log( "NULL node" );
-			else
-				node->children[0] = NULL;
-			return;
-		}
-	}
-}
-
+// Quick typedef, cause why not
+typedef std::map<Chunk*, raycast_r> ChunkHitlist;
 raycast_r World::raycastWorld(const raycast_r &inray, bool solidOnly)
 {
 	raycast_r ray = inray;
 	Vector3 min, max;
-	ChunkList hitChunks;
-	for(ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it)
+	ChunkHitlist hitChunks;
+	auto wcube = mWorldSize*mWorldSize*mWorldSize;
+
+	for( int i = 0; i < wcube; i++ )
 	{
-		min = Vector3( (*it)->getX() * CHUNK_WIDTH, (*it)->getY() * CHUNK_HEIGHT,  (*it)->getZ() * CHUNK_WIDTH );
-		max = Vector3( (*it)->getX() * CHUNK_WIDTH + CHUNK_WIDTH, (*it)->getY() * CHUNK_HEIGHT + CHUNK_HEIGHT,  (*it)->getZ() * CHUNK_WIDTH + CHUNK_WIDTH );
+		if( !(mChunks[i]) ) { continue; }
+		Chunk* c = mChunks[i];
+		min = Vector3( (c)->getX() * CHUNK_WIDTH, (c)->getY() * CHUNK_HEIGHT,  (c)->getZ() * CHUNK_WIDTH );
+		max = Vector3( (c)->getX() * CHUNK_WIDTH + CHUNK_WIDTH, (c)->getY() * CHUNK_HEIGHT + CHUNK_HEIGHT,  (c)->getZ() * CHUNK_WIDTH + CHUNK_WIDTH );
 		ray = raycastCube(ray, min, max);
 		if(ray.hit && ray.i0 <= inray.maxDistance )
-			hitChunks.push_back((*it));
-	}
-	BlockList* blocks;
-	ray.hit = false;
-	std::vector<raycast_r> raycasts;
-	for(unsigned int c = 0; c < hitChunks.size(); c++)
-	{
-		blocks = hitChunks[c]->getVisibleBlocks();
-		WorldChunk* chnk = hitChunks[c];
-		for(BlockList::iterator block = blocks->begin(); block != blocks->end(); ++block) 
 		{
-			if( solidOnly && !(*block).second->isSolid() )
-				continue;
-			Vector3 bPos = Util::indexToPosition( (*block).first );
-			min = Vector3( chnk->getX() * CHUNK_WIDTH - 0.0f,
-					chnk->getY() * CHUNK_HEIGHT + 0.0f,
-					chnk->getZ() * CHUNK_WIDTH - 0.0f ) + bPos;
-			max = Vector3( chnk->getX() * CHUNK_WIDTH + 1.0f,
-					chnk->getY() * CHUNK_HEIGHT + 1.0f,
-					chnk->getZ() * CHUNK_WIDTH + 1.0f ) + bPos;
-			raycast_r r = inray;
-			r = raycastCube(r, min, max);
-			if( r.hit == true && r.i0 <= inray.maxDistance ) {
-				r.block = block->second;
-				r.blockPosition = bPos;
-				r.blockIndex = block->first;
-				r.chunk = chnk;
-				raycasts.push_back( r );
-			}
-		}	
-	}
-	// Final pass, find closest hit.
-	float m = std::numeric_limits<float>::max();
-	raycast_r closest;
-	for(std::vector<raycast_r>::iterator it = raycasts.begin(); it != raycasts.end(); ++it)
-	{
-		if((*it).i0 < m) {
-			m = it->i0;
-			closest = (*it);
+			hitChunks[c] = ray;
 		}
 	}
+	ray.hit = false;
+	raycast_r closest;
+	float dist = std::numeric_limits<float>::max();
+	float chunkDist = std::numeric_limits<float>::max();
+	for( ChunkHitlist::iterator it = hitChunks.begin(); it != hitChunks.end(); it++ )
+	{
+		Chunk* hitChunk = it->first;
+		if( it->second.i0 > chunkDist ) continue; // if the point the ray entered the chunk is already further away than our closest hit then we can disregard it.
+
+		BlockArray blocks = hitChunk->getBlocks(); 
+		for( size_t c = 0; c < CHUNK_SIZE-1; c++ )
+		{
+			if( (blocks)[c] == NULL ) continue;
+			BaseBlock* b = (blocks)[c];
+
+			if( solidOnly && !b->isSolid() )
+				continue;
+
+			Vector3 bPos = Util::indexToPosition( c );
+			min = Vector3( hitChunk->getX() * CHUNK_WIDTH - 0.0f,
+					hitChunk->getY() * CHUNK_HEIGHT + 0.0f,
+					hitChunk->getZ() * CHUNK_WIDTH - 0.0f ) + bPos;
+			max = Vector3( hitChunk->getX() * CHUNK_WIDTH + 1.0f,
+					hitChunk->getY() * CHUNK_HEIGHT + 1.0f,
+					hitChunk->getZ() * CHUNK_WIDTH + 1.0f ) + bPos;
+			raycast_r r = inray;
+			r = raycastCube(r, min, max);
+			if( r.hit == true && r.i0 <= inray.maxDistance && ray.i0 < dist ) {
+				r.block = b;
+				r.blockPosition = bPos;
+				r.blockIndex = c;
+				r.chunk = hitChunk;
+				chunkDist = dist = ray.i0;
+				closest = r;
+			}
+		}
+	}	
 
 	return closest;
 }
 
 CollisionResponse World::AABBWorld( Vector3& min, Vector3& max )
 {
-	ChunkList hitChunks;
+	/*ChunkList hitChunks;
 	AABB targetBB;
 	targetBB.center = (min + (max-min)/2);
 	targetBB.extents = (max-min);
@@ -564,7 +280,7 @@ CollisionResponse World::AABBWorld( Vector3& min, Vector3& max )
 		Vector3 chunkPos( (*it)->getX() * CHUNK_WIDTH, (*it)->getY() * CHUNK_HEIGHT, (*it)->getZ() * CHUNK_WIDTH );
 		for(BlockList::iterator block = blocks->begin(); block != blocks->end(); ++block) {
 			bb.center = chunkPos + Util::indexToPosition( block->first )
-						+ Vector3( 0.5f, 0.5f, 0.5f );
+				+ Vector3( 0.5f, 0.5f, 0.5f );
 			bb.extents = Vector3( 1.0f, 1.0f, 1.0f );
 			Collision::AABBvsAABB( bb, targetBB, r );
 			if( r.collision ) {
@@ -575,7 +291,7 @@ CollisionResponse World::AABBWorld( Vector3& min, Vector3& max )
 			}
 		}	
 	}
-	
+
 	if( ( ofs.x > ofs.y ) && ( ofs.x > ofs.z ) ) {
 		final.response.x = ofs.x;
 	}
@@ -587,7 +303,8 @@ CollisionResponse World::AABBWorld( Vector3& min, Vector3& max )
 	}
 
 
-	return final;
+	return final;*/
+	return CollisionResponse();
 }
 
 Vector3 normals[3] = {
