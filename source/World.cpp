@@ -32,7 +32,9 @@ mWorldStage( WORLD_NORMAL )
 	
 	for( size_t x = 0; x < edgeSize; x++ ) {
 		for( size_t z = 0; z < edgeSize; z++ ) {
-			createChunk( x, 0, z );
+			for( size_t y = 0; y < 2; y++ ) {
+				createChunk( x, y, z );
+			}
 		}
 	}
 	

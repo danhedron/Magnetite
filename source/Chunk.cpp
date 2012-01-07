@@ -24,11 +24,25 @@ mPhysicsState( NULL )
 	{
 		for(int z = 0; z < CHUNK_WIDTH; z++)
 		{
-			for(int y = 0; y < CHUNK_HEIGHT; y++)
+			if( getY() == 1 ) 
 			{
-				BaseBlock* block = NULL;
-				block = FactoryManager::getManager().createBlock("stone");
-				setBlockAt( block, x, y, z  );
+				for(int y = 0; y < CHUNK_HEIGHT/2; y++)
+				{
+					BaseBlock* block = NULL;
+					block = FactoryManager::getManager().createBlock("stone");
+					setBlockAt( block, x, y, z  );
+				}
+				BaseBlock* grass = FactoryManager::getManager().createBlock("grass");
+				setBlockAt( grass, x, CHUNK_HEIGHT/2, z  );
+			}
+			else
+			{
+				for(int y = 0; y < CHUNK_HEIGHT; y++)
+				{
+					BaseBlock* block = NULL;
+					block = FactoryManager::getManager().createBlock("stone");
+					setBlockAt( block, x, y, z  );
+				}	
 			}
 		}
 	}
@@ -106,6 +120,9 @@ void Chunk::removeBlockAt( short index )
 {
 	if( index < 0 || index > CHUNK_SIZE )
 		return;
+	BlockList::iterator it = mVisibleBlocks.find( index );
+	if( it != mVisibleBlocks.end() )
+		mVisibleBlocks.erase( it );
 	delete mBlocks[index];
 	mBlocks[index] = NULL;
 	_raiseChunkFlag( DataUpdated );
@@ -129,6 +146,9 @@ void Chunk::updateVisibility( )
 	
 	if( _hasChunkFlag( DataUpdated ) )
 	{
+		long worldX = getX() * CHUNK_WIDTH;
+		long worldY = getY() * CHUNK_HEIGHT;
+		long worldZ = getZ() * CHUNK_WIDTH;
 		for( long x = 0; x < CHUNK_WIDTH; x++ ) {
 			for( long y = 0; y < CHUNK_HEIGHT; y++ ) {
 				for( long z = 0; z < CHUNK_WIDTH; z++ ) {
@@ -137,32 +157,32 @@ void Chunk::updateVisibility( )
 					short visFlags = 0;
 					short visOrig = b->getVisFlags();
 					//Check All axes for adjacent blocks.
-					BaseBlock* cb = w->getBlockAt( getX() + x + 1, getY() + y, getZ() + z );
+					BaseBlock* cb = w->getBlockAt( worldX + x + 1, worldY + y, worldZ + z );
 					if( cb == NULL || !cb->isOpaque() ) {
 						mVisibleFaces++;
 						visFlags = visFlags | FACE_RIGHT;
 					}
-					cb = w->getBlockAt( getX() + x - 1, getY() + y, getZ() + z );
+					cb = w->getBlockAt( worldX + x - 1, worldY + y, worldZ + z );
 					if( cb == NULL || !cb->isOpaque() ) {
 						mVisibleFaces++;
 						visFlags = visFlags | FACE_LEFT;
 					}
-					cb = w->getBlockAt( getX() + x, getY() + y + 1, getZ() + z );
+					cb = w->getBlockAt( worldX + x, worldY + y + 1, worldZ + z );
 					if( cb == NULL || !cb->isOpaque() ) {
 						mVisibleFaces++;
 						visFlags = visFlags | FACE_TOP;
 					}
-					cb = w->getBlockAt( getX() + x, getY() + y - 1, getZ() + z );
+					cb = w->getBlockAt( worldX + x, worldY + y - 1, worldZ + z );
 					if( cb == NULL || !cb->isOpaque() ) {
 						mVisibleFaces++;
 						visFlags = visFlags | FACE_BOTTOM;
 					}
-					cb = w->getBlockAt( getX() + x, getY() + y, getZ() + z + 1 );
+					cb = w->getBlockAt( worldX + x, worldY + y, worldZ + z + 1 );
 					if( cb == NULL || !cb->isOpaque() ) {
 						mVisibleFaces++;
 						visFlags = visFlags | FACE_BACK;
 					}
-					cb = w->getBlockAt( getX() + x, getY() + y, getZ() + z - 1 );
+					cb = w->getBlockAt( worldX + x, worldY + y, worldZ + z - 1 );
 					if( cb == NULL || !cb->isOpaque() ) {
 						mVisibleFaces++;
 						visFlags = visFlags | FACE_FORWARD;
