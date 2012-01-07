@@ -146,6 +146,7 @@ void Chunk::updateVisibility( )
 	
 	if( _hasChunkFlag( DataUpdated ) )
 	{
+		mVisibleFaces = 0;
 		long worldX = getX() * CHUNK_WIDTH;
 		long worldY = getY() * CHUNK_HEIGHT;
 		long worldZ = getZ() * CHUNK_WIDTH;
