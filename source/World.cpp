@@ -234,37 +234,35 @@ Sky* World::getSky()
 	return mSky;
 }
 
-// Quick typedef, cause why not
-typedef std::map<Chunk*, raycast_r> ChunkHitlist;
 raycast_r World::raycastWorld(const raycast_r &inray, bool solidOnly)
 {
 	raycast_r ray = inray;
 	Vector3 min, max;
-	ChunkHitlist hitChunks;
 	auto wcube = mWorldSize*mWorldSize*mWorldSize;
-
+	std::vector<Chunk*> hitChunks;
+	
 	for( int i = 0; i < wcube; i++ )
 	{
-		if( !(mChunks[i]) ) { continue; }
+		if( !mChunks[i] ) { continue; }
 		Chunk* c = mChunks[i];
-		min = Vector3( (c)->getX() * CHUNK_WIDTH, (c)->getY() * CHUNK_HEIGHT,  (c)->getZ() * CHUNK_WIDTH );
-		max = Vector3( (c)->getX() * CHUNK_WIDTH + CHUNK_WIDTH, (c)->getY() * CHUNK_HEIGHT + CHUNK_HEIGHT,  (c)->getZ() * CHUNK_WIDTH + CHUNK_WIDTH );
-		ray = raycastCube(ray, min, max);
-		if(ray.hit && ray.i0 <= inray.maxDistance )
+		min = Vector3( c->getX() * CHUNK_WIDTH, c->getY() * CHUNK_HEIGHT, c->getZ() * CHUNK_WIDTH );
+		max = Vector3( c->getX() * CHUNK_WIDTH + CHUNK_WIDTH, c->getY() * CHUNK_HEIGHT + CHUNK_WIDTH, c->getZ() * CHUNK_WIDTH + CHUNK_WIDTH );
+		ray = raycastCube( ray, min, max );
+		if( ray.hit && ray.i0 <= inray.maxDistance )
 		{
-			hitChunks[c] = ray;
+			hitChunks.push_back( c );
 		}
 	}
+	
 	ray.hit = false;
 	raycast_r closest;
 	float dist = std::numeric_limits<float>::max();
-	float chunkDist = std::numeric_limits<float>::max();
-	for( ChunkHitlist::iterator it = hitChunks.begin(); it != hitChunks.end(); it++ )
+	
+	for( int i = 0; i < hitChunks.size(); i++ )
 	{
-		Chunk* hitChunk = it->first;
-		if( it->second.i0 > chunkDist ) continue; // if the point the ray entered the chunk is already further away than our closest hit then we can disregard it.
-
-		BlockArray blocks = hitChunk->getBlocks(); 
+		Chunk* hitChunk = hitChunks[i];
+		BlockArray blocks = hitChunk->getBlocks();
+		
 		for( size_t c = 0; c < CHUNK_SIZE-1; c++ )
 		{
 			if( (blocks)[c] == NULL ) continue;
@@ -282,17 +280,17 @@ raycast_r World::raycastWorld(const raycast_r &inray, bool solidOnly)
 					hitChunk->getZ() * CHUNK_WIDTH + 1.0f ) + bPos;
 			raycast_r r = inray;
 			r = raycastCube(r, min, max);
-			if( r.hit == true && r.i0 <= inray.maxDistance && ray.i0 < dist ) {
+			if( r.hit == true && r.i0 < dist ) {
 				r.block = b;
 				r.blockPosition = bPos;
 				r.blockIndex = c;
 				r.chunk = hitChunk;
-				chunkDist = dist = ray.i0;
+				dist = r.i0;
 				closest = r;
 			}
 		}
-	}	
-
+	}
+	
 	return closest;
 }
 
