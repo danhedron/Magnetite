@@ -465,8 +465,11 @@ void Renderer::render(double dt, World* world)
 
 		for( size_t c = 0; c < world->getChunkCount(); c++ )
 		{
+			Util::log( Util::toString( c ) );
 			if( chunks[c] )
+			{
 				_renderChunk( chunks[c] );
+			}
 		}
 
 		if( tex != 0 )
@@ -533,7 +536,7 @@ void Renderer::_renderChunk( Chunk* chunk )
 	float z = chunk->getZ() * CHUNK_WIDTH;
 	glTranslatef(x,y,z);
 	
-	if( !chunk->_hasChunkFlag( Chunk::MeshInvalid ) ) {
+	if( !chunk->_hasChunkFlag( Chunk::MeshInvalid ) && chunk->getGeometry() != NULL ) {
 		GLgeometry* chunkGeom = chunk->getGeometry();
 		
 		if( chunkGeom->vertexBO == 0 || chunkGeom->indexBO == 0 )

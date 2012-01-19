@@ -3,6 +3,7 @@
 #include "prerequisites.h"
 
 class Chunk;
+class World;
 
 class ChunkGenerator
 {
@@ -19,7 +20,19 @@ public:
 	float interpolatedNoise( float x, float y );
 	float smooth( float x, float y );
 
+	/**
+	 * This is partical deprecated.
+	 * \deprecated Use fillRegion instead
+	 */
 	void fillChunk( Chunk* chunk );
+	
+	/**
+	 * Fills a region of the world with data from this generator.
+	 * @param w Pointer to the world object.
+	 * @param min The minimum of the bounding box to fill.
+	 * @param max The maximum of the bounding box to fill.
+	 */
+	void fillRegion( World* w, const Vector3& min, const Vector3& max );
 };
 
 

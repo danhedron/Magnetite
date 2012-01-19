@@ -3,6 +3,7 @@
 #include "Chunk.h"
 #include "BlockFactory.h"
 #include "BaseBlock.h"
+#include "World.h"
 
 ChunkGenerator::ChunkGenerator(long seed)
 : mSeed( seed )
@@ -56,7 +57,33 @@ float ChunkGenerator::smooth( float x, float z )
 	return center + sides + corners;
 }
 
- void ChunkGenerator::fillChunk(Chunk *chunk)
+void ChunkGenerator::fillRegion( World* w, const Vector3& min, const Vector3& max )
+{
+	float p = 0.25f;
+	float octs = 10;
+	for( int x = floor(min.x); x < floor( max.x ); x++ )
+	{
+		for( int z = floor(min.z); z < floor( max.z ); z++ )
+		{
+			float total = 0.f;
+			for( float i = 0; i < octs; i++ ) {
+				float freq = pow(2.f, i);
+				float amp = pow(p, i);
+				total = total + interpolatedNoise((float)(x) * freq * 0.05f , (float)(z) *freq * 0.05f ) * amp;
+			}
+			total = (total*30.f) + 128.f;
+			for( int y = 0; y < total-1; y++ )
+			{
+				BaseBlock* b = FactoryManager::getManager().createBlock("stone");
+				w->setBlockAt(b, x, y, z );
+			}
+			BaseBlock* top = FactoryManager::getManager().createBlock("grass");
+			w->setBlockAt(top, x, total, z );
+		}
+	}
+}
+
+void ChunkGenerator::fillChunk(Chunk *chunk)
 {
 	if( chunk->getY() > 0 ) return; //Don't fill chunks above ground yet (supermountains yet to come)
 	if( chunk->getY() == 0 ) {

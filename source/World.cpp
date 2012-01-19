@@ -30,17 +30,20 @@ mWorldStage( WORLD_NORMAL )
 	mChunks = new ChunkPtr[edgeSize*edgeSize*edgeSize];
 	memset( mChunks, 0, sizeof( ChunkPtr ) * edgeSize*edgeSize*edgeSize); 
 	
-	for( size_t x = 0; x < edgeSize; x++ ) {
-		for( size_t z = 0; z < edgeSize; z++ ) {
-			for( size_t y = 0; y < 2; y++ ) {
-				createChunk( x, y, z );
-			}
-		}
-	}
+// 	for( size_t x = 0; x < edgeSize; x++ ) {
+// 		for( size_t z = 0; z < edgeSize; z++ ) {
+// 			for( size_t y = 0; y < edgeSize; y++ ) {
+// 				size_t idx = coordsToIndex( x, y, z );
+// 				mChunks[idx] = NULL;
+// 			}
+// 		}
+// 	}
 	
 	createSky( 0 );
 
 	mGenerator = new ChunkGenerator(1024);
+	mGenerator->fillRegion( this, Vector3(0,0,0), Vector3( (edgeSize-1) * CHUNK_WIDTH, (edgeSize-1) * CHUNK_WIDTH, (edgeSize-1) * CHUNK_WIDTH ) );
+	
 	printDbg = false;
 }
 
@@ -67,6 +70,26 @@ BlockPtr World::getBlockAt( long x, long y, long z )
 	Chunk* c = getChunk( cx, cy, cz );
 	if( c == NULL ) return NULL;
 	else return c->getBlockAt( x % CHUNK_WIDTH, y % CHUNK_HEIGHT, z % CHUNK_WIDTH );
+}
+
+void World::removeBlockAt( long x, long y, long z )
+{
+	size_t cx = floor( ((float) x)/CHUNK_WIDTH );
+	size_t cy = floor( ((float) y)/CHUNK_HEIGHT );
+	size_t cz = floor( ((float) z)/CHUNK_WIDTH );
+	Chunk* c = getChunk( cx, cy, cz );
+	if( c == NULL ) return;
+	else c->removeBlockAt( x % CHUNK_WIDTH, y % CHUNK_HEIGHT, z % CHUNK_WIDTH );
+}
+
+void World::setBlockAt( BaseBlock* b, long x, long y, long z )
+{
+	size_t cx = floor( ((float) x)/CHUNK_WIDTH );
+	size_t cy = floor( ((float) y)/CHUNK_HEIGHT );
+	size_t cz = floor( ((float) z)/CHUNK_WIDTH );
+	Chunk* c = getChunk( cx, cy, cz );
+	if( c == NULL ) return;
+	else c->setBlockAt( b, x % CHUNK_WIDTH, y % CHUNK_HEIGHT, z % CHUNK_WIDTH );
 }
 
 float World::getLightColor( LightIndex light )
@@ -100,7 +123,14 @@ Chunk* World::getChunk(const long x, const long y, const long z)
 {
 	size_t index = coordsToIndex( x, y, z );
 	if( x < 0 || x > mWorldSize-1 || y < 0 || y > mWorldSize-1 || z < 0 || z > mWorldSize-1 )
+	{
 		return NULL;
+	}
+	else if( mChunks[index] == NULL )
+	{
+		// Chunk is inside the world bounds, but hasn't been created yet.
+		return createChunk( x, y, z );
+	}
 
 	return mChunks[index];
 }
@@ -108,9 +138,9 @@ Chunk* World::getChunk(const long x, const long y, const long z)
 Chunk* World::createChunk(long x, long y, long z)
 {
 	size_t index = coordsToIndex( x, y, z );
-	if( index < 0 || index > mWorldSize*mWorldSize*mWorldSize-1 )
+	if( x < 0 || x > mWorldSize-1 || y < 0 || y > mWorldSize-1 || z < 0 || z > mWorldSize-1 )
 		return NULL;
-	mChunks[index] = new Chunk( ChunkIndex{ x, y, z } );
+	mChunks[index] = new Chunk( ChunkIndex{ x, y, z } ); // 6859 (thanks to n3hima)
 	
 	return mChunks[index];
 }

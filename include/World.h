@@ -170,6 +170,16 @@ public:
 	 * Returns the block at the world index specified
 	 */
 	BlockPtr getBlockAt( long x, long y, long z );
+	
+	/**
+	 * Removes any block at the given position
+	 */
+	void removeBlockAt( long x, long y, long z );
+	
+	/**
+	 * Places a block at the world coordinates
+	 */
+	void setBlockAt( BaseBlock* b, long x, long y, long z );
 
 	/**
 	 * Loads a world of the specified name

@@ -20,32 +20,18 @@ mPhysicsState( NULL )
 	// Allocates the internal block array 
 	_allocateArray( CHUNK_SIZE );
 	
-	for(int x = 0; x < CHUNK_WIDTH; x++)
+	/*for(int x = 0; x < CHUNK_WIDTH; x++)
 	{
 		for(int z = 0; z < CHUNK_WIDTH; z++)
 		{
-			if( getY() == 1 ) 
+			for(int y = 0; y < CHUNK_HEIGHT; y++)
 			{
-				for(int y = 0; y < CHUNK_HEIGHT/2; y++)
-				{
-					BaseBlock* block = NULL;
-					block = FactoryManager::getManager().createBlock("stone");
-					setBlockAt( block, x, y, z  );
-				}
-				BaseBlock* grass = FactoryManager::getManager().createBlock("grass");
-				setBlockAt( grass, x, CHUNK_HEIGHT/2, z  );
-			}
-			else
-			{
-				for(int y = 0; y < CHUNK_HEIGHT; y++)
-				{
-					BaseBlock* block = NULL;
-					block = FactoryManager::getManager().createBlock("stone");
-					setBlockAt( block, x, y, z  );
-				}	
+				BaseBlock* block = NULL;
+				block = FactoryManager::getManager().createBlock("stone");
+				setBlockAt( block, x, y, z  );
 			}
 		}
-	}
+	}*/
 }
 
 Chunk::~Chunk()
