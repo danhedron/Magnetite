@@ -465,7 +465,6 @@ void Renderer::render(double dt, World* world)
 
 		for( size_t c = 0; c < world->getChunkCount(); c++ )
 		{
-			Util::log( Util::toString( c ) );
 			if( chunks[c] )
 			{
 				_renderChunk( chunks[c] );
