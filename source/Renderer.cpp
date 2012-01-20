@@ -592,15 +592,34 @@ void Renderer::drawStats(double dt, size_t chunkCount, World* world)
 void Renderer::drawBlockChooser( double dt )
 {
 	BlockFactoryList::iterator iter = FactoryManager::getManager().blockFactoryList.find(blockType);
+	
 	if( iter == FactoryManager::getManager().blockFactoryList.end() )
 	{
-		iter =FactoryManager::getManager().blockFactoryList.begin();
+		iter = FactoryManager::getManager().blockFactoryList.begin();
 		blockType = iter->first;
 	}
-
+	
 	std::stringstream ss;
-	ss << "Current Block: " << iter->first << std::endl;
-	drawText( ss.str(), 6, 200);
+	int n = 0;
+	auto origIter = iter;
+	
+	for( int i = 1; i < 4; i++ ) 
+	{
+		if( iter != FactoryManager::getManager().blockFactoryList.begin() )
+		{
+			iter--;
+			drawText(iter->first, 15 - ( 5 * i ), 200 - ( 20 * i ));
+		}
+	}
+	iter = origIter;
+	for( int i = 1; i < 4; i++ ) 
+	{
+		if( ++iter == FactoryManager::getManager().blockFactoryList.end() )
+		{
+			iter = FactoryManager::getManager().blockFactoryList.begin();
+		}
+		drawText(iter->first, 15 - ( 5 * i ), 200 + ( 20 * i ));
+	}
 }
 
 void Renderer::drawCrosshair( double dt )
