@@ -12,13 +12,18 @@ Add an Environment Variable named SFMLDIR, set it to the SFML folder.
 Installing SMFL and OpenGL (Ubuntu)
 -----------------------------------
 
-Add these to /etc/apt/sources.list
-	deb http://ppa.launchpad.net/christoph-egger/ubuntu hardy main
-	deb-src http://ppa.launchpad.net/christoph-egger/ubuntu hardy main
-Run
-	aptitude update && apt-get install libsfml-dev libcsfml-dev 
-	#mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev
 
+Run
+	sudo apt-get install libglew1.5-dev libjpeg8-dev libopenal-dev libsndfile1-dev libbullet-dev libv8-dev cmake
+	git clone https://github.com/LaurentGomila/SFML.git
+	cd SFML && cmake . && make install
+	cd ../Magnetite && cmake .
+	
+	#Add these to /etc/apt/sources.list
+	#deb http://ppa.launchpad.net/christoph-egger/ubuntu hardy main
+	#deb-src http://ppa.launchpad.net/christoph-egger/ubuntu hardy main
+	#mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev
+	#libsfml-dev libcsfml-dev
 
 Building
 ========
