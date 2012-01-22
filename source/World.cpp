@@ -113,7 +113,7 @@ void World::destoryWorld()
 	{
 		if(mChunks[i])
 		{
-			delete mChunks;
+			delete mChunks[i];
 			mChunks[i] = NULL;
 		}
 	}
