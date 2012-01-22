@@ -25,11 +25,6 @@ void BaseBlock::connectedChange( short face )
 
 }
 
-int BaseBlock::getLightLevel()
-{
-	return 0;
-}
-
 /*short BaseBlock::getX() {
 	return (mDataFlags & BMASK_XPOS);
 }
@@ -88,6 +83,7 @@ void BaseBlock::buildCubeData( BlockContext& ctx, size_t& ind, size_t& eInd, GLv
 		return;
 	}
 	float x = ctx.worldX, y = ctx.worldY, z = ctx.worldZ;
+	long wx = (ctx.chunk->getX()*CHUNK_WIDTH) + x, wy = (ctx.chunk->getY()*CHUNK_HEIGHT) + y, wz = (ctx.chunk->getZ()*CHUNK_WIDTH) + z;
 	short texX = 0, texY = 0;
 
 	short visFlags = getVisFlags();
@@ -96,8 +92,8 @@ void BaseBlock::buildCubeData( BlockContext& ctx, size_t& ind, size_t& eInd, GLv
 	if((visFlags & FACE_BACK) == FACE_BACK ) {
 		this->getTextureCoords( FACE_BACK, texX, texY );
 		GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
-
-		float color = World::getLightColor( ctx.chunk->getLightLevel( x, y, z+1 ) );
+		
+		float color = World::getLightColor( ctx.world->getLightLevel( wx, wy, wz+1 ) );
 		data[ind + 0] = Renderer::vertex( x + 1.0f, y + 1.0f,	z + 1.0f, // Coordinates
 								0.0f, 0.0f, -1.0f,
 								rect.x, rect.y,
@@ -124,7 +120,7 @@ void BaseBlock::buildCubeData( BlockContext& ctx, size_t& ind, size_t& eInd, GLv
 		this->getTextureCoords( FACE_FORWARD, texX, texY );
 		GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
-		float color = World::getLightColor( ctx.chunk->getLightLevel( x, y, z-1 ) );
+		float color = World::getLightColor( ctx.world->getLightLevel( wx, wy, wz-1 ) );
 		data[ind + 0] = Renderer::vertex( x + 1.0f, y + 1.0f, z - 0.0f, // Coordinates
 								0.0f, 0.0f, 1.0f,
 								rect.x, rect.y,
@@ -151,7 +147,7 @@ void BaseBlock::buildCubeData( BlockContext& ctx, size_t& ind, size_t& eInd, GLv
 		this->getTextureCoords( FACE_RIGHT, texX, texY );
 		GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
-		float color = World::getLightColor( ctx.chunk->getLightLevel( x+1, y, z ) );
+		float color = World::getLightColor( ctx.world->getLightLevel( wx+1, wy, wz ) );
 		data[ind + 0] = Renderer::vertex( x + 1.0f, y + 1.0f, z + 1.0f, // Coordinates
 								1.0f, 0.0f, 0.0f,
 								rect.x + rect.w, rect.y,
@@ -178,7 +174,7 @@ void BaseBlock::buildCubeData( BlockContext& ctx, size_t& ind, size_t& eInd, GLv
 		this->getTextureCoords( FACE_BOTTOM, texX, texY );
 		GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
-		float color = World::getLightColor( ctx.chunk->getLightLevel( x, y-1, z ) );
+		float color = World::getLightColor( ctx.world->getLightLevel( wx, wy-1, wz ) );
 		data[ind + 0] = Renderer::vertex( x - 0.0f, y - 0.0f, z + 1.0f, // Coordinates
 								0.0f, -1.0f, 0.0f,
 								rect.x, rect.y,
@@ -205,7 +201,7 @@ void BaseBlock::buildCubeData( BlockContext& ctx, size_t& ind, size_t& eInd, GLv
 		this->getTextureCoords( FACE_TOP, texX, texY );
 		GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
-		float color = World::getLightColor( ctx.chunk->getLightLevel( x, y+1, z ) );
+		float color = World::getLightColor( ctx.world->getLightLevel( wx, wy+1, wz ) );
 		data[ind + 0] = Renderer::vertex( x - 0.0f, y + 1.0f, z + 1.0f, // Coordinates
 								0.0f, 1.0f, 0.0f,
 								rect.x, rect.y,
@@ -232,7 +228,7 @@ void BaseBlock::buildCubeData( BlockContext& ctx, size_t& ind, size_t& eInd, GLv
 		this->getTextureCoords( FACE_LEFT, texX, texY );
 		GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
-		float color = World::getLightColor( ctx.chunk->getLightLevel( x-1, y, z ) );
+		float color = World::getLightColor( ctx.world->getLightLevel( wx-1, wy, wz ) );
 		data[ind + 0] = Renderer::vertex( x - 0.0f, y + 1.0f, z - 0.0f, // Coordinates
 								-1.0f, 0.0f, 0.0f,
 								rect.x + rect.w, rect.y,

@@ -39,6 +39,11 @@ protected:
 	ChunkIndex	mWorldIndex;
 	
 	/**
+	 * Array of light values
+	 */
+	LightIndex* mLightValues;
+	
+	/**
 	 * Number of visible faces.
 	 */
 	size_t	mVisibleFaces;
@@ -143,6 +148,11 @@ public:
 	 * Retuns true if there's a block next to the given position
 	 */
 	bool hasNeighbours( short x, short y, short z );
+	
+	/** 
+	 * Sets the light value at the given pointer
+	 */
+	void setLightLevel( LightIndex value, short x, short y, short z );
 	
 	/**
 	 * Returns a pointer to this chunk's geometry

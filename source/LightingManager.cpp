@@ -1,4 +1,7 @@
 #include "LightingManager.h"
+#include "MagnetiteCore.h"
+#include "BaseBlock.h"
+#include "World.h"
 #include "Chunk.h"
 #include "math.h"
 
@@ -51,6 +54,7 @@ void LightingManager::gatherLight( Chunk* chunk )
 	static Sample smp;
 	static IntRay rays[ray_count];
 	static bool madeRays = false;
+	World* world = MagnetiteCore::Singleton->getWorld();
 
 	if( !madeRays ) {
 		// Generate some useful rays.
@@ -140,17 +144,20 @@ void LightingManager::gatherLight( Chunk* chunk )
 							xoff = x + offs->x;
 							yoff = y + offs->y;
 							zoff = z + offs->z;
-							if( xoff < x - CHUNK_WIDTH/4 || xoff >= x + CHUNK_WIDTH/4 ) {
+							long wx = xoff + (chunk->getX() * CHUNK_WIDTH);
+							long wy = yoff + (chunk->getY() * CHUNK_HEIGHT);
+							long wz = zoff + (chunk->getZ() * CHUNK_WIDTH);
+							if( xoff < x - CHUNK_WIDTH / 2 || xoff >= x + CHUNK_WIDTH / 2 ) {
 								break;
 							} 
-							else if( yoff < 0 || yoff >= CHUNK_HEIGHT ) {
+							else if( yoff < y - CHUNK_HEIGHT / 2 || yoff >= y + CHUNK_HEIGHT / 2 ) {
 								break;
 							} 
-							else if( zoff < z - CHUNK_WIDTH/4 || zoff >= z + CHUNK_WIDTH/4 ) {
+							else if( zoff < z - CHUNK_WIDTH / 2 || zoff >= z + CHUNK_WIDTH / 2 ) {
 								break;
 							}
 							else {
-								obs = chunk->getBlockAt( xoff, yoff, zoff );
+								obs = world->getBlockAt( wx, wy, wz );
 								if( obs ) {
 									collided = true;
 									break;
@@ -166,7 +173,8 @@ void LightingManager::gatherLight( Chunk* chunk )
 							back += ray->back;
 						}
 					}
-					//chunk->setLightLevel( x, y, z, smp.getSample(right, left, top, bottom, front, back) * 256);
+					LightIndex lighness = smp.getSample(right, left, top, bottom, front, back) * 256;
+					chunk->setLightLevel(lighness, x, y, z);
 				}
 			}
 		}

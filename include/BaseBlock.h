@@ -21,6 +21,7 @@ enum {
 	BMASK_VISFLAGS = ( (1<<0) | (1<<1) | (1<<2) | (1<<3) | (1<<4) | (1<<5) )
 };
 
+class World;
 class Chunk;
 
 struct BlockContext
@@ -29,6 +30,7 @@ struct BlockContext
 	float worldY;
 	float worldZ;
 	Chunk* chunk;
+	World* world;
 };
 
 class BaseBlock
@@ -63,11 +65,6 @@ public:
 	 * Returns true if this block needs to think
 	 */
 	virtual bool isThinking() { return false; }
-
-	/**
-	 * Returns the level of light emited by this block
-	 */
-	virtual int getLightLevel();
 
 	/**
 	 * Called when a nearby block changes.

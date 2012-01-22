@@ -56,13 +56,18 @@ long Chunk::getZ()
 
 size_t Chunk::getLightLevel( short x, short y, short z )
 {
-	return 100;
+	if( x < 0 || x >= CHUNK_WIDTH || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_WIDTH )
+		return 0;
+	return mLightValues[ BLOCK_INDEX_2( x, y, z ) ];
 }
 
 void Chunk::_allocateArray( size_t size )
 {
 	mBlocks = new BlockPtr[size];
 	memset( mBlocks, 0, sizeof( BlockPtr ) * size );
+	
+	mLightValues = new LightIndex[size];
+	memset( mBlocks, 0, sizeof( LightIndex ) * size );
 }
 
 BlockPtr* Chunk::getBlocks()
@@ -125,6 +130,13 @@ bool Chunk::hasNeighbours( short x, short y, short z )
 	return false;
 }
 
+void Chunk::setLightLevel( LightIndex value, short x, short y, short z )
+{
+	if( x < 0 || x >= CHUNK_WIDTH || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_WIDTH )
+		return;
+	mLightValues[ BLOCK_INDEX_2( x, y, z ) ] = value;
+}
+
 void Chunk::updateVisibility( )
 {
 	MagnetiteCore* core = CoreSingleton;
@@ -182,7 +194,7 @@ void Chunk::updateVisibility( )
 						mVisibleBlocks.insert( BlockList::value_type( BLOCK_INDEX_2( x, y, z ), b ) );
 				}
 			}
-		}	
+		}
 		_raiseChunkFlag( MeshInvalid );
 	}
 }
@@ -239,6 +251,7 @@ void Chunk::generate()
 		context.worldY = pos.y;
 		context.worldZ = pos.z;
 		context.chunk = this;
+		context.world = MagnetiteCore::Singleton->getWorld();
 		it->second->buildCubeData( context, vind, eind, verts, edges );
 	}
 	

@@ -92,6 +92,16 @@ void World::setBlockAt( BaseBlock* b, long x, long y, long z )
 	else c->setBlockAt( b, x % CHUNK_WIDTH, y % CHUNK_HEIGHT, z % CHUNK_WIDTH );
 }
 
+LightIndex World::getLightLevel( long x, long y, long z )
+{
+	size_t cx = floor( ((float) x)/CHUNK_WIDTH );
+	size_t cy = floor( ((float) y)/CHUNK_HEIGHT );
+	size_t cz = floor( ((float) z)/CHUNK_WIDTH );
+	Chunk* c = getChunk( cx, cy, cz );
+	if( c == NULL ) return 0;
+	return c->getLightLevel( x % CHUNK_WIDTH, y % CHUNK_HEIGHT, z % CHUNK_WIDTH );
+}
+
 float World::getLightColor( LightIndex light )
 {
 	return ( 0.1f + ( 0.9f * ( (float)light/256 ) ) );

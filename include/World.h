@@ -180,6 +180,14 @@ public:
 	 * Places a block at the world coordinates
 	 */
 	void setBlockAt( BaseBlock* b, long x, long y, long z );
+	
+	/** 
+	 * Returns the light level at the world coordinates
+	 * @param x X Coordinate
+	 * @param y Y Coordinate
+	 * @param z Z Coordinate
+	 */
+	LightIndex getLightLevel( long x, long y, long z );
 
 	/**
 	 * Loads a world of the specified name

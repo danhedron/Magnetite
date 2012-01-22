@@ -566,7 +566,7 @@ void Renderer::_renderChunk( Chunk* chunk )
 
 	}
 	else {
-		Util::log("Warning: Ungenerated Chunk in render queue. ~ Grab a developer and complain");
+		//Util::log("Warning: Ungenerated Chunk in render queue. ~ Grab a developer and complain");
 	}
 }
 
