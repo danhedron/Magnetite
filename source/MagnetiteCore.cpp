@@ -185,9 +185,15 @@ void MagnetiteCore::go()
 			}
 
 			if( lEvt.Type == sf::Event::KeyPressed )
+			{
 				mInputManager->keyDown( lEvt.Key.Code );
+				mGame->keyDown( lEvt.Key.Code );
+			}
 			if( lEvt.Type == sf::Event::KeyReleased )
+			{
 				mInputManager->keyUp( lEvt.Key.Code );
+				mGame->keyUp( lEvt.Key.Code );
+			}
 
 			if( (lEvt.Type == sf::Event::KeyPressed) &&
 				(lEvt.Key.Code == sf::Keyboard::R) ) {
@@ -277,6 +283,8 @@ void MagnetiteCore::go()
 		//Ensure the renderer has the correct camera
 		mRenderer->setCamera( mGame->getLocalPlayer()->getCamera() );
 		mRenderer->render(lDelta, mWorld);
+		
+		mGame->uiPaint( mRenderer );
 
 		mWindow.Display();
 	}

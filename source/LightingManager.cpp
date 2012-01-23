@@ -147,13 +147,13 @@ void LightingManager::gatherLight( Chunk* chunk )
 							long wx = xoff + (chunk->getX() * CHUNK_WIDTH);
 							long wy = yoff + (chunk->getY() * CHUNK_HEIGHT);
 							long wz = zoff + (chunk->getZ() * CHUNK_WIDTH);
-							if( xoff < x - CHUNK_WIDTH / 2 || xoff >= x + CHUNK_WIDTH / 2 ) {
+							if( xoff < x - CHUNK_WIDTH  || xoff >= x + CHUNK_WIDTH  ) {
 								break;
 							} 
-							else if( yoff < y - CHUNK_HEIGHT / 2 || yoff >= y + CHUNK_HEIGHT / 2 ) {
+							else if( yoff < y - CHUNK_HEIGHT  || yoff >= y + CHUNK_HEIGHT  ) {
 								break;
 							} 
-							else if( zoff < z - CHUNK_WIDTH / 2 || zoff >= z + CHUNK_WIDTH / 2 ) {
+							else if( zoff < z - CHUNK_WIDTH  || zoff >= z + CHUNK_WIDTH  ) {
 								break;
 							}
 							else {

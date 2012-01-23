@@ -2,6 +2,7 @@
 #include "BlockFactory.h"
 #include "Character.h"
 #include "MagnetiteCore.h"
+#include "Renderer.h"
 #include "Chunk.h"
 #include "BaseBlock.h"
 #include "Camera.h"
@@ -14,6 +15,7 @@ BaseGame::BaseGame()
 {
 	mEngine = MagnetiteCore::Singleton; // Bad design they say? Humbug!
 	mPlayer = NULL;
+	clickMode = "remove";
 }
 
 BaseGame::~BaseGame()
@@ -163,14 +165,20 @@ void BaseGame::playerPrimaryClick( Character* player )
 	ray.maxDistance = 10;
 	if(ray.hit)
 	{	
-		if(ray.chunk && ray.block) 
+		if( clickMode == "remove" )
 		{
-			ray.chunk->removeBlockAt( ray.blockIndex );
+			if(ray.chunk && ray.block) 
+			{
+				ray.chunk->removeBlockAt( ray.blockIndex );
+			}
 		}
-		explosion_t info;
-		info.center = ray.worldHit + ray.hitNormal * 1.5;
-		Explosion expl(info);
-		expl.explode();
+		else
+		{
+			explosion_t info;
+			info.center = ray.worldHit + ray.hitNormal * 1.5;
+			Explosion expl(info);
+			expl.explode();
+		}
 	}
 }
 
@@ -183,7 +191,6 @@ void BaseGame::playerAltClick( Character* player )
 		Util::log( Util::toString( ray.worldHit + ray.hitNormal ) );
 		Vector3 cIndex = mEngine->getWorld()->worldToChunks( ray.worldHit + ray.hitNormal );
 		Vector3 bIndex = mEngine->getWorld()->worldToBlock( ray.worldHit + (ray.hitNormal/2) );
-		Util::log("Ray Hit: " + Util::toString( cIndex ) + " Normal: " + Util::toString( ray.hitNormal ) + " block: " + Util::toString(bIndex) );
 		Chunk* chunk = mEngine->getWorld()->getChunk( cIndex.x, cIndex.y, cIndex.z );
 		if(chunk) {
 			BaseBlock* block = FactoryManager::getManager().createBlock( mEngine->getRenderer()->blockType );
@@ -192,4 +199,23 @@ void BaseGame::playerAltClick( Character* player )
 			}
 		}
 	}
+}
+
+void BaseGame::uiPaint(Renderer* r)
+{
+	r->drawText(clickMode, 10, 50);
+}
+
+void BaseGame::keyDown( size_t evt )
+{
+	if( evt == sf::Keyboard::M )
+	{
+		if( clickMode == "remove" )
+			clickMode = "explode";
+		else clickMode = "remove";
+	}
+}
+
+void BaseGame::keyUp( size_t evt )
+{
 }

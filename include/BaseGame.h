@@ -5,6 +5,7 @@
 
 class Character;
 class MagnetiteCore;
+class Renderer;
 
 class BaseGame
 {
@@ -16,6 +17,7 @@ protected:
 	//< Keeps track of singleplayer ness
 	bool mIsSinglePlayer;
 
+	std::string clickMode;
 public:
 	BaseGame();
 	~BaseGame();
@@ -70,6 +72,21 @@ public:
 	 * Called When a player alt fires
 	 */
 	void playerAltClick( Character* player );
+	
+	/**
+	 * Called when the game is ok to render the GUI
+	 */
+	void uiPaint(Renderer* r);
+	
+	/**
+	 * Generic key down event
+	 */
+	void keyDown( size_t evt );
+	
+	/**
+	 * Generic key up event
+	 */
+	void keyUp( size_t evt );
 
 	//========================= Internal stuff
 
