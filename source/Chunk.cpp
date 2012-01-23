@@ -137,6 +137,11 @@ void Chunk::setLightLevel( LightIndex value, short x, short y, short z )
 	mLightValues[ BLOCK_INDEX_2( x, y, z ) ] = value;
 }
 
+size_t Chunk::getVisibleFaceCount()
+{
+    return mVisibleFaces;
+}
+
 void Chunk::updateVisibility( )
 {
 	MagnetiteCore* core = CoreSingleton;

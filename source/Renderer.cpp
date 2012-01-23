@@ -15,8 +15,8 @@
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
 // Shader paremater indexes.
-size_t attrTC = 0; 
-size_t attrL = 0;
+GLint attrTC = 0; 
+GLint attrL = 0;
 
 void GLgeometry::releaseBuffer()
 {
@@ -32,15 +32,24 @@ void GLgeometry::releaseBuffer()
 
 void GLgeometry::bindToBuffer()
 {
+    PRINT_GLERROR;
 	glGenBuffers(1, &this->vertexBO);
+    PRINT_GLERROR;
 	glBindBuffer( GL_ARRAY_BUFFER, this->vertexBO);
+    PRINT_GLERROR;
 	glBufferData( GL_ARRAY_BUFFER, sizeof(GLvertex)*this->vertexCount+1, this->vertexData, GL_STATIC_DRAW );
+    PRINT_GLERROR;
 	glGenBuffers(1, &this->indexBO);
+    PRINT_GLERROR;
 
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, this->indexBO );
+    PRINT_GLERROR;
 	glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(GLedge)*this->edgeCount+1, this->edgeData, GL_STATIC_DRAW );
+    PRINT_GLERROR;
 	glBindBuffer( GL_ARRAY_BUFFER, 0);
+    PRINT_GLERROR;
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0);
+    PRINT_GLERROR;
 }
 
 void GLshader::create()
@@ -452,8 +461,8 @@ void Renderer::render(double dt, World* world)
 	{
 		glEnableClientState(GL_VERTEX_ARRAY);
 		//glEnableClientState(GL_NORMAL_ARRAY);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glEnableClientState(GL_COLOR_ARRAY);
+		//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		//glEnableClientState(GL_COLOR_ARRAY);
 		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		if( tex != 0 )
@@ -478,8 +487,8 @@ void Renderer::render(double dt, World* world)
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
-		glDisableClientState(GL_COLOR_ARRAY);
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		//glDisableClientState(GL_COLOR_ARRAY);
+		//glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 		//glDisableClientState(GL_NORMAL_ARRAY);
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisable(GL_CULL_FACE);
@@ -537,22 +546,29 @@ void Renderer::_renderChunk( Chunk* chunk )
 	
 	if( !chunk->_hasChunkFlag( Chunk::MeshInvalid ) && chunk->getGeometry() != NULL ) {
 		GLgeometry* chunkGeom = chunk->getGeometry();
+        Util::log(Util::toString( chunkGeom->vertexCount ) + " " + Util::toString( chunk->getVisibleFaceCount() ));
 		
 		if( chunkGeom->vertexBO == 0 || chunkGeom->indexBO == 0 )
 		{
 			chunkGeom->bindToBuffer();
 		}
-
+		if( chunkGeom->vertexBO == 0 || chunkGeom->indexBO == 0 )
+        {
+            Util::log("Error generating geometry buffer");
+            return;
+        }
+        
 		glBindBuffer( GL_ARRAY_BUFFER, chunkGeom->vertexBO );
-		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, chunkGeom->indexBO );
+		glVertexPointer( 3, GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(0) );
+
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, chunkGeom->indexBO );
 
 		glVertexAttribPointer( attrTC, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(12) );
 		//glVertexAttribPointer( attrL, 1, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(15) );
 		//glEnableVertexAttribArray(attrL);
-		glEnableVertexAttribArray(attrTC);
+	    glEnableVertexAttribArray(attrTC);
 
 
-		glVertexPointer( 3, GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(0) );
 		//glNormalPointer( GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(12) );
 		//glTexCoordPointer( 2, GL_UNSIGNED_SHORT, sizeof(GLvertex), BUFFER_OFFSET(12));
 		//glColorPointer( 1, GL_UNSIGNED_SHORT, sizeof(GLvertex), BUFFER_OFFSET(15));
@@ -561,8 +577,8 @@ void Renderer::_renderChunk( Chunk* chunk )
 
 		glDisableVertexAttribArray(attrTC);
 		//glDisableVertexAttribArray(attrL);
-		glBindBuffer( GL_ARRAY_BUFFER, 0 );
-		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+		//glBindBuffer( GL_ARRAY_BUFFER, 0 );
+		//glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 
 	}
 	else {

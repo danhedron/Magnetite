@@ -59,3 +59,5 @@ class Chunk;
 //#define BLOCK_POSITION( index ) index % CHUNK_WIDTH * CHUNK_HEIGHT , (index - std::floorf( index / CHUNK_WIDTH*CHUNK_HEIGHT ) - (index % CHUNK_WIDTH))   , std::floorf( index / CHUNK_WIDTH*CHUNK_HEIGHT ) 
 #define BLOCK_INDEX_2( x, y, z ) ( z * CHUNK_WIDTH * CHUNK_HEIGHT + y * CHUNK_WIDTH + x )
 #define BLOCK_INDEX( block ) (block->getZ() * CHUNK_WIDTH * CHUNK_HEIGHT + block->getY() * CHUNK_WIDTH + block->getX())
+
+#define PRINT_GLERROR {GLenum err = glGetError(); if(err) Util::log(Util::toString(err));}

@@ -144,6 +144,11 @@ public:
 	 */
 	BlockPtr* getBlocks();
 
+    /**
+     * Returns the number of visisble faces this chunk has
+     */
+    size_t getVisibleFaceCount();
+
 	/**
 	 * Retuns true if there's a block next to the given position
 	 */

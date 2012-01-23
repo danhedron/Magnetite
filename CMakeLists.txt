@@ -147,6 +147,8 @@ if(WIN32)
 	set(CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"LIBC.lib\")
 else(WIN32)
 	target_link_libraries(Magnetite /usr/lib/libGLee.so)
+	target_link_libraries(Magnetite /usr/lib/libGL.so)
+	target_link_libraries(Magnetite /usr/lib/libGLU.so)
 	#target_link_libraries(Magnetite /usr/local/lib/libglut.so)
 endif(WIN32)
 
