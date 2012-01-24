@@ -546,27 +546,26 @@ void Renderer::_renderChunk( Chunk* chunk )
 	
 	if( !chunk->_hasChunkFlag( Chunk::MeshInvalid ) && chunk->getGeometry() != NULL ) {
 		GLgeometry* chunkGeom = chunk->getGeometry();
-        Util::log(Util::toString( chunkGeom->vertexCount ) + " " + Util::toString( chunk->getVisibleFaceCount() ));
 		
 		if( chunkGeom->vertexBO == 0 || chunkGeom->indexBO == 0 )
 		{
 			chunkGeom->bindToBuffer();
 		}
 		if( chunkGeom->vertexBO == 0 || chunkGeom->indexBO == 0 )
-        {
-            Util::log("Error generating geometry buffer");
-            return;
-        }
+		{
+			Util::log("Error generating geometry buffer");
+			return;
+		}
         
 		glBindBuffer( GL_ARRAY_BUFFER, chunkGeom->vertexBO );
 		glVertexPointer( 3, GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(0) );
 
-        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, chunkGeom->indexBO );
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, chunkGeom->indexBO );
 
 		glVertexAttribPointer( attrTC, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(12) );
 		//glVertexAttribPointer( attrL, 1, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(15) );
 		//glEnableVertexAttribArray(attrL);
-	    glEnableVertexAttribArray(attrTC);
+		glEnableVertexAttribArray(attrTC);
 
 
 		//glNormalPointer( GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(12) );
