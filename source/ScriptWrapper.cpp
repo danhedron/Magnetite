@@ -1,4 +1,7 @@
 #include "ScriptWrapper.h"
+#include "MagnetiteCore.h"
+#include "World.h"
+#include "BaseBlock.h"
 #include <fstream>
 using namespace v8;
 
@@ -26,6 +29,30 @@ void report( TryCatch* handler )
 	}
 }
 
+typedef std::map<BaseBlock*,PersistentObject> WrappedBlocks;
+WrappedBlocks gWrappedBlocks;
+Persistent<ObjectTemplate> blockTemplate;
+ValueHandle wrapBlock( BaseBlock* block )
+{
+	if( !block ) return Undefined();
+	WrappedBlocks::iterator it = gWrappedBlocks.find( block );
+	if( it != gWrappedBlocks.end() )
+	{
+		return it->second;
+	}
+	
+	if( blockTemplate.IsEmpty() )
+	{
+		blockTemplate = Persistent<ObjectTemplate>::New(ObjectTemplate::New());
+		blockTemplate->Set( String::New( "type" ), String::New( block->getType().c_str() ) );
+	}
+	
+	PersistentObject obj = Persistent<Object>::New(blockTemplate->NewInstance());
+	gWrappedBlocks.insert( WrappedBlocks::value_type( block, obj) );
+	
+	return obj;
+}
+
 ValueHandle runFile( std::string filename )
 {
 	std::ifstream is(filename.c_str(), std::ios_base::in);
@@ -50,10 +77,16 @@ ValueHandle runFile( std::string filename )
 			if(try_catch.HasCaught())
 			{
 				report(&try_catch);
+				return Undefined();
 			}
 		}
 		
 		ValueHandle result = script->Run();
+		if(try_catch.HasCaught())
+		{
+			report(&try_catch);
+			return Undefined();
+		}
 		return scope.Close(result);
 	}
 	else
@@ -81,6 +114,16 @@ ValueHandle import(const Arguments& args)
 	return Undefined();
 }
 
+/*=========== World Object functions ===========*/
+ValueHandle world_getBlock(const Arguments& args)
+{
+	if( args.Length() >= 3 )
+	{
+		return wrapBlock(CoreSingleton->getWorld()->getBlockAt( args[0]->Int32Value(), args[1]->Int32Value(), args[2]->Int32Value() ));
+	}
+	return Undefined();
+}
+
 void ScriptWrapper::init()
 {
 	HandleScope scope;
@@ -91,7 +134,11 @@ void ScriptWrapper::init()
 	Handle<ObjectTemplate> console = ObjectTemplate::New();
 	console->Set(String::New("log"), FunctionTemplate::New(log));
 	
+	Handle<ObjectTemplate> world = ObjectTemplate::New();
+	world->Set(String::New("getBlock"), FunctionTemplate::New(world_getBlock));
+	
 	global->Set(String::New("console"), console);
+	global->Set(String::New("world"), world);
 	
 	mContext = Context::New(NULL, global);
 	

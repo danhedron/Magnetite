@@ -4,6 +4,7 @@
 #include "prerequisites.h"
 
 typedef v8::Persistent<v8::Context> PersistentContext;
+typedef v8::Persistent<v8::Object> PersistentObject;
 typedef v8::Handle<v8::Value> ValueHandle;
 
 class ScriptWrapper

@@ -144,9 +144,9 @@ void MagnetiteCore::startGame( const std::string& type )
 		Util::log("Starting game: " + mGame->getName() );
 	mGame->_startGameSingle();
 	
-	mScriptWrapper->init();
-	
 	newWorld("test");
+	
+	mScriptWrapper->init();
 	
 	// No multiplayer yet so just force player join
 	mGame->_playerJoined();
