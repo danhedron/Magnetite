@@ -1,3 +1,101 @@
 #include "ScriptWrapper.h"
+#include <fstream>
+using namespace v8;
 
+std::string strize( Handle<Value> s )
+{
+	String::Utf8Value v(s);
+	return *v ? *v : "";
+}
 
+void report( TryCatch* handler )
+{
+	HandleScope scope;
+	
+	if(handler->Message().IsEmpty())
+	{
+		// No message
+		Util::log( strize( handler->Exception() ) );
+	}
+	else
+	{
+		Handle<Message> message = handler->Message();
+		std::string file = strize( message->GetScriptResourceName() );
+		int lnnum = message->GetLineNumber();
+		Util::log( file + ":" + Util::toString(lnnum) + " " + strize( handler->Exception() ) );
+	}
+}
+
+ValueHandle runFile( std::string filename )
+{
+	std::ifstream is(filename.c_str(), std::ios_base::in);
+	
+	if(is.is_open())
+	{
+		std::string source;
+		std::string line;
+		
+		while( !is.eof() )
+		{
+			std::getline(is, line);
+			source.append(line);
+		}
+		
+		HandleScope scope;
+		TryCatch try_catch;
+		
+		Handle<Script> script = Script::Compile( String::New(source.c_str()), String::New(filename.c_str()) );
+		if( script.IsEmpty() )
+		{
+			if(try_catch.HasCaught())
+			{
+				report(&try_catch);
+			}
+		}
+		
+		ValueHandle result = script->Run();
+		return scope.Close(result);
+	}
+	else
+	{
+		Util::log("Unable to open: " + filename);
+	}
+	
+	return Undefined();
+}
+
+ValueHandle log(const Arguments& args)
+{
+	for( size_t i = 0; i < args.Length(); i++ )
+	{
+		Util::log( strize(args[i]->ToString() ));
+	}
+}
+
+ValueHandle import(const Arguments& args)
+{
+	if( args.Length() >= 1 )
+	{
+		return runFile( strize( args[0]->ToString() ) );
+	}
+	return Undefined();
+}
+
+void ScriptWrapper::init()
+{
+	HandleScope scope;
+	
+	Handle<ObjectTemplate> global = ObjectTemplate::New();
+	global->Set(String::New("import"), FunctionTemplate::New(import));
+	
+	Handle<ObjectTemplate> console = ObjectTemplate::New();
+	console->Set(String::New("log"), FunctionTemplate::New(log));
+	
+	global->Set(String::New("console"), console);
+	
+	mContext = Context::New(NULL, global);
+	
+	Context::Scope ctx_scope(mContext);
+	
+	runFile("../scripts/main.js");
+}

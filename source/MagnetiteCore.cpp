@@ -1,3 +1,4 @@
+#include "ScriptWrapper.h"
 #include "MagnetiteCore.h"
 #include "WorldChunk.h"
 #include "Renderer.h"
@@ -31,6 +32,7 @@ mWorld( NULL ),
 mResourceManager( NULL ),
 mTextureManager( NULL ),
 mInputManager( NULL ),
+mScriptWrapper( NULL ),
 mTimescale( 1.f ),
 mLastX( 0.f ),
 mLastY( 0.f ),
@@ -44,6 +46,7 @@ mPhysicsWorld( NULL )
 	mRenderer = new Renderer();
 	mTextureManager = new TextureManager();
 	mInputManager = new InputManager();
+	mScriptWrapper = new ScriptWrapper();
 	mInputManager->setEventCallback( Inputs::FORWARD, &globalEventHandler );
 	mInputManager->setEventCallback( Inputs::BACK, &globalEventHandler );
 	mInputManager->setEventCallback( Inputs::LEFT, &globalEventHandler );
@@ -63,6 +66,7 @@ MagnetiteCore::~MagnetiteCore(void)
 	delete mResourceManager;
 	delete mTextureManager;
 	delete mInputManager;
+	delete mScriptWrapper;
 
 	mPhysicsWorld->removeRigidBody( mGroundBody );
 
@@ -139,6 +143,8 @@ void MagnetiteCore::startGame( const std::string& type )
 	if( mGame != NULL ) 
 		Util::log("Starting game: " + mGame->getName() );
 	mGame->_startGameSingle();
+	
+	mScriptWrapper->init();
 	
 	newWorld("test");
 	

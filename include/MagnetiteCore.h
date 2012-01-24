@@ -9,6 +9,7 @@ class World;
 class Character;
 class BaseGame;
 class ResourceManager;
+class ScriptWrapper;
 
 /** @class MagnetiteCore
  * Responsible for managing stuff
@@ -23,8 +24,9 @@ protected:
 	sf::RenderWindow	mWindow;
 	sf::Clock	mClock;
 	Renderer*	mRenderer;
-	ResourceManager* mResourceManager;
-	TextureManager* mTextureManager;
+	ResourceManager*	mResourceManager;
+	ScriptWrapper*	mScriptWrapper;
+	TextureManager* 	mTextureManager;
 	InputManager*	mInputManager;
 	World*		mWorld;
 	bool		mContinue;
