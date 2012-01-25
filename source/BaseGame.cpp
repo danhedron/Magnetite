@@ -188,15 +188,9 @@ void BaseGame::playerAltClick( Character* player )
 	ray = mEngine->getWorld()->raycastWorld(ray);
 	if(ray.hit && ray.block)
 	{
-		Util::log( Util::toString( ray.worldHit + ray.hitNormal ) );
-		Vector3 cIndex = mEngine->getWorld()->worldToChunks( ray.worldHit + ray.hitNormal );
-		Vector3 bIndex = mEngine->getWorld()->worldToBlock( ray.worldHit + (ray.hitNormal/2) );
-		Chunk* chunk = mEngine->getWorld()->getChunk( cIndex.x, cIndex.y, cIndex.z );
-		if(chunk) {
-			BaseBlock* block = FactoryManager::getManager().createBlock( mEngine->getRenderer()->blockType );
-			if( block != NULL ) {
-				chunk->setBlockAt( block, bIndex.x, bIndex.y, bIndex.z );
-			}
+		BaseBlock* block = FactoryManager::getManager().createBlock( mEngine->getRenderer()->blockType );
+		if( block != NULL ) {
+			mEngine->getWorld()->setBlockAt( block, ray.worldHit.x + ray.hitNormal.x/2, ray.worldHit.y + ray.hitNormal.y/2, ray.worldHit.z + ray.hitNormal.z/2 );
 		}
 	}
 }
