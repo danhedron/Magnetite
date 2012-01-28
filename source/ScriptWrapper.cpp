@@ -124,6 +124,15 @@ ValueHandle world_getBlock(const Arguments& args)
 	return Undefined();
 }
 
+ValueHandle world_removeBlock(const Arguments& args)
+{
+	if( args.Length() >= 3 )
+	{
+		CoreSingleton->getWorld()->removeBlockAt( args[0]->Int32Value(), args[1]->Int32Value(), args[2]->Int32Value() );
+	}
+	return Undefined();	
+}
+
 void ScriptWrapper::init()
 {
 	HandleScope scope;
@@ -136,6 +145,7 @@ void ScriptWrapper::init()
 	
 	Handle<ObjectTemplate> world = ObjectTemplate::New();
 	world->Set(String::New("getBlock"), FunctionTemplate::New(world_getBlock));
+	world->Set(String::New("removeBlock"), FunctionTemplate::New(world_removeBlock));
 	
 	global->Set(String::New("console"), console);
 	global->Set(String::New("world"), world);
