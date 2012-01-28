@@ -2,6 +2,7 @@
 #include "MagnetiteCore.h"
 #include "World.h"
 #include "BaseBlock.h"
+#include "BlockFactory.h"
 #include <fstream>
 using namespace v8;
 
@@ -130,7 +131,22 @@ ValueHandle world_removeBlock(const Arguments& args)
 	{
 		CoreSingleton->getWorld()->removeBlockAt( args[0]->Int32Value(), args[1]->Int32Value(), args[2]->Int32Value() );
 	}
-	return Undefined();	
+	return Undefined();
+}
+
+ValueHandle world_createBlock(const Arguments& args)
+{
+	if( args.Length() >= 1 )
+	{
+		BaseBlock* block = FactoryManager::getManager().createBlock( strize(args[0]) );
+		if( block == NULL ) return Undefined();
+		if( args.Length() >= 4 )
+		{
+			CoreSingleton->getWorld()->setBlockAt(block, args[1]->Int32Value(), args[2]->Int32Value(), args[3]->Int32Value() );
+		}
+		return wrapBlock(block);
+	}
+	return Undefined();
 }
 
 void ScriptWrapper::init()
@@ -146,6 +162,7 @@ void ScriptWrapper::init()
 	Handle<ObjectTemplate> world = ObjectTemplate::New();
 	world->Set(String::New("getBlock"), FunctionTemplate::New(world_getBlock));
 	world->Set(String::New("removeBlock"), FunctionTemplate::New(world_removeBlock));
+	world->Set(String::New("createBlock"), FunctionTemplate::New(world_createBlock));
 	
 	global->Set(String::New("console"), console);
 	global->Set(String::New("world"), world);
