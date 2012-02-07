@@ -1,31 +1,40 @@
-#ifndef _BASEGAME_H_
-#define _BASEGAME_H_
+#ifndef _SCRIPTGAME_H_
+#define _SCRIPTGAME_H_
+#include "ScriptWrapper.h"
 #include "prerequisites.h"
-#include "InputManager.h"
+#include "BaseGame.h"
 
-class Character;
-class MagnetiteCore;
-class Renderer;
-
-class BaseGame
+class ScriptGame : public BaseGame
 {
 protected:
-	//< Reference to the engine object
-	MagnetiteCore* mEngine;
-	//< Reference to the local player ( Or NULL if this is a dedicated server )
-	Character* mPlayer;
-	//< Keeps track of singleplayer ness
-	bool mIsSinglePlayer;
+	/**
+	 * Stores the friendly name for this game
+	 */
+	std::string mGameName;
+	
+	/**
+	 * The Javascript object!1
+	 */
+	PersistentObject mScriptObject;
 
-	std::string clickMode;
 public:
-	BaseGame();
-	~BaseGame();
+	ScriptGame();
+	~ScriptGame();
 
 	/**
 	 * Returns the name of this Game for printing purposes.
 	 */
 	virtual std::string getName();
+	
+	/**
+	 * Sets the friendly name for this game
+	 */
+	void setName( const std::string& name );
+	
+	/**
+	 * Sets the internal object for javascript
+	 */
+	void _setScriptObject( PersistentObject object );
 
 	/**
 	 * Returns true in singleplayer mode 
@@ -100,9 +109,6 @@ public:
 	 */
 	virtual void _startGame();
 	
-	/**
-	 * Called when the world has just been loaded
-	 */
 	virtual void _loadGame();
 
 	/**

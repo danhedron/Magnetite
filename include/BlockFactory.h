@@ -107,6 +107,6 @@ public:
 //#define REGISTER_BLOCK_TYPE( name, type ) \
 //	GenericBlockFactory<type> BlockFactory( type );
 #define REG_GAME_TYPE( name, type ) \
-	GenericGameFactory<type> F( name );
+	GenericGameFactory<type> F##type( name );
 
 #endif // _BLOCKFACTORY_H_

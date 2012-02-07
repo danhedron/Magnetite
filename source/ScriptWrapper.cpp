@@ -54,9 +54,10 @@ ValueHandle wrapBlock( BaseBlock* block )
 	return obj;
 }
 
-ValueHandle runFile( std::string filename )
+void ScriptWrapper::runFile( std::string filename )
 {
 	std::ifstream is(filename.c_str(), std::ios_base::in);
+	Context::Scope ctx_scope(mContext);
 	
 	if(is.is_open())
 	{
@@ -66,7 +67,7 @@ ValueHandle runFile( std::string filename )
 		while( !is.eof() )
 		{
 			std::getline(is, line);
-			source.append(line);
+			source.append(line + "\n");
 		}
 		
 		HandleScope scope;
@@ -78,7 +79,7 @@ ValueHandle runFile( std::string filename )
 			if(try_catch.HasCaught())
 			{
 				report(&try_catch);
-				return Undefined();
+				return;
 			}
 		}
 		
@@ -86,16 +87,16 @@ ValueHandle runFile( std::string filename )
 		if(try_catch.HasCaught())
 		{
 			report(&try_catch);
-			return Undefined();
+			return;
 		}
-		return scope.Close(result);
+		return;
 	}
 	else
 	{
 		Util::log("Unable to open: " + filename);
 	}
 	
-	return Undefined();
+	return;
 }
 
 ValueHandle log(const Arguments& args)
@@ -110,7 +111,7 @@ ValueHandle import(const Arguments& args)
 {
 	if( args.Length() >= 1 )
 	{
-		return runFile( strize( args[0]->ToString() ) );
+		MagnetiteCore::Singleton->getScriptManager()->runFile( strize( args[0]->ToString() ) );
 	}
 	return Undefined();
 }
@@ -170,6 +171,35 @@ void ScriptWrapper::init()
 	mContext = Context::New(NULL, global);
 	
 	Context::Scope ctx_scope(mContext);
+}
+
+PersistentObject ScriptWrapper::loadGame( const std::string& name )
+{
+	HandleScope hs;
 	
-	runFile("./scripts/main.js");
+	// This is polluting the global context, loading could be done in a seperate context.
+	Context::Scope scope( mContext );
+	
+	mContext->Global()->Set( String::New("Game"), Object::New() );
+	
+	runFile("./scripts/games/" + name + "/"+ name + ".js");
+	
+	Local<Value> gameVal =  mContext->Global()->Get( String::New("Game"));
+	
+	Local<Object> gameObj = Local<Object>::Cast(gameVal);
+	
+	return Persistent<Object>::New(gameObj);
+}
+
+PersistentObject ScriptWrapper::newGame( const std::string& name )
+{
+	HandleScope hs;
+	
+	// This is polluting the global context, loading could be done in a seperate context.
+	Context::Scope scope( mContext );
+	
+	// There is no cache right now
+	PersistentObject game = loadGame(name);
+		
+	return game;
 }

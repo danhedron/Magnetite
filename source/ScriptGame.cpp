@@ -1,4 +1,4 @@
-#include "BaseGame.h"
+#include "ScriptGame.h"
 #include "BlockFactory.h"
 #include "Character.h"
 #include "MagnetiteCore.h"
@@ -9,48 +9,89 @@
 #include "World.h"
 #include "Explosion.h"
 
-REG_GAME_TYPE( "default", BaseGame )
+//Handled by magic 
+REG_GAME_TYPE( "script", ScriptGame )
 
-BaseGame::BaseGame()
+using namespace v8;
+
+ScriptGame::ScriptGame()
 {
 	mEngine = MagnetiteCore::Singleton; // Bad design they say? Humbug!
 	mPlayer = NULL;
 	clickMode = "remove";
 }
 
-BaseGame::~BaseGame()
+ScriptGame::~ScriptGame()
 {
 
 }
 
-std::string BaseGame::getName()
+std::string ScriptGame::getName()
 {
-	return "Default";
+	HandleScope hs;
+	if( !mScriptObject.IsEmpty() )
+	{
+		if( mScriptObject->Has( String::New("name") ) )
+		{
+			Local<Value> nameVal = mScriptObject->Get( String::New("name") );
+			String::Utf8Value nameStr( nameVal );
+			return *nameStr;
+		}
+	}
+	return "Un-named Game Type";
 }
 
-void BaseGame::_startGameSingle()
+void ScriptGame::setName( const std::string& name )
+{
+	mGameName = name;
+}
+
+void ScriptGame::_setScriptObject( PersistentObject object )
+{
+	mScriptObject = object;
+}
+
+void ScriptGame::_startGameSingle()
 {
 	mIsSinglePlayer = true;
 	_startGame();
 }
 
-void BaseGame::_startGame()
+void ScriptGame::_startGame()
 {
-	Util::log("#== Sandbox Game v0.1 ==================");
-	Util::log("# is multiplayer: " + Util::toString( !isSingleplayer() ) );
+	HandleScope hs;
+	Util::log("#== " + getName() + " ==================");
+	if( !mScriptObject.IsEmpty() && mScriptObject->Has( String::New("onStart") ) )
+	{
+		Local<Value> onStartVal = mScriptObject->Get( String::New("onStart") );
+		if( onStartVal->IsFunction() )
+		{
+			Local<Function> onStart = Local<Function>::Cast( onStartVal );
+			onStart->Call( mScriptObject, 0, NULL );
+		}
+	}
 }
 
-void BaseGame::_loadGame()
+void ScriptGame::_loadGame()
 {
-	
+	HandleScope hs;
+	if( !mScriptObject.IsEmpty() && mScriptObject->Has( String::New("onLoad") ) )
+	{
+		Local<Value> onLoadVal = mScriptObject->Get( String::New("onLoad") );
+		if( onLoadVal->IsFunction() )
+		{
+			Local<Function> onLoad = Local<Function>::Cast( onLoadVal );
+			onLoad->Call( mScriptObject, 0, NULL );
+		}
+	}	
 }
 
-bool BaseGame::isSingleplayer()
+bool ScriptGame::isSingleplayer()
 {
 	return mIsSinglePlayer;
 }
 
-void BaseGame::_playerJoined()
+void ScriptGame::_playerJoined()
 {
 	if( isSingleplayer() ) {
 		mPlayer = createCharacter();
@@ -59,17 +100,17 @@ void BaseGame::_playerJoined()
 	}
 }
 
-Character* BaseGame::getLocalPlayer()
+Character* ScriptGame::getLocalPlayer()
 {
 	return mPlayer;
 }
 
-Character* BaseGame::createCharacter()
+Character* ScriptGame::createCharacter()
 {
 	return mEngine->createCharacter();
 }
 
-void BaseGame::_inputEvents( const InputEvent& e )
+void ScriptGame::_inputEvents( const InputEvent& e )
 {
 	if( e.event == Inputs::FORWARD ) {
 		if( e.down )
@@ -109,13 +150,13 @@ void BaseGame::_inputEvents( const InputEvent& e )
 	}
 }
 
-void BaseGame::_inputMovement( const Vector3& v )
+void ScriptGame::_inputMovement( const Vector3& v )
 {
 	if( getLocalPlayer() )
 		mPlayer->addMoveDelta( v );
 }
 
-void BaseGame::_mouseMoved( const float x, const float y )
+void ScriptGame::_mouseMoved( const float x, const float y )
 {
 	if( getLocalPlayer() ) {
 		mPlayer->getCamera()->pitch( y );
@@ -123,14 +164,14 @@ void BaseGame::_mouseMoved( const float x, const float y )
 	}
 }
 
-void BaseGame::_primary()
+void ScriptGame::_primary()
 {
 	if( getLocalPlayer() ) {
 		playerPrimaryClick( mPlayer );
 	}
 }
 
-void BaseGame::_secondary()
+void ScriptGame::_secondary()
 {
 	if( getLocalPlayer() ) {
 		playerAltClick( mPlayer );
@@ -139,31 +180,31 @@ void BaseGame::_secondary()
 
 //========= Events
 
-void BaseGame::playerJoin( Character* player )
+void ScriptGame::playerJoin( Character* player )
 {
 	Util::log( "A player just joined!" );
 }
 
-void BaseGame::playerSpawn( Character* player )
+void ScriptGame::playerSpawn( Character* player )
 {
 	if( player == mPlayer )
 		Util::log( "You just spawned!" );
 	player->setPosition( Vector3( 0.f, 120.f, 0.f )  );
 }
 
-void BaseGame::playerKilled( Character* player )
+void ScriptGame::playerKilled( Character* player )
 {
 	if( player == mPlayer )
 		Util::log( "You just died! D:" );
 }
 
-void BaseGame::characterDamage( Character* player )
+void ScriptGame::characterDamage( Character* player )
 {
 	if( player == mPlayer )
 		Util::log( "You're taking damage" );
 }
 
-void BaseGame::playerPrimaryClick( Character* player )
+void ScriptGame::playerPrimaryClick( Character* player )
 {
 	raycast_r ray = player->getEyeCast();
 	ray = mEngine->getWorld()->raycastWorld(ray);
@@ -187,7 +228,7 @@ void BaseGame::playerPrimaryClick( Character* player )
 	}
 }
 
-void BaseGame::playerAltClick( Character* player )
+void ScriptGame::playerAltClick( Character* player )
 {
 	raycast_r ray = player->getEyeCast();
 	ray = mEngine->getWorld()->raycastWorld(ray);
@@ -200,12 +241,12 @@ void BaseGame::playerAltClick( Character* player )
 	}
 }
 
-void BaseGame::uiPaint(Renderer* r)
+void ScriptGame::uiPaint(Renderer* r)
 {
 	r->drawText(clickMode, 10, 50);
 }
 
-void BaseGame::keyDown( size_t evt )
+void ScriptGame::keyDown( size_t evt )
 {
 	if( evt == sf::Keyboard::M )
 	{
@@ -215,6 +256,6 @@ void BaseGame::keyDown( size_t evt )
 	}
 }
 
-void BaseGame::keyUp( size_t evt )
+void ScriptGame::keyUp( size_t evt )
 {
 }

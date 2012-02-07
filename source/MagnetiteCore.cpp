@@ -9,6 +9,7 @@
 #include "Character.h"
 #include "BlockFactory.h"
 #include "BaseGame.h"
+#include "ScriptGame.h"
 #include "BulletDebug.h"
 #include "ResourceManager.h"
 #include <ctime>
@@ -108,7 +109,6 @@ void MagnetiteCore::initalizePhysics()
 	mSolver = new btSequentialImpulseConstraintSolver();
 	mPhysicsWorld = new btDiscreteDynamicsWorld( mCCDispatch, mPBroadphase, mSolver, mPCConfig );
 	mPhysicsWorld->setGravity( btVector3( 0.f, -9.81f, 0.f ) );
-
 	mGroundShape = new btStaticPlaneShape( btVector3(0, 1, 0), 0 );
 	mGroundState = new btDefaultMotionState;
 	btRigidBody::btRigidBodyConstructionInfo ci( 0, mGroundState, mGroundShape, btVector3(0,0,0) );
@@ -139,14 +139,22 @@ void MagnetiteCore::screenshot()
 
 void MagnetiteCore::startGame( const std::string& type )
 {
-	mGame = FactoryManager::getManager().createGame(type);
+	mScriptWrapper->init();
+	
+	//mGame = FactoryManager::getManager().createGame(type);
+	ScriptGame* g = new ScriptGame();
+	g->setName("script");
+	g->_setScriptObject( mScriptWrapper->newGame("test") );
+	mGame = g;
 	if( mGame != NULL ) 
 		Util::log("Starting game: " + mGame->getName() );
 	mGame->_startGameSingle();
 	
 	newWorld("test");
 	
-	mScriptWrapper->init();
+	mGame->_loadGame();
+	
+	mScriptWrapper->runFile("./scripts/main.js");
 	
 	// No multiplayer yet so just force player join
 	mGame->_playerJoined();
@@ -317,6 +325,11 @@ ResourceManager* MagnetiteCore::getResourceManager()
 Renderer* MagnetiteCore::getRenderer()
 {
 	return mRenderer;
+}
+
+ScriptWrapper* MagnetiteCore::getScriptManager()
+{
+	return mScriptWrapper;
 }
 
 BaseGame* MagnetiteCore::getGame()

@@ -68,6 +68,11 @@ public:
 	 * Returns a pointer to the Resource Manager
 	 */
 	ResourceManager* getResourceManager();
+	
+	/**
+	 * Returns a pointer to the script manager
+	 */
+	ScriptWrapper* getScriptManager();
 
 	/**
 	 * @return a pointer to the renderer

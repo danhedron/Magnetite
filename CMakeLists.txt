@@ -40,6 +40,7 @@ set(MAGNETITE_SOURCES
 	source/Tests.cpp
 	source/Chunk.cpp
 	source/BaseGame.cpp
+	source/ScriptGame.cpp
 	source/Collision.cpp
 	source/Renderer.cpp
 	source/InputManager.cpp
