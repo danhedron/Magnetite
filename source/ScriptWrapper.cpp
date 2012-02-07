@@ -171,5 +171,5 @@ void ScriptWrapper::init()
 	
 	Context::Scope ctx_scope(mContext);
 	
-	runFile("../scripts/main.js");
+	runFile("./scripts/main.js");
 }
