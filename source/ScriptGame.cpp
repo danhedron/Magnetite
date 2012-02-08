@@ -83,7 +83,7 @@ void ScriptGame::_loadGame()
 			Local<Function> onLoad = Local<Function>::Cast( onLoadVal );
 			onLoad->Call( mScriptObject, 0, NULL );
 		}
-	}	
+	}
 }
 
 bool ScriptGame::isSingleplayer()
@@ -182,13 +182,31 @@ void ScriptGame::_secondary()
 
 void ScriptGame::playerJoin( Character* player )
 {
-	Util::log( "A player just joined!" );
+	HandleScope hs;
+	if( !mScriptObject.IsEmpty() && mScriptObject->Has( String::New("onJoin") ) )
+	{
+		Local<Value> onLoadVal = mScriptObject->Get( String::New("onJoin") );
+		if( onLoadVal->IsFunction() )
+		{
+			Local<Function> onLoad = Local<Function>::Cast( onLoadVal );
+			onLoad->Call( mScriptObject, 0, NULL );
+		}
+	}
 }
 
 void ScriptGame::playerSpawn( Character* player )
 {
-	if( player == mPlayer )
-		Util::log( "You just spawned!" );
+	HandleScope hs;
+	if( !mScriptObject.IsEmpty() && mScriptObject->Has( String::New("onSpawn") ) )
+	{
+		Local<Value> onLoadVal = mScriptObject->Get( String::New("onSpawn") );
+		if( onLoadVal->IsFunction() )
+		{
+			Local<Function> onLoad = Local<Function>::Cast( onLoadVal );
+			onLoad->Call( mScriptObject, 0, NULL );
+		}
+	}
+
 	player->setPosition( Vector3( 0.f, 120.f, 0.f )  );
 }
 

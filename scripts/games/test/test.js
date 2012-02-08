@@ -22,3 +22,19 @@ Game.onLoad = function()
 		world.createBlock( 'cobble', 10, i, 10 );
 	}
 }
+
+/**
+ * Called when a player joins the game
+ */
+Game.onJoin = function( player )
+{
+	console.log('Player joined');
+}
+
+/**
+ * Called when a player spawns
+ */
+Game.onSpawn = function( player )
+{
+	console.log('Player spawned');
+}

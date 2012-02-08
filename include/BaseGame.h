@@ -46,12 +46,12 @@ public:
 	/**
 	 * Called when a player enters the game
 	 */
-	void playerJoin( Character* player );
+	virtual void playerJoin( Character* player );
 
 	/**
 	 * Called when a player is spawning
 	 */
-	void playerSpawn( Character* player );
+	virtual void playerSpawn( Character* player );
 
 	/**
 	 * Called when a player is killed
