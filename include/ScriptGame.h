@@ -85,7 +85,7 @@ public:
 	/**
 	 * Called when the game is ok to render the GUI
 	 */
-	void uiPaint(Renderer* r);
+	virtual void uiPaint(Renderer* r);
 	
 	/**
 	 * Generic key down event

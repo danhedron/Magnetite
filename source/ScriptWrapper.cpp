@@ -1,5 +1,6 @@
 #include "ScriptWrapper.h"
 #include "MagnetiteCore.h"
+#include "Renderer.h"
 #include "World.h"
 #include "BaseBlock.h"
 #include "BlockFactory.h"
@@ -116,6 +117,19 @@ ValueHandle import(const Arguments& args)
 	return Undefined();
 }
 
+ValueHandle debugText(const Arguments& args)
+{
+	if( args.Length() >= 3 )
+	{
+		int x = args[0]->Int32Value();
+		int y = args[1]->Int32Value();
+		std::string text = strize( args[2] );
+		
+		MagnetiteCore::Singleton->getRenderer()->drawText( text, x, y );
+	}
+	return Undefined();
+}
+
 /*=========== World Object functions ===========*/
 ValueHandle world_getBlock(const Arguments& args)
 {
@@ -159,6 +173,7 @@ void ScriptWrapper::init()
 	
 	Handle<ObjectTemplate> console = ObjectTemplate::New();
 	console->Set(String::New("log"), FunctionTemplate::New(log));
+	console->Set(String::New("drawText"), FunctionTemplate::New(debugText));
 	
 	Handle<ObjectTemplate> world = ObjectTemplate::New();
 	world->Set(String::New("getBlock"), FunctionTemplate::New(world_getBlock));
@@ -166,11 +181,17 @@ void ScriptWrapper::init()
 	world->Set(String::New("createBlock"), FunctionTemplate::New(world_createBlock));
 	
 	global->Set(String::New("console"), console);
+	global->Set(String::New("debug"), console);
 	global->Set(String::New("world"), world);
 	
 	mContext = Context::New(NULL, global);
 	
-	Context::Scope ctx_scope(mContext);
+	//Context::Scope ctx_scope(mContext);
+}
+
+PersistentContext ScriptWrapper::getContext()
+{
+	return mContext;
 }
 
 PersistentObject ScriptWrapper::loadGame( const std::string& name )

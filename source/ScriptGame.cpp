@@ -262,6 +262,20 @@ void ScriptGame::playerAltClick( Character* player )
 void ScriptGame::uiPaint(Renderer* r)
 {
 	r->drawText(clickMode, 10, 50);
+	
+	HandleScope hs;
+	PersistentContext ctx = MagnetiteCore::Singleton->getScriptManager()->getContext();
+	Context::Scope scope( ctx );
+	
+	if( !mScriptObject.IsEmpty() && mScriptObject->Has( String::New("draw") ) )
+	{
+		Local<Value> onLoadVal = mScriptObject->Get( String::New("draw") );
+		if( onLoadVal->IsFunction() )
+		{
+			Local<Function> onLoad = Local<Function>::Cast( onLoadVal );
+			onLoad->Call( mScriptObject, 0, NULL );
+		}
+	}
 }
 
 void ScriptGame::keyDown( size_t evt )

@@ -38,3 +38,19 @@ Game.onSpawn = function( player )
 {
 	console.log('Player spawned');
 }
+
+/**
+ * Callback every time the engine updates
+ */
+Game.think = function( dt )
+{
+	
+}
+
+/**
+ * Called every time the world is drawn
+ */
+Game.draw = function( dt )
+{
+	debug.drawText( 100, 100, 'Javascript says hello');
+}

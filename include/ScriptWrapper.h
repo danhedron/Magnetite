@@ -14,7 +14,6 @@ class ScriptWrapper
 	PersistentContext mContext;
 	
 public:
-	PersistentContext getContext();
 	
 	/**
 	 * Loads a game type's script into the cache of game types
@@ -27,6 +26,8 @@ public:
 	PersistentObject newGame( const std::string& name );
 	
 	void runFile( std::string filename );
+	
+	PersistentContext getContext();
 
 	void init();
 };
