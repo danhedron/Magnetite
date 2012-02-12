@@ -205,6 +205,11 @@ void BaseGame::uiPaint(Renderer* r)
 	r->drawText(clickMode, 10, 50);
 }
 
+void BaseGame::think( float dt )
+{
+	
+}
+
 void BaseGame::keyDown( size_t evt )
 {
 	if( evt == sf::Keyboard::M )

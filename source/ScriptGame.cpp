@@ -278,6 +278,25 @@ void ScriptGame::uiPaint(Renderer* r)
 	}
 }
 
+void ScriptGame::think( float dt )
+{	
+	HandleScope hs;
+	PersistentContext ctx = MagnetiteCore::Singleton->getScriptManager()->getContext();
+	Context::Scope scope( ctx );
+	
+	if( !mScriptObject.IsEmpty() && mScriptObject->Has( String::New("think") ) )
+	{
+		Local<Value> onLoadVal = mScriptObject->Get( String::New("think") );
+		if( onLoadVal->IsFunction() )
+		{
+			Local<Function> onLoad = Local<Function>::Cast( onLoadVal );
+			Handle<Value> args[1];
+			args[0] = Number::New( dt );
+			onLoad->Call( mScriptObject, 1, args );
+		}
+	}	
+}
+
 void ScriptGame::keyDown( size_t evt )
 {
 	if( evt == sf::Keyboard::M )
@@ -286,8 +305,37 @@ void ScriptGame::keyDown( size_t evt )
 			clickMode = "explode";
 		else clickMode = "remove";
 	}
+	
+	HandleScope hs;
+	PersistentContext ctx = MagnetiteCore::Singleton->getScriptManager()->getContext();
+	Context::Scope scope( ctx );
+	if( !mScriptObject.IsEmpty() && mScriptObject->Has( String::New("keyDown") ) )
+	{
+		Local<Value> onLoadVal = mScriptObject->Get( String::New("keyDown") );
+		if( onLoadVal->IsFunction() )
+		{
+			Local<Function> onLoad = Local<Function>::Cast( onLoadVal );
+			Handle<Value> args[1];
+			args[0] = Number::New( evt );
+			onLoad->Call( mScriptObject, 1, args );
+		}
+	}
 }
 
 void ScriptGame::keyUp( size_t evt )
 {
+	HandleScope hs;
+	PersistentContext ctx = MagnetiteCore::Singleton->getScriptManager()->getContext();
+	Context::Scope scope( ctx );
+	if( !mScriptObject.IsEmpty() && mScriptObject->Has( String::New("keyUp") ) )
+	{
+		Local<Value> onLoadVal = mScriptObject->Get( String::New("keyUp") );
+		if( onLoadVal->IsFunction() )
+		{
+			Local<Function> onLoad = Local<Function>::Cast( onLoadVal );
+			Handle<Value> args[1];
+			args[0] = Number::New( evt );
+			onLoad->Call( mScriptObject, 1, args );
+		}
+	}
 }

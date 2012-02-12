@@ -144,7 +144,7 @@ void MagnetiteCore::startGame( const std::string& type )
 	//mGame = FactoryManager::getManager().createGame(type);
 	ScriptGame* g = new ScriptGame();
 	g->setName("script");
-	g->_setScriptObject( mScriptWrapper->newGame("test") );
+	g->_setScriptObject( mScriptWrapper->newGame("tetris") );
 	mGame = g;
 	if( mGame != NULL ) 
 		Util::log("Starting game: " + mGame->getName() );
@@ -292,6 +292,11 @@ void MagnetiteCore::go()
 		for( std::vector<Character*>::iterator it = mCharacters.begin(); it != mCharacters.end(); it++ )
 		{
 			(*it)->update( lDelta );
+		}
+		
+		if( mGame != NULL )
+		{
+			mGame->think( lDelta );
 		}
 	
 		//Ensure the renderer has the correct camera

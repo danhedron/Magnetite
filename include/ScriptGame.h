@@ -87,15 +87,17 @@ public:
 	 */
 	virtual void uiPaint(Renderer* r);
 	
+	virtual void think( float dt );
+	
 	/**
 	 * Generic key down event
 	 */
-	void keyDown( size_t evt );
+	virtual void keyDown( size_t evt );
 	
 	/**
 	 * Generic key up event
 	 */
-	void keyUp( size_t evt );
+	virtual void keyUp( size_t evt );
 
 	//========================= Internal stuff
 
