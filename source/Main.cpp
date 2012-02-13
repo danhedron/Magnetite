@@ -25,6 +25,8 @@ Util::LogLevel Util::_loglevel = Util::Info;
 
 int main( int argc, char** argv ) {
 	
+	std::string game = "default";
+	
 	if( argc > 1 ) {
 		char* str = argv[1];
 		if( strstr( str, "--test" ) != NULL ) {
@@ -33,12 +35,15 @@ int main( int argc, char** argv ) {
 
 			return 0;
 		}
+		if( strstr( str, "--game" ) != NULL && argc > 2) {
+			game = std::string(argv[2]);
+		}
 	}
 	MagnetiteCore core;
 
 	core.init(&argc, argv);
 
-	core.startGame("default");
+	core.startGame(game);
 
 	core.go();
 

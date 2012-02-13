@@ -144,7 +144,7 @@ void MagnetiteCore::startGame( const std::string& type )
 	//mGame = FactoryManager::getManager().createGame(type);
 	ScriptGame* g = new ScriptGame();
 	g->setName("script");
-	g->_setScriptObject( mScriptWrapper->newGame("tetris") );
+	g->_setScriptObject( mScriptWrapper->newGame(type) );
 	mGame = g;
 	if( mGame != NULL ) 
 		Util::log("Starting game: " + mGame->getName() );
