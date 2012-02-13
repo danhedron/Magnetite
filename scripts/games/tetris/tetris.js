@@ -16,8 +16,6 @@ function createTetrisField( w, h )
 Game.width = 12;
 Game.height = 20;
 
-Game.field = createTetrisField( Game.width, Game.height );
-
 Game.timer = 0;
 
 Game.colours = [
@@ -97,6 +95,13 @@ Game.onStart = function()
  */
 Game.onLoad = function()
 {
+	this.reset();
+}
+
+Game.reset = function()
+{
+	Game.field = createTetrisField( Game.width, Game.height );
+	Game.score = 0;
 	this.newBlock();
 }
 
@@ -166,10 +171,12 @@ Game.keyDown = function( key )
 				}
 			}
 		}
+		Game.updateWorld();
 	}
 	if( key == 80 )
 	{
 		Game.rotateBlock();
+		Game.updateWorld();
 	}
 	if( key == 81 )
 	{
@@ -187,6 +194,68 @@ Game.keyDown = function( key )
 		}
 		this.updateWorld();
 	}
+	if( key == 77 )
+	{
+		this.updateBlocks();
+	}
+	if( key == 57 )
+	{
+		Game.reset();
+	}
+}
+
+/**
+ * A single tick of the game
+ */
+Game.updateBlocks = function()
+{
+	var b;
+	var below;
+	var stoped = false;
+	for( var x = 0; x < this.width; x+=1 )
+	{
+		for( var y = 0; y < this.height; y+=1 )
+		{
+			var b = this.field[(x*this.height) + y];
+			if( b !== undefined && b.active )
+			{
+				if( y == this.height - 1 ) 
+				{
+					stoped = true;
+				}
+				else
+				{
+					below = this.field[(x*this.height) + y + 1];
+					if( below.active == 0 && below.colour > 0 )
+					{
+						stoped = true;
+					}
+				}
+			}
+		}
+	}
+	
+	if( stoped == true )
+	{
+		this.stopAllActive();
+		this.clearLines();
+		this.newBlock();
+	}
+	
+	for( var x = 0; x < this.width; x+=1 )
+	{
+		for( var y = this.height - 1; y >= 0; y-=1 )
+		{
+			var b = this.field[(x*this.height) + y];
+			if( b !== undefined && b.active )
+			{
+				this.field[(x*this.height) + y + 1] = b;
+				this.field[(x*this.height) + y] = { 'colour':0, 'active':0 };
+			}
+		}
+	}
+	
+	this.updateWorld();
 }
 
 /**
@@ -252,53 +321,7 @@ Game.think = function( dt )
 	this.timer += dt;
 	while( this.timer > 0.5 )
 	{
-		var b;
-		var below;
-		var stoped = false;
-		for( var x = 0; x < this.width; x+=1 )
-		{
-			for( var y = 0; y < this.height; y+=1 )
-			{
-				var b = this.field[(x*this.height) + y];
-				if( b !== undefined && b.active )
-				{
-					if( y == this.height - 1 ) 
-					{
-						stoped = true;
-					}
-					else
-					{
-						below = this.field[(x*this.height) + y + 1];
-						if( below.active == 0 && below.colour > 0 )
-						{
-							stoped = true;
-						}
-					}
-				}
-			}
-		}
-		
-		if( stoped == true )
-		{
-			this.stopAllActive();
-			this.clearLines();
-			this.newBlock();
-		}
-		
-		for( var x = 0; x < this.width; x+=1 )
-		{
-			for( var y = this.height - 1; y >= 0; y-=1 )
-			{
-				var b = this.field[(x*this.height) + y];
-				if( b !== undefined && b.active )
-				{
-					this.field[(x*this.height) + y + 1] = b;
-					this.field[(x*this.height) + y] = { 'colour':0, 'active':0 };
-				}
-			}
-		}
-		
-		this.updateWorld();
+		this.updateBlocks();
 		this.timer -= 0.5;
 	}
 }
@@ -342,6 +365,7 @@ Game.clearLines = function()
 		}
 		if( fill )
 		{
+			this.score += 100;
 			this.pushDown( y );
 		}
 		else
@@ -429,5 +453,5 @@ Game.updateWorld = function()
  */
 Game.draw = function( dt )
 {
-	//debug.drawText( 150, 100, this.drawField());
+	debug.drawText( 20, 100, 'Score: ' + this.score);
 }
