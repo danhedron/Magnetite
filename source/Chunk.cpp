@@ -228,8 +228,14 @@ void Chunk::generate()
 	if( mGeometry != NULL ) 
 	{
 		mGeometry->releaseBuffer();
-		delete[] mGeometry->vertexData;
-		delete[] mGeometry->edgeData;
+		if( mGeometry->vertexCount > 0 )
+		{
+			delete[] mGeometry->vertexData;
+		}
+		if( mGeometry->edgeCount > 0 )
+		{
+			delete[] mGeometry->edgeData;
+		}
 	}
 	else
 	{

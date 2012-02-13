@@ -220,15 +220,18 @@ void World::update( float dt )
 		for( int i = 0; i < wcube; i++ )
 		{
 			if( mChunks[i] )
+			{
 				mChunks[i]->update(dt);
+			}
 		}
 		for( int i = 0; i < wcube; i++ )
 		{
 			if( mChunks[i] )
+			{
 				mChunks[i]->requestGenerate();
+			}
 		}
 	}
-
 }
 
 void World::createSky( size_t time )

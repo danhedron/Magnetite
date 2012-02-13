@@ -456,7 +456,7 @@ void Renderer::render(double dt, World* world)
 			glUniform1i( texLoc, 0 );
 		}
 	}
-
+	
 	if( mDrawWorld ) 
 	{
 		glEnableClientState(GL_VERTEX_ARRAY);
@@ -518,8 +518,6 @@ void Renderer::render(double dt, World* world)
 			MagnetiteCore::Singleton->getPhysicsWorld()->debugDrawWorld();
 			break;
 	};
-
-	drawBlockChooser( dt );
 
 	drawCrosshair( dt );
 }

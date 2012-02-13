@@ -71,13 +71,7 @@ Game.onStart = function()
  */
 Game.onLoad = function()
 {
-	// Create some fancy pillar to demonstrate something
-	for( var i = 0; i < 140; i++ )
-	{
-		world.removeBlock( 10, i, 10 );
-		world.createBlock( 'cobble', 10, i, 10 );
-	}
-	this.newBlock( this.blocks['rod'] );
+	this.newBlock();
 }
 
 /**
@@ -165,6 +159,7 @@ Game.keyDown = function( key )
 				}
 			}
 		}
+		this.updateWorld();
 	}
 }
 
@@ -234,7 +229,7 @@ Game.rotateBlock = function()
 Game.think = function( dt )
 {
 	this.timer += dt;
-	while( this.timer > 1 )
+	while( this.timer > 0.5 )
 	{
 		var b;
 		var below;
@@ -282,8 +277,8 @@ Game.think = function( dt )
 			}
 		}
 		
-		this.drawField();
-		this.timer -= 1;
+		this.updateWorld();
+		this.timer -= 0.5;
 	}
 }
 
@@ -376,10 +371,30 @@ Game.drawField = function()
 	return s;
 }
 
+Game.updateWorld = function()
+{
+	var wx = 1, wy = 1, wz = 0;
+	for( var y = 0; y < this.height; y+=1 )
+	{
+ 		for( var x = 0; x < this.width; x+=1 )
+		{
+			b = this.field[(x*this.height) + y];
+			if( world.getBlock( wx + (this.width - x), wy + (this.height - y), 0 ) )
+			{
+				world.removeBlock( wx + (this.width - x), wy + (this.height - y), 0 );
+			}
+			if( b.colour != 0 )
+			{
+				world.createBlock( 'cobble', wx + (this.width - x), wy + (this.height - y), wz );
+			}
+ 		}
+	}
+}
+
 /**
  * Called every time the world is drawn
  */
 Game.draw = function( dt )
 {
-	debug.drawText( 150, 100, this.drawField());
+	//debug.drawText( 150, 100, this.drawField());
 }
