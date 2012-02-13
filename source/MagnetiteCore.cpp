@@ -285,6 +285,11 @@ void MagnetiteCore::go()
 		
 		mPhysicsWorld->stepSimulation( lDelta );
 		
+		if( mGame != NULL )
+		{
+			mGame->think( lDelta );
+		}
+		
 		//Ensure each loaded chunk is updated before being sent to the GPU
 		mWorld->update( lDelta );
 
@@ -293,12 +298,7 @@ void MagnetiteCore::go()
 		{
 			(*it)->update( lDelta );
 		}
-		
-		if( mGame != NULL )
-		{
-			mGame->think( lDelta );
-		}
-	
+
 		//Ensure the renderer has the correct camera
 		mRenderer->setCamera( mGame->getLocalPlayer()->getCamera() );
 		mRenderer->render(lDelta, mWorld);
