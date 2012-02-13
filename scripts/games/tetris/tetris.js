@@ -20,6 +20,13 @@ Game.field = createTetrisField( Game.width, Game.height );
 
 Game.timer = 0;
 
+Game.colours = [
+	'cobble',
+	'dirt',
+	'grass',
+	'mossycobble'
+];
+
 Game.blocks = [
 	{ 
 		colour: 1,
@@ -180,8 +187,8 @@ Game.rotateBlock = function()
 			{
 				top.x = Math.min( x, top.x );
 				top.y = Math.min( y, top.y );
-				bottom.x = Math.max( x, bottom.x );
-				bottom.y = Math.max( y, bottom.y );
+				bottom.x = Math.max( x+1, bottom.x );
+				bottom.y = Math.max( y+1, bottom.y );
 			}
 			if( b.pivot == true )
 			{
@@ -193,31 +200,26 @@ Game.rotateBlock = function()
 	var rotated = [];
 	var width = bottom.x - top.x;
 	var height = bottom.y - top.y;
-	console.log( width + ' ' + height + ' {' + top.x + ', ' + top.y + '} {' + bottom.x + ', ' + bottom.y +'}' );
-	for( var x = top.x; x <= bottom.x; x += 1 )
+	for( var y = top.y; y <= bottom.y; y += 1 )
 	{
-		for( var y = top.y; y <= bottom.y; y += 1 )
+		for( var x = top.x; x <= bottom.x; x += 1 )
 		{
 			var b = this.field[(x*this.height)+y];
-			if( b.active )
+			if( b.active && b.colour > 0 )
 			{
 				rotated[((x-top.x)*height) + (y - top.y)] = b;
 				this.field[(x*this.height)+y] = {colour: 0, active: 0};
 			}
 		}
 	}
-	for( var y = 0; y <= height; y += 1 )
+	for( var x = 0; x < width; x += 1 )
 	{
-		for( var x = 0; x <= width; x += 1 )
+		for( var y = 0; y < height; y+= 1 )
 		{
-			var b = rotated[(x*height) + y];
-			if( b === undefined )
+			var b = rotated[(x*height)+y];
+			if( b !== undefined )
 			{
-				this.field[((top.x+y)*this.height)+top.y+x] = {colour: 0, active: 0};
-			}
-			else
-			{
-				this.field[((top.x+y)*this.height)+top.y+x] = rotated[(x*height) + y];
+				this.field[((top.x+(height-y-1))*this.height) + top.y + x] = b;
 			}
 		}
 	}
@@ -321,6 +323,7 @@ Game.clearLines = function()
 		}
 		if( fill )
 		{
+			y += 1; // prevent us moving up the field in case there's more than one line
 			this.pushDown( y );
 		}
 	}
@@ -373,19 +376,27 @@ Game.drawField = function()
 
 Game.updateWorld = function()
 {
-	var wx = 1, wy = 1, wz = 0;
+	var wx = 1, wy = 1, wz = 1;
+	// ensure that there's a viewing pane clear
+	for( var y = wy+1; y < wy+this.height+1; y+=1 )
+	{
+		for( var x = wx+1; x < wx+this.width+1; x+=1 )
+		{
+			world.removeBlock( x, y, 0 );
+		}
+	}
 	for( var y = 0; y < this.height; y+=1 )
 	{
  		for( var x = 0; x < this.width; x+=1 )
 		{
 			b = this.field[(x*this.height) + y];
-			if( world.getBlock( wx + (this.width - x), wy + (this.height - y), 0 ) )
+			if( world.getBlock( wx + (this.width - x), wy + (this.height - y), wz ) )
 			{
-				world.removeBlock( wx + (this.width - x), wy + (this.height - y), 0 );
+				world.removeBlock( wx + (this.width - x), wy + (this.height - y), wz );
 			}
 			if( b.colour != 0 )
 			{
-				world.createBlock( 'cobble', wx + (this.width - x), wy + (this.height - y), wz );
+				world.createBlock( this.colours[b.colour - 1], wx + (this.width - x), wy + (this.height - y), wz );
 			}
  		}
 	}
