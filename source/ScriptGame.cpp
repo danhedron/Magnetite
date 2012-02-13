@@ -261,8 +261,6 @@ void ScriptGame::playerAltClick( Character* player )
 
 void ScriptGame::uiPaint(Renderer* r)
 {
-	r->drawText(clickMode, 10, 50);
-	
 	HandleScope hs;
 	PersistentContext ctx = MagnetiteCore::Singleton->getScriptManager()->getContext();
 	Context::Scope scope( ctx );
@@ -299,13 +297,6 @@ void ScriptGame::think( float dt )
 
 void ScriptGame::keyDown( size_t evt )
 {
-	if( evt == sf::Keyboard::M )
-	{
-		if( clickMode == "remove" )
-			clickMode = "explode";
-		else clickMode = "remove";
-	}
-	
 	HandleScope hs;
 	PersistentContext ctx = MagnetiteCore::Singleton->getScriptManager()->getContext();
 	Context::Scope scope( ctx );
