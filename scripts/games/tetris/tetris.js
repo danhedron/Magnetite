@@ -24,7 +24,8 @@ Game.colours = [
 	'cobble',
 	'dirt',
 	'grass',
-	'mossycobble'
+	'mossycobble',
+	'sand'
 ];
 
 Game.blocks = [
@@ -55,12 +56,30 @@ Game.blocks = [
 			[ 0, 0, 0, 0 ]
 		]
 	},
+	{
+		colour: 3,
+		blocks: [
+			[ 0, 0, 1, 0 ],
+			[ 1, 1, 2, 0 ],
+			[ 0, 0, 0, 0 ],
+			[ 0, 0, 0, 0 ]
+		]
+	},
 	{ 
 		colour: 4,
 		blocks: [
 			[ 0, 0, 0, 0 ],
 			[ 0, 1, 1, 0 ],
 			[ 0, 2, 1, 0 ],
+			[ 0, 0, 0, 0 ]
+		]
+	},
+	{
+		colour: 5,
+		blocks: [
+			[ 0, 1, 0, 0 ],
+			[ 0, 1, 1, 0 ],
+			[ 0, 0, 1, 0 ],
 			[ 0, 0, 0, 0 ]
 		]
 	}
@@ -125,7 +144,7 @@ Game.newBlock = function()
 		{
 			var v = l[x];
 			var p = v > 0;
-			this.field[ (x*this.height) + y ] = { colour: p ? data.colour : 0, active: p ? true : false, pivot: (v == 2) ? true : false };
+			this.field[ ((x+(this.width/2)-2)*this.height) + y ] = { colour: p ? data.colour : 0, active: p ? true : false, pivot: (v == 2) ? true : false };
 		}
 	}
 }
@@ -309,7 +328,7 @@ Game.pushDown = function( layer )
  */
 Game.clearLines = function()
 {
-	for( var y = this.height - 1; y >= 0; y -= 1 )
+	for( var y = this.height - 1; y >= 0; )
 	{
 		var fill = true;
 		for( var x = 0; x < this.width; x += 1 )
@@ -323,8 +342,11 @@ Game.clearLines = function()
 		}
 		if( fill )
 		{
-			y += 1; // prevent us moving up the field in case there's more than one line
 			this.pushDown( y );
+		}
+		else
+		{
+			y -= 1;
 		}
 	}
 }
