@@ -2,6 +2,7 @@
 #include "MagnetiteCore.h"
 #include "Renderer.h"
 #include "World.h"
+#include "Player.h"
 #include "BaseBlock.h"
 #include "BlockFactory.h"
 #include <fstream>
@@ -11,6 +12,32 @@ std::string strize( Handle<Value> s )
 {
 	String::Utf8Value v(s);
 	return *v ? *v : "";
+}
+
+ValueHandle wrapVector3( const Vector3& v )
+{
+	HandleScope hs;
+	
+	Local<Object> vec = Object::New();
+	vec->Set( String::New("x"), Number::New( v.x ) );
+	vec->Set( String::New("y"), Number::New( v.y ) );
+	vec->Set( String::New("z"), Number::New( v.z ) );
+	
+	return hs.Close( vec );
+}
+
+Vector3 unwrapVector3( ValueHandle v )
+{
+	HandleScope hs;
+	if( !v->IsObject() ) return Vector3();
+	
+	ObjectHandle veco = ObjectHandle::Cast( v );
+	
+	return Vector3( 
+			veco->Get( String::New("x") )->Int32Value(),
+			veco->Get( String::New("y") )->Int32Value(),
+			veco->Get( String::New("z") )->Int32Value()
+		 );
 }
 
 void report( TryCatch* handler )
@@ -29,6 +56,62 @@ void report( TryCatch* handler )
 		int lnnum = message->GetLineNumber();
 		Util::log( file + ":" + Util::toString(lnnum) + " " + strize( handler->Exception() ) );
 	}
+}
+
+/**
+ * Player functions
+ */
+ValueHandle player_getPosition(const Arguments& args)
+{
+	Handle<Object> self = args.This();
+	Handle<External> rptr = Handle<External>::Cast(self->GetInternalField(0));
+	Player* player = static_cast<Player*>(rptr->Value());
+	
+	return wrapVector3( player->getPosition() );
+}
+
+ValueHandle player_setPosition(const Arguments& args)
+{
+	if( args.Length() > 0 )
+	{
+		Handle<Object> self = args.This();
+		Handle<External> rptr = Handle<External>::Cast(self->GetInternalField(0));
+		Player* player = static_cast<Player*>(rptr->Value());
+		
+		player->setPosition(unwrapVector3( args[0] ));
+	}
+	return Undefined();
+}
+
+typedef std::map<Player*, PersistentObject> WrappedPlayers;
+WrappedPlayers gWrappedPlayers;
+Persistent<ObjectTemplate> playerTemplate;
+
+ValueHandle wrapPlayer( Player* player )
+{
+	HandleScope hs;
+	if( !player ) return Undefined();
+	
+	WrappedPlayers::iterator it = gWrappedPlayers.find( player );
+	if( it != gWrappedPlayers.end() )
+	{
+		return it->second;
+	}
+	
+	if( playerTemplate.IsEmpty() )
+	{
+		playerTemplate = Persistent<ObjectTemplate>::New(ObjectTemplate::New());
+		playerTemplate->SetInternalFieldCount(1);
+		playerTemplate->Set( String::New("getPosition"), FunctionTemplate::New(player_getPosition) );
+		playerTemplate->Set( String::New("setPosition"), FunctionTemplate::New(player_setPosition) );
+	}
+	
+	PersistentObject pl = PersistentObject::New(playerTemplate->NewInstance());
+	gWrappedPlayers.insert( WrappedPlayers::value_type( player, pl ) );
+	
+	pl->SetInternalField(0, External::New(player));
+	
+	return hs.Close(pl);
 }
 
 typedef std::map<BaseBlock*,PersistentObject> WrappedBlocks;

@@ -61,6 +61,7 @@ set(MAGNETITE_SOURCES
 	source/Matrix.cpp
 	source/Vector.cpp
 	source/Character.cpp
+	source/Player.cpp
 	source/BlockFactory.cpp
 	source/BaseBlock.cpp
 	source/StoneBlock.cpp
@@ -105,6 +106,7 @@ set(MAGNETITE_HEADERS
 	include/Sky.h
 	include/Frustum.h
 	include/Camera.h
+	include/Player.h
 	include/Matrix.h
 	include/Vector.h
 	include/Character.h

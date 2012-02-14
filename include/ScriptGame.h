@@ -41,26 +41,16 @@ public:
 	 */
 	bool isSingleplayer();
 
-	/**
-	 * Creates a new, run of the mill character
-	 */
-	Character* createCharacter();
-
-	/**
-	 * Returns the local player
-	 */
-	Character* getLocalPlayer();
-
 	//<== Game Events
 	/**
 	 * Called when a player enters the game
 	 */
-	virtual void playerJoin( Character* player );
+	virtual void playerJoin( Player* player );
 
 	/**
 	 * Called when a player is spawning
 	 */
-	virtual void playerSpawn( Character* player );
+	virtual void playerSpawn( Player* player );
 
 	/**
 	 * Called when a player is killed
@@ -75,12 +65,12 @@ public:
 	/**
 	 * Called When a player primary fires
 	 */
-	void playerPrimaryClick( Character* player );
+	void playerPrimaryClick( Player* player );
 
 	/**
 	 * Called When a player alt fires
 	 */
-	void playerAltClick( Character* player );
+	void playerAltClick( Player* player );
 	
 	/**
 	 * Called when the game is ok to render the GUI

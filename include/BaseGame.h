@@ -3,6 +3,7 @@
 #include "prerequisites.h"
 #include "InputManager.h"
 
+class Player;
 class Character;
 class MagnetiteCore;
 class Renderer;
@@ -13,7 +14,7 @@ protected:
 	//< Reference to the engine object
 	MagnetiteCore* mEngine;
 	//< Reference to the local player ( Or NULL if this is a dedicated server )
-	Character* mPlayer;
+	Player* mPlayer;
 	//< Keeps track of singleplayer ness
 	bool mIsSinglePlayer;
 
@@ -40,18 +41,18 @@ public:
 	/**
 	 * Returns the local player
 	 */
-	Character* getLocalPlayer();
+	Player* getLocalPlayer();
 
 	//<== Game Events
 	/**
 	 * Called when a player enters the game
 	 */
-	virtual void playerJoin( Character* player );
+	virtual void playerJoin( Player* player );
 
 	/**
 	 * Called when a player is spawning
 	 */
-	virtual void playerSpawn( Character* player );
+	virtual void playerSpawn( Player* player );
 
 	/**
 	 * Called when a player is killed
@@ -66,12 +67,12 @@ public:
 	/**
 	 * Called When a player primary fires
 	 */
-	void playerPrimaryClick( Character* player );
+	void playerPrimaryClick( Player* player );
 
 	/**
 	 * Called When a player alt fires
 	 */
-	void playerAltClick( Character* player );
+	void playerAltClick( Player* player );
 	
 	/**
 	 * Called when the game is ok to render the GUI

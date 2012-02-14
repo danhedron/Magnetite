@@ -6,6 +6,7 @@
 #include "InputManager.h"
 #include "StoneBlock.h"
 #include "World.h"
+#include "Player.h"
 #include "Character.h"
 #include "BlockFactory.h"
 #include "BaseGame.h"
@@ -300,7 +301,7 @@ void MagnetiteCore::go()
 		}
 
 		//Ensure the renderer has the correct camera
-		mRenderer->setCamera( mGame->getLocalPlayer()->getCamera() );
+		mRenderer->setCamera( &mGame->getLocalPlayer()->getCamera() );
 		mRenderer->render(lDelta, mWorld);
 		
 		mGame->uiPaint( mRenderer );

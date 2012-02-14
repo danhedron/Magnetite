@@ -1,6 +1,7 @@
 #include "BaseGame.h"
 #include "BlockFactory.h"
 #include "Character.h"
+#include "Player.h"
 #include "MagnetiteCore.h"
 #include "Renderer.h"
 #include "Chunk.h"
@@ -53,13 +54,13 @@ bool BaseGame::isSingleplayer()
 void BaseGame::_playerJoined()
 {
 	if( isSingleplayer() ) {
-		mPlayer = createCharacter();
+		mPlayer = new Player();
 		playerJoin( mPlayer );
 		playerSpawn( mPlayer );
 	}
 }
 
-Character* BaseGame::getLocalPlayer()
+Player* BaseGame::getLocalPlayer()
 {
 	return mPlayer;
 }
@@ -96,13 +97,13 @@ void BaseGame::_inputEvents( const InputEvent& e )
 			_inputMovement( Vector3( 0.f, 0.f, -1.f ) );
 	}
 	if( e.event == Inputs::JUMP && e.down ) {
-		if( getLocalPlayer() ) mPlayer->jump();
+		//if( getLocalPlayer() ) mPlayer->jump();
 	}
 	if( e.event == Inputs::SPRINT ) {
-		if( getLocalPlayer() ) mPlayer->enableSprint( e.down );
+		//if( getLocalPlayer() ) mPlayer->enableSprint( e.down );
 	}
-	if( e.event == Inputs::FLY && e.down ) {
-		if( getLocalPlayer() ) mPlayer->enableFlying( !mPlayer->isFlying() );
+	if( e.event == Inputs::FLY ) {
+		if( getLocalPlayer() ) e.down ? mPlayer->destroyCharacter() : mPlayer->createCharacter();
 	}
 	if( e.event == Inputs::RESPAWN && e.down ) {
 		if( getLocalPlayer() ) mPlayer->setPosition( Vector3( 0, 150.f, 0 ) );
@@ -111,15 +112,15 @@ void BaseGame::_inputEvents( const InputEvent& e )
 
 void BaseGame::_inputMovement( const Vector3& v )
 {
-	if( getLocalPlayer() )
-		mPlayer->addMoveDelta( v );
+	//if( getLocalPlayer() )
+		//mPlayer->addMoveDelta( v );
 }
 
 void BaseGame::_mouseMoved( const float x, const float y )
 {
 	if( getLocalPlayer() ) {
-		mPlayer->getCamera()->pitch( y );
-		mPlayer->getCamera()->yaw( x );
+		mPlayer->getCamera().pitch( y );
+		mPlayer->getCamera().yaw( x );
 	}
 }
 
@@ -139,31 +140,31 @@ void BaseGame::_secondary()
 
 //========= Events
 
-void BaseGame::playerJoin( Character* player )
+void BaseGame::playerJoin( Player* player )
 {
 	Util::log( "A player just joined!" );
 }
 
-void BaseGame::playerSpawn( Character* player )
+void BaseGame::playerSpawn( Player* player )
 {
-	if( player == mPlayer )
-		Util::log( "You just spawned!" );
+	//if( player == mPlayer )
+	//	Util::log( "You just spawned!" );
 	player->setPosition( Vector3( 0.f, 120.f, 0.f )  );
 }
 
 void BaseGame::playerKilled( Character* player )
 {
-	if( player == mPlayer )
-		Util::log( "You just died! D:" );
+	//if( player == mPlayer )
+	//	Util::log( "You just died! D:" );
 }
 
 void BaseGame::characterDamage( Character* player )
 {
-	if( player == mPlayer )
-		Util::log( "You're taking damage" );
+	//if( player == mPlayer )
+	//	Util::log( "You're taking damage" );
 }
 
-void BaseGame::playerPrimaryClick( Character* player )
+void BaseGame::playerPrimaryClick( Player* player )
 {
 	raycast_r ray = player->getEyeCast();
 	ray = mEngine->getWorld()->raycastWorld(ray);
@@ -187,7 +188,7 @@ void BaseGame::playerPrimaryClick( Character* player )
 	}
 }
 
-void BaseGame::playerAltClick( Character* player )
+void BaseGame::playerAltClick( Player* player )
 {
 	raycast_r ray = player->getEyeCast();
 	ray = mEngine->getWorld()->raycastWorld(ray);
@@ -209,7 +210,6 @@ void BaseGame::think( float dt )
 {
 	
 }
-
 void BaseGame::keyDown( size_t evt )
 {
 	if( evt == sf::Keyboard::M )

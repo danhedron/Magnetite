@@ -110,7 +110,7 @@ Game.reset = function()
  */
 Game.onJoin = function( player )
 {
-	console.log('Player joined');
+	console.log( player.getPosition() );
 }
 
 /**
@@ -118,7 +118,8 @@ Game.onJoin = function( player )
  */
 Game.onSpawn = function( player )
 {
-	console.log('Player spawned');
+	console.log('moving player');
+	player.setPosition( { x: 7, y: 10, z: -15 } );
 }
 
 /**

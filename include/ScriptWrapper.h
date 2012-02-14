@@ -6,8 +6,16 @@
 typedef v8::Persistent<v8::Context> PersistentContext;
 typedef v8::Persistent<v8::Object> PersistentObject;
 typedef v8::Handle<v8::Value> ValueHandle;
+typedef v8::Handle<v8::Object> ObjectHandle;
 // It's types all the way down
 typedef std::map<std::string, v8::Persistent<v8::Object>> GameTypePrototypes;
+
+/**
+ * Evil global functions
+ */
+class Player;
+
+ValueHandle wrapPlayer( Player* player );
 
 class ScriptWrapper
 {

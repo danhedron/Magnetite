@@ -3,6 +3,7 @@
 #include "Character.h"
 #include "MagnetiteCore.h"
 #include "Renderer.h"
+#include "Player.h"
 #include "Chunk.h"
 #include "BaseBlock.h"
 #include "Camera.h"
@@ -94,73 +95,26 @@ bool ScriptGame::isSingleplayer()
 void ScriptGame::_playerJoined()
 {
 	if( isSingleplayer() ) {
-		mPlayer = createCharacter();
+		mPlayer = new Player();
 		playerJoin( mPlayer );
 		playerSpawn( mPlayer );
 	}
 }
 
-Character* ScriptGame::getLocalPlayer()
-{
-	return mPlayer;
-}
-
-Character* ScriptGame::createCharacter()
-{
-	return mEngine->createCharacter();
-}
-
 void ScriptGame::_inputEvents( const InputEvent& e )
 {
-	if( e.event == Inputs::FORWARD ) {
-		if( e.down )
-			_inputMovement( Vector3( 0.f, 0.f, -1.f ) );
-		else
-			_inputMovement( Vector3( 0.f, 0.f, 1.f ) );
-	}
-	if( e.event == Inputs::LEFT ) {
-		if( e.down )
-			_inputMovement( Vector3( -1.f, 0.f, 0.f ) );
-		else
-			_inputMovement( Vector3( 1.f, 0.f, 0.f ) );
-	}
-	if( e.event == Inputs::RIGHT ) {
-		if( e.down )
-			_inputMovement( Vector3( 1.f, 0.f, 0.f ) );
-		else
-			_inputMovement( Vector3( -1.f, 0.f, 0.f ) );
-	}
-	if( e.event == Inputs::BACK ) {
-		if( e.down )
-			_inputMovement( Vector3( 0.f, 0.f, 1.f ) );
-		else
-			_inputMovement( Vector3( 0.f, 0.f, -1.f ) );
-	}
-	if( e.event == Inputs::JUMP && e.down ) {
-		if( getLocalPlayer() ) mPlayer->jump();
-	}
-	if( e.event == Inputs::SPRINT ) {
-		if( getLocalPlayer() ) mPlayer->enableSprint( e.down );
-	}
-	if( e.event == Inputs::FLY && e.down ) {
-		if( getLocalPlayer() ) mPlayer->enableFlying( !mPlayer->isFlying() );
-	}
-	if( e.event == Inputs::RESPAWN && e.down ) {
-		if( getLocalPlayer() ) mPlayer->setPosition( Vector3( 0, 150.f, 0 ) );
-	}
 }
 
 void ScriptGame::_inputMovement( const Vector3& v )
 {
-	if( getLocalPlayer() )
-		mPlayer->addMoveDelta( v );
+	
 }
 
 void ScriptGame::_mouseMoved( const float x, const float y )
 {
 	if( getLocalPlayer() ) {
-		mPlayer->getCamera()->pitch( y );
-		mPlayer->getCamera()->yaw( x );
+		mPlayer->getCamera().pitch( y );
+		mPlayer->getCamera().yaw( x );
 	}
 }
 
@@ -180,49 +134,53 @@ void ScriptGame::_secondary()
 
 //========= Events
 
-void ScriptGame::playerJoin( Character* player )
+void ScriptGame::playerJoin( Player* player )
 {
 	HandleScope hs;
+	PersistentContext ctx = MagnetiteCore::Singleton->getScriptManager()->getContext();
+	Context::Scope scope( ctx );
 	if( !mScriptObject.IsEmpty() && mScriptObject->Has( String::New("onJoin") ) )
 	{
 		Local<Value> onLoadVal = mScriptObject->Get( String::New("onJoin") );
 		if( onLoadVal->IsFunction() )
 		{
 			Local<Function> onLoad = Local<Function>::Cast( onLoadVal );
-			onLoad->Call( mScriptObject, 0, NULL );
+			Handle<Value> args[1];
+			args[0] = wrapPlayer( player );
+			onLoad->Call( mScriptObject, 1, args );
 		}
 	}
 }
 
-void ScriptGame::playerSpawn( Character* player )
+void ScriptGame::playerSpawn( Player* player )
 {
 	HandleScope hs;
+	PersistentContext ctx = MagnetiteCore::Singleton->getScriptManager()->getContext();
+	Context::Scope scope( ctx );
 	if( !mScriptObject.IsEmpty() && mScriptObject->Has( String::New("onSpawn") ) )
 	{
 		Local<Value> onLoadVal = mScriptObject->Get( String::New("onSpawn") );
 		if( onLoadVal->IsFunction() )
 		{
 			Local<Function> onLoad = Local<Function>::Cast( onLoadVal );
-			onLoad->Call( mScriptObject, 0, NULL );
+			Handle<Value> args[1];
+			args[0] = wrapPlayer( player );
+			onLoad->Call( mScriptObject, 1, args );
 		}
 	}
-
-	player->setPosition( Vector3( 0.f, 120.f, 0.f )  );
 }
 
 void ScriptGame::playerKilled( Character* player )
 {
-	if( player == mPlayer )
-		Util::log( "You just died! D:" );
+	
 }
 
 void ScriptGame::characterDamage( Character* player )
 {
-	if( player == mPlayer )
-		Util::log( "You're taking damage" );
+	
 }
 
-void ScriptGame::playerPrimaryClick( Character* player )
+void ScriptGame::playerPrimaryClick( Player* player )
 {
 	raycast_r ray = player->getEyeCast();
 	ray = mEngine->getWorld()->raycastWorld(ray);
@@ -246,7 +204,7 @@ void ScriptGame::playerPrimaryClick( Character* player )
 	}
 }
 
-void ScriptGame::playerAltClick( Character* player )
+void ScriptGame::playerAltClick( Player* player )
 {
 	raycast_r ray = player->getEyeCast();
 	ray = mEngine->getWorld()->raycastWorld(ray);
