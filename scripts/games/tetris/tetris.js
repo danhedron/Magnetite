@@ -134,12 +134,12 @@ Game.createPlatform = function()
 			world.createBlock( 'stone', this.platformX + x + 1, this.platformY + y, this.platformZ );
 		}
 	}
-	for( var x = -15; x < 0; x += 1 )
+	for( var x = -16; x < 0; x += 1 )
 	{
 		for( var y = -5; y < this.height+2; y += 1 )
 		{
-			//world.createBlock( 'stone', this.platformX + x + 1, this.platformY + y, this.platformZ );
-			if( ( x > -15 && x < 0 && y < this.height + 1 && y > this.height - 7 ) ) continue;
+			world.createBlock( 'stone', this.platformX + x + 1, this.platformY + y, this.platformZ );
+			if( ( x > -16 && x < 0 && y < this.height + 1 && y > this.height - 5 ) ) continue;
 			world.createBlock( this.platformBlock, this.platformX + x, this.platformY + y, this.platformZ + 1 );
 			
 		}
@@ -203,7 +203,7 @@ Game.newBlock = function()
 		{
 			var v = l[x];
 			var p = v > 0;
-			this.field[ ((x+(this.width/2)-2)*this.height) + y ] = { colour: p ? data.colour : 0, active: p ? true : false, pivot: (v == 2) ? true : false };
+			this.field[ ((x+(this.width/2)-2)*this.height) + y ] = { colour: p ? data[0].colour : 0, active: p ? true : false, pivot: (v == 2) ? true : false };
 		}
 	}
 	
@@ -482,8 +482,7 @@ Game.updateWorld = function()
  		for( var x = 0; x < this.width; x+=1 )
 		{
 			b = this.field[(x*this.height) + y];
-			var block = world.getBlock( this.platformX + x + 1, this.platformY + (this.height - y), this.platformZ + 1 );
-			if( block !== undefined && block.type != this.colours[b.colour - 1] )
+			if( b !== undefined )
 			{
 				world.removeBlock( this.platformX + x + 1, this.platformY + (this.height - y), this.platformZ + 1 );
 			}
@@ -509,6 +508,10 @@ Game.updateWorld = function()
 				if( p )
 				{
 					world.createBlock( type, this.platformX + ( -5 * i ) - 4 + x, this.platformY + this.height - 1 - y, this.platformZ + 1 );
+				}
+				else
+				{
+					world.removeBlock( this.platformX + ( -5 * i ) - 4 + x, this.platformY + this.height - 1 - y, this.platformZ + 1 );
 				}
 			}
 		}
