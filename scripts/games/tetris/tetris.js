@@ -310,7 +310,7 @@ Game.updateBlocks = function()
 		}
 	}
 	
-	//this.updateWorld();
+	this.updateWorld();
 }
 
 /**

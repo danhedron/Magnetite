@@ -85,6 +85,10 @@ void Chunk::setBlockAt( BlockPtr block, short index )
 {
 	if( index < 0 || index > CHUNK_SIZE )
 		return;
+	if( mBlocks[ index ] != NULL )
+	{
+		removeBlockAt( index );
+	}
 	mBlocks[ index ] = block;
 	_raiseChunkFlag( DataUpdated );
 }
