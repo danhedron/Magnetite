@@ -21,7 +21,7 @@ public:
 
 	void setWorldTransform( const btTransform &world ) {
 		if( mObject ==  NULL ) return;
-		btQuaternion rot = world.getRotation();
+		//btQuaternion rot = world.getRotation();
 		// Wait we don't support that yet.
 		btVector3 p = world.getOrigin();
 		mObject->_physicsUpdateTransform( Vector3( p.x(), p.y(), p.z() ) );

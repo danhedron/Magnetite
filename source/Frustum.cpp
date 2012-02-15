@@ -24,10 +24,10 @@ Frustum::Frustum()
 : mAspect( 1.f ),
 mNear( 0.01f ),
 mFar( 1000.f ),
-mTop( 0 ),
-mBottom( 0 ),
 mLeft( 0 ),
 mRight( 0 ),
+mTop( 0 ),
+mBottom( 0 ),
 mCamera( NULL ),
 mFrustumVolume( NULL )
 {
@@ -179,7 +179,7 @@ int Frustum::intersectsAABB(const Vector3 &mins, const Vector3 &maxs)
 
 void Frustum::updateFrustumVolume()
 {
-	if( mFrustumVolume )
+	/*if( mFrustumVolume )
 		delete mFrustumVolume;
 	mFrustumVolume = new GLgeometry;
 
@@ -261,5 +261,5 @@ void Frustum::updateFrustumVolume()
 	mFrustumVolume->edgeData = edges;
 	mFrustumVolume->edgeCount = 24;
 
-		
+	*/	
 }

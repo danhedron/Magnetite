@@ -61,6 +61,8 @@ void ScriptGame::_startGameSingle()
 void ScriptGame::_startGame()
 {
 	HandleScope hs;
+	PersistentContext ctx = MagnetiteCore::Singleton->getScriptManager()->getContext();
+	Context::Scope scope( ctx );
 	Util::log("#== " + getName() + " ==================");
 	if( !mScriptObject.IsEmpty() && mScriptObject->Has( String::New("onStart") ) )
 	{
@@ -76,6 +78,8 @@ void ScriptGame::_startGame()
 void ScriptGame::_loadGame()
 {
 	HandleScope hs;
+	PersistentContext ctx = MagnetiteCore::Singleton->getScriptManager()->getContext();
+	Context::Scope scope( ctx );
 	if( !mScriptObject.IsEmpty() && mScriptObject->Has( String::New("onLoad") ) )
 	{
 		Local<Value> onLoadVal = mScriptObject->Get( String::New("onLoad") );

@@ -2,8 +2,8 @@
 #include "Matrix.h"
 
 Camera::Camera(void)
-: mPitch ( 0 ),
-mYaw( 0 )
+: mYaw( 0 ),
+mPitch ( 0 )
 {
 	mViewFrustum.setCamera(this);
 	setPosition(Vector3());

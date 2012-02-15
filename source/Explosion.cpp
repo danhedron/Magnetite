@@ -18,10 +18,6 @@ Explosion::~Explosion()
 void Explosion::explode()
 {
 	World* world = MagnetiteCore::Singleton->getWorld();
-	Renderer* renderer = MagnetiteCore::Singleton->getRenderer();
-	
-	int totalRays = 0;
-	int totalInMXZ = 0;
 
 	float step = 0.5f;
 	float length = 5.0f;

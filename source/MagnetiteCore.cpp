@@ -29,20 +29,21 @@ void globalEventHandler( const InputEvent& evt )
 }
 
 MagnetiteCore::MagnetiteCore(void)
-: mContinue( true ),
-mWorld( NULL ),
+:
 mResourceManager( NULL ),
+mScriptWrapper( NULL ),
 mTextureManager( NULL ),
 mInputManager( NULL ),
-mScriptWrapper( NULL ),
+mWorld( NULL ),
+mContinue( true ),
 mTimescale( 1.f ),
-mLastX( 0.f ),
-mLastY( 0.f ),
 mPBroadphase( NULL ),
 mPCConfig( NULL ),
 mCCDispatch ( NULL ),
 mSolver( NULL ),
-mPhysicsWorld( NULL )
+mPhysicsWorld( NULL ),
+mLastX( 0.f ),
+mLastY( 0.f )
 {
 	MagnetiteCore::Singleton = this;
 	mRenderer = new Renderer();
@@ -352,7 +353,7 @@ void MagnetiteCore::newWorld( std::string name )
 {
 	unloadWorld();
 
-	mWorld = new World( 5 );
+	mWorld = new World( 10 );
 	//mWorld->newWorld( name );
 }
 

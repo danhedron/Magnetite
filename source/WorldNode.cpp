@@ -110,7 +110,7 @@ WorldNode* WorldNode::getNodeAt( const Vector3& pos , bool create )
 
 Chunk* WorldNode::getChunkAt( const ChunkIndex& idx, bool create )
 {
-
+	return NULL;
 }
 
 bool WorldNode::isChunk()
@@ -189,5 +189,5 @@ WorldNode* WorldNode::getNodeAt( const ChunkIndex& idx, bool create )
 		return children[arryIdx];
 	}
 	
-	
+	return NULL;
 }

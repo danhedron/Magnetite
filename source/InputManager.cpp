@@ -25,7 +25,6 @@ void InputManager::loadInputs()
 	std::ifstream stream("../config/inputs");
 	if( stream && !stream.bad() )
 	{
-		size_t line_c = 1;
 		while( !stream.eof() ) 
 		{
 			std::string event = "";
@@ -58,6 +57,8 @@ std::string InputManager::inputToString( Inputs::Event evt )
 			return "jump";
 		case Inputs::SPRINT:
 			return "sprint";
+		default:
+			return "";
 	}
 	return "";
 }

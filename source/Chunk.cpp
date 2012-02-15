@@ -9,10 +9,11 @@
 
 Chunk::Chunk( ChunkIndex index )
 : mGeometry (NULL),
-mPhysicsBody( NULL ),
-mPhysicsMesh( NULL ),
+mChunkFlags( 0 ),
 mPhysicsShape( NULL ),
-mPhysicsState( NULL )
+mPhysicsState( NULL ),
+mPhysicsMesh( NULL ),
+mPhysicsBody( NULL )
 {
 	mVisibleFaces = 0;
 	mWorldIndex = index;
@@ -159,7 +160,6 @@ void Chunk::updateVisibility( )
 					if( mBlocks[BLOCK_INDEX_2( x, y, z)] == NULL ) continue;
 					BaseBlock* b = mBlocks[BLOCK_INDEX_2( x, y, z)];
 					short visFlags = 0;
-					short visOrig = b->getVisFlags();
 					//Check All axes for adjacent blocks.
 					BaseBlock* cb = w->getBlockAt( worldX + x + 1, worldY + y, worldZ + z );
 					if( cb == NULL || !cb->isOpaque() ) {
@@ -328,7 +328,7 @@ void Chunk::_raiseChunkFlag( uint16_t flag )
 
 bool Chunk::_hasChunkFlag( uint16_t flag )
 {
-	return ( mChunkFlags & flag == flag );
+	return ( (mChunkFlags & flag) == flag );
 }
 
 void Chunk::_lowerChunkFlag( uint16_t flag )

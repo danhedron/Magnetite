@@ -109,7 +109,7 @@ float World::getLightColor( LightIndex light )
 
 void World::destoryWorld()
 {
-	for( int i = 0; i < mWorldSize*mWorldSize*mWorldSize; i++ )
+	for( size_t i = 0; i < mWorldSize*mWorldSize*mWorldSize; i++ )
 	{
 		if(mChunks[i])
 		{
@@ -198,7 +198,6 @@ void World::update( float dt )
 		mSky->update( dt );
 
 	// Proccess the chunk loading queue
-	int c = 0;
 	if( mChunksToLoad.size() > 0 ) {
 		mWorldStage = WORLD_GEN;
 		for( int i = 0; mChunksToLoad.size() > 0 && i < 10; i++ ) {

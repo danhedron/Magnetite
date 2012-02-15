@@ -167,7 +167,8 @@ void ScriptWrapper::runFile( std::string filename )
 			}
 		}
 		
-		ValueHandle result = script->Run();
+		script->Run();
+		
 		if(try_catch.HasCaught())
 		{
 			report(&try_catch);
@@ -185,10 +186,11 @@ void ScriptWrapper::runFile( std::string filename )
 
 ValueHandle log(const Arguments& args)
 {
-	for( size_t i = 0; i < args.Length(); i++ )
+	for( int i = 0; i < args.Length(); i++ )
 	{
 		Util::log( strize(args[i]->ToString() ));
 	}
+	return Undefined();
 }
 
 ValueHandle import(const Arguments& args)

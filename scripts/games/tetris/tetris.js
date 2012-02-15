@@ -16,6 +16,15 @@ function createTetrisField( w, h )
 Game.width = 12;
 Game.height = 20;
 
+Game.platformX = 90 - Math.ceil(Game.width / 2);
+Game.platformY = 122;
+Game.platformZ = 40;
+Game.platformBlock = 'cobble';
+
+Game.cameraX = 84;
+Game.cameraY = 132;
+Game.cameraZ = 55;
+
 Game.timer = 0;
 
 Game.colours = [
@@ -26,6 +35,7 @@ Game.colours = [
 	'sand'
 ];
 
+Game.next = [];
 Game.blocks = [
 	{ 
 		colour: 1,
@@ -96,6 +106,44 @@ Game.onStart = function()
 Game.onLoad = function()
 {
 	this.reset();
+	this.createPlatform();
+}
+
+/**
+ * Creates the platform on which the tetris game is played
+ */
+Game.createPlatform = function()
+{
+	for( var x = 0; x < this.width+2; x += 1 )
+	{
+		world.createBlock( this.platformBlock, this.platformX + x, this.platformY + this.height + 1, this.platformZ + 1 );
+		for( var z = 0; z < 2; z += 1 )
+		{
+			for( var y = 0; y < 5; y += 1 )
+			{
+				world.createBlock( this.platformBlock, this.platformX + x, this.platformY - y, this.platformZ + z );
+			}
+		}
+	}
+	for( var y = 0; y < this.height+1; y += 1 )
+	{
+		world.createBlock( this.platformBlock, this.platformX, this.platformY + y, this.platformZ + 1 );
+		world.createBlock( this.platformBlock, this.platformX + this.width + 1, this.platformY + y, this.platformZ + 1 );
+		for( var x = 0; x < this.width; x+= 1 )
+		{
+			world.createBlock( 'stone', this.platformX + x + 1, this.platformY + y, this.platformZ );
+		}
+	}
+	for( var x = -15; x < 0; x += 1 )
+	{
+		for( var y = -5; y < this.height+2; y += 1 )
+		{
+			//world.createBlock( 'stone', this.platformX + x + 1, this.platformY + y, this.platformZ );
+			if( ( x > -15 && x < 0 && y < this.height + 1 && y > this.height - 7 ) ) continue;
+			world.createBlock( this.platformBlock, this.platformX + x, this.platformY + y, this.platformZ + 1 );
+			
+		}
+	}
 }
 
 Game.reset = function()
@@ -118,8 +166,7 @@ Game.onJoin = function( player )
  */
 Game.onSpawn = function( player )
 {
-	console.log('moving player');
-	player.setPosition( { x: 7, y: 10, z: -15 } );
+	player.setPosition( { x: this.cameraX, y: this.cameraY, z: this.cameraZ } );
 }
 
 /**
@@ -141,8 +188,14 @@ Game.stopAllActive = function()
  */
 Game.newBlock = function()
 {
-	var data = this.blocks[ Math.floor(Math.random()*this.blocks.length) ];
-	var block = data.blocks;
+	while( this.next.length < 4 )
+	{
+		var data = this.blocks[ Math.floor(Math.random()*this.blocks.length) ];
+		this.next.push( data );
+	}
+	
+	var data = this.next.splice(0, 1);
+	var block = data[0].blocks;
 	for( var y = 0; y < block.length; y += 1 )
 	{
 		var l = block[y];
@@ -153,6 +206,7 @@ Game.newBlock = function()
 			this.field[ ((x+(this.width/2)-2)*this.height) + y ] = { colour: p ? data.colour : 0, active: p ? true : false, pivot: (v == 2) ? true : false };
 		}
 	}
+	
 }
 
 Game.keyDown = function( key )
@@ -256,7 +310,7 @@ Game.updateBlocks = function()
 		}
 	}
 	
-	this.updateWorld();
+	//this.updateWorld();
 }
 
 /**
@@ -423,29 +477,41 @@ Game.drawField = function()
 
 Game.updateWorld = function()
 {
-	var wx = 1, wy = 1, wz = 1;
-	// ensure that there's a viewing pane clear
-	for( var y = wy+1; y < wy+this.height+1; y+=1 )
-	{
-		for( var x = wx+1; x < wx+this.width+1; x+=1 )
-		{
-			world.removeBlock( x, y, 0 );
-		}
-	}
 	for( var y = 0; y < this.height; y+=1 )
 	{
  		for( var x = 0; x < this.width; x+=1 )
 		{
 			b = this.field[(x*this.height) + y];
-			if( world.getBlock( wx + (this.width - x), wy + (this.height - y), wz ) )
+			var block = world.getBlock( this.platformX + x + 1, this.platformY + (this.height - y), this.platformZ + 1 );
+			if( block !== undefined && block.type != this.colours[b.colour - 1] )
 			{
-				world.removeBlock( wx + (this.width - x), wy + (this.height - y), wz );
+				world.removeBlock( this.platformX + x + 1, this.platformY + (this.height - y), this.platformZ + 1 );
 			}
 			if( b.colour != 0 )
 			{
-				world.createBlock( this.colours[b.colour - 1], wx + (this.width - x), wy + (this.height - y), wz );
+				world.createBlock( this.colours[b.colour - 1], this.platformX + x + 1 , this.platformY + (this.height - y), this.platformZ + 1 );
 			}
  		}
+	}
+	
+	for( var i = 0; i < this.next.length; i += 1 )
+	{
+		//5
+		var block = this.next[i].blocks;
+		for( var y = 0; y < block.length; y += 1 )
+		{
+			var l = block[y];
+			for( var x = 0; x < l.length; x += 1 )
+			{
+				var v = l[x];
+				var p = v > 0;
+				var type = this.colours[this.next[i].colour-1];
+				if( p )
+				{
+					world.createBlock( type, this.platformX + ( -5 * i ) - 4 + x, this.platformY + this.height - 1 - y, this.platformZ + 1 );
+				}
+			}
+		}
 	}
 }
 

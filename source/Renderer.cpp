@@ -185,19 +185,20 @@ void GLprogram::bindAttribute( int index, std::string attribute )
 Renderer::Renderer(void)
 : totalTime( 0 ),
 chunkVbo( 0 ),
+chunkSize( 0 ),
 mScrWidth( 0 ),
 mScrHeight( 0 ),
 mBlRendered( 0 ),
 mBlTotal( 0 ),
 mRenderMode( RENDER_SOLID ),
-mGeomType( GEOM_FALLBACK ),
 mDebugMode( DEBUG_OFF ),
-mFpsAvg( 0 ),
 mCamera( NULL ),
-blockType( "" ),
+mFpsAvg( 0 ),
 mDrawFrustum( false ),
 mDrawWorld( true ),
-mWorldProgram( NULL )
+mWorldProgram( NULL ),
+mGeomType( GEOM_FALLBACK ),
+blockType( "" )
 {
 }
 
@@ -361,12 +362,15 @@ void Renderer::toggleCameraFrustum()
 	}
 }
 
-GLvertex Renderer::vertex(float x, float y, float z, float nx, float ny, float nz, float u, float v, float r, float g, float b)
+GLvertex Renderer::vertex(float x, float y, float z, float u, float v, float l)
 {
-	size_t u0 = u;
-	size_t v0 = v;
-	size_t l0 = r * 255;
-	GLvertex vert = { x, y, z, (GLubyte)u0, (GLubyte)v0, (GLubyte)l0 }; //nx, ny, nz,
+	GLvertex vert;
+	vert.x = x;
+	vert.y = y;
+	vert.z = z;
+	vert.u0 = (GLubyte)u;
+	vert.v0 = (GLubyte)v;
+	vert.l = (GLubyte)(l*255);
 	return vert;
 }
 
@@ -561,10 +565,9 @@ void Renderer::_renderChunk( Chunk* chunk )
 		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, chunkGeom->indexBO );
 
 		glVertexAttribPointer( attrTC, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(12) );
+		glEnableVertexAttribArray(attrTC);
 		//glVertexAttribPointer( attrL, 1, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(15) );
 		//glEnableVertexAttribArray(attrL);
-		glEnableVertexAttribArray(attrTC);
-
 
 		//glNormalPointer( GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(12) );
 		//glTexCoordPointer( 2, GL_UNSIGNED_SHORT, sizeof(GLvertex), BUFFER_OFFSET(12));
@@ -613,7 +616,6 @@ void Renderer::drawBlockChooser( double dt )
 	}
 	
 	std::stringstream ss;
-	int n = 0;
 	auto origIter = iter;
 	
 	for( int i = 1; i < 4; i++ ) 

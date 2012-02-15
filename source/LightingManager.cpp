@@ -46,8 +46,6 @@ struct Sample {
 	}
 };
 
-static int ry = 0;
-
 void LightingManager::gatherLight( Chunk* chunk )
 {
 	BaseBlock* block = NULL;
@@ -70,8 +68,6 @@ void LightingManager::gatherLight( Chunk* chunk )
 			pts[k].y = y;
 			pts[k].z = sin(phi)*r;
 		}
-
-		size_t r = 0;
 
 		for( int i = 0; i < ray_count; i++ ) {
 			IntRay current;
@@ -128,9 +124,6 @@ void LightingManager::gatherLight( Chunk* chunk )
 	int xoff, yoff, zoff;
 	BaseBlock* obs = NULL;
 	bool collided;
-	bool outside;
-	int rt = 0;
-	int rc = 0;
 	float right = 0, left = 0, top = 0, bottom = 0, front = 0, back = 0;
 	for( short x = 0; x < CHUNK_WIDTH; x++ ) {
 		for( short y = 0; y < CHUNK_HEIGHT; y++ ) {

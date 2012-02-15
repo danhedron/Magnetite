@@ -2,10 +2,10 @@
 #include <fstream>
 
 ShaderResource::ShaderResource( std::string file )
-	: BaseResource( file ),
-	mName( 0 ),
-	mSource("")
-	  
+: 	BaseResource( file ),
+mSource(""),
+mName( 0 )
+
 {
 
 }

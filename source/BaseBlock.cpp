@@ -95,21 +95,17 @@ void BaseBlock::buildCubeData( BlockContext& ctx, size_t& ind, size_t& eInd, GLv
 		
 		float color = World::getLightColor( ctx.world->getLightLevel( wx, wy, wz+1 ) );
 		data[ind + 0] = Renderer::vertex( x + 1.0f, y + 1.0f,	z + 1.0f, // Coordinates
-								0.0f, 0.0f, -1.0f,
 								rect.x, rect.y,
-								color,color,color);
+								color );
 		data[ind + 1] = Renderer::vertex( x - 0.0f, y + 1.0f, z + 1.0f, // Coordinates
-								0.0f, 0.0f, -1.0f,
 								rect.x + rect.w, rect.y,
-								color,color,color );
+								color );
 		data[ind + 2] = Renderer::vertex( x - 0.0f, y - 0.0f, z + 1.0f, // Coordinates
-								0.0f, 0.0f, -1.0f,
 								rect.x + rect.w, rect.y + rect.h,
-								color,color,color );
+								color );
 		data[ind + 3] = Renderer::vertex( x + 1.0f, y - 0.0f, z + 1.0f, // Coordinates
-								0.0f, 0.0f, -1.0f,
 								rect.x, rect.y + rect.h,
-								color,color,color );
+								color );
 		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
 		edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
 		eInd += 6;
@@ -122,21 +118,17 @@ void BaseBlock::buildCubeData( BlockContext& ctx, size_t& ind, size_t& eInd, GLv
 
 		float color = World::getLightColor( ctx.world->getLightLevel( wx, wy, wz-1 ) );
 		data[ind + 0] = Renderer::vertex( x + 1.0f, y + 1.0f, z - 0.0f, // Coordinates
-								0.0f, 0.0f, 1.0f,
 								rect.x, rect.y,
-								color,color,color );
+								color );
 		data[ind + 1] = Renderer::vertex( x - 0.0f, y + 1.0f, z - 0.0f, // Coordinates
-								0.0f, 0.0f, 1.0f,
 								rect.x + rect.w, rect.y,
-								color,color,color );
+								color );
 		data[ind + 2] = Renderer::vertex( x - 0.0f, y - 0.0f, z - 0.0f, // Coordinates
-								0.0f, 0.0f, 1.0f,
 								rect.x + rect.w, rect.y + rect.h,
-								color,color,color );
+								color );
 		data[ind + 3] = Renderer::vertex( x + 1.0f, y - 0.0f, z - 0.0f, // Coordinates
-								0.0f, 0.0f, 1.0f,
 								rect.x, rect.y + rect.h,
-								color,color,color );
+								color );
 		edges[eInd + 5] = ind + 2; edges[eInd + 4] = ind + 1; edges[eInd + 3] = ind + 0;
 		edges[eInd + 2] = ind + 2; edges[eInd + 1] = ind + 0; edges[eInd + 0] = ind + 3;
 		eInd += 6;
@@ -149,21 +141,17 @@ void BaseBlock::buildCubeData( BlockContext& ctx, size_t& ind, size_t& eInd, GLv
 
 		float color = World::getLightColor( ctx.world->getLightLevel( wx+1, wy, wz ) );
 		data[ind + 0] = Renderer::vertex( x + 1.0f, y + 1.0f, z + 1.0f, // Coordinates
-								1.0f, 0.0f, 0.0f,
 								rect.x + rect.w, rect.y,
-								color,color,color );
+								color );
 		data[ind + 1] = Renderer::vertex( x + 1.0f, y - 0.0f, z + 1.0f, // Coordinates
-								1.0f, 0.0f, 0.0f,
 								rect.x + rect.w, rect.y + rect.h,
-								color,color,color );
+								color );
 		data[ind + 2] = Renderer::vertex( x + 1.0f, y - 0.0f, z - 0.0f, // Coordinates
-								1.0f, 0.0f, 0.0f,
 								rect.x, rect.y + rect.h,
-								color,color,color );
+								color );
 		data[ind + 3] = Renderer::vertex( x + 1.0f, y + 1.0f, z - 0.0f, // Coordinates
-								1.0f, 0.0f, 0.0f,
 								rect.x, rect.y,
-								color,color,color );
+								color );
 		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
 		edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
 		eInd += 6;
@@ -176,21 +164,17 @@ void BaseBlock::buildCubeData( BlockContext& ctx, size_t& ind, size_t& eInd, GLv
 
 		float color = World::getLightColor( ctx.world->getLightLevel( wx, wy-1, wz ) );
 		data[ind + 0] = Renderer::vertex( x - 0.0f, y - 0.0f, z + 1.0f, // Coordinates
-								0.0f, -1.0f, 0.0f,
 								rect.x, rect.y,
-								color,color,color );
+								color );
 		data[ind + 1] = Renderer::vertex( x - 0.0f, y - 0.0f, z - 0.0f, // Coordinates
-								0.0f, -1.0f, 0.0f,
 								rect.x + rect.w, rect.y,
-								color,color,color );
+								color );
 		data[ind + 2] = Renderer::vertex( x + 1.0f, y - 0.0f, z - 0.0f, // Coordinates
-								0.0f, -1.0f, 0.0f,
 								rect.x + rect.w, rect.y + rect.h,
-								color,color,color );
+								color );
 		data[ind + 3] = Renderer::vertex( x + 1.0f, y - 0.0f, z + 1.0f, // Coordinates
-								0.0f, -1.0f, 0.0f,
 								rect.x, rect.y + rect.h,
-								color,color,color );
+								color );
 		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
 		edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
 		eInd += 6;
@@ -203,21 +187,17 @@ void BaseBlock::buildCubeData( BlockContext& ctx, size_t& ind, size_t& eInd, GLv
 
 		float color = World::getLightColor( ctx.world->getLightLevel( wx, wy+1, wz ) );
 		data[ind + 0] = Renderer::vertex( x - 0.0f, y + 1.0f, z + 1.0f, // Coordinates
-								0.0f, 1.0f, 0.0f,
 								rect.x, rect.y,
-								color,color,color );
+								color );
 		data[ind + 1] = Renderer::vertex( x + 1.0f, y + 1.0f, z + 1.0f, // Coordinates
-								0.0f, 1.0f, 0.0f,
 								rect.x + rect.w, rect.y,
-								color,color,color );
+								color );
 		data[ind + 2] = Renderer::vertex( x + 1.0f, y + 1.0f, z - 0.0f, // Coordinates
-								0.0f, 1.0f, 0.0f,
 								rect.x + rect.w, rect.y + rect.h,
-								color,color,color );
+								color );
 		data[ind + 3] = Renderer::vertex( x - 0.0f, y + 1.0f, z - 0.0f, // Coordinates
-								0.0f, 1.0f, 0.0f,
 								rect.x, rect.y + rect.h,
-								color,color,color );
+								color );
 		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
 		edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
 		eInd += 6;
@@ -230,21 +210,17 @@ void BaseBlock::buildCubeData( BlockContext& ctx, size_t& ind, size_t& eInd, GLv
 
 		float color = World::getLightColor( ctx.world->getLightLevel( wx-1, wy, wz ) );
 		data[ind + 0] = Renderer::vertex( x - 0.0f, y + 1.0f, z - 0.0f, // Coordinates
-								-1.0f, 0.0f, 0.0f,
 								rect.x + rect.w, rect.y,
-								color,color,color );
+								color );
 		data[ind + 1] = Renderer::vertex( x - 0.0f, y - 0.0f, z - 0.0f, // Coordinates
-								-1.0f, 0.0f, 0.0f,
 								rect.x + rect.w, rect.y + rect.h,
-								color,color,color );
+								color );
 		data[ind + 2] = Renderer::vertex( x - 0.0f, y - 0.0f, z + 1.0f, // Coordinates
-								-1.0f, 0.0f, 0.0f,
 								rect.x, rect.y + rect.h,
-								color,color,color );
+								color );
 		data[ind + 3] = Renderer::vertex( x - 0.0f, y + 1.0f, z + 1.0f, // Coordinates
-								-1.0f, 0.0f, 0.0f,
 								rect.x, rect.y,
-								color,color,color );
+								color );
 		edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
 		edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
 		eInd += 6;

@@ -14,7 +14,6 @@ void Collision::AABBvsAABB( AABB &a, AABB &b, CollisionResponse& resp )
 	resp.collision = overlap( a.min(), a.max(), b.min(), b.max() );
 
 	if( resp.collision ) {
-		Vector3 d = a.center - b.center;
 		resp.response = Vector3();
 
 		Vector3 mina = a.min();
