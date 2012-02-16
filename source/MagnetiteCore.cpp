@@ -174,9 +174,6 @@ void MagnetiteCore::mouseMoved( const float x, const float y )
 
 void MagnetiteCore::go() 
 {
-	// Print factory list for testing
-	FactoryManager::getManager().logFactories();
-	
 	int lastX = mWindow.GetWidth()/2;
 	int lastY = mWindow.GetHeight()/2;
 

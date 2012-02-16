@@ -249,6 +249,24 @@ ValueHandle world_createBlock(const Arguments& args)
 	return Undefined();
 }
 
+/**
+ * Meta api
+ */
+ValueHandle meta_blocks_availableTypes(Local<String> prop,
+						   const AccessorInfo& info) {
+	HandleScope hs;
+	
+	BlockFactoryList& list = FactoryManager::getManager().blockFactoryList;
+	Local<Array> types = Array::New(list.size());
+	size_t i = 0;
+	for( BlockFactoryList::iterator it = list.begin(); it != list.end(); ++it )
+	{
+		types->Set( Number::New( i++ ), String::New((*it).first.c_str()) );
+	}
+	
+	return hs.Close( types );
+}
+
 void ScriptWrapper::init()
 {
 	HandleScope scope;
@@ -265,9 +283,18 @@ void ScriptWrapper::init()
 	world->Set(String::New("removeBlock"), FunctionTemplate::New(world_removeBlock));
 	world->Set(String::New("createBlock"), FunctionTemplate::New(world_createBlock));
 	
+	Handle<ObjectTemplate> meta = ObjectTemplate::New();
+	Handle<ObjectTemplate> blocks = ObjectTemplate::New();
+	blocks->SetAccessor(String::New("availableTypes"), meta_blocks_availableTypes, NULL,
+				  Handle<Value>(),
+				  PROHIBITS_OVERWRITING,
+			   ReadOnly);
+	meta->Set(String::New("blocks"), blocks);
+	
 	global->Set(String::New("console"), console);
 	global->Set(String::New("debug"), console);
 	global->Set(String::New("world"), world);
+	global->Set(String::New("meta"), meta);
 	
 	mContext = Context::New(NULL, global);
 	
