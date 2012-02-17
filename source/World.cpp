@@ -92,6 +92,27 @@ void World::setBlockAt( BaseBlock* b, long x, long y, long z )
 	else c->setBlockAt( b, x % CHUNK_WIDTH, y % CHUNK_HEIGHT, z % CHUNK_WIDTH );
 }
 
+void World::moveBlock( long x, long y, long z, float time, long ex, long ey, long ez )
+{
+	BaseBlock* block = getBlockAt( x, y, z );
+	if( block )
+	{
+		MovingBlock mv;
+		mv.block = block;
+		mv.geom = NULL;
+		mv.start = Vector3( x, y, z );
+		mv.current = mv.start;
+		mv.end = Vector3( ex, ey, ez );
+		mv.time = time;
+		mMovingBlocks.push_back(mv);
+	}
+}
+
+MovingBlockList& World::getMovingBlocks()
+{
+	return mMovingBlocks;
+}
+
 LightIndex World::getLightLevel( long x, long y, long z )
 {
 	size_t cx = floor( ((float) x)/CHUNK_WIDTH );
@@ -230,6 +251,65 @@ void World::update( float dt )
 				mChunks[i]->requestGenerate();
 			}
 		}
+	}
+}
+
+void World::updateMovingBlocks( float dt )
+{
+	for( MovingBlock& b : mMovingBlocks )
+	{
+		float newTime = b.time - dt;
+		if( newTime > 0 )
+		{
+			if( b.geom != NULL ) 
+			{
+				b.geom->releaseBuffer();
+				if(  b.geom->vertexCount > 0 )
+				{
+					delete[]  b.geom->vertexData;
+				}
+				if(  b.geom->edgeCount > 0 )
+				{
+					delete[]  b.geom->edgeData;
+				}
+			}
+			else
+			{
+				 b.geom = new GLgeometry();
+			}
+			
+			GLuint numVerts = 4;
+			GLuint numEdges = 6;			
+			GLvertex*	verts = new GLvertex[numVerts];
+			GLedge*	edges = new GLedge[numEdges];
+			
+			size_t vind = 0;
+			size_t eind = 0;
+			
+			auto dif = (b.start - b.end) * newTime;
+			b.current += dif;
+			
+			BlockContext context;
+			context.worldX = b.current.x;
+			context.worldY = b.current.y;
+			context.worldZ = b.current.z;
+			context.chunk = NULL;
+			context.world = this;
+			b.block->updateVisFlags( FACE_ALL );
+			b.block->buildCubeData( context, vind, eind, verts, edges );
+		}
+		else
+		{
+			long x = std::round( b.end.x );
+			long y = std::round( b.end.y );
+			long z = std::round( b.end.z );
+			setBlockAt( b.block, x, y, z );
+		}
+	}
+	for( MovingBlockList::iterator it = mMovingBlocks.begin(); it != mMovingBlocks.end(); )
+	{
+		auto now = ++it;
+		mMovingBlocks.erase( now );
 	}
 }
 

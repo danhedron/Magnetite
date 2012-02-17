@@ -72,6 +72,7 @@ set(MAGNETITE_SOURCES
 	source/SandBlock.cpp
 	source/WoodBlock.cpp
 	source/WaterBlock.cpp
+	source/MovingBlock.cpp
 	source/ChunkGenerator.cpp
 	source/ChunkLoader.cpp
 	source/World.cpp
@@ -120,6 +121,7 @@ set(MAGNETITE_HEADERS
 	include/WoodBlock.h
 	include/WaterBlock.h
 	include/BaseBlock.h
+	include/MovingBlock.h
 	include/ChunkGenerator.h
 	include/ChunkLoader.h
 	include/World.h

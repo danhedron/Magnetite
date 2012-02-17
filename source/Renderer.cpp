@@ -497,6 +497,34 @@ void Renderer::render(double dt, World* world)
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisable(GL_CULL_FACE);
 	}
+	
+	// Draw moving blocks
+	MovingBlockList& moving = world->getMovingBlocks();
+	for( MovingBlock& b : moving )
+	{
+		GLgeometry* geom = b.geom;
+		if( geom->vertexBO == 0 || geom->indexBO == 0 )
+		{
+			geom->bindToBuffer();
+		}
+		if( geom->vertexBO == 0 || geom->indexBO == 0 )
+		{
+			Util::log("Error generating geometry buffer");
+			return;
+		}
+        
+		glBindBuffer( GL_ARRAY_BUFFER, geom->vertexBO );
+		glVertexPointer( 3, GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(0) );
+
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, geom->indexBO );
+
+		glVertexAttribPointer( attrTC, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(12) );
+		glEnableVertexAttribArray(attrTC);
+		
+		glDrawRangeElements( GL_TRIANGLES, 0, geom->vertexCount, geom->edgeCount, GL_UNSIGNED_SHORT, 0);
+
+		glDisableVertexAttribArray(attrTC);
+	}
 
 	glUseProgram( 0 );
 

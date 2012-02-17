@@ -3,6 +3,7 @@
 #include "prerequisites.h"
 #include "WorldNode.h"
 #include "Collision.h"
+#include "MovingBlock.h"
 
 class Chunk;
 typedef Chunk* ChunkPtr;
@@ -135,6 +136,8 @@ protected:
 	std::string mWorldName;
 	WorldStage mWorldStage;
 	ChunkLoadList mChunksToLoad;
+	
+	MovingBlockList mMovingBlocks;
 public:
 	/** 
 	 * Constructor: -
@@ -180,6 +183,16 @@ public:
 	 * Places a block at the world coordinates
 	 */
 	void setBlockAt( BaseBlock* b, long x, long y, long z );
+	
+	/**
+	 * Starts a block moving if there is a block at the given coordinates
+	 */
+	void moveBlock( long x, long y, long z, float time, long ex, long ey, long ez );
+	
+	/**
+	 * Returns the list of moving blocks
+	 */
+	MovingBlockList& getMovingBlocks();
 	
 	/** 
 	 * Returns the light level at the world coordinates
@@ -320,6 +333,11 @@ public:
 	 * Updates all loaded chunks
 	 */
 	void update( float dt );
+	
+	/**
+	 * Updates all of the moving blocks
+	 */
+	void updateMovingBlocks( float dt );
 
 	/**
 	 * Performs a raycast test against a single cube
