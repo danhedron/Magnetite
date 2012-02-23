@@ -6,6 +6,7 @@
 #include "BaseBlock.h"
 #include "BlockFactory.h"
 #include <fstream>
+
 using namespace v8;
 
 std::string strize( Handle<Value> s )
@@ -56,6 +57,78 @@ void report( TryCatch* handler )
 		int lnnum = message->GetLineNumber();
 		Util::log( file + ":" + Util::toString(lnnum) + " " + strize( handler->Exception() ) );
 	}
+}
+
+typedef std::map<BaseBlock*,PersistentObject> WrappedBlocks;
+WrappedBlocks gWrappedBlocks;
+Persistent<ObjectTemplate> blockTemplate;
+ValueHandle wrapBlock( BaseBlock* block )
+{
+	if( !block ) return Undefined();
+	WrappedBlocks::iterator it = gWrappedBlocks.find( block );
+	if( it != gWrappedBlocks.end() )
+	{
+		return it->second;
+	}
+	
+	if( blockTemplate.IsEmpty() )
+	{
+		blockTemplate = Persistent<ObjectTemplate>::New(ObjectTemplate::New());
+		blockTemplate->Set( String::New( "type" ), String::New( block->getType().c_str() ) );
+	}
+	
+	PersistentObject obj = Persistent<Object>::New(blockTemplate->NewInstance());
+	gWrappedBlocks.insert( WrappedBlocks::value_type( block, obj) );
+	
+	return obj;
+}
+
+/**
+ * Ray functions
+ */
+Persistent<ObjectTemplate> rayTemplate;
+ValueHandle constructRay( const Arguments& args )
+{
+	if( !args.IsConstructCall() )
+		return Undefined();
+	
+	HandleScope hs;
+	
+	if( rayTemplate.IsEmpty() )
+	{
+		rayTemplate = Persistent<ObjectTemplate>::New(ObjectTemplate::New());
+		rayTemplate->Set( String::New("origin"), wrapVector3( Vector3() ) );
+		rayTemplate->Set( String::New("direction"), wrapVector3( Vector3(0, 1.f, 0) ) );	
+	}
+	
+	return rayTemplate->NewInstance();
+}
+
+bool unwrapRay( Local<Value> ray, raycast_r& r )
+{
+	HandleScope hs;
+	if( ray->IsObject() )
+	{
+		Handle<Object> rayO = Handle<Object>::Cast( ray );
+		r.orig = unwrapVector3( rayO->Get(String::New("origin")) );
+		r.dir = unwrapVector3( rayO->Get(String::New("direction")) );
+		return true;
+	}
+	return false;
+}
+
+ValueHandle wrapRay( raycast_r& ray )
+{
+	ObjectHandle rayO = rayTemplate->NewInstance();
+	
+	rayO->Set( String::New("origin"), wrapVector3( ray.orig ) );
+	rayO->Set( String::New("direction"), wrapVector3( ray.dir ) );
+	if( ray.block )
+	{
+		rayO->Set( String::New("block"), wrapBlock( ray.block ) );
+	}
+	
+	return rayO;
 }
 
 /**
@@ -112,30 +185,6 @@ ValueHandle wrapPlayer( Player* player )
 	pl->SetInternalField(0, External::New(player));
 	
 	return hs.Close(pl);
-}
-
-typedef std::map<BaseBlock*,PersistentObject> WrappedBlocks;
-WrappedBlocks gWrappedBlocks;
-Persistent<ObjectTemplate> blockTemplate;
-ValueHandle wrapBlock( BaseBlock* block )
-{
-	if( !block ) return Undefined();
-	WrappedBlocks::iterator it = gWrappedBlocks.find( block );
-	if( it != gWrappedBlocks.end() )
-	{
-		return it->second;
-	}
-	
-	if( blockTemplate.IsEmpty() )
-	{
-		blockTemplate = Persistent<ObjectTemplate>::New(ObjectTemplate::New());
-		blockTemplate->Set( String::New( "type" ), String::New( block->getType().c_str() ) );
-	}
-	
-	PersistentObject obj = Persistent<Object>::New(blockTemplate->NewInstance());
-	gWrappedBlocks.insert( WrappedBlocks::value_type( block, obj) );
-	
-	return obj;
 }
 
 void ScriptWrapper::runFile( std::string filename )
@@ -249,6 +298,21 @@ ValueHandle world_createBlock(const Arguments& args)
 	return Undefined();
 }
 
+ValueHandle world_fireRay(const Arguments& args)
+{
+	if( args.Length() >= 1 && args[0]->IsObject() )
+	{
+		raycast_r ray;
+		if( unwrapRay( args[0], ray ) )
+		{
+			raycast_r outr = MagnetiteCore::Singleton->getWorld()->raycastWorld( ray, false );
+			return wrapRay( outr );
+		}
+	}
+	return Undefined();
+}
+
+
 /**
  * Meta api
  */
@@ -282,6 +346,7 @@ void ScriptWrapper::init()
 	world->Set(String::New("getBlock"), FunctionTemplate::New(world_getBlock));
 	world->Set(String::New("removeBlock"), FunctionTemplate::New(world_removeBlock));
 	world->Set(String::New("createBlock"), FunctionTemplate::New(world_createBlock));
+	world->Set(String::New("fireRay"), FunctionTemplate::New(world_fireRay));
 	
 	Handle<ObjectTemplate> meta = ObjectTemplate::New();
 	Handle<ObjectTemplate> blocks = ObjectTemplate::New();
@@ -295,6 +360,7 @@ void ScriptWrapper::init()
 	global->Set(String::New("debug"), console);
 	global->Set(String::New("world"), world);
 	global->Set(String::New("meta"), meta);
+	global->Set(String::New("Ray"), FunctionTemplate::New(constructRay));
 	
 	mContext = Context::New(NULL, global);
 	

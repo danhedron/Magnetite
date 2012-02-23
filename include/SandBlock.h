@@ -11,6 +11,8 @@ public:
 	SandBlock();
 	~SandBlock(void);
 	
+	virtual void think( BlockContext &ctx, float dt );
+	
 	void connectedChange( BlockContext &ctx, short face );
 
 	std::string getType();

@@ -322,6 +322,21 @@ void Chunk::generatePhysics()
 
 void Chunk::update( float dt )
 {
+	/*BlockContext context;
+	for( size_t i = 0; i < CHUNK_SIZE; i += 1 )
+	{
+		if( mBlocks[i] )
+		{
+			Vector3 pos = Util::indexToPosition( i );
+			context.worldX = pos.x;
+			context.worldY = pos.y;
+			context.worldZ = pos.z;
+			context.chunk = this;
+			context.world = MagnetiteCore::Singleton->getWorld();
+			mBlocks[i]->think( context, dt );
+		}
+	}*/
+	
 	requestGenerate();
 }
 

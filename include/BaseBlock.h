@@ -65,6 +65,11 @@ public:
 	 * Returns true if this block needs to think
 	 */
 	virtual bool isThinking() { return false; }
+	
+	/**
+	 * Updates the block, if it needs that sort of thing.
+	 */
+	virtual void think( BlockContext &ctx, float dt ) { }
 
 	/**
 	 * Called when a nearby block changes.
