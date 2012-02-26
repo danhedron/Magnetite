@@ -729,11 +729,9 @@ void Renderer::lastBlock()
 
 void Renderer::drawText(std::string text, int x, int y)
 {
-	mWindow->SaveGLStates();
 	sf::Text drawableString(text, sf::Font::GetDefaultFont(), 14.5f);
 	drawableString.SetColor(sf::Color(0,255,0));
 	drawableString.SetPosition( x, y );
 	mWindow->Draw(drawableString);
-	mWindow->RestoreGLStates();
 }
 

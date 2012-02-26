@@ -177,14 +177,12 @@ void MagnetiteCore::go()
 	int lastX = mWindow.GetWidth()/2;
 	int lastY = mWindow.GetHeight()/2;
 
-	mClock.Reset();
-	while(mContinue && mWindow.IsOpened()) {
-#ifdef WIN32
-		float lDelta = mClock.GetElapsedTime();
-#else
-		float lDelta = mClock.GetElapsedTime()*0.001;
-#endif
-		mClock.Reset();
+	mClock.Restart();
+	while(mContinue && mWindow.IsOpen()) {
+
+		float lDelta = mClock.GetElapsedTime().AsMilliseconds();
+
+		mClock.Restart();
 
 		// Handle Events before we render.
 		sf::Event lEvt;
