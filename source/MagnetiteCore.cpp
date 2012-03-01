@@ -180,7 +180,7 @@ void MagnetiteCore::go()
 	mClock.Restart();
 	while(mContinue && mWindow.IsOpen()) {
 
-		float lDelta = mClock.GetElapsedTime().AsMilliseconds();
+		float lDelta = ((float)mClock.GetElapsedTime().AsMilliseconds())/1000;
 
 		mClock.Restart();
 

@@ -156,6 +156,24 @@ ValueHandle player_setPosition(const Arguments& args)
 	return Undefined();
 }
 
+ValueHandle player_move(const Arguments& args)
+{
+	Handle<Object> self = args.This();
+	Handle<External> rptr = Handle<External>::Cast(self->GetInternalField(0));
+	Player* player = static_cast<Player*>(rptr->Value());
+	
+	if( args.Length() == 1 && args[0]->IsObject() )
+	{	
+		player->move(unwrapVector3( args[0] ));
+	}
+	else if( args.Length() >= 3 && args[0]->IsNumber() && args[1]->IsNumber() && args[2]->IsNumber() )
+	{
+		player->move( Vector3( args[0]->NumberValue(),  args[1]->NumberValue(), args[2]->NumberValue() ) );
+	}
+	
+	return Undefined();
+}
+
 typedef std::map<Player*, PersistentObject> WrappedPlayers;
 WrappedPlayers gWrappedPlayers;
 Persistent<ObjectTemplate> playerTemplate;
@@ -177,6 +195,7 @@ ValueHandle wrapPlayer( Player* player )
 		playerTemplate->SetInternalFieldCount(1);
 		playerTemplate->Set( String::New("getPosition"), FunctionTemplate::New(player_getPosition) );
 		playerTemplate->Set( String::New("setPosition"), FunctionTemplate::New(player_setPosition) );
+		playerTemplate->Set( String::New("move"), FunctionTemplate::New(player_move) );
 	}
 	
 	PersistentObject pl = PersistentObject::New(playerTemplate->NewInstance());

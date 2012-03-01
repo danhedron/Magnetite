@@ -34,6 +34,11 @@ public:
 	Camera& getCamera();
 	
 	/**
+	 * Adjusts the player's position by the given vector
+	 */
+	void move( const Vector3& offset );
+	
+	/**
 	 * Gets a ray representing the Player's look
 	 */
 	raycast_r getEyeCast();

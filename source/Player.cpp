@@ -23,6 +23,11 @@ raycast_r Player::getEyeCast()
 	return ray;
 } 
 
+void Player::move( const Vector3& offset )
+{
+	setPosition( getPosition() + offset );
+}
+
 void Player::setPosition( const Vector3& pos )
 {
 	mCamera.setPosition( pos );
