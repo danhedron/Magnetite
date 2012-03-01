@@ -75,6 +75,12 @@ Game.keyUp = function(k)
 	}
 }
 
+Game.onPrimary = function( player )
+{
+	var rs = world.fireRay( player.getEyeCast() );
+	console.log( JSON.stringify( rs.block)  );
+}
+
 Game.think = function( dt )
 {
 	if( this.player.moveDir.x != 0 || this.player.moveDir.y != 0 || this.player.moveDir.z != 0 )

@@ -35,9 +35,9 @@ Vector3 unwrapVector3( ValueHandle v )
 	ObjectHandle veco = ObjectHandle::Cast( v );
 	
 	return Vector3( 
-			veco->Get( String::New("x") )->Int32Value(),
-			veco->Get( String::New("y") )->Int32Value(),
-			veco->Get( String::New("z") )->Int32Value()
+			veco->Get( String::New("x") )->NumberValue(),
+			veco->Get( String::New("y") )->NumberValue(),
+			veco->Get( String::New("z") )->NumberValue()
 		 );
 }
 
@@ -117,7 +117,7 @@ bool unwrapRay( Local<Value> ray, raycast_r& r )
 	return false;
 }
 
-ValueHandle wrapRay( raycast_r& ray )
+ValueHandle wrapRay( const raycast_r& ray )
 {
 	ObjectHandle rayO = rayTemplate->NewInstance();
 	
@@ -127,6 +127,8 @@ ValueHandle wrapRay( raycast_r& ray )
 	{
 		rayO->Set( String::New("block"), wrapBlock( ray.block ) );
 	}
+	rayO->Set( String::New("hit"), Boolean::New( ray.hit ) );
+	rayO->Set( String::New("worldHit"), wrapVector3( ray.worldHit ) );
 	
 	return rayO;
 }
@@ -154,6 +156,24 @@ ValueHandle player_setPosition(const Arguments& args)
 		player->setPosition(unwrapVector3( args[0] ));
 	}
 	return Undefined();
+}
+
+ValueHandle player_getLookDirection(const Arguments& args)
+{
+	Handle<Object> self = args.This();
+	Handle<External> rptr = Handle<External>::Cast(self->GetInternalField(0));
+	Player* player = static_cast<Player*>(rptr->Value());
+	
+	return wrapVector3( player->getLookDirection() );
+}
+
+ValueHandle player_getEyeCast(const Arguments& args)
+{
+	Handle<Object> self = args.This();
+	Handle<External> rptr = Handle<External>::Cast(self->GetInternalField(0));
+	Player* player = static_cast<Player*>(rptr->Value());
+	
+	return wrapRay( player->getEyeCast() );
 }
 
 ValueHandle player_move(const Arguments& args)
@@ -195,6 +215,8 @@ ValueHandle wrapPlayer( Player* player )
 		playerTemplate->SetInternalFieldCount(1);
 		playerTemplate->Set( String::New("getPosition"), FunctionTemplate::New(player_getPosition) );
 		playerTemplate->Set( String::New("setPosition"), FunctionTemplate::New(player_setPosition) );
+		playerTemplate->Set( String::New("getLookDirection"), FunctionTemplate::New(player_getLookDirection) );
+		playerTemplate->Set( String::New("getEyeCast"), FunctionTemplate::New(player_getEyeCast));
 		playerTemplate->Set( String::New("move"), FunctionTemplate::New(player_move) );
 	}
 	

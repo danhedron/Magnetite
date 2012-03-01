@@ -65,12 +65,12 @@ public:
 	/**
 	 * Called When a player primary fires
 	 */
-	void playerPrimaryClick( Player* player );
+	virtual void playerPrimaryClick( Player* player );
 
 	/**
 	 * Called When a player alt fires
 	 */
-	void playerAltClick( Player* player );
+	virtual void playerAltClick( Player* player );
 	
 	/**
 	 * Called when the game is ok to render the GUI

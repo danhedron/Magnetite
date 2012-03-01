@@ -44,6 +44,11 @@ public:
 	raycast_r getEyeCast();
 	
 	/**
+	 * Gets the direction the player is looking in
+	 */
+	Vector3 getLookDirection();
+	
+	/**
 	 * Creates a character for the player to have a physical body
 	 */
 	void createCharacter() {};

@@ -186,37 +186,36 @@ void ScriptGame::characterDamage( Character* player )
 
 void ScriptGame::playerPrimaryClick( Player* player )
 {
-	raycast_r ray = player->getEyeCast();
-	ray = mEngine->getWorld()->raycastWorld(ray);
-	ray.maxDistance = 10;
-	if(ray.hit)
-	{	
-		if( clickMode == "remove" )
+	HandleScope hs;
+	PersistentContext ctx = MagnetiteCore::Singleton->getScriptManager()->getContext();
+	Context::Scope scope( ctx );
+	if( !mScriptObject.IsEmpty() && mScriptObject->Has( String::New("onPrimary") ) )
+	{
+		Local<Value> onLoadVal = mScriptObject->Get( String::New("onPrimary") );
+		if( onLoadVal->IsFunction() )
 		{
-			if(ray.chunk && ray.block) 
-			{
-				ray.chunk->removeBlockAt( ray.blockIndex );
-			}
-		}
-		else
-		{
-			explosion_t info;
-			info.center = ray.worldHit + ray.hitNormal * 1.5;
-			Explosion expl(info);
-			expl.explode();
+			Local<Function> onLoad = Local<Function>::Cast( onLoadVal );
+			Handle<Value> args[1];
+			args[0] = wrapPlayer( player );
+			onLoad->Call( mScriptObject, 1, args );
 		}
 	}
 }
 
 void ScriptGame::playerAltClick( Player* player )
 {
-	raycast_r ray = player->getEyeCast();
-	ray = mEngine->getWorld()->raycastWorld(ray);
-	if(ray.hit && ray.block)
+	HandleScope hs;
+	PersistentContext ctx = MagnetiteCore::Singleton->getScriptManager()->getContext();
+	Context::Scope scope( ctx );
+	if( !mScriptObject.IsEmpty() && mScriptObject->Has( String::New("onAlt") ) )
 	{
-		BaseBlock* block = FactoryManager::getManager().createBlock( mEngine->getRenderer()->blockType );
-		if( block != NULL ) {
-			mEngine->getWorld()->setBlockAt( block, ray.worldHit.x + ray.hitNormal.x/2, ray.worldHit.y + ray.hitNormal.y/2, ray.worldHit.z + ray.hitNormal.z/2 );
+		Local<Value> onLoadVal = mScriptObject->Get( String::New("onAlt") );
+		if( onLoadVal->IsFunction() )
+		{
+			Local<Function> onLoad = Local<Function>::Cast( onLoadVal );
+			Handle<Value> args[1];
+			args[0] = wrapPlayer( player );
+			onLoad->Call( mScriptObject, 1, args );
 		}
 	}
 }

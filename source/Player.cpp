@@ -19,9 +19,14 @@ raycast_r Player::getEyeCast()
 {
 	raycast_r ray;
 	ray.orig = getPosition();
-	ray.dir = mCamera.getForward();
+	ray.dir = getLookDirection();
 	return ray;
 } 
+
+Vector3 Player::getLookDirection()
+{
+	return mCamera.getForward();
+}
 
 void Player::move( const Vector3& offset )
 {
