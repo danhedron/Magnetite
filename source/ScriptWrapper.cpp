@@ -129,6 +129,7 @@ ValueHandle wrapRay( const raycast_r& ray )
 	}
 	rayO->Set( String::New("hit"), Boolean::New( ray.hit ) );
 	rayO->Set( String::New("worldHit"), wrapVector3( ray.worldHit ) );
+	rayO->Set( String::New("normal"), wrapVector3( ray.hitNormal ) );
 	
 	return rayO;
 }

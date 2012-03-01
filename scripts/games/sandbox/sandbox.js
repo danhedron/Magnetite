@@ -10,6 +10,7 @@ Game.onLoad = function()
 	{
 		console.log( 'type: ' + result.block.type );
 	}
+	this.currentBlock = 0;
 }
 
 Game.onSpawn = function( p )
@@ -19,10 +20,28 @@ Game.onSpawn = function( p )
 	this.player.moveDir = { x: 0, y: 0, z: 0 };
 }
 
+Game.changeBlock = function( v )
+{
+	this.currentBlock += v;
+	if( this.currentBlock < 0 )
+		this.currentBlock = meta.blocks.availableTypes.length - 1;
+	else if( this.currentBlock > meta.blocks.availableTypes.length - 1 )
+	{
+		this.currentBlock = 0;
+	}
+	console.log( meta.blocks.availableTypes[this.currentBlock] );
+}
+
 Game.keyDown = function(k)
 {
 	switch( k )
 	{
+		case 68:
+			this.changeBlock(-1);
+			break;
+		case 67:
+			this.changeBlock( 1);
+			break;
 		case 22:
 			// W
 			this.player.moveDir.z = -10;
@@ -78,7 +97,13 @@ Game.keyUp = function(k)
 Game.onPrimary = function( player )
 {
 	var rs = world.fireRay( player.getEyeCast() );
-	console.log( JSON.stringify( rs.block)  );
+	world.createBlock( meta.blocks.availableTypes[this.currentBlock], rs.worldHit.x + (rs.normal.x /2),  rs.worldHit.y + (rs.normal.y /2),  rs.worldHit.z + (rs.normal.z /2) );
+}
+
+Game.onAlt = function( player )
+{
+	var rs = world.fireRay( player.getEyeCast() );
+	world.removeBlock( rs.worldHit.x - (rs.normal.x /2),  rs.worldHit.y - (rs.normal.y /2),  rs.worldHit.z - (rs.normal.z /2) );
 }
 
 Game.think = function( dt )
@@ -87,4 +112,8 @@ Game.think = function( dt )
 	{
 		this.player.move( this.player.moveDir.z * dt,  this.player.moveDir.y * dt, this.player.moveDir.x * dt );
 	}
+}
+
+Game.draw = function()
+{
 }
