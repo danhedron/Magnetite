@@ -25,7 +25,7 @@ raycast_r Player::getEyeCast()
 
 void Player::move( const Vector3& offset )
 {
-	setPosition( getPosition() + offset );
+	mCamera.translate( offset );
 }
 
 void Player::setPosition( const Vector3& pos )
