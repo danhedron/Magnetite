@@ -1,5 +1,29 @@
 Game.name = 'Sandbox';
 
+Game.tools = [
+	{
+		title: 'place',
+		func: function( pl ) {
+			var rs = world.fireRay( pl.getEyeCast() );
+			world.createBlock( meta.blocks.availableTypes[this.currentBlock], rs.worldHit.x + (rs.normal.x /2),  rs.worldHit.y + (rs.normal.y /2),  rs.worldHit.z + (rs.normal.z /2) );
+		}
+	},
+	{
+		title: 'remove',
+		func: function( pl ) {
+			var rs = world.fireRay( pl.getEyeCast() );
+			world.removeBlock( rs.worldHit.x - (rs.normal.x /2),  rs.worldHit.y - (rs.normal.y /2),  rs.worldHit.z - (rs.normal.z /2) );
+		}
+	},
+	{
+		title: 'explode',
+		func: function( pl ) {
+		
+		}
+	}
+	];
+Game.toolIndex = 0;
+
 Game.onLoad = function()
 {
 	var ray = new Ray();
@@ -96,14 +120,13 @@ Game.keyUp = function(k)
 
 Game.onPrimary = function( player )
 {
-	var rs = world.fireRay( player.getEyeCast() );
-	world.createBlock( meta.blocks.availableTypes[this.currentBlock], rs.worldHit.x + (rs.normal.x /2),  rs.worldHit.y + (rs.normal.y /2),  rs.worldHit.z + (rs.normal.z /2) );
+	this.tools[ this.toolIndex % this.tools.length ].func.call( this, player );
 }
 
 Game.onAlt = function( player )
 {
-	var rs = world.fireRay( player.getEyeCast() );
-	world.removeBlock( rs.worldHit.x - (rs.normal.x /2),  rs.worldHit.y - (rs.normal.y /2),  rs.worldHit.z - (rs.normal.z /2) );
+	this.toolIndex++;
+	console.log( this.tools[ this.toolIndex % this.tools.length ].title );
 }
 
 Game.think = function( dt )
