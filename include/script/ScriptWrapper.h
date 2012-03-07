@@ -7,6 +7,7 @@ typedef v8::Persistent<v8::Context> PersistentContext;
 typedef v8::Persistent<v8::Object> PersistentObject;
 typedef v8::Handle<v8::Value> ValueHandle;
 typedef v8::Handle<v8::Object> ObjectHandle;
+typedef v8::Handle<v8::ObjectTemplate> ObjectTemplateHandle;
 // It's types all the way down
 typedef std::map<std::string, v8::Persistent<v8::Object>> GameTypePrototypes;
 

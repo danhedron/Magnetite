@@ -203,15 +203,6 @@ void ScriptWrapper::runFile( std::string filename )
 	return;
 }
 
-ValueHandle log(const Arguments& args)
-{
-	for( int i = 0; i < args.Length(); i++ )
-	{
-		Util::log( strize(args[i]->ToString() ));
-	}
-	return Undefined();
-}
-
 ValueHandle import(const Arguments& args)
 {
 	if( args.Length() >= 1 )
@@ -220,21 +211,6 @@ ValueHandle import(const Arguments& args)
 	}
 	return Undefined();
 }
-
-ValueHandle debugText(const Arguments& args)
-{
-	if( args.Length() >= 3 )
-	{
-		int x = args[0]->Int32Value();
-		int y = args[1]->Int32Value();
-		std::string text = strize( args[2] );
-		
-		MagnetiteCore::Singleton->getRenderer()->drawText( text, x, y );
-	}
-	return Undefined();
-}
-
-
 
 /**
  * Meta api
@@ -260,12 +236,7 @@ void ScriptWrapper::init()
 	
 	Handle<ObjectTemplate> global = ObjectTemplate::New();
 	global->Set(String::New("import"), FunctionTemplate::New(import));
-	
-	Handle<ObjectTemplate> console = ObjectTemplate::New();
-	console->Set(String::New("log"), FunctionTemplate::New(log));
-	console->Set(String::New("drawText"), FunctionTemplate::New(debugText));
-	
-	
+
 	Handle<ObjectTemplate> meta = ObjectTemplate::New();
 	Handle<ObjectTemplate> blocks = ObjectTemplate::New();
 	blocks->SetAccessor(String::New("availableTypes"), meta_blocks_availableTypes, NULL,
@@ -280,11 +251,15 @@ void ScriptWrapper::init()
 	{
 		// Registers the return value of the global's function 
 		// in the global variable name given
-		global->Set(String::New( it->first.c_str() ), (it->second)());
+		ObjectTemplateHandle glob = (it->second)();
+		global->Set(String::New( it->first.c_str() ), glob);
+		// I thought the original system wasn't hacky enough so I replaced it with a more complex series of hacks.
+		if( it->first == "debug" ) 
+		{
+			global->Set(String::New("console"), glob);
+		}
 	}
 	
-	global->Set(String::New("console"), console);
-	global->Set(String::New("debug"), console);
 	global->Set(String::New("meta"), meta);
 	global->Set(String::New("Ray"), FunctionTemplate::New(constructRay));
 	

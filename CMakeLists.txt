@@ -81,7 +81,9 @@ set(MAGNETITE_SOURCES
 	source/WorldTree.cpp
 	source/Explosion.cpp
 	source/TextureManager.cpp
-	source/ScriptWrapper.cpp
+	source/script/ScriptWrapper.cpp
+	source/script/ScriptGlobalsWorld.cpp
+	source/script/ScriptGlobalsDebug.cpp
 )
 set(MAGNETITE_HEADERS
 	include/MagnetiteCore.h
@@ -130,7 +132,10 @@ set(MAGNETITE_HEADERS
 	include/WorldTree.h
 	include/Explosion.h
 	include/TextureManager.h
-	include/ScriptWrapper.h
+	include/script/ScriptWrapper.h
+	include/script/ScriptGlobalsList.h
+	include/script/ScriptGlobalsWorld.h
+	include/script/ScriptGlobalsDebug.h
 	include/util.h
 )
 source_group("Header Files" FILES ${MAGNETITE_HEADERS})
@@ -139,6 +144,7 @@ source_group("Source Files" FILES ${MAGNETITE_SOURCES})
 add_executable(Magnetite ${MAGNETITE_SOURCES} ${MAGNETITE_HEADERS})
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/include/script)
 include_directories(${PROJECT_SOURCE_DIR}/depends/include/)
 
 # Windows only

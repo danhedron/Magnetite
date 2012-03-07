@@ -1,0 +1,4 @@
+#ifndef _SCRIPTGLOBALSDEBUG_H_
+#define _SCRIPTGLOBALSDEBUG_H_
+
+#endif
