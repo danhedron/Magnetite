@@ -3,6 +3,7 @@ include/BuildConfig.h
 .geany
 *~
 *.swp
+*.kate-swp
 
 CMakeCache.txt
 CMakeFiles/
