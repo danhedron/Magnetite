@@ -4,6 +4,8 @@ include/BuildConfig.h
 *~
 *.swp
 *.kate-swp
+*.kdev4
+
 
 CMakeCache.txt
 CMakeFiles/
