@@ -260,6 +260,13 @@ void ScriptWrapper::init()
 		}
 	}
 	
+	GlobalScriptFunctions functions = ScriptGlobalsList::getList().getFunctions();
+	for( GlobalScriptFunctions::iterator it = functions.begin(); it != functions.end(); ++it )
+	{
+		Handle<FunctionTemplate> f = (it->second)();
+		global->Set(String::New( it->first.c_str() ), f);
+	}
+	
 	global->Set(String::New("meta"), meta);
 	global->Set(String::New("Ray"), FunctionTemplate::New(constructRay));
 	

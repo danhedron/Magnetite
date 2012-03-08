@@ -84,6 +84,7 @@ set(MAGNETITE_SOURCES
 	source/script/ScriptWrapper.cpp
 	source/script/ScriptGlobalsWorld.cpp
 	source/script/ScriptGlobalsDebug.cpp
+	source/script/ScriptExplosion.cpp
 )
 set(MAGNETITE_HEADERS
 	include/MagnetiteCore.h
@@ -136,6 +137,7 @@ set(MAGNETITE_HEADERS
 	include/script/ScriptGlobalsList.h
 	include/script/ScriptGlobalsWorld.h
 	include/script/ScriptGlobalsDebug.h
+	include/script/ScriptExplosion.h
 	include/util.h
 )
 source_group("Header Files" FILES ${MAGNETITE_HEADERS})

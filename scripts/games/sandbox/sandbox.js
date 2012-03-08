@@ -18,7 +18,12 @@ Game.tools = [
 	{
 		title: 'explode',
 		func: function( pl ) {
-		
+			var ex = new Explosion(); 
+			var rs = world.fireRay( pl.getEyeCast() );
+			ex.origin = rs.worldHit;
+			ex.power = 10;
+			ex.radius = 5;
+			ex.explode();
 		}
 	}
 	];
@@ -126,7 +131,6 @@ Game.onPrimary = function( player )
 Game.onAlt = function( player )
 {
 	this.toolIndex++;
-	console.log( this.tools[ this.toolIndex % this.tools.length ].title );
 }
 
 Game.think = function( dt )
