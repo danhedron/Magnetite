@@ -464,9 +464,6 @@ void Renderer::render(double dt, World* world)
 	if( mDrawWorld ) 
 	{
 		glEnableClientState(GL_VERTEX_ARRAY);
-		//glEnableClientState(GL_NORMAL_ARRAY);
-		//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		//glEnableClientState(GL_COLOR_ARRAY);
 		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		if( tex != 0 )
@@ -491,11 +488,8 @@ void Renderer::render(double dt, World* world)
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
-		//glDisableClientState(GL_COLOR_ARRAY);
-		//glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		//glDisableClientState(GL_NORMAL_ARRAY);
 		glDisableClientState(GL_VERTEX_ARRAY);
-		glDisable(GL_CULL_FACE);
+ 		glDisable(GL_CULL_FACE);
 	}
 	
 	// Draw moving blocks
@@ -594,24 +588,15 @@ void Renderer::_renderChunk( Chunk* chunk )
 
 		glVertexAttribPointer( attrTC, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(12) );
 		glEnableVertexAttribArray(attrTC);
-		//glVertexAttribPointer( attrL, 1, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(15) );
-		//glEnableVertexAttribArray(attrL);
-
-		//glNormalPointer( GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(12) );
-		//glTexCoordPointer( 2, GL_UNSIGNED_SHORT, sizeof(GLvertex), BUFFER_OFFSET(12));
-		//glColorPointer( 1, GL_UNSIGNED_SHORT, sizeof(GLvertex), BUFFER_OFFSET(15));
 
 		glDrawRangeElements( GL_TRIANGLES, 0, chunkGeom->vertexCount, chunkGeom->edgeCount, GL_UNSIGNED_SHORT, 0);
 
 		glDisableVertexAttribArray(attrTC);
-		//glDisableVertexAttribArray(attrL);
-		//glBindBuffer( GL_ARRAY_BUFFER, 0 );
-		//glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+		
+		glBindBuffer( GL_ARRAY_BUFFER, 0);
 
 	}
-	else {
-		//Util::log("Warning: Ungenerated Chunk in render queue. ~ Grab a developer and complain");
-	}
+
 }
 
 void Renderer::drawStats(double dt, size_t chunkCount, World* world)
@@ -729,9 +714,11 @@ void Renderer::lastBlock()
 
 void Renderer::drawText(std::string text, int x, int y)
 {
-	sf::Text drawableString(text, sf::Font::GetDefaultFont(), 14.5f);
+	mWindow->PushGLStates();
+	sf::Text drawableString(text, sf::Font::GetDefaultFont(), 17.f);
 	drawableString.SetColor(sf::Color(0,255,0));
 	drawableString.SetPosition( x, y );
 	mWindow->Draw(drawableString);
+	mWindow->PopGLStates();
 }
 

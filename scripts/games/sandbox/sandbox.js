@@ -139,4 +139,5 @@ Game.think = function( dt )
 
 Game.draw = function()
 {
+	console.drawText( 10, 10, this.tools[ this.toolIndex % this.tools.length ].title );
 }
