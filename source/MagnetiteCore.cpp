@@ -87,9 +87,9 @@ MagnetiteCore::~MagnetiteCore(void)
 void MagnetiteCore::init(int *argc, char **argv)
 {
 	mResourceManager = new ResourceManager();
-	mResourceManager->addLocation("../resources/shaders/");
-	mResourceManager->addLocation("../resources/sprites/");
-	mResourceManager->addLocation("../resources/ui/");
+	mResourceManager->addLocation("./resources/shaders/");
+	mResourceManager->addLocation("./resources/sprites/");
+	mResourceManager->addLocation("./resources/ui/");
 	sf::ContextSettings wnds;
 	wnds.DepthBits = 24;
 	//wnds.AntialiasingLevel = 2;

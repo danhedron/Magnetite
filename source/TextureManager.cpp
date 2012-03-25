@@ -14,12 +14,12 @@ TextureManager::~TextureManager( void )
 
 void TextureManager::initalize()
 {
-	if(loadTexture("../resources/sprites/world.png")) {
-		GLtexture* texture = fetchTexture("../resources/sprites/world.png");
+	if(loadTexture("./resources/sprites/world.png")) {
+		GLtexture* texture = fetchTexture("./resources/sprites/world.png");
 		mBlockWidth = texture->width;
 		mBlockHeight = texture->height;
 	}
-	loadTexture("../resources/sprites/vistest.png");
+	loadTexture("./resources/sprites/vistest.png");
 }
 
 bool TextureManager::loadTexture(std::string textureName)

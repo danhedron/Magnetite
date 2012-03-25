@@ -245,7 +245,7 @@ void Renderer::initialize(sf::RenderWindow& window)
 		mGeomType = GEOM_GEOMSHADER;
 	//}
 	
-	MagnetiteCore::Singleton->getTextureManager()->loadTexture("../resources/ui/crosshair.png");
+	MagnetiteCore::Singleton->getTextureManager()->loadTexture("./resources/ui/crosshair.png");
 
 	mWorldProgram = MagnetiteCore::Singleton->getResourceManager()->getResource<ProgramResource>("world.prog");
 	if( mWorldProgram == NULL ) {
@@ -385,7 +385,7 @@ GLshader* Renderer::loadShader( std::string filename, GLenum type )
 		return mShaders[filename];
 	}
 
-	std::string shaderPath = "../resources/shaders/";
+	std::string shaderPath = "./resources/shaders/";
 	std::ifstream file( (shaderPath+filename).c_str() );
 	if( !file ) return NULL;
 
@@ -444,7 +444,7 @@ void Renderer::render(double dt, World* world)
 
 	ChunkArray chunks = world->getChunks();
 
-	GLtexture* tex = MagnetiteCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/world.png");
+	GLtexture* tex = MagnetiteCore::Singleton->getTextureManager()->fetchTexture("./resources/sprites/world.png");
 
 	mCamera->applyMatrix( true, false );
 
@@ -655,7 +655,7 @@ void Renderer::drawCrosshair( double dt )
 	// Switch to 2D for overlays
 	enable2D();
 
-	GLtexture* tex = MagnetiteCore::Singleton->getTextureManager()->fetchTexture("../resources/ui/crosshair.png");
+	GLtexture* tex = MagnetiteCore::Singleton->getTextureManager()->fetchTexture("./resources/ui/crosshair.png");
 
 	if( tex != 0 )
 	{
