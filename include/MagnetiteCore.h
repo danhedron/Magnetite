@@ -2,6 +2,7 @@
 #define _OPENCRAFTCORE_H_
 #include "prerequisites.h"
 
+class Player;
 class Renderer;
 class TextureManager;
 class InputManager;
@@ -133,6 +134,11 @@ public:
 	 * Destroys a character
 	 */
 	void destroyCharacter( Character* c );
+	
+	/**
+	 * Stores a player.
+	 */
+	void addPlayer( Player* p );
 
 	/**
 	 * Player Input - Movement

@@ -55,6 +55,7 @@ void BaseGame::_playerJoined()
 {
 	if( isSingleplayer() ) {
 		mPlayer = new Player();
+		mEngine->addPlayer(mPlayer);
 		playerJoin( mPlayer );
 		playerSpawn( mPlayer );
 	}

@@ -373,6 +373,11 @@ Character* MagnetiteCore::createCharacter()
 	return c;
 }
 
+void MagnetiteCore::addPlayer( Player* p )
+{
+	mCharacters.push_back( p );
+}
+
 void MagnetiteCore::destroyCharacter( Character* c )
 {
 	for( std::vector<Character*>::iterator it = mCharacters.begin(); it != mCharacters.end(); it++ ) {
