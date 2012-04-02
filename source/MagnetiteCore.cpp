@@ -297,7 +297,7 @@ void MagnetiteCore::go()
 		}
 
 		//Ensure the renderer has the correct camera
-		mRenderer->setCamera( &mGame->getLocalPlayer()->getCamera() );
+		mRenderer->setCamera( mGame->getLocalPlayer()->getCamera() );
 		mRenderer->render(lDelta, mWorld);
 		
 		mGame->uiPaint( mRenderer );
@@ -376,8 +376,10 @@ Character* MagnetiteCore::createCharacter()
 void MagnetiteCore::destroyCharacter( Character* c )
 {
 	for( std::vector<Character*>::iterator it = mCharacters.begin(); it != mCharacters.end(); it++ ) {
-		if( c == (*it) )
+		if( c == (*it) ) {
 			mCharacters.erase( it++ );
+			delete c;
+		}
 	}
 }
 

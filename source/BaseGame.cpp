@@ -102,9 +102,6 @@ void BaseGame::_inputEvents( const InputEvent& e )
 	if( e.event == Inputs::SPRINT ) {
 		//if( getLocalPlayer() ) mPlayer->enableSprint( e.down );
 	}
-	if( e.event == Inputs::FLY ) {
-		if( getLocalPlayer() ) e.down ? mPlayer->destroyCharacter() : mPlayer->createCharacter();
-	}
 	if( e.event == Inputs::RESPAWN && e.down ) {
 		if( getLocalPlayer() ) mPlayer->setPosition( Vector3( 0, 150.f, 0 ) );
 	}
@@ -119,8 +116,8 @@ void BaseGame::_inputMovement( const Vector3& v )
 void BaseGame::_mouseMoved( const float x, const float y )
 {
 	if( getLocalPlayer() ) {
-		mPlayer->getCamera().pitch( y );
-		mPlayer->getCamera().yaw( x );
+		mPlayer->getCamera()->pitch( y );
+		mPlayer->getCamera()->yaw( x );
 	}
 }
 

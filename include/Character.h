@@ -67,11 +67,16 @@ public:
 	 * Gets a pointer to the camera
 	 */
 	Camera* getCamera();
-
+	
 	/**
-	 * Gets a ray representing the Character's look
+	 * Gets a ray representing the Player's look
 	 */
 	raycast_r getEyeCast();
+	
+	/**
+	 * Gets the direction the player is looking in
+	 */
+	Vector3 getLookDirection();
 	
 	/**
 	 * Gets a ray representing the -UP axis

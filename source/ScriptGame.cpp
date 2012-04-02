@@ -117,8 +117,8 @@ void ScriptGame::_inputMovement( const Vector3& v )
 void ScriptGame::_mouseMoved( const float x, const float y )
 {
 	if( getLocalPlayer() ) {
-		mPlayer->getCamera().pitch( y );
-		mPlayer->getCamera().yaw( x );
+		mPlayer->getCamera()->pitch( y );
+		mPlayer->getCamera()->yaw( x );
 	}
 }
 

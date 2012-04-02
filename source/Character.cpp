@@ -67,6 +67,11 @@ raycast_r Character::getEyeCast()
 	return ray;
 } 
 
+Vector3 Character::getLookDirection()
+{
+	return mCamera.getForward();
+}
+
 raycast_r Character::getFeetCast()
 {
 	raycast_r ray;
