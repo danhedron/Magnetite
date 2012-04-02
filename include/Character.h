@@ -93,6 +93,11 @@ public:
 	 * @param dp Position delta
 	 */
 	void addMoveDelta( const Vector3& dp );
+	
+	/**
+	 * Moves the character by the given delta.
+	 */
+	void move( const Vector3& v );
 
 	/**
 	 * Update camera poisition and stuff.

@@ -11,8 +11,3 @@ Player::~Player()
 {
 	
 }
-
-void Player::move( const Vector3& offset )
-{
-	mCamera.translate( offset );
-}

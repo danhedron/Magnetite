@@ -118,24 +118,27 @@ void Character::jump()
 
 void Character::update(float dt)
 {
-	//Matrix4 yaw = Matrix4::rotateY( -(mCamera.getYaw()*3.141f)/180 );
-
-	if( !mFlying ) {
-		Vector3 walkDir = Matrix4::rotateY( -(mCamera.getYaw()*3.141f)/180) * mMoveVector * (mSprint ? mSprintSpeed : mMoveSpeed) * dt;
-		mPhysicsController->setWalkDirection( btVector3( walkDir.x, walkDir.y, walkDir.z ) );
-		
-		btTransform t = mPhysicsBody->getWorldTransform();
-		mPosition = Vector3( t.getOrigin().x(), t.getOrigin().y(), t.getOrigin().z() );
-
-	}
-	else
-	{
-		Vector3 delty = Matrix4::rotateX( -(mCamera.getPitch()*3.141f)/180) * -mMoveVector * 5;
-		Vector3 delt = Matrix4::rotateY( -(mCamera.getYaw()*3.141f)/180) * delty * 5;
-		mPosition -= delt * dt;
-	}
-
+	//move( mMoveVector * dt );
+	
+	btTransform t = mPhysicsBody->getWorldTransform();
+	mPosition = Vector3( t.getOrigin().x(), t.getOrigin().y(), t.getOrigin().z() );
+	
+	if( mFlying ) mPhysicsController->setGravity(0);
+	else mPhysicsController->setGravity(1);
+	
 	mCamera.setPosition( mPosition + Vector3( 0.f, (mHeight/2) * 0.9f, 0.f) );
+}
+
+void Character::move( const Vector3& v )
+{
+	// translate the vector around the yaw.
+	Vector3 final = Matrix4::rotateY( -(mCamera.getYaw()*3.141f)/180 ) * v * (mSprint ? mSprintSpeed : mMoveSpeed);
+	
+	mPhysicsController->setWalkDirection( btVector3( final.x, final.y, final.z ) );
+		
+	btTransform t = mPhysicsBody->getWorldTransform();
+	mPosition = Vector3( t.getOrigin().x(), t.getOrigin().y(), t.getOrigin().z() );
+
 }
 
 void Character::_physicsUpdateTransform( const Vector3& v )

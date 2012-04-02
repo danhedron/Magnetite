@@ -79,6 +79,15 @@ ValueHandle player_enableFlying(const Arguments& args)
 	return Undefined();
 }
 
+ValueHandle player_isFlying(const Arguments& args)
+{
+	Handle<Object> self = args.This();
+	Handle<External> rptr = Handle<External>::Cast(self->GetInternalField(0));
+	Player* player = static_cast<Player*>(rptr->Value());
+
+	return Boolean::New(player->isFlying());
+}
+
 
 typedef std::map<Player*, PersistentObject> WrappedPlayers;
 WrappedPlayers gWrappedPlayers;
@@ -105,6 +114,7 @@ ValueHandle wrapPlayer( Player* player )
 		playerTemplate->Set( String::New("getEyeCast"), FunctionTemplate::New(player_getEyeCast));
 		playerTemplate->Set( String::New("move"), FunctionTemplate::New(player_move) );
 		playerTemplate->Set( String::New("enableFlying"), FunctionTemplate::New(player_enableFlying) );
+		playerTemplate->Set( String::New("isFlying"), FunctionTemplate::New(player_isFlying) );
 	}
 	
 	PersistentObject pl = PersistentObject::New(playerTemplate->NewInstance());

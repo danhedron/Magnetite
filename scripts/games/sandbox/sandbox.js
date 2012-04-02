@@ -86,19 +86,19 @@ Game.keyDown = function(k)
 			break;
 		case 22:
 			// W
-			this.player.moveTarget.z = -10;
+			this.player.moveTarget.x = -10;
 			break;
 		case 0:
 			// A
-			this.player.moveTarget.x = 10;
+			this.player.moveTarget.z = 10;
 			break;
 		case 18:
 			// S
-			this.player.moveTarget.z = 10;
+			this.player.moveTarget.x = 10;
 			break;
 		case 3:
 			// D
-			this.player.moveTarget.x = -10;
+			this.player.moveTarget.z = -10;
 			break;
 		case 16:
 			this.player.moveTarget.y = 10;
@@ -107,7 +107,7 @@ Game.keyDown = function(k)
 			this.player.moveTarget.y = -10;
 			break;
 		case 57:
-			this.player.createCharacter();
+			this.player.enableFlying( !this.player.isFlying() )
 			break;
 	}
 }
@@ -118,19 +118,19 @@ Game.keyUp = function(k)
 	{
 		case 22:
 			// W
-			this.player.moveTarget.z = 0;
+			this.player.moveTarget.x = 0;
 			break;
 		case 0:
 			// A
-			this.player.moveTarget.x = -0;
+			this.player.moveTarget.z = -0;
 			break;
 		case 18:
 			// S
-			this.player.moveTarget.z = -0;
+			this.player.moveTarget.x = -0;
 			break;
 		case 3:
 			// D
-			this.player.moveTarget.x = 0;
+			this.player.moveTarget.z = 0;
 			break;
 		case 16:
 		case 4:

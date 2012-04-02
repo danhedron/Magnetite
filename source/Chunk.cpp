@@ -276,7 +276,7 @@ void Chunk::generate()
 	mGeometry->vertexCount	= numVerts;
 	
 	// generate physics
-	//generatePhysics();
+	generatePhysics();
 }
 
 void Chunk::generatePhysics()
