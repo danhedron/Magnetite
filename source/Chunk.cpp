@@ -58,7 +58,7 @@ long Chunk::getZ()
 size_t Chunk::getLightLevel( short x, short y, short z )
 {
 	if( x < 0 || x >= CHUNK_WIDTH || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_WIDTH )
-		return 0;
+		return 255;
 	return mLightValues[ BLOCK_INDEX_2( x, y, z ) ];
 }
 
@@ -124,8 +124,10 @@ void Chunk::removeBlockAt( short index )
 	_raiseChunkFlag( DataUpdated );
 }
 
-bool Chunk::hasNeighbours( short x, short y, short z )
+bool Chunk::hasNeighbours( long x, long y, long z )
 {
+	if( x == 0 || y == 0 || z == 0 ) return true;
+	if( x >= CHUNK_WIDTH-1 ||  y >= CHUNK_HEIGHT-1 ||  z >= CHUNK_WIDTH-1 ) return true;
 	if( getBlockAt(x - 1, y, z) ) return true;
 	if( getBlockAt(x + 1, y, z) ) return true;
 	if( getBlockAt(x, y - 1, z) ) return true;
@@ -215,6 +217,7 @@ void Chunk::requestGenerate()
 		updateVisibility();
 		if( _hasChunkFlag( MeshInvalid ) )
 		{
+			Util::log("-- Generating");
 			generate();
 			_lowerChunkFlag( MeshInvalid );
 		}
@@ -228,6 +231,17 @@ GLgeometry* Chunk::getGeometry()
 }
 
 void Chunk::generate()
+{
+	// Lighting must be done before geometry
+	generateLighting();
+	
+	generateGeometry();
+	
+	// generate physics - geometry must already be generated
+	generatePhysics();
+}
+
+void Chunk::generateGeometry()
 {
 	if( mGeometry != NULL ) 
 	{
@@ -255,8 +269,6 @@ void Chunk::generate()
 	size_t vind = 0;
 	size_t eind = 0;
 	
-	LightingManager::lightChunk( this );
-	
 	BlockContext context;
 	
 	for( BlockList::iterator it = mVisibleBlocks.begin(); it != mVisibleBlocks.end(); ++it )
@@ -274,9 +286,11 @@ void Chunk::generate()
 	mGeometry->vertexData	= verts;
 	mGeometry->edgeCount	= numEdges;
 	mGeometry->vertexCount	= numVerts;
-	
-	// generate physics
-	generatePhysics();
+}
+
+void Chunk::generateLighting()
+{
+	LightingManager::lightChunk( this );
 }
 
 void Chunk::generatePhysics()

@@ -373,6 +373,16 @@ public:
 	 * @returns a Pointer to the sky object.
 	 */
 	Sky* getSky();
+	
+	/**
+	 * Builds the data for the initial world
+	 */
+    void buildTerrain();
+	
+	/**
+	 * Returns true if there is a block surrounding this point
+	 */
+    bool hasNeighbours(short int x, short int y, short int z);
 
 };
 

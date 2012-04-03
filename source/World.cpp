@@ -8,6 +8,7 @@
 #include "StoneBlock.h"
 #include "ChunkGenerator.h"
 #include "MagnetiteCore.h"
+#include <LightingManager.h>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
@@ -41,15 +42,45 @@ mWorldStage( WORLD_NORMAL )
 	
 	createSky( 0 );
 
-	mGenerator = new ChunkGenerator(1024);
-	mGenerator->fillRegion( this, Vector3(0,0,0), Vector3( (edgeSize-1) * CHUNK_WIDTH, (edgeSize-1) * CHUNK_WIDTH, (edgeSize-1) * CHUNK_WIDTH ) );
-	
 	printDbg = false;
 }
 
 World::~World()
 {
-	destoryWorld();	
+	destoryWorld();
+}
+
+void World::buildTerrain()
+{
+	mGenerator = new ChunkGenerator(1024);
+	mGenerator->fillRegion( this, Vector3(0,0,0), Vector3( (mWorldSize-1) * CHUNK_WIDTH, (mWorldSize-1) * CHUNK_WIDTH, (mWorldSize-1) * CHUNK_WIDTH ) );
+	
+	auto wcube = mWorldSize*mWorldSize*mWorldSize;
+	
+	// Initial Ordering:
+	// - Generate Lighting 
+	// - Generate Visibility Data
+	// - Generate Geometry
+	
+	for( int i = 0; i < wcube; i++ )
+	{
+		if( mChunks[i] )
+		{
+			mChunks[i]->updateVisibility();
+			mChunks[i]->generateLighting();
+		}
+	}
+	
+	for( int i = 0; i < wcube; i++ )
+	{
+		if( mChunks[i] )
+		{
+			mChunks[i]->generateGeometry();
+			mChunks[i]->generatePhysics();
+			mChunks[i]->_lowerChunkFlag( Chunk::MeshInvalid );
+			mChunks[i]->_lowerChunkFlag( Chunk::DataUpdated );
+		}
+	}
 }
 
 size_t World::coordsToIndex( int x, int y, int z )
@@ -119,7 +150,7 @@ LightIndex World::getLightLevel( long x, long y, long z )
 	size_t cy = floor( ((float) y)/CHUNK_HEIGHT );
 	size_t cz = floor( ((float) z)/CHUNK_WIDTH );
 	Chunk* c = getChunk( cx, cy, cz );
-	if( c == NULL ) return 0;
+	if( c == NULL ) return 255;
 	return c->getLightLevel( x % CHUNK_WIDTH, y % CHUNK_HEIGHT, z % CHUNK_WIDTH );
 }
 
@@ -190,6 +221,11 @@ void World::setPagingCamera( Camera* _c )
 	mPagingCamera = _c;
 }
 
+bool World::hasNeighbours(short int x, short int y, short int z)
+{
+	return false;
+}
+
 void World::activateChunk( long x, long y, long z )
 {
 	// Generate or load the chunk as it is not loaded.
@@ -236,19 +272,11 @@ void World::update( float dt )
 	else
 	{
 		auto wcube = mWorldSize*mWorldSize*mWorldSize;
-
 		for( int i = 0; i < wcube; i++ )
 		{
 			if( mChunks[i] )
 			{
 				mChunks[i]->update(dt);
-			}
-		}
-		for( int i = 0; i < wcube; i++ )
-		{
-			if( mChunks[i] )
-			{
-				mChunks[i]->requestGenerate();
 			}
 		}
 	}

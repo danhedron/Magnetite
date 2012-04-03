@@ -152,7 +152,7 @@ public:
 	/**
 	 * Retuns true if there's a block next to the given position
 	 */
-	bool hasNeighbours( short x, short y, short z );
+	bool hasNeighbours( long int x, long int y, long int z );
 	
 	/** 
 	 * Sets the light value at the given pointer
@@ -173,6 +173,16 @@ public:
 	 * Generates the chunk's actual geometry
 	 */
 	void generate();
+	
+	/**
+	 * Generates the geometry for this chunk's mesh.
+	 */
+	void generateGeometry();
+	
+	/**
+	 * Generates the light data for this chunk
+	 */
+	void generateLighting();
 	
 	/**
 	 * Generates the chunk's physical geometry
