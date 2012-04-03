@@ -40,7 +40,31 @@ Game.tools = [
 		title: 'tree',
 		func: function( pl ) {
 			var rs = world.fireRay( pl.getEyeCast() );
-			world.createBlock( 'log', rs.worldHit.x + (rs.normal.x/2), rs.worldHit.y + (rs.normal.y/2), rs.worldHit.z + (rs.normal.z/2) );
+			var b = { x: rs.worldHit.x + (rs.normal.x/2), y: rs.worldHit.y + (rs.normal.y/2), z: rs.worldHit.z + (rs.normal.z/2) };
+			world.createBlock( 'log', b.x, b.y  , b.z );
+			world.createBlock( 'log', b.x, b.y+1, b.z );
+			world.createBlock( 'log', b.x, b.y+2, b.z );
+			world.createBlock( 'log', b.x, b.y+3, b.z );
+			world.createBlock( 'log', b.x, b.y+4, b.z );
+			for( var x = -2; x <= 2; x++ )
+			{
+				for( var z = -2; z <= 2; z++ )
+				{
+					if( x != 0 || z != 0 ) {
+						world.createBlock( 'leaf', b.x+x, b.y+3, b.z+z );
+					}
+				}
+			}
+			for( var x = -1; x <= 1; x++ )
+			{
+				for( var z = -1; z <= 1; z++ )
+				{
+					if( x != 0 || z != 0 ) {
+						world.createBlock( 'leaf', b.x+x, b.y+4, b.z+z );
+					}
+				}
+			}
+			world.createBlock( 'leaf', b.x, b.y+5, b.z );
 		}
 	}
 	];
