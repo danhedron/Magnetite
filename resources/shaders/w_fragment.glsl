@@ -6,7 +6,7 @@ varying vec2 f_coords;
 
 void main (void)  
 {
-	vec4 col = texture2D( worldDiffuse, f_coords * 0.25) * f_light / 255;
-	col.a = 1;
+	vec4 col = texture2D( worldDiffuse, f_coords * 0.25);
+	col.rgb *= f_light / 255;
 	gl_FragColor = col;
 } 

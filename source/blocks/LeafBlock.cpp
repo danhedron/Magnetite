@@ -23,6 +23,11 @@ void LeafBlock::hit()
 
 }
 
+bool LeafBlock::isOpaque()
+{
+	return false;
+}
+
 void LeafBlock::getTextureCoords( short face, short &x, short &y )
 {
 	x = 2;

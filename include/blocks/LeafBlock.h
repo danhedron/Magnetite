@@ -14,6 +14,8 @@ public:
 	std::string getType();
 
 	void getTextureCoords( short face, short &x, short &y );
+	
+	virtual bool isOpaque();
 
 	void created();
 	void hit();
