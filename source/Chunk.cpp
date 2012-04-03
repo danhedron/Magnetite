@@ -217,7 +217,6 @@ void Chunk::requestGenerate()
 		updateVisibility();
 		if( _hasChunkFlag( MeshInvalid ) )
 		{
-			Util::log("-- Generating");
 			generate();
 			_lowerChunkFlag( MeshInvalid );
 		}
