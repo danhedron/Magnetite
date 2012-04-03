@@ -59,7 +59,7 @@ Game.onSpawn = function( p )
 	this.player.setPosition( { x: 10, y: 130, z: 10 } );
 	this.player.moveTarget = { x: 0, y: 0, z: 0 };
 	this.player.moveSpeed = { x: 0, y: 0, z: 0 };
-	this.player.movementSpeed = 1;
+	this.player.movementSpeed = 2;
 }
 
 Game.changeBlock = function( v )
@@ -86,25 +86,25 @@ Game.keyDown = function(k)
 			break;
 		case 22:
 			// W
-			this.player.moveTarget.x = -10;
+			this.player.moveTarget.x = -1;
 			break;
 		case 0:
 			// A
-			this.player.moveTarget.z = 10;
+			this.player.moveTarget.z = -1;
 			break;
 		case 18:
 			// S
-			this.player.moveTarget.x = 10;
+			this.player.moveTarget.x = 1;
 			break;
 		case 3:
 			// D
-			this.player.moveTarget.z = -10;
+			this.player.moveTarget.z = 1;
 			break;
 		case 16:
-			this.player.moveTarget.y = 10;
+			this.player.moveTarget.y = 1;
 			break;
 		case 4:
-			this.player.moveTarget.y = -10;
+			this.player.moveTarget.y = -1;
 			break;
 		case 57:
 			this.player.enableFlying( !this.player.isFlying() )
