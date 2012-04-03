@@ -19,14 +19,14 @@ struct IntOffset {
 		int x, y, z;
 };
 
-#define point_count 128
+#define point_count 32
 
 struct IntRay {
 	float left, right, top, bottom, front, back;
 	IntOffset points[point_count];
 };
 
-#define ray_count 64
+#define ray_count 32
 
 struct Sample {
 	float left, right, top, bottom, front, back;
@@ -121,43 +121,30 @@ void LightingManager::gatherLight( Chunk* chunk )
 
 	IntRay *ray, *rayend;
 	IntOffset *offs, *offend;
-	int xoff, yoff, zoff;
 	BaseBlock* obs = NULL;
 	bool collided;
+	long pX = (chunk->getX() * CHUNK_WIDTH);
+	long pY = (chunk->getY() * CHUNK_HEIGHT);
+	long pZ = (chunk->getZ() * CHUNK_WIDTH);
+	
 	float right = 0, left = 0, top = 0, bottom = 0, front = 0, back = 0;
 	for( short x = 0; x < CHUNK_WIDTH; x++ ) {
 		for( short y = 0; y < CHUNK_HEIGHT; y++ ) {
 			for( short z = 0; z < CHUNK_WIDTH; z++ ) {
 				block = chunk->getBlockAt( x, y, z );
-				right = 0; left = 0; top = 0; bottom = 0; front = 0; back = 0;
 				if( block == NULL && chunk->hasNeighbours( x, y, z ) ) {
+					right = 0; left = 0; top = 0; bottom = 0; front = 0; back = 0;
 					for( ray = &rays[0], rayend = &rays[0 + ray_count]; ray < rayend; ray++ ) {
-						collided = false;
 						for( offs = &ray->points[0], offend = &ray->points[0 + point_count]; offs < offend; offs++ ) {
-							xoff = x + offs->x;
-							yoff = y + offs->y;
-							zoff = z + offs->z;
-							long wx = xoff + (chunk->getX() * CHUNK_WIDTH);
-							long wy = yoff + (chunk->getY() * CHUNK_HEIGHT);
-							long wz = zoff + (chunk->getZ() * CHUNK_WIDTH);
-							if( xoff < x - CHUNK_WIDTH  || xoff >= x + CHUNK_WIDTH  ) {
-								break;
-							} 
-							else if( yoff < y - CHUNK_HEIGHT  || yoff >= y + CHUNK_HEIGHT  ) {
-								break;
-							} 
-							else if( zoff < z - CHUNK_WIDTH  || zoff >= z + CHUNK_WIDTH  ) {
-								break;
-							}
-							else {
-								obs = world->getBlockAt( wx, wy, wz );
-								if( obs ) {
-									collided = true;
-									break;
-								}
-							}
+							long wx = x + offs->x + pX;
+							long wy = y + offs->y + pY;
+							long wz = z + offs->z + pZ;
+							
+							obs = world->getBlockAt( wx, wy, wz );
+							if( obs ) break;
 						}
-						if( collided == false ) {
+						if( obs == nullptr )
+						{
 							right += ray->right;
 							left += ray->left;
 							top += ray->top;
@@ -166,7 +153,7 @@ void LightingManager::gatherLight( Chunk* chunk )
 							back += ray->back;
 						}
 					}
-					LightIndex lighness = smp.getSample(right, left, top, bottom, front, back) * 256;
+					LightIndex lighness = smp.getSample(right, left, top, bottom, front, back) * 255;
 					chunk->setLightLevel(lighness, x, y, z);
 				}
 			}
