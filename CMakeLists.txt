@@ -86,6 +86,8 @@ set(MAGNETITE_SOURCES
 	source/script/ScriptGlobalsDebug.cpp
 	source/script/ScriptExplosion.cpp
 	source/script/ScriptPlayer.cpp
+	source/blocks/LogBlock.cpp
+	source/blocks/LeafBlock.cpp
 )
 set(MAGNETITE_HEADERS
 	include/MagnetiteCore.h
@@ -140,6 +142,8 @@ set(MAGNETITE_HEADERS
 	include/script/ScriptGlobalsDebug.h
 	include/script/ScriptExplosion.h
 	include/script/ScriptPlayer.h
+	include/blocks/LogBlock.h
+	include/blocks/LeafBlock.h
 	include/util.h
 )
 source_group("Header Files" FILES ${MAGNETITE_HEADERS})
@@ -149,6 +153,7 @@ add_executable(Magnetite ${MAGNETITE_SOURCES} ${MAGNETITE_HEADERS})
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/include/script)
+include_directories(${PROJECT_SOURCE_DIR}/include/blocks)
 include_directories(${PROJECT_SOURCE_DIR}/depends/include/)
 
 # Windows only

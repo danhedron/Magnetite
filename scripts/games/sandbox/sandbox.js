@@ -35,6 +35,13 @@ Game.tools = [
 			ex.radius = 5;
 			ex.explode();
 		}
+	},
+	{
+		title: 'tree',
+		func: function( pl ) {
+			var rs = world.fireRay( pl.getEyeCast() );
+			world.createBlock( 'log', rs.worldHit.x + (rs.normal.x/2), rs.worldHit.y + (rs.normal.y/2), rs.worldHit.z + (rs.normal.z/2) );
+		}
 	}
 	];
 Game.toolIndex = 0;
@@ -174,5 +181,5 @@ Game.think = function( dt )
 
 Game.draw = function()
 {
-	console.drawText( 10, 10, this.tools[ this.toolIndex % this.tools.length ].title );
+	console.drawText( 10, 10, this.tools[ this.toolIndex % this.tools.length ].title + '\n' + meta.blocks.availableTypes[this.currentBlock] );
 }
