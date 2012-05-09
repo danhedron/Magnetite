@@ -4,6 +4,7 @@
 #include "World.h"
 #include "Chunk.h"
 #include "math.h"
+#include "Profiler.h"
 
 LightingManager::LightingManager()
 : litChunks(0)
@@ -122,7 +123,6 @@ void LightingManager::gatherLight( Chunk* chunk )
 	IntRay *ray, *rayend;
 	IntOffset *offs, *offend;
 	BaseBlock* obs = NULL;
-	bool collided;
 	long pX = (chunk->getX() * CHUNK_WIDTH);
 	long pY = (chunk->getY() * CHUNK_HEIGHT);
 	long pZ = (chunk->getZ() * CHUNK_WIDTH);

@@ -88,6 +88,7 @@ set(MAGNETITE_SOURCES
 	source/script/ScriptPlayer.cpp
 	source/blocks/LogBlock.cpp
 	source/blocks/LeafBlock.cpp
+	source/Profiler.cpp
 )
 set(MAGNETITE_HEADERS
 	include/MagnetiteCore.h
@@ -144,6 +145,7 @@ set(MAGNETITE_HEADERS
 	include/script/ScriptPlayer.h
 	include/blocks/LogBlock.h
 	include/blocks/LeafBlock.h
+	include/Profiler.h
 	include/util.h
 )
 source_group("Header Files" FILES ${MAGNETITE_HEADERS})

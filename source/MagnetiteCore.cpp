@@ -91,12 +91,11 @@ void MagnetiteCore::init(int *argc, char **argv)
 	mResourceManager->addLocation("./resources/sprites/");
 	mResourceManager->addLocation("./resources/ui/");
 	sf::ContextSettings wnds;
-	wnds.DepthBits = 24;
+	wnds.depthBits = 24;
 	//wnds.AntialiasingLevel = 2;
-	mWindow.Create(sf::VideoMode(800,600,32), "Magnetite", sf::Style::Close | sf::Style::Resize, wnds);
-	mWindow.EnableKeyRepeat( false );
-	mWindow.EnableVerticalSync( false );
-	//mWindow.UseVerticalSync(true);
+	mWindow.create(sf::VideoMode(800,600,32), "Magnetite", sf::Style::Close | sf::Style::Resize, wnds);
+	mWindow.setKeyRepeatEnabled( false );
+	mWindow.setVerticalSyncEnabled( false );
 	mRenderer->initialize(mWindow);
 	mTextureManager->initalize();
 	mRenderer->resizeViewport(0,0,800,600);
@@ -127,7 +126,7 @@ btDiscreteDynamicsWorld* MagnetiteCore::getPhysicsWorld()
 
 void MagnetiteCore::screenshot()
 {
-	sf::Image screen = mWindow.Capture();
+	sf::Image screen = mWindow.capture();
 	time_t rawt = time( NULL );
 	tm* t = localtime( &rawt );
 	char tstr[80];
@@ -136,7 +135,7 @@ void MagnetiteCore::screenshot()
 	fname.append( tstr );
 	fname.append(".png");
 	Util::log("Saving screenshot to: " + fname);
-	screen.SaveToFile(fname);
+	screen.saveToFile(fname);
 }
 
 void MagnetiteCore::startGame( const std::string& type )
@@ -174,40 +173,40 @@ void MagnetiteCore::mouseMoved( const float x, const float y )
 
 void MagnetiteCore::go() 
 {
-	int lastX = mWindow.GetWidth()/2;
-	int lastY = mWindow.GetHeight()/2;
+	int lastX = mWindow.getSize().x/2;
+	int lastY = mWindow.getSize().y/2;
 
-	mClock.Restart();
-	while(mContinue && mWindow.IsOpen()) {
+	mClock.restart();
+	while(mContinue && mWindow.isOpen()) {
 
-		float lDelta = ((float)mClock.GetElapsedTime().AsMilliseconds())/1000;
+		float lDelta = ((float)mClock.getElapsedTime().asMilliseconds())/1000;
 
-		mClock.Restart();
+		mClock.restart();
 
 		// Handle Events before we render.
 		sf::Event lEvt;
-		while( mWindow.PollEvent(lEvt) ) {
-			if( lEvt.Type == sf::Event::Closed ) {
+		while( mWindow.pollEvent(lEvt) ) {
+			if( lEvt.type == sf::Event::Closed ) {
 				exit();
 			}
-			if( (lEvt.Type == sf::Event::KeyPressed) &&
-				(lEvt.Key.Code == sf::Keyboard::Escape) ) {
+			if( (lEvt.type == sf::Event::KeyPressed) &&
+				(lEvt.key.code == sf::Keyboard::Escape) ) {
 				exit();
 			}
 
-			if( lEvt.Type == sf::Event::KeyPressed )
+			if( lEvt.type == sf::Event::KeyPressed )
 			{
-				mInputManager->keyDown( lEvt.Key.Code );
-				mGame->keyDown( lEvt.Key.Code );
+				mInputManager->keyDown( lEvt.key.code );
+				mGame->keyDown( lEvt.key.code );
 			}
-			if( lEvt.Type == sf::Event::KeyReleased )
+			if( lEvt.type == sf::Event::KeyReleased )
 			{
-				mInputManager->keyUp( lEvt.Key.Code );
-				mGame->keyUp( lEvt.Key.Code );
+				mInputManager->keyUp( lEvt.key.code );
+				mGame->keyUp( lEvt.key.code );
 			}
 
-			if( (lEvt.Type == sf::Event::KeyPressed) &&
-				(lEvt.Key.Code == sf::Keyboard::R) ) {
+			if( (lEvt.type == sf::Event::KeyPressed) &&
+				(lEvt.key.code == sf::Keyboard::R) ) {
 					if(mRenderer->getRenderMode() == Renderer::RENDER_SOLID)
 						mRenderer->setRenderMode(Renderer::RENDER_LIGHTING);
 					else
@@ -217,64 +216,64 @@ void MagnetiteCore::go()
 			//==========
 			//= Debug Buttons
 			//==========
-			if( (lEvt.Type == sf::Event::KeyReleased ) &&
-				(lEvt.Key.Code == sf::Keyboard::F1 ) ) {
+			if( (lEvt.type == sf::Event::KeyReleased ) &&
+				(lEvt.key.code == sf::Keyboard::F1 ) ) {
 				mRenderer->setDebugMode( Renderer::DEBUG_OFF );
 			}
-			if( (lEvt.Type == sf::Event::KeyReleased ) &&
-				(lEvt.Key.Code == sf::Keyboard::F3 ) ) {
+			if( (lEvt.type == sf::Event::KeyReleased ) &&
+				(lEvt.key.code == sf::Keyboard::F3 ) ) {
 				mRenderer->setDebugMode( Renderer::DEBUG_STATS );
 			}
-			if( (lEvt.Type == sf::Event::KeyReleased ) &&
-				(lEvt.Key.Code == sf::Keyboard::F4 ) ) {
+			if( (lEvt.type == sf::Event::KeyReleased ) &&
+				(lEvt.key.code == sf::Keyboard::F4 ) ) {
 				mRenderer->setDebugMode( Renderer::DEBUG_PHYSICS );
 			}
-			if( (lEvt.Type == sf::Event::KeyReleased ) &&
-				(lEvt.Key.Code == sf::Keyboard::F5 ) ) {
+			if( (lEvt.type == sf::Event::KeyReleased ) &&
+				(lEvt.key.code == sf::Keyboard::F5 ) ) {
 				mRenderer->setDebugMode( Renderer::DEBUG_LINES );
 			}
-			if( (lEvt.Type == sf::Event::KeyReleased ) &&
-				(lEvt.Key.Code == sf::Keyboard::F6 ) ) {
+			if( (lEvt.type == sf::Event::KeyReleased ) &&
+				(lEvt.key.code == sf::Keyboard::F6 ) ) {
 				Util::setLogLevel( Util::Verbose );
 			}
-			if( (lEvt.Type == sf::Event::KeyReleased) &&
-				(lEvt.Key.Code == sf::Keyboard::F) ) {
+			if( (lEvt.type == sf::Event::KeyReleased) &&
+				(lEvt.key.code == sf::Keyboard::F) ) {
 					//mPlayer->enableFlying( !mPlayer->isFlying() );
 					//Util::log( (Util::toString(mPlayer->isFlying())) + " Flying");
 			}
-			if( (lEvt.Type == sf::Event::KeyReleased) &&
-				(lEvt.Key.Code == sf::Keyboard::F) ) {
+			if( (lEvt.type == sf::Event::KeyReleased) &&
+				(lEvt.key.code == sf::Keyboard::F) ) {
 					//mPlayer->enableFlying( !mPlayer->isFlying() );
 					//Util::log( (Util::toString(mPlayer->isFlying())) + " Flying");
 			}
-			if( (lEvt.Type == sf::Event::KeyPressed) &&
-				(lEvt.Key.Code == sf::Keyboard::Add) ) {
+			if( (lEvt.type == sf::Event::KeyPressed) &&
+				(lEvt.key.code == sf::Keyboard::Add) ) {
 					mRenderer->nextBlock();
 			}
-			if( (lEvt.Type == sf::Event::KeyPressed) &&
-				(lEvt.Key.Code == sf::Keyboard::Num9) ) {
+			if( (lEvt.type == sf::Event::KeyPressed) &&
+				(lEvt.key.code == sf::Keyboard::Num9) ) {
 					mTimescale *= 0.5f;
 			}
-			if( (lEvt.Type == sf::Event::KeyPressed) &&
-				(lEvt.Key.Code == sf::Keyboard::Num0) ) {
+			if( (lEvt.type == sf::Event::KeyPressed) &&
+				(lEvt.key.code == sf::Keyboard::Num0) ) {
 					mTimescale *= 2.f;
 			}
-			if( (lEvt.Type == sf::Event::MouseMoved) ) {
-					mGame->_mouseMoved( -(lEvt.MouseMove.X - lastX), -(lEvt.MouseMove.Y  - lastY));
-					lastX = lEvt.MouseMove.X;
-					lastY = lEvt.MouseMove.Y;
+			if( (lEvt.type == sf::Event::MouseMoved) ) {
+					mGame->_mouseMoved( -(lEvt.mouseMove.x - lastX), -(lEvt.mouseMove.y  - lastY));
+					lastX = lEvt.mouseMove.x;
+					lastY = lEvt.mouseMove.y;
 			}
-			if( (lEvt.Type == sf::Event::MouseLeft) ) {
-					sf::Mouse::SetPosition( sf::Vector2i( mWindow.GetWidth() / 2, mWindow.GetHeight() / 2), mWindow );
+			if( (lEvt.type == sf::Event::MouseLeft) ) {
+					sf::Mouse::setPosition( sf::Vector2i( mWindow.getSize().x / 2, mWindow.getSize().y / 2), mWindow );
 			}
-			if( lEvt.Type == sf::Event::MouseButtonPressed && lEvt.MouseButton.Button == sf::Mouse::Left ) {
+			if( lEvt.type == sf::Event::MouseButtonPressed && lEvt.mouseButton.button == sf::Mouse::Left ) {
 				mGame->_primary();
 			}
-			if( lEvt.Type == sf::Event::MouseButtonPressed && lEvt.MouseButton.Button == sf::Mouse::Right ) {
+			if( lEvt.type == sf::Event::MouseButtonPressed && lEvt.mouseButton.button == sf::Mouse::Right ) {
 				mGame->_secondary();
 			}
-			if( lEvt.Type == sf::Event::Resized ) {
-				mRenderer->resizeViewport( 0, 0, lEvt.Size.Width, lEvt.Size.Height );
+			if( lEvt.type == sf::Event::Resized ) {
+				mRenderer->resizeViewport( 0, 0, lEvt.size.width, lEvt.size.height );
 			}
 		}
 
@@ -302,10 +301,10 @@ void MagnetiteCore::go()
 		
 		mGame->uiPaint( mRenderer );
 
-		mWindow.Display();
+		mWindow.display();
 	}
 
-	mWindow.Close();
+	mWindow.close();
 
 }
 

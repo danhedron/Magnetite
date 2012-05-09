@@ -714,11 +714,11 @@ void Renderer::lastBlock()
 
 void Renderer::drawText(std::string text, int x, int y)
 {
-	mWindow->PushGLStates();
-	sf::Text drawableString(text, sf::Font::GetDefaultFont(), 17.f);
-	drawableString.SetColor(sf::Color(0,255,0));
-	drawableString.SetPosition( x, y );
-	mWindow->Draw(drawableString);
-	mWindow->PopGLStates();
+	mWindow->pushGLStates();
+	sf::Text drawableString(text, sf::Font::getDefaultFont(), 17.f);
+	drawableString.setColor(sf::Color(0,255,0));
+	drawableString.setPosition( x, y );
+	mWindow->draw(drawableString);
+	mWindow->popGLStates();
 }
 

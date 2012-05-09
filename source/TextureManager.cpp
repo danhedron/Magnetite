@@ -38,14 +38,14 @@ bool TextureManager::loadTexture(std::string textureName)
 		{
 			GLuint lTextId = 0;
 			sf::Image image;
-			if(!image.LoadFromFile(textureName))
+			if(!image.loadFromFile(textureName))
 				return false;
 			glGenTextures(1, &lTextId);
-			lTexture.width = image.GetWidth();
-			lTexture.height = image.GetWidth();
+			lTexture.width = image.getSize().x;
+			lTexture.height = image.getSize().y;
 			lTexture.glID = lTextId;
 			glBindTexture(GL_TEXTURE_2D, lTextId);
-			gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, image.GetWidth(), image.GetHeight(), GL_RGBA, GL_UNSIGNED_BYTE, image.GetPixelsPtr());
+			gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, image.getSize().x, image.getSize().y, GL_RGBA, GL_UNSIGNED_BYTE, image.getPixelsPtr());
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		}
