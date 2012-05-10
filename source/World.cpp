@@ -95,9 +95,9 @@ WorldStage World::getCurrentStage()
 
 BlockPtr World::getBlockAt( long x, long y, long z )
 {
-	size_t cx = floor( ((float) x)/CHUNK_WIDTH );
-	size_t cy = floor( ((float) y)/CHUNK_HEIGHT );
-	size_t cz = floor( ((float) z)/CHUNK_WIDTH );
+	size_t cx = floor( (x)/CHUNK_WIDTH );
+	size_t cy = floor( (y)/CHUNK_HEIGHT );
+	size_t cz = floor( (z)/CHUNK_WIDTH );
 	Chunk* c = getChunk( cx, cy, cz );
 	if( c == NULL ) return NULL;
 	else return c->getBlockAt( x % CHUNK_WIDTH, y % CHUNK_HEIGHT, z % CHUNK_WIDTH );

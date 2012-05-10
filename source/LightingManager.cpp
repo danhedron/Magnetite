@@ -126,21 +126,20 @@ void LightingManager::gatherLight( Chunk* chunk )
 	long pX = (chunk->getX() * CHUNK_WIDTH);
 	long pY = (chunk->getY() * CHUNK_HEIGHT);
 	long pZ = (chunk->getZ() * CHUNK_WIDTH);
-
+	Perf::Profiler::get().begin("Chunk Lighting");
 	float right = 0, left = 0, top = 0, bottom = 0, front = 0, back = 0;
 	for( short x = 0; x < CHUNK_WIDTH; x++ ) {
 		for( short y = 0; y < CHUNK_HEIGHT; y++ ) {
 			for( short z = 0; z < CHUNK_WIDTH; z++ ) {
 				block = chunk->getBlockAt( x, y, z );
 				if( block == NULL && chunk->hasNeighbours( x, y, z ) ) {
+					long wx = x + pX;
+					long wy = y + pY;
+					long wz = z + pZ;
 					right = 0; left = 0; top = 0; bottom = 0; front = 0; back = 0;
 					for( ray = &rays[0], rayend = &rays[0 + ray_count]; ray < rayend; ray++ ) {
 						for( offs = &ray->points[0], offend = &ray->points[0 + point_count]; offs < offend; offs++ ) {
-							long wx = x + offs->x + pX;
-							long wy = y + offs->y + pY;
-							long wz = z + offs->z + pZ;
-							
-							obs = world->getBlockAt( wx, wy, wz );
+							obs = world->getBlockAt( wx + offs->x, wy + offs->y, wz + offs->z );
 							if( obs ) break;
 						}
 						if( obs == nullptr )
@@ -159,6 +158,7 @@ void LightingManager::gatherLight( Chunk* chunk )
 			}
 		}
 	}
+	Perf::Profiler::get().end("Chunk Lighting");
 }
 
 void LightingManager::lightChunk( Chunk* chunk )
