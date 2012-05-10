@@ -20,14 +20,14 @@ struct IntOffset {
 		int x, y, z;
 };
 
-#define point_count 32
+#define point_count 16
 
 struct IntRay {
 	float left, right, top, bottom, front, back;
 	IntOffset points[point_count];
 };
 
-#define ray_count 32
+#define ray_count 16
 
 struct Sample {
 	float left, right, top, bottom, front, back;
@@ -126,7 +126,7 @@ void LightingManager::gatherLight( Chunk* chunk )
 	long pX = (chunk->getX() * CHUNK_WIDTH);
 	long pY = (chunk->getY() * CHUNK_HEIGHT);
 	long pZ = (chunk->getZ() * CHUNK_WIDTH);
-	
+
 	float right = 0, left = 0, top = 0, bottom = 0, front = 0, back = 0;
 	for( short x = 0; x < CHUNK_WIDTH; x++ ) {
 		for( short y = 0; y < CHUNK_HEIGHT; y++ ) {
