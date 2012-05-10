@@ -75,6 +75,11 @@ protected:
 	btDefaultMotionState*	mPhysicsState;
 	btTriangleMesh*		mPhysicsMesh;
 	btRigidBody*		mPhysicsBody;
+	
+	/**
+	 * Block counter
+	 */
+	size_t mNumBlocks;
 
 public:
 	/**
@@ -213,6 +218,11 @@ public:
 	 * Removes a chunk flag
 	 */
 	void _lowerChunkFlag( uint16_t flag );
+	
+	/**
+	 * Returns the number of non-empty blocks in the chunk
+	 */
+    const size_t getBlockCount();
 };
 
 

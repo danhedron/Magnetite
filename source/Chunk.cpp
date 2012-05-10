@@ -1,3 +1,4 @@
+
 #include "Chunk.h"
 #include "BaseBlock.h"
 #include "BlockFactory.h"
@@ -13,7 +14,8 @@ mChunkFlags( 0 ),
 mPhysicsShape( NULL ),
 mPhysicsState( NULL ),
 mPhysicsMesh( NULL ),
-mPhysicsBody( NULL )
+mPhysicsBody( NULL ),
+mNumBlocks( 0 )
 {
 	mVisibleFaces = 0;
 	mWorldIndex = index;
@@ -89,6 +91,7 @@ void Chunk::setBlockAt( BlockPtr block, short index )
 	{
 		removeBlockAt( index );
 	}
+	mNumBlocks++;
 	mBlocks[ index ] = block;
 	_raiseChunkFlag( DataUpdated );
 }
@@ -120,6 +123,7 @@ void Chunk::removeBlockAt( short index )
 	if( it != mVisibleBlocks.end() )
 		mVisibleBlocks.erase( it );
 	delete mBlocks[index];
+	mNumBlocks--;
 	mBlocks[index] = NULL;
 	_raiseChunkFlag( DataUpdated );
 }
@@ -366,4 +370,9 @@ bool Chunk::_hasChunkFlag( uint16_t flag )
 void Chunk::_lowerChunkFlag( uint16_t flag )
 {
 	mChunkFlags &= (~flag);
+}
+
+const size_t Chunk::getBlockCount()
+{
+	return mNumBlocks;
 }
