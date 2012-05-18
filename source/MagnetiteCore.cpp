@@ -184,18 +184,17 @@ void MagnetiteCore::go()
 		
 		while(mContinue && mWindow.isOpen()) {
 			float lDelta = ((float)timer.getElapsedTime().asMilliseconds())/1000;
+			
+			if( lDelta < 1.f/60.f )
+			{
+				continue;
+			}
 			timer.restart(); 
 			
 			lDelta *= mTimescale;
 			
 			mPhysicsWorld->stepSimulation( lDelta );
 			
-			// Update all the characters
-			for( std::vector<Character*>::iterator it = mCharacters.begin(); it != mCharacters.end(); it++ )
-			{
-				(*it)->update( lDelta );
-			}
-
 			//Ensure each loaded chunk is updated before being sent to the GPU
 			mWorld->update( lDelta );
 		}
@@ -307,6 +306,13 @@ void MagnetiteCore::go()
 		{
 			mGame->think( lDelta );
 		}
+		
+		// Update all the characters
+		for( std::vector<Character*>::iterator it = mCharacters.begin(); it != mCharacters.end(); it++ )
+		{
+			(*it)->update( lDelta );
+		}
+		
 		
 		mRenderer->render(lDelta, mWorld);
 		
