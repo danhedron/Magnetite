@@ -189,15 +189,15 @@ void MagnetiteCore::go()
 			lDelta *= mTimescale;
 			
 			mPhysicsWorld->stepSimulation( lDelta );
-
-			//Ensure each loaded chunk is updated before being sent to the GPU
-			mWorld->update( lDelta );
-
+			
 			// Update all the characters
 			for( std::vector<Character*>::iterator it = mCharacters.begin(); it != mCharacters.end(); it++ )
 			{
 				(*it)->update( lDelta );
 			}
+
+			//Ensure each loaded chunk is updated before being sent to the GPU
+			mWorld->update( lDelta );
 		}
 	});
 	
