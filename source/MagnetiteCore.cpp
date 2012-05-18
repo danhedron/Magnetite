@@ -14,6 +14,7 @@
 #include "BulletDebug.h"
 #include "ResourceManager.h"
 #include <ctime>
+#include <thread>
 
 MagnetiteCore* MagnetiteCore::Singleton = 0;
 static GLDebugDrawer debug;
@@ -175,15 +176,39 @@ void MagnetiteCore::go()
 {
 	int lastX = mWindow.getSize().x/2;
 	int lastY = mWindow.getSize().y/2;
+	
+	mRenderer->setCamera( mGame->getLocalPlayer()->getCamera() );
+	
+	std::thread rendering_thread( [&]() {
+		sf::Clock timer;
+		
+		while(mContinue && mWindow.isOpen()) {
+			float lDelta = ((float)timer.getElapsedTime().asMilliseconds())/1000;
+			timer.restart(); 
+			
+			lDelta *= mTimescale;
+			
+			mPhysicsWorld->stepSimulation( lDelta );
 
+			//Ensure each loaded chunk is updated before being sent to the GPU
+			mWorld->update( lDelta );
+
+			// Update all the characters
+			for( std::vector<Character*>::iterator it = mCharacters.begin(); it != mCharacters.end(); it++ )
+			{
+				(*it)->update( lDelta );
+			}
+		}
+	});
+	
+	rendering_thread.detach();
+	
 	mClock.restart();
 	while(mContinue && mWindow.isOpen()) {
-
 		float lDelta = ((float)mClock.getElapsedTime().asMilliseconds())/1000;
-
 		mClock.restart();
-
-		// Handle Events before we render.
+		
+		// Handle Events before we do anything
 		sf::Event lEvt;
 		while( mWindow.pollEvent(lEvt) ) {
 			if( lEvt.type == sf::Event::Closed ) {
@@ -277,26 +302,12 @@ void MagnetiteCore::go()
 			}
 		}
 
-		lDelta *= mTimescale;
-		
-		mPhysicsWorld->stepSimulation( lDelta );
 		
 		if( mGame != NULL )
 		{
 			mGame->think( lDelta );
 		}
 		
-		//Ensure each loaded chunk is updated before being sent to the GPU
-		mWorld->update( lDelta );
-
-		// Update all the characters
-		for( std::vector<Character*>::iterator it = mCharacters.begin(); it != mCharacters.end(); it++ )
-		{
-			(*it)->update( lDelta );
-		}
-
-		//Ensure the renderer has the correct camera
-		mRenderer->setCamera( mGame->getLocalPlayer()->getCamera() );
 		mRenderer->render(lDelta, mWorld);
 		
 		mGame->uiPaint( mRenderer );

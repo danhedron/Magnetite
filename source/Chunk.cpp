@@ -376,3 +376,8 @@ const size_t Chunk::getBlockCount()
 {
 	return mNumBlocks;
 }
+
+std::mutex& Chunk::getMutex()
+{
+	return mMutex;
+}

@@ -477,7 +477,11 @@ void Renderer::render(double dt, World* world)
 		{
 			if( chunks[c] )
 			{
-				_renderChunk( chunks[c] );
+				if( chunks[c]->getMutex().try_lock() )
+				{
+					_renderChunk( chunks[c] );
+					chunks[c]->getMutex().unlock();
+				}
 			}
 		}
 

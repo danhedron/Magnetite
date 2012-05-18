@@ -1,6 +1,7 @@
 #ifndef _CHUNK_H_
 #define _CHUNK_H_
 #include "prerequisites.h"
+#include <mutex>
 
 // for standard size types
 #include <cstdint>
@@ -80,6 +81,12 @@ protected:
 	 * Block counter
 	 */
 	size_t mNumBlocks;
+	
+	/**
+	 * Threading lock
+	 *  ensures that only one thread is doing something with this chunk.
+	 */
+	std::mutex mMutex;
 
 public:
 	/**
@@ -223,6 +230,11 @@ public:
 	 * Returns the number of non-empty blocks in the chunk
 	 */
     const size_t getBlockCount();
+	
+	/**
+	 * Returns the mutex for this chunk
+	 */
+	std::mutex& getMutex();
 };
 
 

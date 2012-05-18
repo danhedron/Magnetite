@@ -62,7 +62,7 @@ void World::buildTerrain()
 	// - Generate Visibility Data
 	// - Generate Geometry
 	
-	for( int i = 0; i < wcube; i++ )
+	/*for( int i = 0; i < wcube; i++ )
 	{
 		if( mChunks[i] )
 		{
@@ -80,7 +80,7 @@ void World::buildTerrain()
 			mChunks[i]->_lowerChunkFlag( Chunk::MeshInvalid );
 			mChunks[i]->_lowerChunkFlag( Chunk::DataUpdated );
 		}
-	}
+	}*/
 }
 
 size_t World::coordsToIndex( int x, int y, int z )
@@ -276,7 +276,11 @@ void World::update( float dt )
 		{
 			if( mChunks[i] )
 			{
-				mChunks[i]->update(dt);
+				if( mChunks[i]->getMutex().try_lock() )
+				{
+					mChunks[i]->update(dt);
+					mChunks[i]->getMutex().unlock();
+				}
 			}
 		}
 	}
