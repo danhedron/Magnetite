@@ -1,7 +1,7 @@
 #ifndef _INPUTMANAGER_H_
 #define _INPUTMANAGER_H_
 #include "prerequisites.h"
-#include <Window/Event.hpp>
+#include <SFML/Window/Event.hpp>
 
 /**
  todo:

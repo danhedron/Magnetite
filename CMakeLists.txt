@@ -167,11 +167,6 @@ if(WIN32)
 	target_link_libraries(Magnetite psapi.lib)
 	# 'fix' LIBC.lib error
 	set(CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"LIBC.lib\")
-else(WIN32)
-	target_link_libraries(Magnetite /usr/lib/libGLee.so)
-	target_link_libraries(Magnetite /usr/lib/libGL.so)
-	target_link_libraries(Magnetite /usr/lib/libGLU.so)
-	#target_link_libraries(Magnetite /usr/local/lib/libglut.so)
 endif(WIN32)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
@@ -198,13 +193,15 @@ endif(V8_FOUND)
 
 #Find OpenGl Under Linux
 find_package(OpenGL REQUIRED)
-if(OpenGL_FOUND)
-	target_link_libraries(Magnetite ${OpenGL_LIBRARY})
-	include_directories(${OpenGL_INCLUDE_DIR})
-endif(OpenGL_FOUND)
-#FindOpenGL doesn't seem to work under windows
-if(WIN32)
-	target_link_libraries(Magnetite opengl32.lib glu32.lib winmm.lib)
-endif(WIN32)
+if(OPENGL_FOUND)
+	target_link_libraries(Magnetite ${OPENGL_LIBRARY})
+	include_directories(${OPENGL_INCLUDE_DIR})
+endif(OPENGL_FOUND)
+
+find_package(GLee REQUIRED)
+if(GLEE_FOUND)
+	target_link_libraries(Magnetite ${GLEE_LIBRARY})
+	include_directories(${GLEE_INCLUDE_DIR})
+endif(GLEE_FOUND)
 
 # Bin = ${OPEN_BINARY_DIR}
