@@ -200,7 +200,8 @@ endif(OPENGL_FOUND)
 
 find_package(GLee REQUIRED)
 if(GLEE_FOUND)
-	target_link_libraries(Magnetite ${GLEE_LIBRARY})
+	target_link_libraries(Magnetite ${GLEE_LIBRARIES})
+	message(${GLEE_LIBRARIES})
 	include_directories(${GLEE_INCLUDE_DIR})
 endif(GLEE_FOUND)
 

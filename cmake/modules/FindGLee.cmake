@@ -1,11 +1,9 @@
 # - Find GLee
 # Finds the native GLee headers and libraries
 #
-#  GLEE_INCLUDE_DIR -  where to find V8.h, etc.
-#  GLEE_LIBRARIES    - List of libraries when using V8.
-#  GLEE_FOUND        - True if V8 found.
-
-GET_FILENAME_COMPONENT(module_file_path ${CMAKE_CURRENT_LIST_FILE} PATH )
+#  GLEE_INCLUDE_DIR -  where to find GLee.h
+#  GLEE_LIBRARIES    - List of libraries when using GLee.
+#  GLEE_FOUND        - True if GLee found.
 
 # Look for the header file.
 FIND_PATH( GLEE_INCLUDE_DIR NAMES GLee.h
@@ -18,8 +16,6 @@ MARK_AS_ADVANCED(GLEE_INCLUDE_DIR)
 # Look for the library.
 # Does this work on UNIX systems? (LINUX)
 FIND_LIBRARY( GLEE_LIBRARY NAMES GLee
-	/usr/lib/
-	/usr
 	DOC "Path to the GLee library." )
 MARK_AS_ADVANCED(GLEE_LIBRARY)
 
