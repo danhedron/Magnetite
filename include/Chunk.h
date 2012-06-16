@@ -6,6 +6,7 @@
 // for standard size types
 #include <cstdint>
 
+class World;
 /**
  * @struct ChunkIndex
  * contains the 3 components of a chunk's index in the world
@@ -24,6 +25,11 @@ struct GLgeometry;
 class Chunk
 {
 protected:
+	/**
+	 * World Pointer
+	 */
+	World*	mWorld;
+	
 	/**
 	 * Array of blocks
 	 */
@@ -98,7 +104,7 @@ public:
 	};
 
 public:
-	Chunk( ChunkIndex index );
+	Chunk( ChunkIndex index, World*  world );
 	~Chunk();
 
 	/**
@@ -115,6 +121,11 @@ public:
 	 * Returns the chunks z index
 	 */
 	long getZ();
+	
+	/**
+	 * Returns the world this chunk belongs to.
+	 */
+	World* getWorld();
 	
 	/**
 	 * returns the light level at the block
@@ -159,7 +170,12 @@ public:
     /**
      * Returns the number of visisble faces this chunk has
      */
-    size_t getVisibleFaceCount();
+	size_t getVisibleFaceCount();
+	
+	/**
+	 * Returns the list of visible blocks
+	 */
+	BlockList& getVisibleBlocks();
 
 	/**
 	 * Retuns true if there's a block next to the given position

@@ -81,6 +81,8 @@ set(MAGNETITE_SOURCES
 	source/WorldTree.cpp
 	source/Explosion.cpp
 	source/TextureManager.cpp
+	source/geometry/BaseTriangulator.cpp
+	source/geometry/BlockTriangulator.cpp
 	source/script/ScriptWrapper.cpp
 	source/script/ScriptGlobalsWorld.cpp
 	source/script/ScriptGlobalsDebug.cpp
@@ -137,6 +139,8 @@ set(MAGNETITE_HEADERS
 	include/WorldTree.h
 	include/Explosion.h
 	include/TextureManager.h
+	include/BaseTriangulator.h
+	include/BlockTriangulator.h
 	include/script/ScriptWrapper.h
 	include/script/ScriptGlobalsList.h
 	include/script/ScriptGlobalsWorld.h

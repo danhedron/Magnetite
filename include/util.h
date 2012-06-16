@@ -87,7 +87,9 @@ public:
 
 	static std::string toString(size_t number)
 	{
-		return itoa(number, 10);
+		std::stringstream ss;
+		ss << number;
+		return ss.str();
 	}
 
 	static std::string toString(int number)

@@ -5,6 +5,7 @@
 #include "Collision.h"
 #include "MovingBlock.h"
 
+class BaseTriangulator;
 class Chunk;
 typedef Chunk* ChunkPtr;
 typedef Chunk** ChunkArray;
@@ -138,6 +139,12 @@ protected:
 	ChunkLoadList mChunksToLoad;
 	
 	MovingBlockList mMovingBlocks;
+	
+	/**
+	 * The Triangulator to use for creating the world geometry
+	 */
+	BaseTriangulator* mTriangulator;
+	
 public:
 	/** 
 	 * Constructor: -
@@ -163,6 +170,11 @@ public:
 	 * Returns the world's current stage
 	 */
 	WorldStage getCurrentStage();
+	
+	/**
+	 * Returns the triangulator to use for generating meshes.
+	 */
+	BaseTriangulator* getTriangulator();
 
 	/**
 	 * Returns the color of a brightness level

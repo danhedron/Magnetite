@@ -42,7 +42,9 @@ WorldNode::WorldNode( WorldNode* parent )
 
 Chunk* WorldNode::createChunk( ChunkIndex i )
 {
-	return new Chunk( i );
+	//return new Chunk( i,  );
+	throw std::exception(); // need to update this.
+	return NULL;
 }
 
 Chunk* WorldNode::_createChunk( )

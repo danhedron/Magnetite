@@ -9,6 +9,7 @@
 #include "ChunkGenerator.h"
 #include "MagnetiteCore.h"
 #include <LightingManager.h>
+#include <BlockTriangulator.h>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
@@ -24,7 +25,8 @@
 World::World( size_t edgeSize )
 : mSky( NULL ),
 mPagingCamera( NULL ),
-mWorldStage( WORLD_NORMAL )
+mWorldStage( WORLD_NORMAL ),
+mTriangulator( new BlockTriangulator() )
 {	
 
 	mWorldSize = edgeSize;
@@ -55,7 +57,7 @@ void World::buildTerrain()
 	mGenerator = new ChunkGenerator(1024);
 	mGenerator->fillRegion( this, Vector3(0,0,0), Vector3( (mWorldSize-1) * CHUNK_WIDTH, (mWorldSize-1) * CHUNK_WIDTH, (mWorldSize-1) * CHUNK_WIDTH ) );
 	
-	auto wcube = mWorldSize*mWorldSize*mWorldSize;
+	//auto wcube = mWorldSize*mWorldSize*mWorldSize;
 	
 	// Initial Ordering:
 	// - Generate Lighting 
@@ -91,6 +93,11 @@ size_t World::coordsToIndex( int x, int y, int z )
 WorldStage World::getCurrentStage()
 {
 	return mWorldStage;
+}
+
+BaseTriangulator* World::getTriangulator()
+{
+	return mTriangulator;
 }
 
 BlockPtr World::getBlockAt( long x, long y, long z )
@@ -202,7 +209,7 @@ Chunk* World::createChunk(long x, long y, long z)
 	size_t index = coordsToIndex( x, y, z );
 	if( x < 0 || x > mWorldSize-1 || y < 0 || y > mWorldSize-1 || z < 0 || z > mWorldSize-1 )
 		return NULL;
-	mChunks[index] = new Chunk( ChunkIndex{ x, y, z } ); // 6859 (thanks to n3hima)
+	mChunks[index] = new Chunk( ChunkIndex{ x, y, z }, this ); // 6859 (thanks to n3hima)
 	
 	return mChunks[index];
 }

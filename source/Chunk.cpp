@@ -7,9 +7,12 @@
 #include "MagnetiteCore.h"
 #include "World.h"
 #include "Renderer.h"
+#include <BaseTriangulator.h>
+#include <util.h>
 
-Chunk::Chunk( ChunkIndex index )
-: mGeometry (NULL),
+Chunk::Chunk( ChunkIndex index, World* world )
+: mWorld( world ),
+mGeometry (NULL),
 mChunkFlags( 0 ),
 mPhysicsShape( NULL ),
 mPhysicsState( NULL ),
@@ -55,6 +58,11 @@ long Chunk::getY()
 long Chunk::getZ()
 {
 	return mWorldIndex.z;
+}
+
+World* Chunk::getWorld()
+{
+	return mWorld;
 }
 
 size_t Chunk::getLightLevel( short x, short y, short z )
@@ -151,6 +159,11 @@ void Chunk::setLightLevel( LightIndex value, short x, short y, short z )
 size_t Chunk::getVisibleFaceCount()
 {
     return mVisibleFaces;
+}
+
+BlockList& Chunk::getVisibleBlocks()
+{
+		return mVisibleBlocks;
 }
 
 void Chunk::updateVisibility( )
@@ -263,12 +276,18 @@ void Chunk::generateGeometry()
 		mGeometry = new GLgeometry();
 	}
 	
+	
 	GLuint numVerts = mVisibleFaces * 4;
 	GLuint numEdges = mVisibleFaces * 6;
 	
-	GLvertex*	verts = new GLvertex[numVerts];
-	GLedge*	edges = new GLedge[numEdges];
+	mGeometry->vertexData = new GLvertex[numVerts];
+	mGeometry->edgeData = new GLedge[numEdges];
+	mGeometry->vertexCount = numVerts;
+	mGeometry->edgeCount = numEdges;
 	
+	mWorld->getTriangulator()->triangulateChunk(mGeometry, this);
+	
+	/*
 	size_t vind = 0;
 	size_t eind = 0;
 	
@@ -288,7 +307,7 @@ void Chunk::generateGeometry()
 	mGeometry->edgeData	= edges;
 	mGeometry->vertexData	= verts;
 	mGeometry->edgeCount	= numEdges;
-	mGeometry->vertexCount	= numVerts;
+	mGeometry->vertexCount	= numVerts;*/
 }
 
 void Chunk::generateLighting()
