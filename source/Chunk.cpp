@@ -276,38 +276,8 @@ void Chunk::generateGeometry()
 		mGeometry = new GLgeometry();
 	}
 	
-	
-	GLuint numVerts = mVisibleFaces * 4;
-	GLuint numEdges = mVisibleFaces * 6;
-	
-	mGeometry->vertexData = new GLvertex[numVerts];
-	mGeometry->edgeData = new GLedge[numEdges];
-	mGeometry->vertexCount = numVerts;
-	mGeometry->edgeCount = numEdges;
-	
 	mWorld->getTriangulator()->triangulateChunk(mGeometry, this);
 	
-	/*
-	size_t vind = 0;
-	size_t eind = 0;
-	
-	BlockContext context;
-	
-	for( BlockList::iterator it = mVisibleBlocks.begin(); it != mVisibleBlocks.end(); ++it )
-	{
-		Vector3 pos = Util::indexToPosition( it->first );
-		context.worldX = pos.x;
-		context.worldY = pos.y;
-		context.worldZ = pos.z;
-		context.chunk = this;
-		context.world = MagnetiteCore::Singleton->getWorld();
-		it->second->buildCubeData( context, vind, eind, verts, edges );
-	}
-	
-	mGeometry->edgeData	= edges;
-	mGeometry->vertexData	= verts;
-	mGeometry->edgeCount	= numEdges;
-	mGeometry->vertexCount	= numVerts;*/
 }
 
 void Chunk::generateLighting()

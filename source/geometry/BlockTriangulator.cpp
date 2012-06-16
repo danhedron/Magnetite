@@ -29,6 +29,15 @@ static size_t face_indicies[] = {
 
 void BlockTriangulator::triangulateChunk( GLgeometry* geom, Chunk* chunk )
 {
+	// Prepare the geometry
+	GLuint numVerts = chunk->getVisibleFaceCount() * 4;
+	GLuint numEdges = chunk->getVisibleFaceCount() * 6;
+	
+	geom->vertexData = new GLvertex[numVerts];
+	geom->edgeData = new GLedge[numEdges];
+	geom->vertexCount = numVerts;
+	geom->edgeCount = numEdges;
+
 	//BlockContext context;
 	
 	size_t eInd = 0, ind = 0;
@@ -191,8 +200,4 @@ void BlockTriangulator::triangulateChunk( GLgeometry* geom, Chunk* chunk )
 		}
 	}
 	
-	/*geom->edgeData		= edges;
-	geom->vertexData	= data;
-	geom->edgeCount		= eInd-1;
-	geom->vertexCount	= ind-1;*/
 }
