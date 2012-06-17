@@ -10,13 +10,40 @@
 class Character : public PhysicsWorldObject
 {
 protected:
+	/**
+	 * Move vector for the movements
+	 */
 	Vector3 mMoveVector;
+	
+	/**
+	 * Is the character currently experiencing physics.
+	 */
 	bool mFlying;
+	
+	/**
+	 * Movement speed
+	 */
 	float mMoveSpeed;
+	
+	/**
+	 * Sprinting speed
+	 */
 	float mSprintSpeed;
+	
+	/**
+	 * Are we moving quicker.
+	 */
 	bool mSprint;
-	Camera mCamera; //< Camera angles used for character rotation.
-	float mHeight; //< Height of the player in world units.
+	
+	/**
+	 * Camera for look angles.
+	 */
+	Camera mCamera;
+	
+	/**
+	 * Offset of the camera is 3/4ths of this value from the position.
+	 */
+	float mHeight;
 
 	btKinematicCharacterController* mPhysicsController;
 	btPairCachingGhostObject*		mPhysicsBody;
@@ -25,7 +52,7 @@ protected:
 public:
 	
 	Character( );
-	~Character( );
+	virtual ~Character( );
 
 	/**
 	 * Sets the player's texture to another.
@@ -105,6 +132,9 @@ public:
 	 */
 	virtual void update( float dt );
 
+	/**
+	 * Jump :- todo: more options
+	 */
 	virtual void jump();
 
 	/**
