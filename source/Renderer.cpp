@@ -12,8 +12,6 @@
 #include "BlockFactory.h"
 #include "util.h"
 
-#define BUFFER_OFFSET(i) ((char*)NULL + (i))
-
 // Shader paremater indexes.
 GLint attrTC = 0; 
 GLint attrL = 0;

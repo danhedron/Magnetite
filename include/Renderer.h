@@ -2,6 +2,8 @@
 #define _RENDERER_H_
 #include "prerequisites.h"
 
+#define BUFFER_OFFSET(i) ((char*)NULL + (i))
+
 class BaseBlock;
 class Camera;
 class World;

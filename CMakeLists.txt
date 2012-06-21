@@ -55,6 +55,7 @@ set(MAGNETITE_SOURCES
 	source/ShaderResource.cpp
 	source/ProgramResource.cpp
 	source/ResourceManager.cpp
+	source/resources/ModelResources.cpp
 	source/Sky.cpp
 	source/Frustum.cpp
 	source/Camera.cpp
@@ -113,6 +114,7 @@ set(MAGNETITE_HEADERS
 	include/ResourceManager.h
 	include/ShaderResource.h
 	include/ProgramResource.h
+	include/ModelResource.h
 	include/Sky.h
 	include/Frustum.h
 	include/Camera.h
@@ -205,8 +207,15 @@ endif(OPENGL_FOUND)
 find_package(GLee REQUIRED)
 if(GLEE_FOUND)
 	target_link_libraries(Magnetite ${GLEE_LIBRARIES})
-	message(${GLEE_LIBRARIES})
 	include_directories(${GLEE_INCLUDE_DIR})
 endif(GLEE_FOUND)
+
+# Find Assimp
+find_package(ASSIMP REQUIRED)
+if(ASSIMP_FOUND)
+	target_link_libraries(Magnetite ${ASSIMP_LIBRARIES})
+	include_directories(${ASSIMP_INCLUDE_DIR})
+endif(ASSIMP_FOUND)
+
 
 # Bin = ${OPEN_BINARY_DIR}
