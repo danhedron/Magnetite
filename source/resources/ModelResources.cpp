@@ -6,6 +6,8 @@
 #include <assimp/aiScene.h>
 #include <assimp/aiPostProcess.h>
 
+#include "glgeometry.h"
+
 ModelResource::ModelResource(const std::string& file)
 : BaseResource(file),
 mFilename(file),
@@ -71,6 +73,8 @@ void ModelResource::draw()
 {
 	glBindBuffer( GL_ARRAY_BUFFER, mGeometry->vertexBO );
 	glVertexPointer( 3, GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(0) );
+	
+	// Todo here: Get some kind of GLprogram involved.
 
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, mGeometry->indexBO );
 	

@@ -9,61 +9,13 @@ class Camera;
 class World;
 class ProgramResource;
 
-/**
- * @struct Struct to represent a vertex, memory aligned for easy array-xing
- */
-struct GLvertex {
-	float x, y, z;
-	/*float nx, ny, nz;*/ // Normals are undeeded at the moment.
-	GLubyte u0, v0;
-	GLubyte l;
-	GLubyte b; // Is this even?
-};
-typedef unsigned short GLedge;
-
-struct GLgeometry {
-	GLedge* edgeData;
-	GLvertex* vertexData;
-	size_t edgeCount;
-	size_t vertexCount;
-	GLgeometry() { vertexBO = 0; indexBO = 0; }
-	~GLgeometry() { releaseBuffer(); delete[] edgeData; delete[] vertexData; }
-	GLuint vertexBO;
-	GLuint indexBO;
-	void releaseBuffer();
-	void bindToBuffer();
-};
-
 struct GLbuffer {
 	GLuint vertex;
 	GLuint index;
 };
 
-struct GLshader {
-	GLuint ref;
-	GLenum type;
-	std::string source;
-	std::string filename;
-
-	GLshader() { ref = 0; type = 0; }
-	void create();
-};
-
-struct GLprogram {
-	GLuint ref;
-	GLshader* vertex;
-	GLshader* fragment;
-	GLshader* geometry;
-	bool valid;
-	// These aren't used properly at the moment, I'd like to clean up the usage of this class 
-	std::map<std::string, GLuint> mUniforms;
-	std::map<int, std::string> mAttributes;
-
-	GLprogram() { ref = 0; vertex = NULL; fragment = NULL; geometry = NULL; valid = false;}
-	void link();
-	void bindUniformTexture( std::string var, GLint unit );
-	void bindAttribute( int index, std::string attribute );
-};
+class GLshader;
+class GLprogram;
 
 //typedef std::map<WorldChunk*,GLeometry> ChunkGeomList;
 //typedef std::map<WorldChunk*,GLbuffer> ChunkGeomList;
@@ -112,7 +64,7 @@ protected:
 
 	std::map<std::string, GLshader*> mShaders;
 
-	GLprogram mLightingProgram;
+	GLprogram* mLightingProgram;
 	ProgramResource* mWorldProgram;
 
 	GeomType mGeomType;
@@ -125,8 +77,6 @@ protected:
 public:
 	Renderer(void);
 	~Renderer(void);
-
-	static GLvertex vertex( float x, float y, float z, float u, float v, float l );
 
 	/**
 	 * Rendermode enum
@@ -236,8 +186,6 @@ public:
 	 * @param y Coordinate
 	 */
 	void drawText( std::string text, int x, int y );
-
-	static void buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges);
 
 	/**
 	 * Toggles the drawing of the camera's frustum

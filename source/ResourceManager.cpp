@@ -21,6 +21,10 @@ void ResourceManager::addLocation( const std::string& loc )
 void ResourceManager::indexFolder( const std::string& loc )
 {
 	DIR* d = opendir( loc.c_str() );
+	if( d == NULL ) {
+		Util::log("Missing folder.");
+		return;
+	}
 	dirent* dir = readdir(d);
 	while( dir != NULL ) {
 		if( dir->d_type == DT_REG) {

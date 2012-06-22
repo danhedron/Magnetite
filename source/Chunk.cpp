@@ -10,6 +10,8 @@
 #include <BaseTriangulator.h>
 #include <util.h>
 
+#include "glgeometry.h"
+
 Chunk::Chunk( ChunkIndex index, World* world )
 : mWorld( world ),
 mGeometry (NULL),

@@ -1,11 +1,11 @@
 #include "World.h"
 #include "Chunk.h"
-#include "WorldTree.h"
-#include "WorldNode.h"
+#include "BaseBlock.h"
+//#include "WorldTree.h"
+//#include "WorldNode.h"
 #include "Renderer.h"
 #include "Sky.h"
 #include "Camera.h"
-#include "StoneBlock.h"
 #include "ChunkGenerator.h"
 #include "MagnetiteCore.h"
 #include <LightingManager.h>
@@ -14,6 +14,7 @@
 #include <fstream>
 #include <stdio.h>
 #include <math.h>
+#include "glgeometry.h"
 
 #ifdef WIN32
 #include <direct.h>
@@ -335,7 +336,7 @@ void World::updateMovingBlocks( float dt )
 			context.chunk = NULL;
 			context.world = this;
 			b.block->updateVisFlags( FACE_ALL );
-			b.block->buildCubeData( context, vind, eind, verts, edges );
+			//b.block->buildCubeData( context, vind, eind, verts, edges );
 		}
 		else
 		{

@@ -12,173 +12,14 @@
 #include "BlockFactory.h"
 #include "util.h"
 
+// OpenGL Classes
+#include "glprogram.h"
+#include "glshader.h"
+#include "glgeometry.h"
+
 // Shader paremater indexes.
 GLint attrTC = 0; 
 GLint attrL = 0;
-
-void GLgeometry::releaseBuffer()
-{
-	if( this->vertexBO != 0 ) {
-		glDeleteBuffers( 1, &this->vertexBO );
-		this->vertexBO = 0;
-	}
-	if( this->indexBO != 0 ) {
-		glDeleteBuffers( 1, &this->indexBO );
-		this->indexBO = 0;
-	}
-}
-
-void GLgeometry::bindToBuffer()
-{
-    PRINT_GLERROR;
-	glGenBuffers(1, &this->vertexBO);
-    PRINT_GLERROR;
-	glBindBuffer( GL_ARRAY_BUFFER, this->vertexBO);
-    PRINT_GLERROR;
-	glBufferData( GL_ARRAY_BUFFER, sizeof(GLvertex)*this->vertexCount+1, this->vertexData, GL_STATIC_DRAW );
-    PRINT_GLERROR;
-	glGenBuffers(1, &this->indexBO);
-    PRINT_GLERROR;
-
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, this->indexBO );
-    PRINT_GLERROR;
-	glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(GLedge)*this->edgeCount+1, this->edgeData, GL_STATIC_DRAW );
-    PRINT_GLERROR;
-	glBindBuffer( GL_ARRAY_BUFFER, 0);
-    PRINT_GLERROR;
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0);
-    PRINT_GLERROR;
-}
-
-void GLshader::create()
-{
-	if( ref != 0 || source.length() == 0 )
-		return;
-
-	ref = glCreateShader( type );
-	if( ref == 0 )
-		return;
-
-	const char* src = source.c_str();
-	glShaderSource( ref, 1, &src, NULL );
-	glCompileShader( ref );
-	
-	GLint success;
-	glGetObjectParameterivARB( ref, GL_COMPILE_STATUS, &success );
-	if( success ) {
-		Util::log("Shader Compiled OK: " + Util::toString(ref));
-	}
-	else {
-		Util::log("Error compiling shader (" + filename + "): ");
-	}
-
-	GLint blen = 0;	
-	GLsizei slen = 0;
-
-	glGetShaderiv(ref, GL_INFO_LOG_LENGTH , &blen);       
-	if (blen > 1)
-	{
-		GLchar* compiler_log = (GLchar*)malloc(blen);
-		glGetInfoLogARB(ref, blen, &slen, compiler_log);
-		Util::log("\t" + std::string(compiler_log));
-		free (compiler_log);
-	}
-}
-
-void GLprogram::link()
-{
-	if( ref != 0 ) {
-		Util::log("Program already linked");
-		return;
-	}
-	if( vertex == NULL ) {
-		Util::log("Vertex Shader missing");
-		return;
-	}
-	if( fragment == NULL ) {
-		Util::log("Fragment Shader missing");
-		return;
-	}
-	if( vertex->ref == 0 )
-	{
-		// Init vertex shader.
-		vertex->create();
-		if( vertex->ref == 0 ) {
-			//return;
-		}
-	}
-	if( fragment->ref == 0 )
-	{
-		// Init fragment shader.
-		fragment->create();
-		if( fragment->ref == 0 ) {
-			//return;
-		}
-	}
-	if( geometry != NULL ) {
-		if( geometry->ref == 0 ) {
-			geometry->create();
-			//return;
-		}
-	}
-
-	ref = glCreateProgram();
-
-	glAttachShader( ref, vertex->ref );
-	if( geometry != NULL ) {
-		glAttachShader( ref, geometry->ref );
-	}
-	glAttachShader( ref, fragment->ref );
-
-
-	// deal with attributes n stuff
-	for( std::map<int, std::string>::iterator it = mAttributes.begin(); it != mAttributes.end(); it++ )
-	{
-		glBindAttribLocation(ref, it->first, it->second.c_str());
-	}
-
-	glLinkProgram( ref );
-
-	GLint linked;
-	glGetProgramiv(ref, GL_LINK_STATUS, &linked);
-	if (linked)
-	{
-		Util::log("Program Linked OK");
-		valid = true;
-	}
-	else
-	{
-		Util::log("Error Linking Program:");
-		valid = false;
-	}
-
-	GLint blen = 0;	
-	GLsizei slen = 0;
-
-	glGetProgramiv(ref, GL_INFO_LOG_LENGTH , &blen);       
-	if (blen > 1)
-	{
-		GLchar* compiler_log = (GLchar*)malloc(blen);
-		glGetInfoLogARB(ref, blen, &slen, compiler_log);
-		Util::log("\t" + std::string(compiler_log));
-		free (compiler_log);
-	}
-}
-
-void GLprogram::bindUniformTexture( std::string var, GLint unit )
-{
-	//if( mUniforms.find( var ) != mUniforms.end() ) return;
-	const char* v = var.c_str();
-	GLuint loc = glGetUniformLocation( ref, v );
-	glUseProgram( ref );
-	glUniform1i( loc, unit );
-	mUniforms[var] = loc;
-}
-
-void GLprogram::bindAttribute( int index, std::string attribute )
-{
-	mAttributes[index] = attribute;
-}
 
 Renderer::Renderer(void)
 : totalTime( 0 ),
@@ -206,7 +47,7 @@ Renderer::~Renderer(void)
 		glDeleteBuffersARB(1, &chunkVbo);
 
 	for( std::map<std::string, GLshader*>::iterator it = mShaders.begin(); it != mShaders.end(); it++ ) {
-		glDeleteShader( it->second->ref );
+		delete it->second;
 		mShaders.erase( it++ );
 	}
 }
@@ -360,23 +201,6 @@ void Renderer::toggleCameraFrustum()
 	}
 }
 
-GLvertex Renderer::vertex(float x, float y, float z, float u, float v, float l)
-{
-	GLvertex vert;
-	vert.x = x;
-	vert.y = y;
-	vert.z = z;
-	vert.u0 = (GLubyte)u;
-	vert.v0 = (GLubyte)v;
-	vert.l = (GLubyte)(l*255);
-	return vert;
-}
-
-void Renderer::buildCubeData(BaseBlock* block, size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges)
-{
-	
-}
-
 GLshader* Renderer::loadShader( std::string filename, GLenum type )
 {
 	if( mShaders.find(filename) != mShaders.end() ) {
@@ -394,10 +218,11 @@ GLshader* Renderer::loadShader( std::string filename, GLenum type )
 		ss << s << '\n';
 	}
 
-	GLshader* shader = new GLshader();
-	shader->source = ss.str();
-	shader->filename = filename;
-	shader->type = type;
+	GLshader* shader = new GLshader(
+		ss.str(),
+		filename
+	);
+	shader->setType(type);
 
 	mShaders[filename] = shader;
 
@@ -407,7 +232,7 @@ GLshader* Renderer::loadShader( std::string filename, GLenum type )
 void Renderer::unloadShader( std::string filename )
 {
 	if( mShaders.find(filename) != mShaders.end() ) {
-		glDeleteShader( mShaders[filename]->ref );
+		delete mShaders[filename];
 		mShaders.erase( mShaders.find(filename) );
 	}
 

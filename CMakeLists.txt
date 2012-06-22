@@ -43,6 +43,9 @@ set(MAGNETITE_SOURCES
 	source/ScriptGame.cpp
 	source/Collision.cpp
 	source/Renderer.cpp
+	source/renderer/glprogram.cpp
+	source/renderer/glshader.cpp
+	source/renderer/glgeometry.cpp
 	source/InputManager.cpp
 	source/BulletDebug.cpp
 	source/LightingManager.cpp
@@ -105,6 +108,9 @@ set(MAGNETITE_HEADERS
 	include/InputManager.h
 	include/LightingManager.h
 	include/Renderer.h
+	include/glprogram.h
+	include/glshader.h
+	include/glgeometry.h
 	include/PhysicsState.h
 	include/ChunkPhysicsState.h
 	include/WorldObject.h

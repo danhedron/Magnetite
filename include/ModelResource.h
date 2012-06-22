@@ -3,6 +3,8 @@
 #include "BaseResource.h"
 #include "Renderer.h"
 
+class GLgeometry;
+
 /**
  * @class ModelResource
  * Class for 3D-Models loaded into the engine,

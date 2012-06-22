@@ -5,6 +5,7 @@
 #include <MagnetiteCore.h>
 #include <World.h>
 #include <TextureManager.h>
+#include "glgeometry.h"
 
 // These are here for reference & eveuntually some cleaner code.
 /*static float face_vertices[] = {
@@ -66,16 +67,16 @@ void BlockTriangulator::triangulateChunk( GLgeometry* geom, Chunk* chunk )
 			GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 			
 			float color = World::getLightColor( chunk->getWorld()->getLightLevel( wx, wy, wz+1 ) );
-			data[ind + 0] = Renderer::vertex( pos.x + 1.0f, pos.y + 1.0f, pos.z + 1.0f, // Coordinates
+			data[ind + 0] = GLgeometry::vertex( pos.x + 1.0f, pos.y + 1.0f, pos.z + 1.0f, // Coordinates
 									rect.x, rect.y,
 									color );
-			data[ind + 1] = Renderer::vertex( pos.x - 0.0f, pos.y + 1.0f, pos.z + 1.0f, // Coordinates
+			data[ind + 1] = GLgeometry::vertex( pos.x - 0.0f, pos.y + 1.0f, pos.z + 1.0f, // Coordinates
 									rect.x + rect.w, rect.y,
 									color );
-			data[ind + 2] = Renderer::vertex( pos.x - 0.0f, pos.y - 0.0f, pos.z + 1.0f, // Coordinates
+			data[ind + 2] = GLgeometry::vertex( pos.x - 0.0f, pos.y - 0.0f, pos.z + 1.0f, // Coordinates
 									rect.x + rect.w, rect.y + rect.h,
 									color );
-			data[ind + 3] = Renderer::vertex( pos.x + 1.0f, pos.y - 0.0f, pos.z + 1.0f, // Coordinates
+			data[ind + 3] = GLgeometry::vertex( pos.x + 1.0f, pos.y - 0.0f, pos.z + 1.0f, // Coordinates
 									rect.x, rect.y + rect.h,
 									color );
 			edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
@@ -89,16 +90,16 @@ void BlockTriangulator::triangulateChunk( GLgeometry* geom, Chunk* chunk )
 			GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
 			float color = World::getLightColor( chunk->getWorld()->getLightLevel( wx, wy, wz-1 ) );
-			data[ind + 0] = Renderer::vertex( pos.x + 1.0f, pos.y + 1.0f, pos.z - 0.0f, // Coordinates
+			data[ind + 0] = GLgeometry::vertex( pos.x + 1.0f, pos.y + 1.0f, pos.z - 0.0f, // Coordinates
 									rect.x, rect.y,
 									color );
-			data[ind + 1] = Renderer::vertex( pos.x - 0.0f, pos.y + 1.0f, pos.z - 0.0f, // Coordinates
+			data[ind + 1] = GLgeometry::vertex( pos.x - 0.0f, pos.y + 1.0f, pos.z - 0.0f, // Coordinates
 									rect.x + rect.w, rect.y,
 									color );
-			data[ind + 2] = Renderer::vertex( pos.x - 0.0f, pos.y - 0.0f, pos.z - 0.0f, // Coordinates
+			data[ind + 2] = GLgeometry::vertex( pos.x - 0.0f, pos.y - 0.0f, pos.z - 0.0f, // Coordinates
 									rect.x + rect.w, rect.y + rect.h,
 									color );
-			data[ind + 3] = Renderer::vertex( pos.x + 1.0f, pos.y - 0.0f, pos.z - 0.0f, // Coordinates
+			data[ind + 3] = GLgeometry::vertex( pos.x + 1.0f, pos.y - 0.0f, pos.z - 0.0f, // Coordinates
 									rect.x, rect.y + rect.h,
 									color );
 			edges[eInd + 5] = ind + 2; edges[eInd + 4] = ind + 1; edges[eInd + 3] = ind + 0;
@@ -112,16 +113,16 @@ void BlockTriangulator::triangulateChunk( GLgeometry* geom, Chunk* chunk )
 			GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
 			float color = World::getLightColor( chunk->getWorld()->getLightLevel( wx+1, wy, wz ) );
-			data[ind + 0] = Renderer::vertex( pos.x + 1.0f, pos.y + 1.0f, pos.z + 1.0f, // Coordinates
+			data[ind + 0] = GLgeometry::vertex( pos.x + 1.0f, pos.y + 1.0f, pos.z + 1.0f, // Coordinates
 									rect.x + rect.w, rect.y,
 									color );
-			data[ind + 1] = Renderer::vertex( pos.x + 1.0f, pos.y - 0.0f, pos.z + 1.0f, // Coordinates
+			data[ind + 1] = GLgeometry::vertex( pos.x + 1.0f, pos.y - 0.0f, pos.z + 1.0f, // Coordinates
 									rect.x + rect.w, rect.y + rect.h,
 									color );
-			data[ind + 2] = Renderer::vertex( pos.x + 1.0f, pos.y - 0.0f, pos.z - 0.0f, // Coordinates
+			data[ind + 2] = GLgeometry::vertex( pos.x + 1.0f, pos.y - 0.0f, pos.z - 0.0f, // Coordinates
 									rect.x, rect.y + rect.h,
 									color );
-			data[ind + 3] = Renderer::vertex( pos.x + 1.0f, pos.y + 1.0f, pos.z - 0.0f, // Coordinates
+			data[ind + 3] = GLgeometry::vertex( pos.x + 1.0f, pos.y + 1.0f, pos.z - 0.0f, // Coordinates
 									rect.x, rect.y,
 									color );
 			edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
@@ -135,16 +136,16 @@ void BlockTriangulator::triangulateChunk( GLgeometry* geom, Chunk* chunk )
 			GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
 			float color = World::getLightColor( chunk->getWorld()->getLightLevel( wx, wy-1, wz ) );
-			data[ind + 0] = Renderer::vertex( pos.x - 0.0f, pos.y - 0.0f, pos.z + 1.0f, // Coordinates
+			data[ind + 0] = GLgeometry::vertex( pos.x - 0.0f, pos.y - 0.0f, pos.z + 1.0f, // Coordinates
 									rect.x, rect.y,
 									color );
-			data[ind + 1] = Renderer::vertex( pos.x - 0.0f, pos.y - 0.0f, pos.z - 0.0f, // Coordinates
+			data[ind + 1] = GLgeometry::vertex( pos.x - 0.0f, pos.y - 0.0f, pos.z - 0.0f, // Coordinates
 									rect.x + rect.w, rect.y,
 									color );
-			data[ind + 2] = Renderer::vertex( pos.x + 1.0f, pos.y - 0.0f, pos.z - 0.0f, // Coordinates
+			data[ind + 2] = GLgeometry::vertex( pos.x + 1.0f, pos.y - 0.0f, pos.z - 0.0f, // Coordinates
 									rect.x + rect.w, rect.y + rect.h,
 									color );
-			data[ind + 3] = Renderer::vertex( pos.x + 1.0f, pos.y - 0.0f, pos.z + 1.0f, // Coordinates
+			data[ind + 3] = GLgeometry::vertex( pos.x + 1.0f, pos.y - 0.0f, pos.z + 1.0f, // Coordinates
 									rect.x, rect.y + rect.h,
 									color );
 			edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
@@ -158,16 +159,16 @@ void BlockTriangulator::triangulateChunk( GLgeometry* geom, Chunk* chunk )
 			GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
 			float color = World::getLightColor( chunk->getWorld()->getLightLevel( wx, wy+1, wz ) );
-			data[ind + 0] = Renderer::vertex( pos.x - 0.0f, pos.y + 1.0f, pos.z + 1.0f, // Coordinates
+			data[ind + 0] = GLgeometry::vertex( pos.x - 0.0f, pos.y + 1.0f, pos.z + 1.0f, // Coordinates
 									rect.x, rect.y,
 									color );
-			data[ind + 1] = Renderer::vertex( pos.x + 1.0f, pos.y + 1.0f, pos.z + 1.0f, // Coordinates
+			data[ind + 1] = GLgeometry::vertex( pos.x + 1.0f, pos.y + 1.0f, pos.z + 1.0f, // Coordinates
 									rect.x + rect.w, rect.y,
 									color );
-			data[ind + 2] = Renderer::vertex( pos.x + 1.0f, pos.y + 1.0f, pos.z - 0.0f, // Coordinates
+			data[ind + 2] = GLgeometry::vertex( pos.x + 1.0f, pos.y + 1.0f, pos.z - 0.0f, // Coordinates
 									rect.x + rect.w, rect.y + rect.h,
 									color );
-			data[ind + 3] = Renderer::vertex( pos.x - 0.0f, pos.y + 1.0f, pos.z - 0.0f, // Coordinates
+			data[ind + 3] = GLgeometry::vertex( pos.x - 0.0f, pos.y + 1.0f, pos.z - 0.0f, // Coordinates
 									rect.x, rect.y + rect.h,
 									color );
 			edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
@@ -181,16 +182,16 @@ void BlockTriangulator::triangulateChunk( GLgeometry* geom, Chunk* chunk )
 			GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
 			float color = World::getLightColor( chunk->getWorld()->getLightLevel( wx-1, wy, wz ) );
-			data[ind + 0] = Renderer::vertex( pos.x - 0.0f, pos.y + 1.0f, pos.z - 0.0f, // Coordinates
+			data[ind + 0] = GLgeometry::vertex( pos.x - 0.0f, pos.y + 1.0f, pos.z - 0.0f, // Coordinates
 									rect.x + rect.w, rect.y,
 									color );
-			data[ind + 1] = Renderer::vertex( pos.x - 0.0f, pos.y - 0.0f, pos.z - 0.0f, // Coordinates
+			data[ind + 1] = GLgeometry::vertex( pos.x - 0.0f, pos.y - 0.0f, pos.z - 0.0f, // Coordinates
 									rect.x + rect.w, rect.y + rect.h,
 									color );
-			data[ind + 2] = Renderer::vertex( pos.x - 0.0f, pos.y - 0.0f, pos.z + 1.0f, // Coordinates
+			data[ind + 2] = GLgeometry::vertex( pos.x - 0.0f, pos.y - 0.0f, pos.z + 1.0f, // Coordinates
 									rect.x, rect.y + rect.h,
 									color );
-			data[ind + 3] = Renderer::vertex( pos.x - 0.0f, pos.y + 1.0f, pos.z + 1.0f, // Coordinates
+			data[ind + 3] = GLgeometry::vertex( pos.x - 0.0f, pos.y + 1.0f, pos.z + 1.0f, // Coordinates
 									rect.x, rect.y,
 									color );
 			edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;

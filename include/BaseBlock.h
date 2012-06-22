@@ -4,7 +4,6 @@
 #include <iostream>
 #include <fstream>
 
-struct GLvertex;
 typedef unsigned short GLedge;
 
 enum {
@@ -98,11 +97,6 @@ public:
 	 * Reads the data for this block from a stream
 	 */
 	void readFromStream( std::ifstream& stream );
-
-	/**
-	 * Returns the Verex Data for this block
-	 */
-	virtual void buildCubeData(BlockContext &ctx, size_t& ind, size_t& eInd, GLvertex* data, GLedge* edges);
 
 	virtual std::string getType() = 0;
 

@@ -4,6 +4,7 @@
 #include "Renderer.h"
 
 class Camera;
+class GLgeometry;
 
 struct Plane 
 {

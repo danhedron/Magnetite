@@ -3,6 +3,8 @@
 #include "MagnetiteCore.h"
 #include "TextureManager.h"
 
+#include "glgeometry.h"
+
 Sky::Sky()
 : mTime( 0 ),
 mMilliTime( 0 )
@@ -16,13 +18,13 @@ mMilliTime( 0 )
 	size_t edge = 0;
 	
 	/* Face +Y */
-	mGeom->vertexData[face+ 0] = Renderer::vertex( 250.f, 250.f, 250.f,
+	mGeom->vertexData[face+ 0] = GLgeometry::vertex( 250.f, 250.f, 250.f,
 											0.f, -1.f, 0.f);
-	mGeom->vertexData[face+ 1] = Renderer::vertex( 250.f, 250.f, -250.f,
+	mGeom->vertexData[face+ 1] = GLgeometry::vertex( 250.f, 250.f, -250.f,
 											0.f, -1.f, 0.f);
-	mGeom->vertexData[face+ 2] = Renderer::vertex( -250.f, 250.f, -250.f,
+	mGeom->vertexData[face+ 2] = GLgeometry::vertex( -250.f, 250.f, -250.f,
 											0.f, -1.f, 0.f);
-	mGeom->vertexData[face+ 3] = Renderer::vertex( -250.f, 250.f, 250.f,
+	mGeom->vertexData[face+ 3] = GLgeometry::vertex( -250.f, 250.f, 250.f,
 											0.f, -1.f, 0.f);
 	mGeom->edgeData[edge+0] = face + 0; mGeom->edgeData[edge+1] = face + 1; mGeom->edgeData[edge+2] = face + 2;
 	mGeom->edgeData[edge+3] = face + 0; mGeom->edgeData[edge+4] = face + 2; mGeom->edgeData[edge+5] = face + 3;
@@ -30,13 +32,13 @@ mMilliTime( 0 )
 	edge += 6;
 
 	/* Face +X */
-	mGeom->vertexData[face+ 0] = Renderer::vertex( 250.f, -250.f, 250.f,
+	mGeom->vertexData[face+ 0] = GLgeometry::vertex( 250.f, -250.f, 250.f,
 											-1.f, 0.f, 0.f);
-	mGeom->vertexData[face+ 1] = Renderer::vertex( 250.f, -250.f, -250.f,
+	mGeom->vertexData[face+ 1] = GLgeometry::vertex( 250.f, -250.f, -250.f,
 											-1.f, 0.f, 0.f);
-	mGeom->vertexData[face+ 2] = Renderer::vertex( 250.f, 250.f, -250.f,
+	mGeom->vertexData[face+ 2] = GLgeometry::vertex( 250.f, 250.f, -250.f,
 											-1.f, 0.f, 0.f);
-	mGeom->vertexData[face+ 3] = Renderer::vertex( 250.f, 250.f, 250.f,
+	mGeom->vertexData[face+ 3] = GLgeometry::vertex( 250.f, 250.f, 250.f,
 											-1.f, 0.f, 0.f);
 	mGeom->edgeData[edge+0] = face + 0; mGeom->edgeData[edge+1] = face + 1; mGeom->edgeData[edge+2] = face + 2;
 	mGeom->edgeData[edge+3] = face + 0; mGeom->edgeData[edge+4] = face + 2; mGeom->edgeData[edge+5] = face + 3;
@@ -44,13 +46,13 @@ mMilliTime( 0 )
 	edge += 6;
 
 	/* Face -X */
-	mGeom->vertexData[face+ 0] = Renderer::vertex( -250.f, 250.f, 250.f,
+	mGeom->vertexData[face+ 0] = GLgeometry::vertex( -250.f, 250.f, 250.f,
 											1.f, 0.f, 0.f);
-	mGeom->vertexData[face+ 1] = Renderer::vertex( -250.f, 250.f, -250.f,
+	mGeom->vertexData[face+ 1] = GLgeometry::vertex( -250.f, 250.f, -250.f,
 											1.f, 0.f, 0.f);
-	mGeom->vertexData[face+ 2] = Renderer::vertex( -250.f, -250.f, -250.f,
+	mGeom->vertexData[face+ 2] = GLgeometry::vertex( -250.f, -250.f, -250.f,
 											1.f, 0.f, 0.f);
-	mGeom->vertexData[face+ 3] = Renderer::vertex( -250.f, -250.f, 250.f,
+	mGeom->vertexData[face+ 3] = GLgeometry::vertex( -250.f, -250.f, 250.f,
 											1.f, 0.f, 0.f);
 	mGeom->edgeData[edge+0] = face + 0; mGeom->edgeData[edge+1] = face + 1; mGeom->edgeData[edge+2] = face + 2;
 	mGeom->edgeData[edge+3] = face + 0; mGeom->edgeData[edge+4] = face + 2; mGeom->edgeData[edge+5] = face + 3;
@@ -58,13 +60,13 @@ mMilliTime( 0 )
 	edge += 6;
 		
 	/* Face +Z */
-	mGeom->vertexData[face+ 0] = Renderer::vertex( 250.f, 250.f, 250.f,
+	mGeom->vertexData[face+ 0] = GLgeometry::vertex( 250.f, 250.f, 250.f,
 											0.f, 0.f, -1.f);
-	mGeom->vertexData[face+ 1] = Renderer::vertex( -250.f, 250.f, 250.f,
+	mGeom->vertexData[face+ 1] = GLgeometry::vertex( -250.f, 250.f, 250.f,
 											0.f, 0.f, -1.f);
-	mGeom->vertexData[face+ 2] = Renderer::vertex( -250.f, -250.f, 250.f,
+	mGeom->vertexData[face+ 2] = GLgeometry::vertex( -250.f, -250.f, 250.f,
 											0.f, 0.f, -1.f);
-	mGeom->vertexData[face+ 3] = Renderer::vertex( 250.f, -250.f, 250.f,
+	mGeom->vertexData[face+ 3] = GLgeometry::vertex( 250.f, -250.f, 250.f,
 											0.f, 0.f, -1.f);
 	mGeom->edgeData[edge+0] = face + 0; mGeom->edgeData[edge+1] = face + 1; mGeom->edgeData[edge+2] = face + 2;
 	mGeom->edgeData[edge+3] = face + 0; mGeom->edgeData[edge+4] = face + 2; mGeom->edgeData[edge+5] = face + 3;
@@ -72,13 +74,13 @@ mMilliTime( 0 )
 	edge += 6;
 
 	/* Face -Z */
-	mGeom->vertexData[face+ 0] = Renderer::vertex( 250.f, -250.f, -250.f,
+	mGeom->vertexData[face+ 0] = GLgeometry::vertex( 250.f, -250.f, -250.f,
 											0.f, 0.f, 1.f);
-	mGeom->vertexData[face+ 1] = Renderer::vertex( -250.f, -250.f, -250.f,
+	mGeom->vertexData[face+ 1] = GLgeometry::vertex( -250.f, -250.f, -250.f,
 											0.f, 0.f, 1.f);
-	mGeom->vertexData[face+ 2] = Renderer::vertex( -250.f, 250.f, -250.f,
+	mGeom->vertexData[face+ 2] = GLgeometry::vertex( -250.f, 250.f, -250.f,
 											0.f, 0.f, 1.f);
-	mGeom->vertexData[face+ 3] = Renderer::vertex( 250.f, 250.f, -250.f,
+	mGeom->vertexData[face+ 3] = GLgeometry::vertex( 250.f, 250.f, -250.f,
 											0.f, 0.f, 1.f);
 	mGeom->edgeData[edge+0] = face + 0; mGeom->edgeData[edge+1] = face + 1; mGeom->edgeData[edge+2] = face + 2;
 	mGeom->edgeData[edge+3] = face + 0; mGeom->edgeData[edge+4] = face + 2; mGeom->edgeData[edge+5] = face + 3;
