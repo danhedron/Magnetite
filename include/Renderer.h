@@ -95,7 +95,8 @@ public:
 		DEBUG_PERF,
 		DEBUG_TERRAIN,
 		DEBUG_PHYSICS,
-		DEBUG_LINES
+		DEBUG_LINES,
+		DEBUG_SKY
 	};
 
 	/**

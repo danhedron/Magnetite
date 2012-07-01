@@ -35,7 +35,7 @@ class GLprogram {
 	 */
 	std::map<std::string, GLuint> mUniforms;
 	
-	std::map<int, std::string> mAttributes;
+	std::map<std::string, int> mAttributes;
 
 	GLprogram();
 	
@@ -43,7 +43,7 @@ class GLprogram {
 	
 	void bindUniformTexture( std::string var, GLint unit );
 	
-	void bindAttribute( int index, std::string attribute );
+	size_t getAttributeIndex( const std::string& attribute );
 };
 
 

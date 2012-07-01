@@ -43,7 +43,7 @@ set(MAGNETITE_SOURCES
 	source/ScriptGame.cpp
 	source/Collision.cpp
 	source/Renderer.cpp
-	source/renderer/glprogram.cpp
+	source/renderer/ProgramResource.cpp
 	source/renderer/glshader.cpp
 	source/renderer/glgeometry.cpp
 	source/InputManager.cpp
@@ -56,7 +56,6 @@ set(MAGNETITE_SOURCES
 	source/WorldItem.cpp
 	source/BaseResource.cpp
 	source/ShaderResource.cpp
-	source/ProgramResource.cpp
 	source/ResourceManager.cpp
 	source/resources/ModelResources.cpp
 	source/Sky.cpp

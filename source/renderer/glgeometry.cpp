@@ -32,24 +32,16 @@ void GLgeometry::releaseBuffer()
 
 void GLgeometry::bindToBuffer()
 {
-    PRINT_GLERROR;
 	glGenBuffers(1, &this->vertexBO);
-    PRINT_GLERROR;
 	glBindBuffer( GL_ARRAY_BUFFER, this->vertexBO);
-    PRINT_GLERROR;
 	glBufferData( GL_ARRAY_BUFFER, sizeof(GLvertex)*this->vertexCount+1, this->vertexData, GL_STATIC_DRAW );
-    PRINT_GLERROR;
-	glGenBuffers(1, &this->indexBO);
-    PRINT_GLERROR;
 
+	glGenBuffers(1, &this->indexBO);
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, this->indexBO );
-    PRINT_GLERROR;
 	glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(GLedge)*this->edgeCount+1, this->edgeData, GL_STATIC_DRAW );
-    PRINT_GLERROR;
+	
 	glBindBuffer( GL_ARRAY_BUFFER, 0);
-    PRINT_GLERROR;
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0);
-    PRINT_GLERROR;
 }
 
 GLvertex GLgeometry::vertex(float x, float y, float z, float u, float v, float l)

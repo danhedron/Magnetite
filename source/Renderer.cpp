@@ -245,6 +245,7 @@ void Renderer::render(double dt, World* world)
 	mFpsAvg = (mFpsAvg + (1/dt)) / 2;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glColor3f(1,1,1);
+	
 
 	if( mDebugMode == DEBUG_LINES ) {
 		for( LineList::iterator it = mDebugLines.begin(); it != mDebugLines.end(); it++ ) 
@@ -263,15 +264,20 @@ void Renderer::render(double dt, World* world)
 
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CW);
+	
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
+	mCamera->applyMatrix( true, false );
+	if( world->getSky() != NULL )
+	{
+		world->getSky()->renderSky();
+	}
+	
 	rendered = 0;
 
 	ChunkArray chunks = world->getChunks();
 
 	GLtexture* tex = MagnetiteCore::Singleton->getTextureManager()->fetchTexture("./resources/sprites/world.png");
-
-	mCamera->applyMatrix( true, false );
-
-	//world->getSky()->renderSky();
 
 	if( mRenderMode == RENDER_SOLID ) {
 		GLint texLoc = glGetUniformLocation( mWorldProgram->getName(), "worldDiffuse");
@@ -284,11 +290,10 @@ void Renderer::render(double dt, World* world)
 		}
 	}
 	
-	if( mDrawWorld ) 
+	if( mDrawWorld && mDebugMode != DEBUG_SKY ) 
 	{
 		glEnableClientState(GL_VERTEX_ARRAY);
-		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+		
 		if( tex != 0 )
 		{
 			glEnable(GL_TEXTURE_2D);

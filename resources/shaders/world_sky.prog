@@ -1,0 +1,4 @@
+#sky shader program
+vertex:s_vertex.glsl
+fragment:s_fragment.glsl
+#end of shader

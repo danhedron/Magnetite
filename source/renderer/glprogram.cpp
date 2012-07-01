@@ -47,13 +47,6 @@ void GLprogram::link()
 	glAttachShader( mName, mVertex->getName() );
 	glAttachShader( mName, mFragment->getName() );
 
-
-	// deal with attributes n stuff
-	for( std::map<int, std::string>::iterator it = mAttributes.begin(); it != mAttributes.end(); it++ )
-	{
-		glBindAttribLocation( mName, it->first, it->second.c_str());
-	}
-
 	glLinkProgram( mName );
 
 	GLint linked;
@@ -92,7 +85,18 @@ void GLprogram::bindUniformTexture( std::string var, GLint unit )
 	mUniforms[var] = loc;
 }
 
-void GLprogram::bindAttribute( int index, std::string attribute )
+size_t GLprogram::getAttributeIndex( const std::string& attribute )
 {
-	mAttributes[index] = attribute;
+	if( mName > 0 ) 
+	{
+		std::map<std::string, int>::iterator it = mAttributes.find(attribute);
+		if( it != mAttributes.end() )
+		{
+			return it->second;
+		}
+		GLint p = glGetAttribLocation( mName, attribute.c_str() );
+		mAttributes[attribute] = p;
+		return p;
+	}
+	return 0;
 }

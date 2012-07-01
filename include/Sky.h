@@ -4,6 +4,8 @@
 
 #define DAY_LENGTH 600
 
+class ProgramResource;
+struct GLtexture;
 struct GLgeometry;
 
 class Sky {
@@ -11,6 +13,8 @@ protected:
 	size_t mTime;
 	float mMilliTime;
 	GLgeometry* mGeom;
+	GLtexture* mSkyTexture;
+	ProgramResource* mSkyProgram;
 public:
 	Sky( void );
 	~Sky();

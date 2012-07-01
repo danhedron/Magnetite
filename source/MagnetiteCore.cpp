@@ -258,7 +258,7 @@ void MagnetiteCore::go()
 			}
 			if( (lEvt.type == sf::Event::KeyReleased ) &&
 				(lEvt.key.code == sf::Keyboard::F6 ) ) {
-				Util::setLogLevel( Util::Verbose );
+				mRenderer->setDebugMode( Renderer::DEBUG_SKY );
 			}
 			if( (lEvt.type == sf::Event::KeyReleased) &&
 				(lEvt.key.code == sf::Keyboard::F) ) {
@@ -300,7 +300,6 @@ void MagnetiteCore::go()
 				mRenderer->resizeViewport( 0, 0, lEvt.size.width, lEvt.size.height );
 			}
 		}
-
 		
 		if( mGame != NULL )
 		{

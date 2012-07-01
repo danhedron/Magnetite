@@ -5,9 +5,15 @@ ShaderResource::ShaderResource( std::string file )
 : 	BaseResource( file ),
 mSource(""),
 mName( 0 )
-
 {
 
+}
+
+ShaderResource::~ShaderResource()
+{
+	if( mName != 0 ) {
+		glDeleteShader( mName );
+	}
 }
 
 void ShaderResource::compile( GLenum type )

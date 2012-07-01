@@ -26,6 +26,16 @@ protected:
 	 * Fragment Shader
 	 */
 	ShaderResource* mFragmentShader;
+	
+	/**
+	 * Cache for attribute indicies
+	 */
+	std::map<std::string, int> mAttributes;
+	
+	/**
+	 * Cache for uniform locations
+	 */
+	std::map<std::string, int> mUniforms;
 
 public:
 	ProgramResource( std::string file );
@@ -52,7 +62,7 @@ public:
 	void setFragmentShader( ShaderResource* shader );	
 	
 	/**
-	 * Makes this shader active (for rendering and shit)
+	 * Makes this the active program.
 	 */
 	void makeActive();
 
@@ -65,6 +75,16 @@ public:
 	 * Returns the OpenGL name of this program
 	 */
 	GLuint getName();
+	
+	/**
+	 * Returns the index of an attribute
+	 */
+	GLint getAttributeIndex( const std::string& attr );
+	
+	/**
+	 * Returns the location of a uniform
+	 */
+	GLint getUniformLocation( const std::string& uni );
 };
 
 #endif

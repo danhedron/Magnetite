@@ -61,7 +61,7 @@ struct GLgeometry {
 	/**
 	 * Utility function for constructing a vertex
 	 */
-	static GLvertex vertex( float x, float y, float z, float u, float v, float l );
+	static GLvertex vertex( float x, float y, float z, float u = 0.f, float v = 0.f, float l = 0.f );
 
 };
 

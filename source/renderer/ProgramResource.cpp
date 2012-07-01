@@ -15,8 +15,18 @@ ProgramResource::ProgramResource( std::string file )
 }
 
 ProgramResource::~ProgramResource() {
+	if( mVertexShader ) {
+		delete mVertexShader;
+	}
+	if( mFragmentShader ) {
+		delete mFragmentShader;
+	}
+	if( mGeometryShader ) {
+		delete mGeometryShader;
+	}
+	
 	if( mName != 0 ) {
-		glDeleteShader( mName );
+		glDeleteProgram( mName );
 	}
 }
 
@@ -122,7 +132,7 @@ void ProgramResource::load()
 			token = "";
 		}
 		else if( c == '\n' && sh != NULL ) {
-			ShaderResource* shader = MagnetiteCore::Singleton->getResourceManager()->getResource<ShaderResource>(token); 	 
+			ShaderResource* shader = MagnetiteCore::Singleton->getResourceManager()->getResource<ShaderResource>(token);
 			*sh = shader;
 			token = "";
 		}
@@ -138,4 +148,41 @@ void ProgramResource::load()
 GLuint ProgramResource::getName()
 {
 	return mName;
+}
+
+GLint ProgramResource::getAttributeIndex( const std::string& attribute )
+{
+	if( mName > 0 ) 
+	{
+		std::map<std::string, int>::iterator it = mAttributes.find(attribute);
+		if( it != mAttributes.end() )
+		{
+			return it->second;
+		}
+		GLint p = glGetAttribLocation( mName, attribute.c_str() );
+		mAttributes[attribute] = p;
+		return p;
+	}
+	return 0;
+}
+
+GLint ProgramResource::getUniformLocation( const std::string& uniform )
+{
+	if( mName > 0 ) 
+	{
+		std::map<std::string, int>::iterator it = mUniforms.find(uniform);
+		if( it != mUniforms.end() )
+		{
+			return it->second;
+		}
+		GLint p = glGetUniformLocation( mName, uniform.c_str() );
+		mUniforms[uniform] = p;
+		return p;
+	}
+	return 0;
+}
+
+void ProgramResource::makeActive()
+{
+	glUseProgram( mName );
 }
