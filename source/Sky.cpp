@@ -20,7 +20,7 @@ mSkyProgram(NULL)
 	mGeom->vertexData = new GLvertex[mGeom->vertexCount];
 	mGeom->edgeData = new GLedge[mGeom->edgeCount];
 	
-	static float halfSize = 250.f;
+	static float halfSize = 0.5f;
 	size_t v = 0, i = 0;
 	
 	mGeom->vertexData[v + 0] = GLgeometry::vertex( halfSize, halfSize, halfSize );
