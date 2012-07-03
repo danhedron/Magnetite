@@ -12,7 +12,10 @@ mFilter(GL_NEAREST)
 
 Texture::~Texture()
 {
-	
+	if( mName != 0 )
+	{
+		glDeleteTextures(1, mName);
+	}
 }
 
 void Texture::load()
