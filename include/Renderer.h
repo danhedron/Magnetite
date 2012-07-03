@@ -4,6 +4,7 @@
 
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
+class Texture;
 class BaseBlock;
 class Camera;
 class World;
@@ -13,9 +14,6 @@ struct GLbuffer {
 	GLuint vertex;
 	GLuint index;
 };
-
-class GLshader;
-class GLprogram;
 
 //typedef std::map<WorldChunk*,GLeometry> ChunkGeomList;
 //typedef std::map<WorldChunk*,GLbuffer> ChunkGeomList;
@@ -39,9 +37,7 @@ class Renderer
 {
 protected:
 	float totalTime;
-	GLuint chunkVbo;
-	GLuint chunkSize;
-
+	
 	size_t mScrWidth;
 	size_t mScrHeight;
 
@@ -62,11 +58,10 @@ protected:
 
 	//ChunkGeomList mWorldBuffers;
 
-	std::map<std::string, GLshader*> mShaders;
-
-	GLprogram* mLightingProgram;
 	ProgramResource* mWorldProgram;
-
+	Texture* mWorldTexture;
+	Texture* mCrosshair;
+	
 	GeomType mGeomType;
 
 	/**
@@ -138,16 +133,6 @@ public:
 	
 	Camera* getCamera();
 
-	/**
-	 * Loads a named shader from a file
-	 */
-	GLshader* loadShader( std::string filename, GLenum type );
-
-	/**
-	 * Unloads a named shader
-	 */
-	void unloadShader( std::string filename );
-
 	void render( double dt, World* world );
 
 	/**
@@ -163,21 +148,9 @@ public:
 	void drawStats( double dt, size_t chunkCount, World* world );
 
 	/**
-	 * Draws the block chooser
-	 */
-	void drawBlockChooser( double dt );
-
-	/**
 	 * Draws the crosshair
 	 */
 	void drawCrosshair( double dt );
-
-	/**
-	 * Chooses the next block 
-	 */
-	void nextBlock();
-	void lastBlock();
-	std::string blockType;
 
 	/**
 	 * Draws the string on the screen (coords start from top left)
@@ -197,15 +170,9 @@ public:
 	 * Sets wether or not to draw the world
 	 */
 	void setWorldVisible( bool vis );
-
+	
 	bool isWorldVisible();
-
-	/**
-	 * Notify the renderer that a chunk has been unloaded from the engine and it is ok to release it's graphics buffer.
-	 * @param chunk pointer to the unloaded chunk
-	 */
-	void notifyChunkUnloaded( Chunk* chunk );
-
+	
 	/**
 	 * Sets the internal rendermode:-
 	 * * RENDER_SOLID: Render with textures.

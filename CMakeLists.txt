@@ -58,6 +58,7 @@ set(MAGNETITE_SOURCES
 	source/ShaderResource.cpp
 	source/ResourceManager.cpp
 	source/resources/ModelResources.cpp
+	source/resources/Texture.cpp
 	source/Sky.cpp
 	source/Frustum.cpp
 	source/Camera.cpp
@@ -120,6 +121,7 @@ set(MAGNETITE_HEADERS
 	include/ShaderResource.h
 	include/ProgramResource.h
 	include/ModelResource.h
+	include/Texture.h
 	include/Sky.h
 	include/Frustum.h
 	include/Camera.h

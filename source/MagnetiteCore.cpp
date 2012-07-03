@@ -260,20 +260,6 @@ void MagnetiteCore::go()
 				(lEvt.key.code == sf::Keyboard::F6 ) ) {
 				mRenderer->setDebugMode( Renderer::DEBUG_SKY );
 			}
-			if( (lEvt.type == sf::Event::KeyReleased) &&
-				(lEvt.key.code == sf::Keyboard::F) ) {
-					//mPlayer->enableFlying( !mPlayer->isFlying() );
-					//Util::log( (Util::toString(mPlayer->isFlying())) + " Flying");
-			}
-			if( (lEvt.type == sf::Event::KeyReleased) &&
-				(lEvt.key.code == sf::Keyboard::F) ) {
-					//mPlayer->enableFlying( !mPlayer->isFlying() );
-					//Util::log( (Util::toString(mPlayer->isFlying())) + " Flying");
-			}
-			if( (lEvt.type == sf::Event::KeyPressed) &&
-				(lEvt.key.code == sf::Keyboard::Add) ) {
-					mRenderer->nextBlock();
-			}
 			if( (lEvt.type == sf::Event::KeyPressed) &&
 				(lEvt.key.code == sf::Keyboard::Num9) ) {
 					mTimescale *= 0.5f;

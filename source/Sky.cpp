@@ -1,11 +1,11 @@
 #include "Sky.h"
 #include "Renderer.h"
 #include "MagnetiteCore.h"
-#include "TextureManager.h"
 
 #include "glgeometry.h"
 #include <util.h>
 #include <ProgramResource.h>
+#include <Texture.h>
 #include <ResourceManager.h>
 
 Sky::Sky()
@@ -32,8 +32,6 @@ mSkyProgram(NULL)
 	mGeom->vertexData[v + 5] = GLgeometry::vertex( halfSize,-halfSize,-halfSize );
 	mGeom->vertexData[v + 6] = GLgeometry::vertex(-halfSize,-halfSize, halfSize );
 	mGeom->vertexData[v + 7] = GLgeometry::vertex(-halfSize,-halfSize,-halfSize );
-	
-	
 	
 	/* +Y Face */
 	mGeom->edgeData[i + 0] = v + 0; mGeom->edgeData[i + 1] = v + 1; mGeom->edgeData[i + 2] = v + 2;
@@ -67,12 +65,9 @@ mSkyProgram(NULL)
 
 	mGeom->bindToBuffer();
 	
-	if( MagnetiteCore::Singleton->getTextureManager()->fetchTexture("../resources/sprites/sky.png") == NULL )
-	{
-		MagnetiteCore::Singleton->getTextureManager()->loadTexture("resources/sprites/sky.png");
-	}
-	
-	mSkyTexture = MagnetiteCore::Singleton->getTextureManager()->fetchTexture("resources/sprites/sky.png");
+	mSkyTexture = MagnetiteCore::Singleton->getResourceManager()->getResource<Texture>("sky.png");
+	mSkyTexture->setFilter(GL_LINEAR);
+	mSkyTexture->load();
 	mSkyProgram = MagnetiteCore::Singleton->getResourceManager()->getResource<ProgramResource>("world_sky.prog");
 	mSkyProgram->link();
 }
@@ -90,7 +85,7 @@ void Sky::renderSky()
 
 	if(mSkyTexture != NULL) {
 		glClientActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, mSkyTexture->glID);
+		glBindTexture(GL_TEXTURE_2D, mSkyTexture->getName());
 		auto txuI = mSkyProgram->getUniformLocation("skyDiffuse");
 		glUniform1i(txuI, 0);
 	}

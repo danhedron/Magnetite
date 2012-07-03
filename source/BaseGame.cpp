@@ -164,39 +164,12 @@ void BaseGame::characterDamage( Character* player )
 
 void BaseGame::playerPrimaryClick( Player* player )
 {
-	raycast_r ray = player->getEyeCast();
-	ray = mEngine->getWorld()->raycastWorld(ray);
-	ray.maxDistance = 10;
-	if(ray.hit)
-	{	
-		if( clickMode == "remove" )
-		{
-			if(ray.chunk && ray.block) 
-			{
-				ray.chunk->removeBlockAt( ray.blockIndex );
-			}
-		}
-		else
-		{
-			explosion_t info;
-			info.center = ray.worldHit + ray.hitNormal * 1.5;
-			Explosion expl(info);
-			expl.explode();
-		}
-	}
+	
 }
 
 void BaseGame::playerAltClick( Player* player )
 {
-	raycast_r ray = player->getEyeCast();
-	ray = mEngine->getWorld()->raycastWorld(ray);
-	if(ray.hit && ray.block)
-	{
-		BaseBlock* block = FactoryManager::getManager().createBlock( mEngine->getRenderer()->blockType );
-		if( block != NULL ) {
-			mEngine->getWorld()->setBlockAt( block, ray.worldHit.x + ray.hitNormal.x/2, ray.worldHit.y + ray.hitNormal.y/2, ray.worldHit.z + ray.hitNormal.z/2 );
-		}
-	}
+	
 }
 
 void BaseGame::uiPaint(Renderer* r)
@@ -210,14 +183,10 @@ void BaseGame::think( float dt )
 }
 void BaseGame::keyDown( size_t evt )
 {
-	if( evt == sf::Keyboard::M )
-	{
-		if( clickMode == "remove" )
-			clickMode = "explode";
-		else clickMode = "remove";
-	}
+	
 }
 
 void BaseGame::keyUp( size_t evt )
 {
+	
 }

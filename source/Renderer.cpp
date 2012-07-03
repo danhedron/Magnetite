@@ -6,25 +6,16 @@
 #include "MagnetiteCore.h"
 #include "TextureManager.h"
 #include "ProgramResource.h"
+#include "Texture.h"
 #include "ResourceManager.h"
 #include "ShaderResource.h"
 #include "Camera.h"
-#include "BlockFactory.h"
 #include "util.h"
 
-// OpenGL Classes
-#include "glprogram.h"
-#include "glshader.h"
 #include "glgeometry.h"
-
-// Shader paremater indexes.
-GLint attrTC = 0; 
-GLint attrL = 0;
 
 Renderer::Renderer(void)
 : totalTime( 0 ),
-chunkVbo( 0 ),
-chunkSize( 0 ),
 mScrWidth( 0 ),
 mScrHeight( 0 ),
 mBlRendered( 0 ),
@@ -36,20 +27,13 @@ mFpsAvg( 0 ),
 mDrawFrustum( false ),
 mDrawWorld( true ),
 mWorldProgram( NULL ),
-mGeomType( GEOM_FALLBACK ),
-blockType( "" )
+mWorldTexture( NULL ),
+mGeomType( GEOM_FALLBACK )
 {
 }
 
 Renderer::~Renderer(void)
 {
-	if( chunkVbo != 0 )
-		glDeleteBuffersARB(1, &chunkVbo);
-
-	for( std::map<std::string, GLshader*>::iterator it = mShaders.begin(); it != mShaders.end(); it++ ) {
-		delete it->second;
-		mShaders.erase( it++ );
-	}
 }
 
 void Renderer::initialize(sf::RenderWindow& window)
@@ -84,16 +68,18 @@ void Renderer::initialize(sf::RenderWindow& window)
 		mGeomType = GEOM_GEOMSHADER;
 	//}
 	
-	MagnetiteCore::Singleton->getTextureManager()->loadTexture("./resources/ui/crosshair.png");
+	mCrosshair = MagnetiteCore::Singleton->getResourceManager()->getResource<Texture>("crosshair.png");
+	mCrosshair->load();
+	
+	mWorldTexture = MagnetiteCore::Singleton->getResourceManager()->getResource<Texture>("world.png");
+	mWorldTexture->load();
 
 	mWorldProgram = MagnetiteCore::Singleton->getResourceManager()->getResource<ProgramResource>("world.prog");
 	if( mWorldProgram == NULL ) {
 		Util::log("World Program Missing!");
 	}
 	mWorldProgram->link();
-
-	// Find the shader parameters.
-	attrTC = glGetAttribLocation( mWorldProgram->getName(), "in_p" );
+	
 	//attrL = glGetAttribLocation( mWorldProgram.ref, "in_light" );
 
 	//mLightingProgram.vertex = loadShader("w_vertex.glsl", GL_VERTEX_SHADER);
@@ -201,43 +187,6 @@ void Renderer::toggleCameraFrustum()
 	}
 }
 
-GLshader* Renderer::loadShader( std::string filename, GLenum type )
-{
-	if( mShaders.find(filename) != mShaders.end() ) {
-		return mShaders[filename];
-	}
-
-	std::string shaderPath = "./resources/shaders/";
-	std::ifstream file( (shaderPath+filename).c_str() );
-	if( !file ) return NULL;
-
-	std::stringstream ss;
-	std::string s;
-	while( !file.eof() ) {
-		std::getline( file, s );
-		ss << s << '\n';
-	}
-
-	GLshader* shader = new GLshader(
-		ss.str(),
-		filename
-	);
-	shader->setType(type);
-
-	mShaders[filename] = shader;
-
-	return shader;
-}
-
-void Renderer::unloadShader( std::string filename )
-{
-	if( mShaders.find(filename) != mShaders.end() ) {
-		delete mShaders[filename];
-		mShaders.erase( mShaders.find(filename) );
-	}
-
-}
-
 static size_t rendered;
 void Renderer::render(double dt, World* world)
 {
@@ -277,30 +226,21 @@ void Renderer::render(double dt, World* world)
 
 	ChunkArray chunks = world->getChunks();
 
-	GLtexture* tex = MagnetiteCore::Singleton->getTextureManager()->fetchTexture("./resources/sprites/world.png");
-
-	if( mRenderMode == RENDER_SOLID ) {
-		GLint texLoc = glGetUniformLocation( mWorldProgram->getName(), "worldDiffuse");
-		if( mWorldProgram->getName() == 0 ) {
-			Util::log("Using Invalid Program :(");
-		}
-		else {
-			glUseProgram( mWorldProgram->getName() );
-			glUniform1i( texLoc, 0 );
-		}
-	}
-	
 	if( mDrawWorld && mDebugMode != DEBUG_SKY ) 
 	{
-		glEnableClientState(GL_VERTEX_ARRAY);
+		mWorldProgram->makeActive();
 		
-		if( tex != 0 )
+		// Set up the uniform for the world diffuse texture.
+		GLint samplerLocation = mWorldProgram->getUniformLocation("worldDiffuse");
+		if( samplerLocation != -1 )
 		{
 			glEnable(GL_TEXTURE_2D);
+			glUniform1i( samplerLocation, 0 );
 			glActiveTexture( GL_TEXTURE0 );
-			glBindTexture(GL_TEXTURE_2D, tex->glID);
+			glBindTexture(GL_TEXTURE_2D, mWorldTexture->getName());
 		}
-
+		
+		
 		for( size_t c = 0; c < world->getChunkCount(); c++ )
 		{
 			if( chunks[c] )
@@ -312,59 +252,48 @@ void Renderer::render(double dt, World* world)
 				}
 			}
 		}
+		
+		// Draw moving blocks
+		MovingBlockList& moving = world->getMovingBlocks();
+		for( MovingBlock& b : moving )
+		{
+			GLgeometry* geom = b.geom;
+			if( geom->vertexBO == 0 || geom->indexBO == 0 )
+			{
+				geom->bindToBuffer();
+				// Check everything went ok, if not skip the block.
+				if( geom->vertexBO == 0 || geom->indexBO == 0 ) continue;
+			}
+			
+			glBindBuffer( GL_ARRAY_BUFFER, geom->vertexBO );
+			glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, geom->indexBO );
+			
+			auto vertexA = mWorldProgram->getAttributeIndex("in_vertex");
+			glEnableVertexAttribArray(vertexA);
+			glVertexAttribPointer( vertexA, 3, GL_FLOAT, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(0) );
 
-		if( tex != 0 )
+			// The UV information in packed into one attribute, should split into 2.
+			auto paramA = mWorldProgram->getAttributeIndex("in_params");
+			glEnableVertexAttribArray(paramA);
+			glVertexAttribPointer( paramA, 3, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(12) );
+			
+			glDrawRangeElements( GL_TRIANGLES, 0, geom->vertexCount, geom->edgeCount, GL_UNSIGNED_SHORT, 0);
+
+			glDisableVertexAttribArray(paramA);
+			glDisableVertexAttribArray(vertexA);
+		}
+		
+		if( samplerLocation != -1 )
 		{
 			glDisable(GL_TEXTURE_2D);
 			glActiveTexture( GL_TEXTURE0 );
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
-
-		glDisableClientState(GL_VERTEX_ARRAY);
- 		glDisable(GL_CULL_FACE);
+		
+		//Detatch the world program
+		glUseProgram( 0 );
 	}
 	
-	// Draw moving blocks
-	MovingBlockList& moving = world->getMovingBlocks();
-	for( MovingBlock& b : moving )
-	{
-		GLgeometry* geom = b.geom;
-		if( geom->vertexBO == 0 || geom->indexBO == 0 )
-		{
-			geom->bindToBuffer();
-		}
-		if( geom->vertexBO == 0 || geom->indexBO == 0 )
-		{
-			Util::log("Error generating geometry buffer");
-			return;
-		}
-        
-		glBindBuffer( GL_ARRAY_BUFFER, geom->vertexBO );
-		glVertexPointer( 3, GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(0) );
-
-		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, geom->indexBO );
-
-		glVertexAttribPointer( attrTC, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(12) );
-		glEnableVertexAttribArray(attrTC);
-		
-		glDrawRangeElements( GL_TRIANGLES, 0, geom->vertexCount, geom->edgeCount, GL_UNSIGNED_SHORT, 0);
-
-		glDisableVertexAttribArray(attrTC);
-	}
-
-	glUseProgram( 0 );
-
-	if( mDrawFrustum )
-	{
-		glLoadIdentity();
-		mCamera->applyMatrix(true, false);
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glVertexPointer(3, GL_FLOAT, sizeof(GLvertex), &(mCamera->getFrustum().mFrustumVolume->vertexData[0].x));
-
-		glDrawRangeElements(GL_LINE_STRIP, 0, mCamera->getFrustum().mFrustumVolume->vertexCount, mCamera->getFrustum().mFrustumVolume->edgeCount, GL_UNSIGNED_SHORT, mCamera->getFrustum().mFrustumVolume->edgeData);
-		glDisableClientState(GL_VERTEX_ARRAY);
-	}
-
 	glLoadIdentity();
 	mCamera->applyMatrix();
 
@@ -401,32 +330,33 @@ void Renderer::_renderChunk( Chunk* chunk )
 	glTranslatef(x,y,z);
 	
 	if( !chunk->_hasChunkFlag( Chunk::MeshInvalid ) && chunk->getGeometry() != NULL ) {
-		GLgeometry* chunkGeom = chunk->getGeometry();
+		GLgeometry* geom = chunk->getGeometry();
 		
-		if( chunkGeom->vertexBO == 0 || chunkGeom->indexBO == 0 )
+		if( geom->vertexBO == 0 || geom->indexBO == 0 )
 		{
-			chunkGeom->bindToBuffer();
-		}
-		if( chunkGeom->vertexBO == 0 || chunkGeom->indexBO == 0 )
-		{
-			Util::log("Error generating geometry buffer");
-			return;
+			geom->bindToBuffer();
+			if( geom->vertexBO == 0 || geom->indexBO == 0 ) return;
 		}
         
-		glBindBuffer( GL_ARRAY_BUFFER, chunkGeom->vertexBO );
-		glVertexPointer( 3, GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(0) );
-
-		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, chunkGeom->indexBO );
-
-		glVertexAttribPointer( attrTC, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(12) );
-		glEnableVertexAttribArray(attrTC);
-
-		glDrawRangeElements( GL_TRIANGLES, 0, chunkGeom->vertexCount, chunkGeom->edgeCount, GL_UNSIGNED_SHORT, 0);
-
-		glDisableVertexAttribArray(attrTC);
+		glBindBuffer( GL_ARRAY_BUFFER, geom->vertexBO );
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, geom->indexBO );
 		
-		glBindBuffer( GL_ARRAY_BUFFER, 0);
+		auto vertexA = mWorldProgram->getAttributeIndex("in_vertex");
+		glEnableVertexAttribArray(vertexA);
+		glVertexAttribPointer( vertexA, 3, GL_FLOAT, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(0) );
 
+		// The UV information in packed into one attribute, should split into 2.
+		auto paramA = mWorldProgram->getAttributeIndex("in_params");
+		glEnableVertexAttribArray(paramA);
+		glVertexAttribPointer( paramA, 3, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(12) );
+		
+		glDrawRangeElements( GL_TRIANGLES, 0, geom->vertexCount, geom->edgeCount, GL_UNSIGNED_SHORT, 0);
+
+		glDisableVertexAttribArray(paramA);
+		glDisableVertexAttribArray(vertexA);
+
+		glBindBuffer( GL_ARRAY_BUFFER, 0 );
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 	}
 
 }
@@ -450,49 +380,15 @@ void Renderer::drawStats(double dt, size_t chunkCount, World* world)
 	drawText( ss.str(), 6, 15 );
 }
 
-void Renderer::drawBlockChooser( double dt )
-{
-	BlockFactoryList::iterator iter = FactoryManager::getManager().blockFactoryList.find(blockType);
-	
-	if( iter == FactoryManager::getManager().blockFactoryList.end() )
-	{
-		iter = FactoryManager::getManager().blockFactoryList.begin();
-		blockType = iter->first;
-	}
-	
-	std::stringstream ss;
-	auto origIter = iter;
-	
-	for( int i = 1; i < 4; i++ ) 
-	{
-		if( iter != FactoryManager::getManager().blockFactoryList.begin() )
-		{
-			iter--;
-			drawText(iter->first, 15 - ( 5 * i ), 200 - ( 20 * i ));
-		}
-	}
-	iter = origIter;
-	for( int i = 1; i < 4; i++ ) 
-	{
-		if( ++iter == FactoryManager::getManager().blockFactoryList.end() )
-		{
-			iter = FactoryManager::getManager().blockFactoryList.begin();
-		}
-		drawText(iter->first, 15 - ( 5 * i ), 200 + ( 20 * i ));
-	}
-}
-
 void Renderer::drawCrosshair( double dt )
 {
 	// Switch to 2D for overlays
 	enable2D();
 
-	GLtexture* tex = MagnetiteCore::Singleton->getTextureManager()->fetchTexture("./resources/ui/crosshair.png");
-
-	if( tex != 0 )
+	if( mCrosshair != NULL ) 
 	{
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, tex->glID);
+		glBindTexture(GL_TEXTURE_2D, mCrosshair->getName());
 	}
 
 	glEnable (GL_BLEND);
@@ -512,36 +408,12 @@ void Renderer::drawCrosshair( double dt )
 
 	glDisable (GL_BLEND);
 
-	if( tex != 0 )
+	if( mCrosshair != NULL )
 	{
 		glDisable(GL_TEXTURE_2D);
 	}
 
 	disable2D();
-}
-
-void Renderer::nextBlock()
-{
-	BlockFactoryList::iterator iter = FactoryManager::getManager().blockFactoryList.find(blockType);
-	if( iter == FactoryManager::getManager().blockFactoryList.end() || ++iter == FactoryManager::getManager().blockFactoryList.end() )
-	{
-		iter = FactoryManager::getManager().blockFactoryList.begin();
-	}
-
-	blockType = iter->first;
-}
-
-void Renderer::lastBlock()
-{
-	BlockFactoryList::iterator iter = FactoryManager::getManager().blockFactoryList.find(blockType);
-	if( iter == FactoryManager::getManager().blockFactoryList.begin() )
-	{
-		iter = FactoryManager::getManager().blockFactoryList.end();
-	}
-	--iter;
-
-
-	blockType = iter->first;
 }
 
 void Renderer::drawText(std::string text, int x, int y)
