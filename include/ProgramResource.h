@@ -36,6 +36,11 @@ protected:
 	 * Cache for uniform locations
 	 */
 	std::map<std::string, int> mUniforms;
+	
+	/**
+	 * Store the enabled attribute arrays
+	 */
+	std::vector<GLuint> mEnabledArrays;
 
 public:
 	ProgramResource( std::string file );
@@ -65,6 +70,11 @@ public:
 	 * Makes this the active program.
 	 */
 	void makeActive();
+	
+	/**
+	 * Stops using the program
+	 */
+	void deactivate();
 
 	/**
 	 * Links the shader
@@ -85,6 +95,16 @@ public:
 	 * Returns the location of a uniform
 	 */
 	GLint getUniformLocation( const std::string& uni );
+	
+	/** 
+	 * Bind an attribute
+	 */
+	void setVertexAttribute( const std::string& name, GLint  size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid*  pointer );
+	
+	/**
+	 * disables all bound attributes
+	 */
+	void disableVertexAttributes();
 };
 
 #endif

@@ -6,6 +6,7 @@
 // for standard size types
 #include <cstdint>
 
+class TerrainGeometry;
 class World;
 /**
  * @struct ChunkIndex
@@ -19,8 +20,6 @@ struct ChunkIndex
 };
 
 typedef std::map<size_t, BlockPtr> BlockList;
-
-struct GLgeometry;
 
 class Chunk
 {
@@ -58,7 +57,7 @@ protected:
 	/**
 	 * The chunk's geometry
 	 */
-	GLgeometry*	mGeometry;
+	TerrainGeometry*	mGeometry;
 
 	/**
 	 * Allocates the array of a given size
@@ -190,7 +189,7 @@ public:
 	/**
 	 * Returns a pointer to this chunk's geometry
 	 */
-	GLgeometry* getGeometry();
+	Geometry* getGeometry();
 	
 	/**
 	 * Requests that the chunk re-generate

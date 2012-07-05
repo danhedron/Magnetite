@@ -14,7 +14,7 @@ Texture::~Texture()
 {
 	if( mName != 0 )
 	{
-		glDeleteTextures(1, mName);
+		glDeleteTextures(1, &mName);
 	}
 }
 

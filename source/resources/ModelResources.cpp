@@ -6,7 +6,7 @@
 #include <assimp/aiScene.h>
 #include <assimp/aiPostProcess.h>
 
-#include "glgeometry.h"
+#include "Geometry.h"
 
 ModelResource::ModelResource(const std::string& file)
 : BaseResource(file),
@@ -41,9 +41,9 @@ void ModelResource::load()
 			Util::log("Skeletons not supported.");
 		}
 		
-		mGeometry = new GLgeometry;
+		mGeometry = new MeshGeometry();
 		
-		mGeometry->vertexData = new GLvertex[m->mNumVertices];
+		mGeometry->vertexData = new GeometryVertex[m->mNumVertices];
 		mGeometry->edgeData = new GLedge[m->mNumFaces*3];
 		mGeometry->vertexCount = m->mNumVertices;
 		mGeometry->edgeCount = m->mNumFaces*3;
@@ -54,7 +54,6 @@ void ModelResource::load()
 			mGeometry->vertexData[v].x = vec.x;
 			mGeometry->vertexData[v].y = vec.y;
 			mGeometry->vertexData[v].z = vec.z;
-			mGeometry->vertexData[v].l = 1;
 		}
 		
 		for( size_t f = 0; f < m->mNumFaces; f+=3 )
@@ -71,12 +70,4 @@ void ModelResource::load()
 
 void ModelResource::draw()
 {
-	glBindBuffer( GL_ARRAY_BUFFER, mGeometry->vertexBO );
-	glVertexPointer( 3, GL_FLOAT, sizeof(GLvertex), BUFFER_OFFSET(0) );
-	
-	// Todo here: Get some kind of GLprogram involved.
-
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, mGeometry->indexBO );
-	
-	glDrawRangeElements( GL_TRIANGLES, 0, mGeometry->vertexCount, mGeometry->edgeCount, GL_UNSIGNED_SHORT, 0);
 }

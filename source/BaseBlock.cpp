@@ -6,7 +6,6 @@
 #include "World.h"
 #include <string>
 
-#include "glgeometry.h"
 
 BaseBlock::BaseBlock()
 : mDataFlags( 0 )

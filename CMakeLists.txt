@@ -45,7 +45,7 @@ set(MAGNETITE_SOURCES
 	source/Renderer.cpp
 	source/renderer/ProgramResource.cpp
 	source/renderer/glshader.cpp
-	source/renderer/glgeometry.cpp
+	source/renderer/Geometry.cpp
 	source/InputManager.cpp
 	source/BulletDebug.cpp
 	source/LightingManager.cpp
@@ -110,7 +110,7 @@ set(MAGNETITE_HEADERS
 	include/Renderer.h
 	include/glprogram.h
 	include/glshader.h
-	include/glgeometry.h
+	include/Geometry.h
 	include/PhysicsState.h
 	include/ChunkPhysicsState.h
 	include/WorldObject.h

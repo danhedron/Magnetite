@@ -1,12 +1,14 @@
 #ifndef _BASETRIANGULATOR_H_
 #define _BASETRIANGULATOR_H_
+#include "prerequisites.h"
 
+class TerrainGeometry;
 class Chunk;
-class GLgeometry;
+
 class BaseTriangulator
 {
 public:
-	virtual void triangulateChunk( GLgeometry* geom, Chunk* chunk ) = 0;
+	virtual void triangulateChunk( TerrainGeometry* geom, Chunk* chunk ) = 0;
 };
 
 #endif

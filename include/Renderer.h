@@ -2,21 +2,11 @@
 #define _RENDERER_H_
 #include "prerequisites.h"
 
-#define BUFFER_OFFSET(i) ((char*)NULL + (i))
-
 class Texture;
 class BaseBlock;
 class Camera;
 class World;
 class ProgramResource;
-
-struct GLbuffer {
-	GLuint vertex;
-	GLuint index;
-};
-
-//typedef std::map<WorldChunk*,GLeometry> ChunkGeomList;
-//typedef std::map<WorldChunk*,GLbuffer> ChunkGeomList;
 
 /**
  * Geometry types, used to dermine wether the renderer should use Geometry shaders or push the finished vertex data to the GPU

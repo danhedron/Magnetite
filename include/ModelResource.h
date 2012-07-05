@@ -3,7 +3,7 @@
 #include "BaseResource.h"
 #include "Renderer.h"
 
-class GLgeometry;
+class MeshGeometry;
 
 /**
  * @class ModelResource
@@ -21,7 +21,7 @@ protected:
 	/**
 	 * Geometry for rendering.
 	 */
-	GLgeometry* mGeometry;
+	MeshGeometry* mGeometry;
 	
 public:
 	/**

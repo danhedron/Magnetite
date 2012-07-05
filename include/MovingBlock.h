@@ -2,8 +2,8 @@
 #define _MOVINGBLOCK_H_
 #include "prerequisites.h"
 
+class TerrainGeometry;
 class BaseBlock;
-class GLgeometry;
 
 struct MovingBlock
 {
@@ -13,7 +13,7 @@ struct MovingBlock
 	Vector3 current;
 	Vector3 end;
 	
-	GLgeometry* geom;
+	TerrainGeometry* geom;
 	
 	float time;
 };

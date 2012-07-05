@@ -6,14 +6,13 @@
 
 class Texture;
 class ProgramResource;
-struct GLtexture;
-struct GLgeometry;
+class MeshGeometry;
 
 class Sky {
 protected:
 	size_t mTime;
 	float mMilliTime;
-	GLgeometry* mGeom;
+	MeshGeometry* mGeom;
 	Texture* mSkyTexture;
 	ProgramResource* mSkyProgram;
 public:

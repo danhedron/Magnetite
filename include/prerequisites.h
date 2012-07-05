@@ -43,6 +43,9 @@ typedef std::vector<WorldTree*> TreeList;
 
 //typedef *BaseBlock[] BlockList;
 
+class Geometry;
+typedef Geometry* GeometryPtr;
+
 class Chunk;
 //typedef std::vector<WorldChunk*> ChunkList;
 
@@ -61,3 +64,5 @@ class Chunk;
 #define BLOCK_INDEX( block ) (block->getZ() * CHUNK_WIDTH * CHUNK_HEIGHT + block->getY() * CHUNK_WIDTH + block->getX())
 
 #define PRINT_GLERROR {GLenum err = glGetError(); if(err) Util::log(Util::toString(err));}
+
+#define BUFFER_OFFSET(i) ((char*)NULL + (i))

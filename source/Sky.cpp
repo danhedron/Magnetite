@@ -2,7 +2,7 @@
 #include "Renderer.h"
 #include "MagnetiteCore.h"
 
-#include "glgeometry.h"
+#include "Geometry.h"
 #include <util.h>
 #include <ProgramResource.h>
 #include <Texture.h>
@@ -14,24 +14,24 @@ mMilliTime( 0 ),
 mSkyTexture(NULL),
 mSkyProgram(NULL)
 {
-	mGeom = new GLgeometry;
+	mGeom = new MeshGeometry;
 	mGeom->vertexCount = 8;
 	mGeom->edgeCount = 6*6;
-	mGeom->vertexData = new GLvertex[mGeom->vertexCount];
+	mGeom->vertexData = new GeometryVertex[mGeom->vertexCount];
 	mGeom->edgeData = new GLedge[mGeom->edgeCount];
 	
 	static float halfSize = 0.5f;
 	size_t v = 0, i = 0;
 	
-	mGeom->vertexData[v + 0] = GLgeometry::vertex( halfSize, halfSize, halfSize );
-	mGeom->vertexData[v + 1] = GLgeometry::vertex( halfSize, halfSize,-halfSize );
-	mGeom->vertexData[v + 2] = GLgeometry::vertex(-halfSize, halfSize, halfSize );
-	mGeom->vertexData[v + 3] = GLgeometry::vertex(-halfSize, halfSize,-halfSize );
+	mGeom->vertexData[v + 0] = Geometry::vertex( halfSize, halfSize, halfSize );
+	mGeom->vertexData[v + 1] = Geometry::vertex( halfSize, halfSize,-halfSize );
+	mGeom->vertexData[v + 2] = Geometry::vertex(-halfSize, halfSize, halfSize );
+	mGeom->vertexData[v + 3] = Geometry::vertex(-halfSize, halfSize,-halfSize );
 	
-	mGeom->vertexData[v + 4] = GLgeometry::vertex( halfSize,-halfSize, halfSize );
-	mGeom->vertexData[v + 5] = GLgeometry::vertex( halfSize,-halfSize,-halfSize );
-	mGeom->vertexData[v + 6] = GLgeometry::vertex(-halfSize,-halfSize, halfSize );
-	mGeom->vertexData[v + 7] = GLgeometry::vertex(-halfSize,-halfSize,-halfSize );
+	mGeom->vertexData[v + 4] = Geometry::vertex( halfSize,-halfSize, halfSize );
+	mGeom->vertexData[v + 5] = Geometry::vertex( halfSize,-halfSize,-halfSize );
+	mGeom->vertexData[v + 6] = Geometry::vertex(-halfSize,-halfSize, halfSize );
+	mGeom->vertexData[v + 7] = Geometry::vertex(-halfSize,-halfSize,-halfSize );
 	
 	/* +Y Face */
 	mGeom->edgeData[i + 0] = v + 0; mGeom->edgeData[i + 1] = v + 1; mGeom->edgeData[i + 2] = v + 2;
@@ -80,27 +80,24 @@ Sky::~Sky()
 void Sky::renderSky()
 {
 	mSkyProgram->makeActive();
-
-	glEnable(GL_TEXTURE_2D);
-
-	if(mSkyTexture != NULL) {
-		glClientActiveTexture(GL_TEXTURE0);
+	
+	// Set up the uniform for the world diffuse texture.
+	GLint samplerLocation = mSkyProgram->getUniformLocation("skyDiffuse");
+	if( samplerLocation != -1 )
+	{
+		glEnable(GL_TEXTURE_2D);
+		glUniform1i( samplerLocation, 0 );
+		glActiveTexture( GL_TEXTURE0 );
 		glBindTexture(GL_TEXTURE_2D, mSkyTexture->getName());
-		auto txuI = mSkyProgram->getUniformLocation("skyDiffuse");
-		glUniform1i(txuI, 0);
 	}
 	
 	glBindBuffer( GL_ARRAY_BUFFER, mGeom->vertexBO );
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, mGeom->indexBO );
 
-	// Get the in_vertex index.
-	auto vtxI = mSkyProgram->getAttributeIndex("in_vertex");
-	glEnableVertexAttribArray(vtxI);
-	glVertexAttribPointer( vtxI, 3, GL_FLOAT, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(0) );
-
+	mGeom->bindVertexAttributes( mSkyProgram );
+	
 	glDrawRangeElements(GL_TRIANGLES, 0, mGeom->vertexCount, mGeom->edgeCount, GL_UNSIGNED_SHORT, 0);
 	
-	glDisableVertexAttribArray(vtxI);
 	
 	glBindBuffer( GL_ARRAY_BUFFER, 0 );
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
@@ -110,7 +107,8 @@ void Sky::renderSky()
 	}
 		
 	glDisable(GL_TEXTURE_2D);
-	glUseProgram(0);
+	
+	mSkyProgram->deactivate();
 }
 
 float Sky::timeUV()

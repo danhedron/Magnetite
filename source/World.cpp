@@ -14,7 +14,6 @@
 #include <fstream>
 #include <stdio.h>
 #include <math.h>
-#include "glgeometry.h"
 
 #ifdef WIN32
 #include <direct.h>
@@ -301,42 +300,6 @@ void World::updateMovingBlocks( float dt )
 		float newTime = b.time - dt;
 		if( newTime > 0 )
 		{
-			if( b.geom != NULL ) 
-			{
-				b.geom->releaseBuffer();
-				if(  b.geom->vertexCount > 0 )
-				{
-					delete[]  b.geom->vertexData;
-				}
-				if(  b.geom->edgeCount > 0 )
-				{
-					delete[]  b.geom->edgeData;
-				}
-			}
-			else
-			{
-				 b.geom = new GLgeometry();
-			}
-			
-			GLuint numVerts = 4;
-			GLuint numEdges = 6;			
-			GLvertex*	verts = new GLvertex[numVerts];
-			GLedge*	edges = new GLedge[numEdges];
-			
-			size_t vind = 0;
-			size_t eind = 0;
-			
-			auto dif = (b.start - b.end) * newTime;
-			b.current += dif;
-			
-			BlockContext context;
-			context.worldX = b.current.x;
-			context.worldY = b.current.y;
-			context.worldZ = b.current.z;
-			context.chunk = NULL;
-			context.world = this;
-			b.block->updateVisFlags( FACE_ALL );
-			//b.block->buildCubeData( context, vind, eind, verts, edges );
 		}
 		else
 		{

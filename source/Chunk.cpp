@@ -10,7 +10,7 @@
 #include <BaseTriangulator.h>
 #include <util.h>
 
-#include "glgeometry.h"
+#include "Geometry.h"
 
 Chunk::Chunk( ChunkIndex index, World* world )
 : mWorld( world ),
@@ -243,7 +243,7 @@ void Chunk::requestGenerate()
 	}
 }
 
-GLgeometry* Chunk::getGeometry()
+GeometryPtr Chunk::getGeometry()
 {
 	return mGeometry;
 }
@@ -263,20 +263,9 @@ void Chunk::generateGeometry()
 {
 	if( mGeometry != NULL ) 
 	{
-		mGeometry->releaseBuffer();
-		if( mGeometry->vertexCount > 0 )
-		{
-			delete[] mGeometry->vertexData;
-		}
-		if( mGeometry->edgeCount > 0 )
-		{
-			delete[] mGeometry->edgeData;
-		}
+		delete mGeometry;
 	}
-	else
-	{
-		mGeometry = new GLgeometry();
-	}
+	mGeometry = new TerrainGeometry();
 	
 	mWorld->getTriangulator()->triangulateChunk(mGeometry, this);
 	
@@ -304,7 +293,7 @@ void Chunk::generatePhysics()
 		btTriangleIndexVertexArray* meshInterface = new btTriangleIndexVertexArray;
 		btIndexedMesh part;
 
-		int vertSize = sizeof( GLvertex );
+		int vertSize = sizeof( TerrainVertex );
 		int indexSize = sizeof( GLedge );
 
 		part.m_vertexBase = (const unsigned char*)&mGeometry->vertexData[0].x;

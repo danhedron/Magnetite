@@ -12,7 +12,9 @@
 #include "Camera.h"
 #include "util.h"
 
-#include "glgeometry.h"
+#include "Geometry.h"
+
+MeshGeometry* crosshairGeom = NULL;
 
 Renderer::Renderer(void)
 : totalTime( 0 ),
@@ -52,21 +54,34 @@ void Renderer::initialize(sf::RenderWindow& window)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(90.f, 1.f, 0.1f, 500.f);
+	
+	if( crosshairGeom == NULL ) 
+	{
+		crosshairGeom = new MeshGeometry();
+		crosshairGeom->vertexCount = 4;
+		crosshairGeom->edgeCount = 6;
+		
+		crosshairGeom->vertexData = new GeometryVertex[crosshairGeom->vertexCount];
+		crosshairGeom->edgeData = new GLedge[crosshairGeom->vertexCount];
+		
+		size_t i = 0;
+		size_t hw = mWindow->getSize().x/2;
+		size_t hh = mWindow->getSize().y/2;
+		crosshairGeom->vertexData[i++] = Geometry::vertex( hw + 8, hh + 8, 0 );
+		crosshairGeom->vertexData[i++] = Geometry::vertex( hw - 8, hh + 8, 0 );
+		crosshairGeom->vertexData[i++] = Geometry::vertex( hw - 8, hh - 8, 0 );
+		crosshairGeom->vertexData[i++] = Geometry::vertex( hw + 8, hh - 8, 0 );
+		
+		/*glTexCoord2f(0.f,0.f);
+		glVertex2i( (mScrWidth/2) + 8, (mScrHeight/2) + 8);
+		glTexCoord2f(0.f,1.f);
+		glVertex2i( (mScrWidth/2) - 8, (mScrHeight/2) + 8);
+		glTexCoord2f(1.f,1.f);
+		glVertex2i( (mScrWidth/2) - 8, (mScrHeight/2) - 8);
+		glTexCoord2f(1.f,0.f);
+		glVertex2i( (mScrWidth/2) + 8, (mScrHeight/2) - 8);*/
 
-	// Detect Geometry shader support
-	/*if( !GL_EXT_geometry_shader4 ) {
-		Util::log("=========== Warning ===========");
-		Util::log("Your GPU doesn't support geometry shaders");
-		Util::log("We will fall back to normal polygons for now");
-		Util::log("but seriously it's 2011, you should upgrade");
-		Util::log("===============================");
-		mGeomType = GEOM_FALLBACK;
 	}
-	else
-	{*/
-		// k
-		mGeomType = GEOM_GEOMSHADER;
-	//}
 	
 	mCrosshair = MagnetiteCore::Singleton->getResourceManager()->getResource<Texture>("crosshair.png");
 	mCrosshair->load();
@@ -257,7 +272,7 @@ void Renderer::render(double dt, World* world)
 		MovingBlockList& moving = world->getMovingBlocks();
 		for( MovingBlock& b : moving )
 		{
-			GLgeometry* geom = b.geom;
+			TerrainGeometry* geom = b.geom;
 			if( geom->vertexBO == 0 || geom->indexBO == 0 )
 			{
 				geom->bindToBuffer();
@@ -267,20 +282,13 @@ void Renderer::render(double dt, World* world)
 			
 			glBindBuffer( GL_ARRAY_BUFFER, geom->vertexBO );
 			glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, geom->indexBO );
-			
-			auto vertexA = mWorldProgram->getAttributeIndex("in_vertex");
-			glEnableVertexAttribArray(vertexA);
-			glVertexAttribPointer( vertexA, 3, GL_FLOAT, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(0) );
-
-			// The UV information in packed into one attribute, should split into 2.
-			auto paramA = mWorldProgram->getAttributeIndex("in_params");
-			glEnableVertexAttribArray(paramA);
-			glVertexAttribPointer( paramA, 3, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(12) );
+		
+			geom->bindVertexAttributes(mWorldProgram);
 			
 			glDrawRangeElements( GL_TRIANGLES, 0, geom->vertexCount, geom->edgeCount, GL_UNSIGNED_SHORT, 0);
-
-			glDisableVertexAttribArray(paramA);
-			glDisableVertexAttribArray(vertexA);
+			
+			glBindBuffer( GL_ARRAY_BUFFER, 0 );
+			glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 		}
 		
 		if( samplerLocation != -1 )
@@ -291,7 +299,7 @@ void Renderer::render(double dt, World* world)
 		}
 		
 		//Detatch the world program
-		glUseProgram( 0 );
+		mWorldProgram->deactivate();
 	}
 	
 	glLoadIdentity();
@@ -330,7 +338,7 @@ void Renderer::_renderChunk( Chunk* chunk )
 	glTranslatef(x,y,z);
 	
 	if( !chunk->_hasChunkFlag( Chunk::MeshInvalid ) && chunk->getGeometry() != NULL ) {
-		GLgeometry* geom = chunk->getGeometry();
+		Geometry* geom = chunk->getGeometry();
 		
 		if( geom->vertexBO == 0 || geom->indexBO == 0 )
 		{
@@ -341,19 +349,9 @@ void Renderer::_renderChunk( Chunk* chunk )
 		glBindBuffer( GL_ARRAY_BUFFER, geom->vertexBO );
 		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, geom->indexBO );
 		
-		auto vertexA = mWorldProgram->getAttributeIndex("in_vertex");
-		glEnableVertexAttribArray(vertexA);
-		glVertexAttribPointer( vertexA, 3, GL_FLOAT, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(0) );
-
-		// The UV information in packed into one attribute, should split into 2.
-		auto paramA = mWorldProgram->getAttributeIndex("in_params");
-		glEnableVertexAttribArray(paramA);
-		glVertexAttribPointer( paramA, 3, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GLvertex), BUFFER_OFFSET(12) );
+		geom->bindVertexAttributes(mWorldProgram);
 		
 		glDrawRangeElements( GL_TRIANGLES, 0, geom->vertexCount, geom->edgeCount, GL_UNSIGNED_SHORT, 0);
-
-		glDisableVertexAttribArray(paramA);
-		glDisableVertexAttribArray(vertexA);
 
 		glBindBuffer( GL_ARRAY_BUFFER, 0 );
 		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );

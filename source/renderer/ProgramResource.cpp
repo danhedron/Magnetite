@@ -186,3 +186,27 @@ void ProgramResource::makeActive()
 {
 	glUseProgram( mName );
 }
+
+void ProgramResource::deactivate()
+{
+	disableVertexAttributes();
+	glUseProgram(0);
+}
+
+void ProgramResource::setVertexAttribute( const std::string& name, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid*  pointer )
+{
+	auto attributeIndex = getAttributeIndex(name);
+	glEnableVertexAttribArray(attributeIndex);
+	mEnabledArrays.push_back(attributeIndex);
+	glVertexAttribPointer( attributeIndex, size, type, normalized, stride, pointer );
+
+}
+
+void ProgramResource::disableVertexAttributes()
+{
+	for(size_t x = 0; x < mEnabledArrays.size(); x++ )
+	{
+		glDisableVertexAttribArray(mEnabledArrays[x]);
+	}
+	mEnabledArrays.clear();	
+}
