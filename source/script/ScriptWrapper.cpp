@@ -48,6 +48,9 @@ void report( TryCatch* handler )
 {
 	HandleScope scope;
 	
+	Util::log( strize(handler->StackTrace()) );
+	return;
+	
 	if(handler->Message().IsEmpty())
 	{
 		// No message
@@ -91,9 +94,9 @@ void ScriptWrapper::runFile( std::string filename )
 			}
 		}
 		
-		script->Run();
+		auto r = script->Run();
 		
-		if(try_catch.HasCaught())
+		if(r.IsEmpty())
 		{
 			report(&try_catch);
 			return;

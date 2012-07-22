@@ -10,46 +10,8 @@ Number.prototype.sign = function() {
   }
 }
 
-Game.tools = [
-	{
-		title: 'place',
-		func: function( pl ) {
-			var rs = world.fireRay( pl.getEyeCast() );
-			world.createBlock( meta.blocks.availableTypes[this.currentBlock], rs.worldHit.x + (rs.normal.x /2),  rs.worldHit.y + (rs.normal.y /2),  rs.worldHit.z + (rs.normal.z /2) );
-		}
-	},
-	{
-		title: 'remove',
-		func: function( pl ) {
-			var rs = world.fireRay( pl.getEyeCast() );
-			world.removeBlock( rs.worldHit.x - (rs.normal.x /2),  rs.worldHit.y - (rs.normal.y /2),  rs.worldHit.z - (rs.normal.z /2) );
-		}
-	},
-	{
-		title: 'explode',
-		func: function( pl ) {
-			var ex = new Explosion(); 
-			var rs = world.fireRay( pl.getEyeCast() );
-			ex.origin = rs.worldHit;
-			ex.power = 10;
-			ex.radius = 5;
-			ex.explode();
-		}
-	}
-	];
-Game.toolIndex = 0;
-
 Game.onLoad = function()
 {
-	var ray = new Ray();
-	ray.origin = { x: 10, y: 200, z : 10 };
-	ray.direction = { x: 0, y: -1, z: 0 };
-	var result = world.fireRay( ray );
-	if( result.block )
-	{
-		console.log( 'type: ' + result.block.type );
-	}
-	this.currentBlock = 0;
 }
 
 Game.onSpawn = function( p )
@@ -61,28 +23,10 @@ Game.onSpawn = function( p )
 	this.player.movementSpeed = 1;
 }
 
-Game.changeBlock = function( v )
-{
-	this.currentBlock += v;
-	if( this.currentBlock < 0 )
-		this.currentBlock = meta.blocks.availableTypes.length - 1;
-	else if( this.currentBlock > meta.blocks.availableTypes.length - 1 )
-	{
-		this.currentBlock = 0;
-	}
-	console.log( meta.blocks.availableTypes[this.currentBlock] );
-}
-
 Game.keyDown = function(k)
 {
 	switch( k )
 	{
-		case 68:
-			this.changeBlock(-1);
-			break;
-		case 67:
-			this.changeBlock( 1);
-			break;
 		case 22:
 			// W
 			this.player.moveTarget.z = -10;
@@ -170,5 +114,4 @@ Game.think = function( dt )
 
 Game.draw = function()
 {
-	console.drawText( 10, 10, this.tools[ this.toolIndex % this.tools.length ].title );
 }

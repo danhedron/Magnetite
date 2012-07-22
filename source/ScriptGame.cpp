@@ -231,8 +231,12 @@ void ScriptGame::uiPaint(Renderer* r)
 		Local<Value> onLoadVal = mScriptObject->Get( String::New("draw") );
 		if( onLoadVal->IsFunction() )
 		{
+			TryCatch ct;
 			Local<Function> onLoad = Local<Function>::Cast( onLoadVal );
-			onLoad->Call( mScriptObject, 0, NULL );
+			auto r = onLoad->Call( mScriptObject, 0, NULL );
+			if( r.IsEmpty() ) {
+				Util::log(strize(ct.StackTrace()));
+			}
 		}
 	}
 }
@@ -248,10 +252,14 @@ void ScriptGame::think( float dt )
 		Local<Value> onLoadVal = mScriptObject->Get( String::New("think") );
 		if( onLoadVal->IsFunction() )
 		{
+			TryCatch ct;
 			Local<Function> onLoad = Local<Function>::Cast( onLoadVal );
 			Handle<Value> args[1];
 			args[0] = Number::New( dt );
-			onLoad->Call( mScriptObject, 1, args );
+			auto r = onLoad->Call( mScriptObject, 1, args );
+			if( r.IsEmpty() ) {
+				Util::log(strize(ct.StackTrace()));
+			}
 		}
 	}	
 }
