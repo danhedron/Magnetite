@@ -1,4 +1,5 @@
 var Events = require('./scripts/events.js');
+var Menu = require('./scripts/menu.js');
 
 Game.name = 'Fortress';
 
@@ -14,6 +15,24 @@ Number.prototype.sign = function() {
 
 Game.onLoad = function()
 {
+	this.constructionMenu = new Menu({
+		items: [
+			{
+				text:'Buildings'
+			},
+			{
+				text:'Defences'
+			},
+			{
+				text:'Structures'
+			},
+			{
+				text:'Machinery'
+			}
+		]
+	});
+	this.constructionMenu.breadcrumbs = ["Menu", "Construction"];
+	this.constructionMenu.position = [20, 30];
 }
 
 Game.onSpawn = function( p )
@@ -131,4 +150,5 @@ Game.think = function( dt )
 
 Game.draw = function()
 {
+	this.constructionMenu.draw();
 }
