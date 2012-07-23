@@ -127,7 +127,7 @@ public:
 	/**
 	 * Called when a local player tries to look
 	 */
-	void _mouseMoved( const float x, const float y );
+	virtual void _mouseMoved( const float x, const float y );
 
 	/**
 	 * Called when the local player click

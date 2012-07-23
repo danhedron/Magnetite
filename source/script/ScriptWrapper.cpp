@@ -48,8 +48,10 @@ void report( TryCatch* handler )
 {
 	HandleScope scope;
 	
-	Util::log( strize(handler->StackTrace()) );
-	return;
+	
+	Util::log( strize(handler->StackTrace()->ToString()) );
+
+	//return;
 	
 	if(handler->Message().IsEmpty())
 	{
@@ -65,7 +67,7 @@ void report( TryCatch* handler )
 	}
 }
 
-void ScriptWrapper::runFile( std::string filename )
+ValueHandle ScriptWrapper::runFile( std::string filename )
 {
 	std::ifstream is(filename.c_str(), std::ios_base::in);
 	Context::Scope ctx_scope(mContext);
@@ -90,7 +92,7 @@ void ScriptWrapper::runFile( std::string filename )
 			if(try_catch.HasCaught())
 			{
 				report(&try_catch);
-				return;
+				return Undefined();
 			}
 		}
 		
@@ -99,23 +101,23 @@ void ScriptWrapper::runFile( std::string filename )
 		if(r.IsEmpty())
 		{
 			report(&try_catch);
-			return;
+			return Undefined();
 		}
-		return;
+		return r;
 	}
 	else
 	{
 		Util::log("Unable to open: " + filename);
 	}
 	
-	return;
+	return Undefined();
 }
 
 ValueHandle import(const Arguments& args)
 {
 	if( args.Length() >= 1 )
 	{
-		MagnetiteCore::Singleton->getScriptManager()->runFile( strize( args[0]->ToString() ) );
+		return MagnetiteCore::Singleton->getScriptManager()->runFile( strize( args[0]->ToString() ) );
 	}
 	return Undefined();
 }
@@ -143,7 +145,7 @@ void ScriptWrapper::init()
 	HandleScope scope;
 	
 	Handle<ObjectTemplate> global = ObjectTemplate::New();
-	global->Set(String::New("import"), FunctionTemplate::New(import));
+	global->Set(String::New("require"), FunctionTemplate::New(import));
 
 	Handle<ObjectTemplate> meta = ObjectTemplate::New();
 	Handle<ObjectTemplate> blocks = ObjectTemplate::New();

@@ -88,6 +88,37 @@ ValueHandle player_isFlying(const Arguments& args)
 	return Boolean::New(player->isFlying());
 }
 
+ValueHandle player_setYaw(const Arguments& args)
+{
+	if(args.Length() > 0 && args[0]->IsNumber())
+	{
+		float y = args[0]->NumberValue();
+		
+		Handle<Object> self = args.This();
+		Handle<External> rptr = Handle<External>::Cast(self->GetInternalField(0));
+		Player* player = static_cast<Player*>(rptr->Value());
+		
+		player->getCamera()->setYaw(y);
+	}
+	
+	return Undefined();
+}
+
+ValueHandle player_setPitch(const Arguments& args)
+{
+	if(args.Length() > 0 && args[0]->IsNumber())
+	{
+		float y = args[0]->NumberValue();
+		
+		Handle<Object> self = args.This();
+		Handle<External> rptr = Handle<External>::Cast(self->GetInternalField(0));
+		Player* player = static_cast<Player*>(rptr->Value());
+		
+		player->getCamera()->setPitch(y);
+	}
+	
+	return Undefined();
+}
 
 typedef std::map<Player*, PersistentObject> WrappedPlayers;
 WrappedPlayers gWrappedPlayers;
@@ -115,6 +146,9 @@ ValueHandle wrapPlayer( Player* player )
 		playerTemplate->Set( String::New("move"), FunctionTemplate::New(player_move) );
 		playerTemplate->Set( String::New("enableFlying"), FunctionTemplate::New(player_enableFlying) );
 		playerTemplate->Set( String::New("isFlying"), FunctionTemplate::New(player_isFlying) );
+		
+		playerTemplate->Set( String::New("setYaw"), FunctionTemplate::New(player_setYaw) );
+		playerTemplate->Set( String::New("setPitch"), FunctionTemplate::New(player_setPitch) );
 	}
 	
 	PersistentObject pl = PersistentObject::New(playerTemplate->NewInstance());

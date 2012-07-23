@@ -116,7 +116,32 @@ void ScriptGame::_inputMovement( const Vector3& v )
 
 void ScriptGame::_mouseMoved( const float x, const float y )
 {
-	if( getLocalPlayer() ) {
+	HandleScope hs;
+	PersistentContext ctx = MagnetiteCore::Singleton->getScriptManager()->getContext();
+	Context::Scope scope( ctx );
+	
+	bool eval = false;
+	if( !mScriptObject.IsEmpty() && mScriptObject->Has( String::New("mouseMoved") ) )
+	{
+		Local<Value> onLoadVal = mScriptObject->Get( String::New("mouseMoved") );
+		if( onLoadVal->IsFunction() )
+		{
+			TryCatch ct;
+			Local<Function> onLoad = Local<Function>::Cast( onLoadVal );
+			Handle<Value> args[2];
+			args[0] = Number::New(x);
+			args[1] = Number::New(y);
+			auto r = onLoad->Call( mScriptObject, 2, args );
+			if( r.IsEmpty() ) {
+				Util::log(strize(ct.StackTrace()));
+			}
+			else 
+			{
+				eval = r->BooleanValue();
+			}
+		}
+	}
+	if(!eval && getLocalPlayer() ) {
 		mPlayer->getCamera()->pitch( y );
 		mPlayer->getCamera()->yaw( x );
 	}

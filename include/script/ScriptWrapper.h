@@ -39,7 +39,7 @@ public:
 	 */
 	PersistentObject newGame( const std::string& name );
 	
-	void runFile( std::string filename );
+	ValueHandle runFile( std::string filename );
 	
 	PersistentContext getContext();
 
