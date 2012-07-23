@@ -1,3 +1,5 @@
+var Events = require('./scripts/events.js');
+
 Game.name = 'Fortress';
 
 Number.prototype.sign = function() {
@@ -20,28 +22,39 @@ Game.onSpawn = function( p )
 	this.player.setPosition( { x: 10, y: 130, z: 10 } );
 	this.player.moveTarget = { x: 0, y: 0, z: 0 };
 	this.player.moveSpeed = { x: 0, y: 0, z: 0 };
+	this.player.turnAngle = 0;
+	this.player.turnSpeed = 0;
+	this.player.lookAngle = -45;
 	this.player.movementSpeed = 1;
+	
+	this.player.enableFlying(true);
 }
 
 Game.keyDown = function(k)
 {
 	switch( k )
 	{
+		case Events.Keys.Q:
+			this.player.turnSpeed += 40;
+			break;
+		case Events.Keys.E:
+			this.player.turnSpeed -= 40;
+			break;
 		case 22:
 			// W
-			this.player.moveTarget.z = -10;
+			this.player.moveTarget.x = -10;
 			break;
 		case 0:
 			// A
-			this.player.moveTarget.x = 10;
+			this.player.moveTarget.z = -10;
 			break;
 		case 18:
 			// S
-			this.player.moveTarget.z = 10;
+			this.player.moveTarget.x = 10;
 			break;
 		case 3:
 			// D
-			this.player.moveTarget.x = -10;
+			this.player.moveTarget.z = 10;
 			break;
 		case 16:
 			this.player.moveTarget.y = 10;
@@ -56,20 +69,16 @@ Game.keyUp = function(k)
 {
 	switch( k )
 	{
-		case 22:
-			// W
-			this.player.moveTarget.z = 0;
+		case Events.Keys.Q:
+		case Events.Keys.E:
+			this.player.turnSpeed = 0;
 			break;
-		case 0:
-			// A
-			this.player.moveTarget.x = -0;
+		case Events.Keys.W:
+		case Events.Keys.S:
+			this.player.moveTarget.x = 0;
 			break;
-		case 18:
-			// S
-			this.player.moveTarget.z = -0;
-			break;
-		case 3:
-			// D
+		case Events.Keys.D:
+		case Events.Keys.A:
 			this.player.moveTarget.x = 0;
 			break;
 		case 16:
@@ -87,6 +96,11 @@ Game.onPrimary = function( player )
 Game.onAlt = function( player )
 {
 	this.toolIndex++;
+}
+
+Game.mouseMoved = function( x, y )
+{
+	return true;
 }
 
 Game.think = function( dt )
@@ -110,6 +124,9 @@ Game.think = function( dt )
 	{
 		this.player.move( this.player.moveSpeed.z * this.player.movementSpeed * dt, this.player.moveSpeed.y * this.player.movementSpeed * dt, this.player.moveSpeed.x * this.player.movementSpeed * dt );
 	}
+	
+	this.player.setYaw( this.player.turnAngle += (this.player.turnSpeed * dt) );
+	this.player.setPitch( this.player.lookAngle );
 }
 
 Game.draw = function()
