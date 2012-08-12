@@ -98,7 +98,7 @@ Game.keyUp = function(k)
 			break;
 		case Events.Keys.D:
 		case Events.Keys.A:
-			this.player.moveTarget.x = 0;
+			this.player.moveTarget.z = 0;
 			break;
 		case 16:
 		case 4:
@@ -124,20 +124,13 @@ Game.mouseMoved = function( x, y )
 
 Game.think = function( dt )
 {
-	var accel = 5.0;
-	var decel = 10.0;
+	var accel = 2.5;
 	for( var d in this.player.moveTarget )
 	{
-		if( Math.abs(this.player.moveTarget[d]) - Math.abs(this.player.moveSpeed[d]) > 0.0001 )
-		{
-			var s = this.player.moveTarget[d].sign();
-			this.player.moveSpeed[d] = s * Math.min( Math.abs(this.player.moveTarget[d]), Math.abs(this.player.moveSpeed[d]) + accel * dt);
-		}
-		else if( Math.abs(this.player.moveSpeed[d]) - Math.abs(this.player.moveTarget[d]) > 0.0001 )
-		{
-			var s = this.player.moveSpeed[d].sign();
-			this.player.moveSpeed[d] = s * Math.max( Math.abs(this.player.moveTarget[d]), Math.abs(this.player.moveSpeed[d]) - decel * dt);
-		}
+		var dimTarget = this.player.moveTarget[d];
+		var dimReal = this.player.moveSpeed[d];
+		var dif = dimTarget - dimReal;
+		this.player.moveSpeed[d] += (dif*accel) * dt;
 	}
 	if( this.player.moveSpeed.x != 0 || this.player.moveSpeed.y != 0 || this.player.moveSpeed.z != 0 )
 	{
