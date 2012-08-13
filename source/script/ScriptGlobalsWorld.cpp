@@ -4,6 +4,7 @@
 #include "World.h"
 #include "BaseBlock.h"
 #include "BlockFactory.h"
+#include <Character.h>
 
 using namespace v8;
 
@@ -129,6 +130,10 @@ ValueHandle world_fireRay(const Arguments& args)
 	return Undefined();
 }
 
+ObjectHandle world_createCharacter( const Arguments& args )
+{
+	Character chr = new Character();
+}
 
 Handle<ObjectTemplate> initWorld( )
 {
