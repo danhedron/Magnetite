@@ -43,6 +43,15 @@ typedef std::vector<WorldTree*> TreeList;
 
 //typedef *BaseBlock[] BlockList;
 
+namespace Magnetite {
+	class Component;
+	typedef std::vector<Component*> ComponentList;
+	
+	typedef size_t EntityID;
+	
+	typedef std::string String;
+};
+
 class Geometry;
 typedef Geometry* GeometryPtr;
 

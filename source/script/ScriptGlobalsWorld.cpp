@@ -130,11 +130,6 @@ ValueHandle world_fireRay(const Arguments& args)
 	return Undefined();
 }
 
-ObjectHandle world_createCharacter( const Arguments& args )
-{
-	Character chr = new Character();
-}
-
 Handle<ObjectTemplate> initWorld( )
 {
 	HandleScope hs;

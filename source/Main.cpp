@@ -39,6 +39,7 @@ int main( int argc, char** argv ) {
 			game = std::string(argv[2]);
 		}
 	}
+	
 	MagnetiteCore core;
 
 	core.init(&argc, argv);

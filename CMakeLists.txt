@@ -51,6 +51,12 @@ set(MAGNETITE_SOURCES
 	source/PhysicsState.cpp
 	source/ChunkPhysicsState.cpp
 	source/WorldObject.cpp
+	
+	source/BaseEntity.cpp
+	source/Component.cpp
+	source/Components/InfoComponent.cpp
+	source/Components/InterpolatorComponent.cpp
+	
 	source/PhysicsWorldObject.cpp
 	source/WorldItem.cpp
 	source/BaseResource.cpp
@@ -111,6 +117,12 @@ set(MAGNETITE_HEADERS
 	include/PhysicsState.h
 	include/ChunkPhysicsState.h
 	include/WorldObject.h
+	
+	include/BaseEntity.h
+	include/Component.h
+	include/Components/InfoComponent.h
+	include/Components/InterpolatorComponent.h
+	
 	include/PhysicsWorldObject.h
 	include/WorldItem.h
 	include/BaseResource.h

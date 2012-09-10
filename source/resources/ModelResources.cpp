@@ -2,9 +2,9 @@
 #include <util.h>
 #include "Renderer.h"
 
-#include <assimp/assimp.hpp>
-#include <assimp/aiScene.h>
-#include <assimp/aiPostProcess.h>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <assimp/Importer.hpp>
 
 #include "Geometry.h"
 
