@@ -13,6 +13,9 @@
 #include "ScriptGame.h"
 #include "BulletDebug.h"
 #include "ResourceManager.h"
+#include <BaseEntity.h>
+#include <Components/InfoComponent.h>
+#include <Components/PhysicsComponent.h>
 #include <ctime>
 #include <thread>
 

@@ -56,6 +56,7 @@ set(MAGNETITE_SOURCES
 	source/Component.cpp
 	source/Components/InfoComponent.cpp
 	source/Components/InterpolatorComponent.cpp
+	source/Components/PhysicsComponent.cpp
 	
 	source/PhysicsWorldObject.cpp
 	source/WorldItem.cpp
@@ -122,6 +123,7 @@ set(MAGNETITE_HEADERS
 	include/Component.h
 	include/Components/InfoComponent.h
 	include/Components/InterpolatorComponent.h
+	include/Components/PhysicsComponent.h
 	
 	include/PhysicsWorldObject.h
 	include/WorldItem.h

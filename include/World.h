@@ -141,6 +141,11 @@ protected:
 	MovingBlockList mMovingBlocks;
 	
 	/**
+	 * List of entities in the world.
+	 */
+	Magnetite::EntityList mEntities;
+	
+	/**
 	 * The Triangulator to use for creating the world geometry
 	 */
 	BaseTriangulator* mTriangulator;
@@ -238,6 +243,16 @@ public:
 	 * Creates a new empty world.
 	 */
 	void createWorld();
+	
+	/**
+	 * Creates a new entity of the given type and adds it to the entity pool.
+	 */
+	template<class T> T* createEntity()
+	{
+		T* e = new T(this);
+		mEntities.push_back(e);
+		return e;
+	};
 	
 	bool printDbg;
 

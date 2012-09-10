@@ -47,6 +47,9 @@ namespace Magnetite {
 	class Component;
 	typedef std::vector<Component*> ComponentList;
 	
+	class BaseEntity;
+	typedef std::vector<BaseEntity*> EntityList;
+	
 	typedef size_t EntityID;
 	
 	typedef std::string String;

@@ -3,6 +3,7 @@
 
 #include "prerequisites.h"
 #include "Components/ComponentEvents.h"
+#include "World.h"
 
 namespace Magnetite {
 	
@@ -23,6 +24,11 @@ namespace Magnetite {
 		 * Name of the entity
 		 */
 		String mName;
+		
+		/**
+		 * Pointer to the world
+		 */
+		World* mWorld;
 		 
 		/**
 		 * A list of components attached to this entity
@@ -41,7 +47,7 @@ namespace Magnetite {
 
 	public:
 		
-		BaseEntity();
+		BaseEntity( World* world );
 		
 		virtual ~BaseEntity();
 		

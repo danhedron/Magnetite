@@ -10,6 +10,7 @@
 #include "MagnetiteCore.h"
 #include <LightingManager.h>
 #include <BlockTriangulator.h>
+#include <BaseEntity.h>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
@@ -260,6 +261,12 @@ void World::update( float dt )
 {
 	if( mSky != NULL )
 		mSky->update( dt );
+	
+	// Tick all of the entities.
+	for( auto it = mEntities.begin(); it != mEntities.end(); it++ )
+	{
+		(*it)->think(dt);
+	}
 
 	// Proccess the chunk loading queue
 	if( mChunksToLoad.size() > 0 ) {

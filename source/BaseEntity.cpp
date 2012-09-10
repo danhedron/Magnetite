@@ -3,7 +3,8 @@
 
 namespace Magnetite {
 	
-	BaseEntity::BaseEntity()
+	BaseEntity::BaseEntity( World* world )
+	: mWorld(world)
 	{
 		
 	}
