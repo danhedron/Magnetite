@@ -33,17 +33,19 @@ public:
 	/**
 	 * Loads the resouce into memory
 	 */
-	void load();
+	virtual void load();
 	
 	/**
 	 * Frees the memory associated with this resource.
 	 */
-	void unload();
+	virtual void unload();
+	
+	virtual bool isLoaded() const;
 	
 	/**
-	 * Draws the geometries with the current settings
+	 * Returns the geometry.
 	 */
-	void draw();
+	MeshGeometry* getGeometry() const;
 };
 
 /**

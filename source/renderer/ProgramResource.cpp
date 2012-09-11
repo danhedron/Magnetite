@@ -145,6 +145,11 @@ void ProgramResource::load()
 	file.close();
 }
 
+bool ProgramResource::isLoaded() const
+{
+	return mName != 0;
+}
+
 GLuint ProgramResource::getName()
 {
 	return mName;

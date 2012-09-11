@@ -15,9 +15,11 @@ public:
 	Texture(const std::string& file);
 	~Texture();
 	
-	void load();
+	virtual void load();
 	
-	void unload();
+	virtual void unload();
+	
+	virtual bool isLoaded() const;
 	
 	GLuint getName();
 	

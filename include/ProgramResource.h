@@ -49,7 +49,11 @@ public:
 	/**
 	 * Loads the shader from the source file
 	 */
-	void load();
+	virtual void load();
+	
+	virtual void unload() {};
+	
+	virtual bool isLoaded() const;
 
 	/**
 	 * Sets the Vertex shader on this program

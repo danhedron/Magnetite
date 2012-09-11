@@ -42,6 +42,11 @@ void Texture::unload()
 	
 }
 
+bool Texture::isLoaded() const
+{
+	return mName != 0;
+}
+
 GLuint Texture::getName()
 {
 	return mName;

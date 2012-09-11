@@ -23,12 +23,19 @@ protected:
 
 public:
 	ShaderResource( std::string file );
-	~ShaderResource();
+	virtual ~ShaderResource();
 
 	/**
 	 * Loads the shader from the source file
 	 */
-	void load();	
+	virtual void load();
+	
+	/**
+	 * Does nothing.
+	 */
+	virtual void unload() {};
+	
+	virtual bool isLoaded() const;
 	
 	/**
 	 * Compiles the shader on the GPU

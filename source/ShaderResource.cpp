@@ -75,6 +75,11 @@ void ShaderResource::load()
 	file.close();
 }
 
+bool ShaderResource::isLoaded() const 
+{
+	return mName != 0;
+}
+
 GLuint ShaderResource::getName()
 {
 	return mName;

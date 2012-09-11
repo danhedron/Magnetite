@@ -10,9 +10,14 @@ public:
 	BaseResource( const std::string& file );
 	~BaseResource();
 
-	void load();
+	virtual void load() = 0;
 
-	void unload();
+	virtual void unload() = 0;
+	
+	/**
+	 * @return true if the resource is loaded
+	 */
+	virtual bool isLoaded() const = 0;
 };
 
 #endif
