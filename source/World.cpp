@@ -336,6 +336,11 @@ Sky* World::getSky()
 	return mSky;
 }
 
+Magnetite::EntityList World::getEntities()
+{
+	return mEntities;
+}
+
 raycast_r World::raycastWorld(const raycast_r &inray, bool solidOnly)
 {
 	raycast_r ray = inray;
@@ -498,7 +503,7 @@ raycast_r World::raycastCube(const raycast_r &inray, Vector3& min, Vector3& max)
 		}
 	}
 
-	ray.hitNormal = ray.hitNormal.normalize();
+	ray.hitNormal = glm::normalize( ray.hitNormal );
 
 	ray.hit = true;
 	ray.i0 = Tnear;

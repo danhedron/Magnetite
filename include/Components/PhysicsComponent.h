@@ -15,6 +15,7 @@ namespace Magnetite
 		btConvexShape*		mPhysicsShape;
 		btRigidBody*		mPhysicsBody;
 		btTransform			mWorld;
+		float				mMass;
 	public:
 		
 		PhysicsComponent(BaseEntity* ent);
@@ -26,6 +27,10 @@ namespace Magnetite
 		virtual void event( const BaseEvent& event );
 		
 		virtual void think( float dt );
+		
+		void setTransform( const btTransform& t );
+		
+		void setMass( float m );
 		
 		void getWorldTransform( btTransform& world ) const;
 

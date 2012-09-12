@@ -44,11 +44,11 @@ namespace Magnetite {
 		}
 	}
 	
-	void BaseEntity::draw( float dt )
+	void BaseEntity::draw( const Component::DrawInfo& info, float dt )
 	{
 		for( auto it = mComponents.begin(); it != mComponents.end(); it++ )
 		{
-			(*it)->draw(dt);
+			(*it)->draw( info, dt);
 		}
 	}
 };

@@ -57,13 +57,14 @@ set(MAGNETITE_SOURCES
 	source/Components/InfoComponent.cpp
 	source/Components/InterpolatorComponent.cpp
 	source/Components/PhysicsComponent.cpp
+	source/Components/RenderableComponent.cpp
 	
 	source/PhysicsWorldObject.cpp
 	source/WorldItem.cpp
 	source/BaseResource.cpp
 	source/ShaderResource.cpp
 	source/ResourceManager.cpp
-	source/resources/ModelResources.cpp
+	source/resources/ModelResource.cpp
 	source/resources/Texture.cpp
 	source/Sky.cpp
 	source/Frustum.cpp
@@ -124,6 +125,7 @@ set(MAGNETITE_HEADERS
 	include/Components/InfoComponent.h
 	include/Components/InterpolatorComponent.h
 	include/Components/PhysicsComponent.h
+	include/Components/RenderableComponent.h
 	
 	include/PhysicsWorldObject.h
 	include/WorldItem.h
@@ -234,6 +236,12 @@ if(ASSIMP_FOUND)
 	target_link_libraries(Magnetite ${ASSIMP_LIBRARIES})
 	include_directories(${ASSIMP_INCLUDE_DIR})
 endif(ASSIMP_FOUND)
+
+# Find GLM
+find_package(GLM REQUIRED)
+if(GLM_FOUND)
+	include_directories(${GLM_INCLUDE_DIR})
+endif(GLM_FOUND)
 
 
 # Bin = ${OPEN_BINARY_DIR}

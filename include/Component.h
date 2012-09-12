@@ -2,6 +2,7 @@
 #define _COMPONENT_H_
 
 #include "Components/ComponentEvents.h"
+#include "Matrix.h"
 
 namespace Magnetite 
 {
@@ -26,6 +27,11 @@ class BaseEntity;
 		
 	public:
 		
+		struct DrawInfo {
+			Matrix4 view;
+			Matrix4 projection;
+		};
+		
 		Component( BaseEntity* ent );
 		
 		/**
@@ -44,7 +50,7 @@ class BaseEntity;
 		 * Callback for drawing.
 		 * @param dt Time since the component was last drawn.
 		 */
-		virtual void draw( float dt );
+		virtual void draw( const DrawInfo& info, float dt );
 		
 	};
 	

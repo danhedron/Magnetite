@@ -254,6 +254,8 @@ public:
 		return e;
 	};
 	
+	Magnetite::EntityList getEntities();
+	
 	bool printDbg;
 
 	/**

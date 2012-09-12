@@ -4,6 +4,7 @@
 #include "prerequisites.h"
 #include "Components/ComponentEvents.h"
 #include "World.h"
+#include "Component.h"
 
 namespace Magnetite {
 	
@@ -75,7 +76,7 @@ namespace Magnetite {
 		/**
 		 * Draws all of the components
 		 */
-		void draw( float dt );
+		void draw( const Component::DrawInfo& info, float dt );
 	};
 	
 };

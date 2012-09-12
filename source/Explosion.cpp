@@ -4,6 +4,7 @@
 #include "MagnetiteCore.h"
 #include "Vector.h"
 #include <math.h>
+#include <glm/gtc/matrix_transform.hpp>
 #include "Renderer.h"
 
 Explosion::Explosion( explosion_t info )
@@ -28,12 +29,12 @@ void Explosion::explode()
 	Vector3 dir;
 	
 	for( float heading = 0; heading <= 2*M_PI; heading += M_PI/24.f ) {
-		Matrix4 headingMat = Matrix4::rotateY(heading);
-		Vector3 hdg = headingMat * Vector3(1,0,0);
+		Matrix4 headingMat = glm::rotate( glm::mat4(), heading, glm::vec3( 0.f, 1.f, 0.f ) );
+		Vector3 hdg = glm::mat3(headingMat) * Vector3(1,0,0);
 		for( float pitch = -M_PI/2.f; pitch <= M_PI; pitch += M_PI/12.f ) {
 			l = 0.f;
 			testPos = explCenter;
-			dir = Matrix4::rotateX(pitch) * hdg;
+			dir = glm::mat3( glm::rotate( glm::mat4(), pitch, glm::vec3( 1.f, 0.f, 0.f ) ) ) * hdg;
 			while( l < length )
 			{
 				l += step;

@@ -1,16 +1,17 @@
 #include "Frustum.h"
 #include "Camera.h"
+#include <glm/gtc/matrix_transform.hpp>
 
 float Plane::distance( const Vector3& p )
 {
-	return (normal.dotProduct( p ) + d);
+	return ( glm::dot( normal, p )  + d);
 }
 
 int Plane::getSide( const Vector3& center, const Vector3& halfSize )
 {
 	float dist = distance(center);
 
-	float maxDist = abs(normal.dotProduct(halfSize));
+	float maxDist = abs( glm::dot( normal, halfSize ) );
 	if( dist < -maxDist ) 
 		return NEGATIVE;
 	
@@ -41,7 +42,7 @@ Frustum::~Frustum()
 
 void Frustum::setFov(float fov)
 {
-	mFov = (3.141f/180.f) * fov;
+	mFov = fov;
 }
 
 void Frustum::setAspectRatio(float ratio)
@@ -72,80 +73,16 @@ Matrix4 Frustum::getPerspective()
 
 void Frustum::updatePerspective()
 {
-	float tany = tan( mFov * 0.5f);
-	float tanx = tany * mAspect;
-
-	float half_w = tanx * mNear;
-	float half_h = tany * mNear;
-
-	mLeft = -half_w;
-	mRight = half_w;
-	mBottom = -half_h;
-	mTop = half_h;
-
-	float invW = 1 / (mRight-mLeft);
-	float invH = 1 / (mTop-mBottom);
-	float invD = 1 / (mFar-mNear);
-
-	float A = 2 * mNear * invW;
-	float B = 2 * mNear * invH;
-	float C = (mRight+mLeft) * invW;
-	float D = (mTop+mBottom) * invH;
-
-	float q, qn;
-	
-	q = - (mFar+mNear) * invD;
-	qn = -2 * (mFar * mNear) * invD;
-
-	mPerspective.zero();
-	mPerspective.m[0][0] = A;
-	mPerspective.m[2][0] = C;
-	mPerspective.m[1][1] = B;
-	mPerspective.m[2][1] = D;
-	mPerspective.m[2][2] = q;
-	mPerspective.m[3][2] = qn;
-	mPerspective.m[2][3] = -1.f;
+	mPerspective = glm::perspective( mFov, getAspectRatio(), mNear, mFar );
 }
 
 void Frustum::updatePlanes()
 {
 	Matrix4 view =  mCamera->getMatrix();
 	Matrix4 clip = getPerspective() * view;
+	
+	// todo: this.
 
-	mPlanes[LEFT].normal.x = clip.m[0][3] + clip.m[0][0];
-	mPlanes[LEFT].normal.y = clip.m[1][3] + clip.m[1][0];
-	mPlanes[LEFT].normal.z = clip.m[2][3] + clip.m[2][0];
-	mPlanes[LEFT].d = clip.m[3][3] + clip.m[3][0];
-
-	mPlanes[RIGHT].normal.x = clip.m[0][3] - clip.m[0][0];
-	mPlanes[RIGHT].normal.y = clip.m[1][3] - clip.m[1][0];
-	mPlanes[RIGHT].normal.z = clip.m[2][3] - clip.m[2][0];
-	mPlanes[RIGHT].d = clip.m[3][3] - clip.m[3][0];
-
-	mPlanes[TOP].normal.x = clip.m[0][3] - clip.m[0][1];
-	mPlanes[TOP].normal.y = clip.m[1][3] - clip.m[1][1];
-	mPlanes[TOP].normal.z = clip.m[2][3] - clip.m[2][1];
-	mPlanes[TOP].d = clip.m[3][3] - clip.m[3][1];
-
-	mPlanes[BOTTOM].normal.x = clip.m[0][3] + clip.m[0][1];
-	mPlanes[BOTTOM].normal.y = clip.m[1][3] + clip.m[1][1];
-	mPlanes[BOTTOM].normal.z = clip.m[2][3] + clip.m[2][1];
-	mPlanes[BOTTOM].d = clip.m[3][3] + clip.m[3][1];
-
-	mPlanes[NEARP].normal.x = clip.m[0][3] + clip.m[0][2];
-	mPlanes[NEARP].normal.y = clip.m[1][3] + clip.m[1][2];
-	mPlanes[NEARP].normal.z = clip.m[2][3] + clip.m[2][2];
-	mPlanes[NEARP].d = clip.m[3][3] + clip.m[3][2];
-
-	mPlanes[FARP].normal.x = clip.m[0][3] - clip.m[0][2];
-	mPlanes[FARP].normal.y = clip.m[1][3] - clip.m[1][2];
-	mPlanes[FARP].normal.z = clip.m[2][3] - clip.m[2][2];
-	mPlanes[FARP].d = clip.m[3][3] - clip.m[3][2];
-
-	for(int p = 0; p < 6; p++)
-	{
-		mPlanes[p].normal = mPlanes[p].normal.normalize();
-	}
 }
 
 int Frustum::intersectsAABB(const Vector3 &mins, const Vector3 &maxs)
@@ -154,9 +91,9 @@ int Frustum::intersectsAABB(const Vector3 &mins, const Vector3 &maxs)
 	Vector3 halfSize = Vector3(maxs) - Vector3(mins);
 	Vector3 center = Vector3(mins) + halfSize;
 
-	if(  Vector3(maxs) < Vector3(mins) ) {
+	/*if( Vector3(maxs) < Vector3(mins) ) {
 		Util::log("Error: Negative volume in aabb");
-	}
+	}*/
 
 	int ret = Frustum::INSIDE;
 	

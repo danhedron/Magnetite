@@ -70,6 +70,16 @@ public:
 	virtual void bindToBuffer() = 0;
 	
 	/**
+	 * Bind the buffer for rendering.
+	 */
+	virtual void bind();
+	
+	/**
+	 * Unbind the buffer after rendering
+	 */
+	virtual void unbind();
+	
+	/**
 	 * Set the given vertex attribute with data from the vertices
 	 */
 	virtual void bindVertexAttributes( ProgramResource* program ) = 0;

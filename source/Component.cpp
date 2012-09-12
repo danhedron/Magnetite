@@ -18,7 +18,7 @@ namespace Magnetite {
 		
 	}
 	
-	void Component::draw( float dt )
+	void Component::draw( const Component::DrawInfo& info, float dt )
 	{
 		
 	}

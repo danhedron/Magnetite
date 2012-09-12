@@ -1,5 +1,10 @@
 #include "Camera.h"
 #include "Matrix.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/matrix_operation.hpp>
+#include <glm/gtx/transform.hpp>
+
 
 Camera::Camera(void)
 : mYaw( 0 ),
@@ -14,24 +19,25 @@ Camera::~Camera(void)
 
 }
 
-Matrix4 Camera::getMatrix()
+glm::mat4 Camera::getMatrix()
 {
-	Matrix4 mat;
-	Matrix4 yaw = Matrix4::rotateY( 3.141f-(getYaw()*3.141f)/180 );
-	Matrix4 pitch = Matrix4::rotateX( (getPitch()*3.141f)/180 );
-	Matrix4 rot = yaw;//(pitch * yaw);
+	glm::mat4 mat;
+	mat = glm::translate( mat, mPosition );
+	
+	mat = glm::rotate(mat, getYaw(), Vector3(0.f, 1.f, 0.f));
+	mat = glm::rotate(mat, getPitch(), Vector3(1.f, 0.f, 0.f));
 
-	rot.translate( mPosition );
-	return rot;
+	return mat;
 }
 
-Matrix4 Camera::getOrientationMatrix()
+glm::mat3 Camera::getOrientationMatrix()
 {
-	Matrix4 yaw = Matrix4::rotateY( 3.141f-(getYaw()*3.141f)/180 );
-	Matrix4 pitch = Matrix4::rotateX( (getPitch()*3.141f)/180 );
-	Matrix4 rotated = (pitch * yaw);
+	glm::mat4 mat;
+	
+	mat = glm::rotate(mat, getYaw(), Vector3(0.f, 1.f, 0.f));
+	mat = glm::rotate(mat, getPitch(), Vector3(1.f, 0.f, 0.f));
 
-	return rotated;
+	return glm::mat3( mat );
 }
 
 Frustum& Camera::getFrustum()
@@ -41,26 +47,16 @@ Frustum& Camera::getFrustum()
 
 Vector3 Camera::getForward() 
 {
-	Matrix4 yaw = Matrix4::rotateY( 3.141f-(getYaw()*3.141f)/180 );
-	Matrix4 pitch = Matrix4::rotateX( (getPitch()*3.141f)/180 );
+	glm::mat3 r = getOrientationMatrix();
 	
-	Vector3 vec = Vector3(0.f, 0.f, 1.f);
-	vec = pitch * vec;
-	vec = yaw * vec;
-	return vec.normalize();
+	return glm::normalize( r * glm::vec3( 0.f, 0.f, 1.f ) );
 }
 
 void Camera::applyMatrix( bool rot, bool pos ) 
 {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	if( rot ) {
-		glRotatef( -mPitch, 1, 0, 0);
-		glRotatef( -mYaw, 0, 1, 0);
-	}
-	if( pos ) {
-		glTranslatef( -mPosition.x, -mPosition.y, -mPosition.z );
-	}
+	glMultMatrixf( glm::value_ptr( glm::inverse(getMatrix()) ) );
 }
 
 void Camera::applyModelViewMatrix( bool rot, bool pos ) 
@@ -120,19 +116,16 @@ float Camera::getPitch()
 
 float Camera::getYaw() 
 {
-	return mYaw;	
+	return mYaw;
 }
 
 void Camera::translate(const Vector3& vec )
 {
 	Vector3 pv = getPosition();
-	Vector3 f;
 	
-	//matrix = Matrix4();
-
-	Matrix4 matX = Matrix4::rotateX( (mPitch*3.141f)/180 );
-	Matrix4 matY = Matrix4::rotateY( 3.141f/2 - (mYaw*3.141f)/180 );
-	f = matY * vec;
-
+	auto r = getOrientationMatrix();
+	
+	glm::vec3 f = r * vec;
+	
 	setPosition( Vector3( f.x + pv.x, f.y + pv.y, f.z + pv.z ) );
 }

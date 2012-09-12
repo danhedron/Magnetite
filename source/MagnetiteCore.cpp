@@ -16,6 +16,9 @@
 #include <BaseEntity.h>
 #include <Components/InfoComponent.h>
 #include <Components/PhysicsComponent.h>
+#include <Components/RenderableComponent.h>
+#include <ModelResource.h>
+#include <ProgramResource.h>
 #include <ctime>
 #include <thread>
 
@@ -94,6 +97,7 @@ void MagnetiteCore::init(int *argc, char **argv)
 	mResourceManager->addLocation("./resources/shaders/");
 	mResourceManager->addLocation("./resources/sprites/");
 	mResourceManager->addLocation("./resources/ui/");
+	mResourceManager->addLocation("./resources/models/");
 	sf::ContextSettings wnds;
 	wnds.depthBits = 24;
 	//wnds.AntialiasingLevel = 2;
@@ -156,6 +160,18 @@ void MagnetiteCore::startGame( const std::string& type )
 	mGame->_startGameSingle();
 	
 	newWorld("test");
+	
+	// Create a new entity
+	auto ent = mWorld->createEntity<Magnetite::BaseEntity>();
+	auto phys = ent->addComponent<Magnetite::PhysicsComponent>();
+	auto vis = ent->addComponent<Magnetite::RenderableComponent>();
+	
+	vis->setModel( mResourceManager->getResource<ModelResource>( "drone.obj" ) );
+	vis->setProgram( mResourceManager->getResource<ProgramResource>( "model.prog" ));
+
+	phys->setTransform(btTransform( btQuaternion(), btVector3(5.f, 115.f, 5.f) ));
+	phys->setMass(0.f);
+	phys->create();
 	
 	mGame->_loadGame();
 	

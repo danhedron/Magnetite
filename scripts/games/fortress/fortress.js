@@ -75,10 +75,10 @@ Game.keyDown = function(k)
 			// D
 			this.player.moveTarget.z = 10;
 			break;
-		case 16:
+		case Events.Keys.X:
 			this.player.moveTarget.y = 10;
 			break;
-		case 4:
+		case Events.Keys.Z:
 			this.player.moveTarget.y = -10;
 			break;
 	}
@@ -100,8 +100,8 @@ Game.keyUp = function(k)
 		case Events.Keys.A:
 			this.player.moveTarget.z = 0;
 			break;
-		case 16:
-		case 4:
+		case Events.Keys.X:
+		case Events.Keys.Z:
 			this.player.moveTarget.y = 0;
 			break;
 	}

@@ -63,7 +63,7 @@ public:
 	Renderer(void);
 	~Renderer(void);
 
-	/**
+	/**b
 	 * Rendermode enum
 	 */
 	enum {

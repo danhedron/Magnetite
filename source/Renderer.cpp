@@ -11,8 +11,11 @@
 #include "ShaderResource.h"
 #include "Camera.h"
 #include "util.h"
+#include <glm/gtc/type_ptr.hpp>
 
 #include "Geometry.h"
+#include <Component.h>
+#include <BaseEntity.h>
 
 MeshGeometry* crosshairGeom = NULL;
 
@@ -114,7 +117,7 @@ void Renderer::resizeViewport(size_t x, size_t y, size_t w, size_t h)
 	glLoadIdentity();
 	if(mCamera) {
 		mCamera->getFrustum().setAspectRatio(aspect);
-		glMultMatrixf(mCamera->getFrustum().getPerspective().matrix);
+		glMultMatrixf( glm::value_ptr( mCamera->getFrustum().getPerspective()  ) );
 	}
 	else {
 		gluPerspective(90.f, aspect, 0.1f, 500.f);
@@ -231,10 +234,13 @@ void Renderer::render(double dt, World* world)
 	
 	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
-	mCamera->applyMatrix( true, false );
+	glLoadIdentity();
+	glMultMatrixf( glm::value_ptr( glm::mat4( glm::inverse(mCamera->getOrientationMatrix() ) ) ) );
 	if( world->getSky() != NULL )
 	{
+		glDisable( GL_DEPTH_TEST );
 		world->getSky()->renderSky();
+		glEnable( GL_DEPTH_TEST );
 	}
 	
 	rendered = 0;
@@ -302,8 +308,18 @@ void Renderer::render(double dt, World* world)
 		mWorldProgram->deactivate();
 	}
 	
-	glLoadIdentity();
-	mCamera->applyMatrix();
+	//glLoadIdentity();
+	//mCamera->applyMatrix();
+	
+	auto entities = world->getEntities();
+	Magnetite::Component::DrawInfo i;
+	i.projection = mCamera->getFrustum().getPerspective();
+	i.view = glm::inverse(mCamera->getMatrix());
+	for( auto it = entities.begin(); it != entities.end(); ++it )
+	{
+		(*it)->draw(i, dt);
+	}
+	
 
 	switch( mDebugMode ) {
 		case DEBUG_STATS:
@@ -330,8 +346,9 @@ void Renderer::_renderChunk( Chunk* chunk )
 	rendered++;
 	// Sort out view Matrix.
 	glLoadIdentity();
-	mCamera->applyMatrix();
-	//glRotatef(totalTime * 50, 1.f, 0.f, 0.f);
+	auto view = glm::inverse( mCamera->getMatrix() );
+	glMultMatrixf( glm::value_ptr(view) );
+	
 	float x = chunk->getX() * CHUNK_WIDTH;
 	float y = chunk->getY() * CHUNK_HEIGHT;
 	float z = chunk->getZ() * CHUNK_WIDTH;

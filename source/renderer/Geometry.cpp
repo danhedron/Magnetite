@@ -29,6 +29,32 @@ void Geometry::releaseBuffer()
 	}
 }
 
+void Geometry::bind()
+{
+	if( this->vertexBO != 0 )
+	{
+		glBindBuffer( GL_ARRAY_BUFFER, this->vertexBO );
+	}
+	
+	if( this->indexBO != 0 )
+	{
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, this->indexBO );
+	}
+}
+
+void Geometry::unbind()
+{
+	if( this->vertexBO != 0 )
+	{
+		glBindBuffer( GL_ARRAY_BUFFER, 0 );
+	}
+	
+	if( this->indexBO != 0 )
+	{
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+	}
+}
+
 TerrainVertex Geometry::terrainVertex(float x, float y, float z, float u, float v, float l)
 {
 	TerrainVertex vert;
@@ -78,7 +104,7 @@ void MeshGeometry::bindToBuffer()
 
 void MeshGeometry::bindVertexAttributes( ProgramResource* program )
 {
-	program->setVertexAttribute("in_vertex", 3, GL_FLOAT, GL_FALSE, sizeof(GeometryVertex), BUFFER_OFFSET(0) );
+	program->setVertexAttribute("vertex_position", 3, GL_FLOAT, GL_FALSE, sizeof(GeometryVertex), BUFFER_OFFSET(0) );
 	
 }
 

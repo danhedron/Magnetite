@@ -9,9 +9,10 @@ namespace Magnetite
 	PhysicsComponent::PhysicsComponent( BaseEntity* ent )
 	: Component(ent),
 	mPhysicsShape(NULL),
-	mPhysicsBody(NULL)
+	mPhysicsBody(NULL),
+	mWorld(btTransform( btQuaternion(), btVector3( 0, 0, 0 ) )),
+	mMass( 1.f )
 	{
-		mWorld = btTransform( btQuaternion(), btVector3( 0, 300.f, 0 ) );
 	}
 	
 	PhysicsComponent::~PhysicsComponent()
@@ -30,15 +31,20 @@ namespace Magnetite
 	
 	void PhysicsComponent::create()
 	{
-		mPhysicsShape = new btBoxShape( btVector3(0.5, 0.5, 0.5 ) );
-		btScalar mass = 1;
-		btVector3 inertia(0,0,0);
-		mPhysicsShape->calculateLocalInertia( mass, inertia );
+		if( mPhysicsShape == nullptr )
+		{
+			mPhysicsShape = new btSphereShape( 1.f );
+			btVector3 inertia(0,0,0);
+			if(mMass > 0.f)
+			{
+				mPhysicsShape->calculateLocalInertia( mMass, inertia );
+			}
 
-		btRigidBody::btRigidBodyConstructionInfo ci( mass, this, mPhysicsShape, inertia );
-		mPhysicsBody = new btRigidBody( ci );
-		//mPhysicsBody->setActivationState(DISABLE_DEACTIVATION);
-		MagnetiteCore::Singleton->getPhysicsWorld()->addRigidBody( mPhysicsBody );
+			btRigidBody::btRigidBodyConstructionInfo ci( mMass, this, mPhysicsShape, inertia );
+			mPhysicsBody = new btRigidBody( ci );
+			//mPhysicsBody->setActivationState(DISABLE_DEACTIVATION);
+			MagnetiteCore::Singleton->getPhysicsWorld()->addRigidBody( mPhysicsBody );
+		}
 	}
 	
 	void PhysicsComponent::event( const BaseEvent& ev )
@@ -52,8 +58,17 @@ namespace Magnetite
 	
 	void PhysicsComponent::think( float dt )
 	{
-		if( mPhysicsBody )
-			mPhysicsBody->activate(true);
+	}
+	
+	void PhysicsComponent::setTransform( const btTransform& t )
+	{
+		mWorld = t;
+		setWorldTransform(t);
+	}
+	
+	void PhysicsComponent::setMass( float m )
+	{
+		mMass = m;
 	}
 	
 	void PhysicsComponent::getWorldTransform( btTransform& world ) const {
@@ -61,7 +76,6 @@ namespace Magnetite
 	}
 	
 	void PhysicsComponent::setWorldTransform( const btTransform &world ) {
-		//mWorld = world;
 		
 		btQuaternion rot = world.getRotation();
 		btVector3 p = world.getOrigin();

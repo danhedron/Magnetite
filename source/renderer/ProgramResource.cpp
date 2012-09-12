@@ -157,15 +157,17 @@ GLuint ProgramResource::getName()
 
 GLint ProgramResource::getAttributeIndex( const std::string& attribute )
 {
-	if( mName > 0 ) 
+	if( mName != 0 ) 
 	{
 		std::map<std::string, int>::iterator it = mAttributes.find(attribute);
 		if( it != mAttributes.end() )
 		{
 			return it->second;
 		}
+		
 		GLint p = glGetAttribLocation( mName, attribute.c_str() );
 		mAttributes[attribute] = p;
+		
 		return p;
 	}
 	return 0;
@@ -173,7 +175,7 @@ GLint ProgramResource::getAttributeIndex( const std::string& attribute )
 
 GLint ProgramResource::getUniformLocation( const std::string& uniform )
 {
-	if( mName > 0 ) 
+	if( mName != 0 ) 
 	{
 		std::map<std::string, int>::iterator it = mUniforms.find(uniform);
 		if( it != mUniforms.end() )
@@ -204,7 +206,6 @@ void ProgramResource::setVertexAttribute( const std::string& name, GLint size, G
 	glEnableVertexAttribArray(attributeIndex);
 	mEnabledArrays.push_back(attributeIndex);
 	glVertexAttribPointer( attributeIndex, size, type, normalized, stride, pointer );
-
 }
 
 void ProgramResource::disableVertexAttributes()

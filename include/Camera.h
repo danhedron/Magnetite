@@ -16,8 +16,8 @@ public:
 	Camera(void);
 	~Camera(void);
 
-	Matrix4 getMatrix();
-	Matrix4 getOrientationMatrix();
+	glm::mat4 getMatrix();
+	glm::mat3 getOrientationMatrix();
 	Frustum& getFrustum();
 
 	void setPosition(const Vector3& v);

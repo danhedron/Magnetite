@@ -2,6 +2,7 @@
 #include "MagnetiteCore.h"
 #include "World.h"
 #include "PhysicsState.h"
+#include <glm/gtc/matrix_transform.hpp>
 
 Character::Character( ) :
 mPhysicsController( NULL )
@@ -132,7 +133,8 @@ void Character::update(float dt)
 void Character::move( const Vector3& v )
 {
 	// translate the vector around the yaw.
-	Vector3 final = Matrix4::rotateY( -(mCamera.getYaw()*3.141f)/180 ) * v * (mSprint ? mSprintSpeed : mMoveSpeed);
+	auto r = glm::rotate( glm::mat4(), mCamera.getYaw(), glm::vec3(0.f, 1.f, 0.f)) ;
+	Vector3 final = (glm::mat3(r) * v) * (mSprint ? mSprintSpeed : mMoveSpeed);
 	
 	mPhysicsController->setWalkDirection( btVector3( final.x, final.y, final.z ) );
 		

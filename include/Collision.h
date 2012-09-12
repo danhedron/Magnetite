@@ -14,10 +14,10 @@ struct AABB
 	Vector3 center;
 	Vector3 extents;
 	Vector3 min() {
-		return center - (extents/2);
+		return center - (extents/2.f);
 	}
 	Vector3 max() {
-		return center + (extents/2);
+		return center + (extents/2.f);
 	}
 };
 
