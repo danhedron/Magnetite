@@ -211,22 +211,7 @@ void Renderer::render(double dt, World* world)
 	totalTime += dt;
 	mFpsAvg = (mFpsAvg + (1/dt)) / 2;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glColor3f(1,1,1);
 	
-
-	if( mDebugMode == DEBUG_LINES ) {
-		for( LineList::iterator it = mDebugLines.begin(); it != mDebugLines.end(); it++ ) 
-		{
-			Line l = *it;
-			glBegin(GL_LINES);
-			glColor3f(1, 1, 1);
-			glVertex3d(l.first.x, l.first.y, l.first.z);
-			glVertex3d(l.second.x, l.second.y, l.second.z);
-			glEnd();
-
-		}
-	}
-
 	glMatrixMode(GL_MODELVIEW);
 
 	glEnable(GL_CULL_FACE);
@@ -307,9 +292,6 @@ void Renderer::render(double dt, World* world)
 		//Detatch the world program
 		mWorldProgram->deactivate();
 	}
-	
-	//glLoadIdentity();
-	//mCamera->applyMatrix();
 	
 	auto entities = world->getEntities();
 	Magnetite::Component::DrawInfo i;

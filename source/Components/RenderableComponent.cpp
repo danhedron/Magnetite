@@ -39,26 +39,30 @@ namespace Magnetite
 	{
 		if( mProgram && mModel )
 		{
-			
 			if( !mModel->isLoaded() )
+			{
 				mModel->load();
+			}
 			
 			if( !mProgram->isLoaded() )
 			{
 				mProgram->load();
 				mProgram->link();
 			}
-
+			
+			auto geom = mModel->getGeometry();
+			
+			geom->bind();
+			
 			mProgram->makeActive();
-
-			mModel->getGeometry()->bindVertexAttributes(mProgram);
-
+			
+			geom->bindVertexAttributes(mProgram);
+			
 			auto mwrld = mProgram->getUniformLocation("matrix_worldspace");
 			auto mproj = mProgram->getUniformLocation("matrix_projection");
 			auto mview = mProgram->getUniformLocation("matrix_view");
 
-			Matrix4 world;
-			world = glm::translate(world, mTranslation);
+			glm::mat4 world = glm::translate( glm::mat4(), mTranslation );
 			
 			if( mwrld != -1 ) 
 				glUniformMatrix4fv( mwrld, 1, GL_FALSE, glm::value_ptr(world) );
@@ -69,13 +73,11 @@ namespace Magnetite
 			if( mview != -1 )
 				glUniformMatrix4fv( mview, 1, GL_FALSE, glm::value_ptr(info.view) );
 			
-			mModel->getGeometry()->bind();
-			
-			glDrawElements(GL_TRIANGLES, mModel->getGeometry()->edgeCount, GL_UNSIGNED_INT, 0 );
-			
-			mModel->getGeometry()->unbind();
+			glDrawRangeElements(GL_TRIANGLES, 0, geom->vertexCount, geom->edgeCount, GL_UNSIGNED_SHORT, 0);
 			
 			mProgram->deactivate();
+			
+			geom->unbind();
 		}
 	}
 	

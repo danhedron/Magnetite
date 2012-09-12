@@ -161,18 +161,6 @@ void MagnetiteCore::startGame( const std::string& type )
 	
 	newWorld("test");
 	
-	// Create a new entity
-	auto ent = mWorld->createEntity<Magnetite::BaseEntity>();
-	auto phys = ent->addComponent<Magnetite::PhysicsComponent>();
-	auto vis = ent->addComponent<Magnetite::RenderableComponent>();
-	
-	vis->setModel( mResourceManager->getResource<ModelResource>( "drone.obj" ) );
-	vis->setProgram( mResourceManager->getResource<ProgramResource>( "model.prog" ));
-
-	phys->setTransform(btTransform( btQuaternion(), btVector3(5.f, 115.f, 5.f) ));
-	phys->setMass(0.f);
-	phys->create();
-	
 	mGame->_loadGame();
 	
 	mScriptWrapper->runFile("./scripts/main.js");

@@ -28,6 +28,7 @@ void ModelResource::load()
 	
 	const aiScene* mdlScene = imp.ReadFile(mFilename.c_str(),
 		aiProcess_Triangulate |
+		aiProcess_FlipWindingOrder |
 		aiProcess_JoinIdenticalVertices 
 	);
 	
@@ -35,6 +36,7 @@ void ModelResource::load()
 		Util::log(imp.GetErrorString());
 	}
 	
+	Util::log("Loading " + Util::toString((size_t)mdlScene->mNumMeshes) + " meshes from " + mFilename);
 	for( size_t i = 0; i < mdlScene->mNumMeshes; i++ ) {
 		aiMesh* m = mdlScene->mMeshes[i];
 		if(m->HasBones()) {
@@ -56,12 +58,14 @@ void ModelResource::load()
 			mGeometry->vertexData[v].z = vec.z;
 		}
 		
-		for( size_t f = 0; f < m->mNumFaces; f+=3 )
-		{
-			for( size_t ind = 0; ind < m->mNumFaces; ind++ )
-			{
-				mGeometry->edgeData[f+ind] = m->mFaces[f].mIndices[ind];
-			}
+		for(size_t f = 0; f < m->mNumFaces; f++) {
+			aiFace face = m->mFaces[f];
+			size_t v0 = face.mIndices[0];
+			size_t v1 = face.mIndices[1];
+			size_t v2 = face.mIndices[2];
+			mGeometry->edgeData[f*3+0] = v0;
+			mGeometry->edgeData[f*3+1] = v1;
+			mGeometry->edgeData[f*3+2] = v2;
 		}
 		
 		mGeometry->bindToBuffer();

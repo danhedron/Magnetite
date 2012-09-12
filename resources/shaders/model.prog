@@ -1,0 +1,4 @@
+#model shader program
+vertex:model_vert.glsl
+fragment:model_frag.glsl
+#end of program

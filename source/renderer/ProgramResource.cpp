@@ -214,5 +214,5 @@ void ProgramResource::disableVertexAttributes()
 	{
 		glDisableVertexAttribArray(mEnabledArrays[x]);
 	}
-	mEnabledArrays.clear();	
+	mEnabledArrays.clear();
 }

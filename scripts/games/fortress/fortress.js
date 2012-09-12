@@ -41,7 +41,7 @@ Game.onSpawn = function( p )
 	this.player.setPosition( { x: 10, y: 130, z: 10 } );
 	this.player.moveTarget = { x: 0, y: 0, z: 0 };
 	this.player.moveSpeed = { x: 0, y: 0, z: 0 };
-	this.player.turnAngle = 0;
+	this.player.turnAngle = 180;
 	this.player.turnSpeed = 0;
 	this.player.lookAngle = -45;
 	this.player.movementSpeed = 1;
