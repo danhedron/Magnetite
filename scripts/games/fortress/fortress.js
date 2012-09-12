@@ -1,5 +1,6 @@
 var Events = require('./scripts/events.js');
 var Menu = require('./scripts/menu.js');
+var Drone = require('./scripts/games/fortress/drone.js');
 
 Game.name = 'Fortress';
 
@@ -33,6 +34,9 @@ Game.onLoad = function()
 	});
 	this.constructionMenu.breadcrumbs = ["Menu", "Construction"];
 	this.constructionMenu.position = [20, 30];
+	
+	// Create a drone.
+	var drone = new Drone();
 }
 
 Game.onSpawn = function( p )

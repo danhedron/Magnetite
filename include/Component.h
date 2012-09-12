@@ -3,6 +3,7 @@
 
 #include "Components/ComponentEvents.h"
 #include "Matrix.h"
+#include "prerequisites.h"
 
 namespace Magnetite 
 {
@@ -52,6 +53,10 @@ class BaseEntity;
 		 */
 		virtual void draw( const DrawInfo& info, float dt );
 		
+		/**
+		 * Component type namespace
+		 */
+		virtual Magnetite::String getType() { return "base"; }
 	};
 	
 };

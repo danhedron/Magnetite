@@ -25,6 +25,11 @@ namespace Magnetite
 		mProgram = prog;
 	}
 	
+	void RenderableComponent::setPosition( const Vector3& p )
+	{
+		mTranslation = p;
+	}
+	
 	void RenderableComponent::event( const BaseEvent& ev )
 	{
 		if( ev.eventID == CE_POSITION_UPDATED )

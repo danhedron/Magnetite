@@ -23,6 +23,7 @@ namespace Magnetite {
 		
 		virtual void draw( float dt );
 		
+		virtual Magnetite::String getType() { return "info"; }
 	};
 	
 };

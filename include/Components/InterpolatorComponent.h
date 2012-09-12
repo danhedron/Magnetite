@@ -28,6 +28,7 @@ namespace Magnetite
 		
 		virtual void think( float dt );
 		
+		virtual Magnetite::String getType() { return "interpolator"; }
 	};
 };
 

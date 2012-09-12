@@ -26,10 +26,13 @@ namespace Magnetite
 		
 		void setProgram( ProgramResource* prog );
 		
+		void setPosition( const Vector3& p );
+		
 		virtual void event( const BaseEvent& ev );
 		
 		virtual void draw( const DrawInfo& info, float dt );
 		
+		virtual Magnetite::String getType() { return "renderable"; }
 	};
 	
 };

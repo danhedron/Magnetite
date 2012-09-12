@@ -99,6 +99,7 @@ set(MAGNETITE_SOURCES
 	source/script/ScriptGlobalsDebug.cpp
 	source/script/ScriptExplosion.cpp
 	source/script/ScriptPlayer.cpp
+	source/script/ScriptEntity.cpp
 	source/blocks/LogBlock.cpp
 	source/blocks/LeafBlock.cpp
 	source/Profiler.cpp
@@ -169,6 +170,7 @@ set(MAGNETITE_HEADERS
 	include/script/ScriptGlobalsDebug.h
 	include/script/ScriptExplosion.h
 	include/script/ScriptPlayer.h
+	include/script/ScriptEntity.h
 	include/blocks/LogBlock.h
 	include/blocks/LeafBlock.h
 	include/Profiler.h

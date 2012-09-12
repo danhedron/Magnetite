@@ -36,6 +36,7 @@ namespace Magnetite
 
 		void setWorldTransform( const btTransform &world );
 		
+		virtual Magnetite::String getType() { return "physics"; }
 	};
 	
 };

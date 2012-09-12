@@ -1,10 +1,12 @@
 #include "ScriptGlobalsWorld.h"
 #include "ScriptGlobalsList.h"
+#include <ScriptEntity.h>
 #include "MagnetiteCore.h"
 #include "World.h"
 #include "BaseBlock.h"
 #include "BlockFactory.h"
 #include <Character.h>
+#include <BaseEntity.h>
 
 using namespace v8;
 
@@ -130,6 +132,13 @@ ValueHandle world_fireRay(const Arguments& args)
 	return Undefined();
 }
 
+ValueHandle world_createEntity( const Arguments& args )
+{
+	auto ent = MagnetiteCore::Singleton->getWorld()->createEntity<Magnetite::BaseEntity>();
+	
+	return wrapEntity(ent);
+}
+
 Handle<ObjectTemplate> initWorld( )
 {
 	HandleScope hs;
@@ -139,6 +148,7 @@ Handle<ObjectTemplate> initWorld( )
 	world->Set(String::New("removeBlock"), FunctionTemplate::New(world_removeBlock));
 	world->Set(String::New("createBlock"), FunctionTemplate::New(world_createBlock));
 	world->Set(String::New("fireRay"), FunctionTemplate::New(world_fireRay));
+	world->Set(String::New("createEntity"), FunctionTemplate::New(world_createEntity));
 	
 	return hs.Close( world );
 }
