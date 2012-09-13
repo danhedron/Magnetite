@@ -57,6 +57,21 @@ ValueHandle renderable_setProgram( const Arguments& args )
 	return Undefined();
 }
 
+ValueHandle renderable_setPosition( const Arguments& args )
+{
+	if( !(args.Length() > 0 && args[0]->IsObject()) ) return Undefined();
+	auto external = args.This()->GetInternalField(0).As<External>();
+	auto self = static_cast<Magnetite::RenderableComponent*>(external->Value());
+	
+	if( self != nullptr  )
+	{
+		auto pos = unwrapVector3(args[0]);
+		self->setPosition(pos);
+	}
+	
+	return Undefined();
+}
+
 template<class T> void addTypeProperties( T* obj, ValueHandle hnd )
 {
 	// Do nothing.
@@ -70,6 +85,7 @@ template<> void addTypeProperties<Magnetite::RenderableComponent>( Magnetite::Re
 	
 	o->Set( String::New("setModel"), FunctionTemplate::New( renderable_setModel)->GetFunction() );
 	o->Set( String::New("setProgram"), FunctionTemplate::New( renderable_setProgram)->GetFunction() );
+	o->Set( String::New("setPosition"), FunctionTemplate::New( renderable_setPosition)->GetFunction() );
 }
 
 ValueHandle wrapComponent( Magnetite::Component* component )
