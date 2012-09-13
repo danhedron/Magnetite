@@ -27,6 +27,51 @@ ValueHandle component_getType( const Arguments& args )
 	return Undefined();
 }
 
+ValueHandle renderable_setModel( const Arguments& args )
+{
+	if( !(args.Length() > 0 && args[0]->IsString()) ) return Undefined();
+	auto external = args.This()->GetInternalField(0).As<External>();
+	auto self = static_cast<Magnetite::RenderableComponent*>(external->Value());
+	
+	if( self != nullptr  )
+	{
+		auto mdl = MagnetiteCore::Singleton->getResourceManager()->getResource<ModelResource>(*(String::AsciiValue( args[0]->ToString() ) ));
+		self->setModel( mdl );
+	}
+	
+	return Undefined();
+}
+
+ValueHandle renderable_setProgram( const Arguments& args )
+{
+	if( !(args.Length() > 0 && args[0]->IsString()) ) return Undefined();
+	auto external = args.This()->GetInternalField(0).As<External>();
+	auto self = static_cast<Magnetite::RenderableComponent*>(external->Value());
+	
+	if( self != nullptr  )
+	{
+		auto prog = MagnetiteCore::Singleton->getResourceManager()->getResource<ProgramResource>(*(String::AsciiValue( args[0]->ToString() ) ));
+		self->setProgram( prog );
+	}
+	
+	return Undefined();
+}
+
+template<class T> void addTypeProperties( T* obj, ValueHandle hnd )
+{
+	// Do nothing.
+}
+
+template<> void addTypeProperties<Magnetite::RenderableComponent>( Magnetite::RenderableComponent* obj, ValueHandle hnd )
+{
+	// Set rederable methods.
+	HandleScope hs;
+	auto o = hnd->ToObject();
+	
+	o->Set( String::New("setModel"), FunctionTemplate::New( renderable_setModel)->GetFunction() );
+	o->Set( String::New("setProgram"), FunctionTemplate::New( renderable_setProgram)->GetFunction() );
+}
+
 ValueHandle wrapComponent( Magnetite::Component* component )
 {
 	HandleScope hs;
@@ -64,24 +109,30 @@ ValueHandle entity_addComponent( const Arguments& args )
 	if( self != nullptr )
 	{
 		Magnetite::Component* c = nullptr;
+		ValueHandle o;
 		
 		if( args[0]->Equals(String::New("renderable")) )
 		{
 			auto vis = self->addComponent<Magnetite::RenderableComponent>();
 			
-			vis->setModel( MagnetiteCore::Singleton->getResourceManager()->getResource<ModelResource>("drone.obj") );
 			vis->setProgram( MagnetiteCore::Singleton->getResourceManager()->getResource<ProgramResource>("model.prog") );
 			
 			c = vis;
+			
+			o = wrapComponent(c);
+			addTypeProperties( vis, o );
 		}
 		else if( args[0]->Equals(String::New("physics")) )
 		{
-			c = self->addComponent<Magnetite::PhysicsComponent>();
+			auto phys = self->addComponent<Magnetite::PhysicsComponent>();
+			c = phys;
+			o = wrapComponent(c);
+			addTypeProperties( phys, o );
 		}
 		
 		if( c == nullptr ) return Undefined();
 		
-		return wrapComponent(c);
+		return o;
 	}
 	
 	return Undefined();
