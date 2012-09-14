@@ -42,8 +42,6 @@ Game.onLoad = function()
 	this.newDrone().t = 1;
 	this.newDrone().t = 2;
 	this.newDrone().t = 3;
-	
-	console.log(Structure);
 }
 
 Game.newDrone = function() {
@@ -100,7 +98,7 @@ Game.keyDown = function(k)
 			break;
 		case Events.Keys.I:
 			// Create some test structures.
-			Structure.create('foundation', { x: 40, y: 130, z: 40 } );
+			Structure.create('woodcutter', { x: 45, y: 119, z: 32 } );
 			break;
 	}
 }

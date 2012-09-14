@@ -26,8 +26,8 @@ void WoodBlock::hit()
 
 void WoodBlock::getTextureCoords( short face, short &x, short &y )
 {
-	x = 4;
-	y = 0;
+	x = 3;
+	y = 2;
 }
 
 
