@@ -117,6 +117,7 @@ ValueHandle import(const Arguments& args)
 {
 	if( args.Length() >= 1 )
 	{
+		Util::log( "Importing: " + strize( args[0]->ToString() ) );
 		return MagnetiteCore::Singleton->getScriptManager()->runFile( strize( args[0]->ToString() ) );
 	}
 	return Undefined();

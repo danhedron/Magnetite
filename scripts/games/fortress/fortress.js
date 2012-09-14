@@ -1,6 +1,7 @@
 var Events = require('./scripts/events.js');
 var Menu = require('./scripts/menu.js');
 var Drone = require('./scripts/games/fortress/drone.js');
+var Structure = require('./scripts/games/fortress/structure.js');
 
 Game.name = 'Fortress';
 
@@ -41,6 +42,8 @@ Game.onLoad = function()
 	this.newDrone().t = 1;
 	this.newDrone().t = 2;
 	this.newDrone().t = 3;
+	
+	console.log(Structure);
 }
 
 Game.newDrone = function() {
@@ -94,6 +97,10 @@ Game.keyDown = function(k)
 			break;
 		case Events.Keys.Z:
 			this.player.moveTarget.y = -10;
+			break;
+		case Events.Keys.I:
+			// Create some test structures.
+			Structure.create('foundation', { x: 40, y: 130, z: 40 } );
 			break;
 	}
 }
