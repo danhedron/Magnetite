@@ -1,7 +1,6 @@
 #include "Tests.h"
 #include "World.h"
 #include "BaseBlock.h"
-#include "WorldChunk.h"
 #include "Renderer.h"
 #include "WorldTree.h"
 #include "WorldNode.h"

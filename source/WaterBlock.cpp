@@ -1,6 +1,5 @@
 #include "WaterBlock.h"
 #include "BlockFactory.h"
-#include "WorldChunk.h"
 #include "TextureManager.h"
 #include "MagnetiteCore.h"
 #include "Renderer.h"

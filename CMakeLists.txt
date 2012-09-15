@@ -87,7 +87,6 @@ set(MAGNETITE_SOURCES
 	source/ChunkGenerator.cpp
 	source/ChunkLoader.cpp
 	source/World.cpp
-	#source/WorldChunk.cpp
 	source/WorldNode.cpp
 	source/WorldTree.cpp
 	source/Explosion.cpp
@@ -157,7 +156,6 @@ set(MAGNETITE_HEADERS
 	include/ChunkGenerator.h
 	include/ChunkLoader.h
 	include/World.h
-	#include/WorldChunk.h
 	include/WorldNode.h
 	include/WorldTree.h
 	include/Explosion.h

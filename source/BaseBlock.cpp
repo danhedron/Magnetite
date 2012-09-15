@@ -2,7 +2,6 @@
 #include "MagnetiteCore.h"
 #include "TextureManager.h"
 #include "Renderer.h"
-#include "WorldChunk.h"
 #include "World.h"
 #include <string>
 

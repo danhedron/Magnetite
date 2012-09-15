@@ -1,6 +1,5 @@
 #include "ScriptWrapper.h"
 #include "MagnetiteCore.h"
-#include "WorldChunk.h"
 #include "Renderer.h"
 #include "TextureManager.h"
 #include "InputManager.h"
