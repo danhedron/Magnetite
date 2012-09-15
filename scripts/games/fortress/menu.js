@@ -10,7 +10,19 @@
 						action: function() {
 							this.build('woodcutter');
 						}
-					}
+					},
+					{
+						text: 'Guard Tower',
+						action: function() {
+							this.build('tower');
+						}
+					},
+					{
+						text: 'Foundations',
+						action: function() {
+							this.build('foundation');
+						}
+					},
 				]
 			},
 			{
