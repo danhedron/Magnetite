@@ -57,9 +57,34 @@ Game.build = function( b )
 		};
 		
 		// Tell the nearest drone to do something about it.
-		this.getNearestDrone( p ).constructionQueue.push(structure);
+		this.getNearestDrone( p ).construct(structure);
 	}
+}
+
+Game.clear = function()
+{
+	var rs = world.fireRay( this.player.getEyeCast() );
 	
+	if( rs.hit )
+	{
+		var p = { x: rs.worldHit.x - (rs.normal.x /2), y: rs.worldHit.y - (rs.normal.y /2), z: rs.worldHit.z - (rs.normal.z /2) };
+		
+		if( this.clearStart == undefined ) 
+		{
+			this.clearStart = p;
+		}
+		else 
+		{
+			this.clearArea( this.clearStart, p );
+			this.clearStart = undefined;
+		}
+	}
+}
+
+Game.clearArea = function( min, max )
+{
+	// Tell the nearest drone to do something about it.
+	this.getNearestDrone( min ).clearArea( min, max );
 }
 
 Game.createStructure = function( s ) {

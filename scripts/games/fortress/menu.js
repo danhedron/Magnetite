@@ -35,6 +35,17 @@
 						}
 					}
 				]
+			},
+			{
+				text: 'Terraforming',
+				children: [
+					{ 
+						text: 'Clear area',
+						action: function() {
+							this.clear();
+						}
+					}
+				]
 			}
 		]
 	}
