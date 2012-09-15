@@ -44,8 +44,8 @@ ValueHandle player_getEyeCast(const Arguments& args)
 	Handle<Object> self = args.This();
 	Handle<External> rptr = Handle<External>::Cast(self->GetInternalField(0));
 	Player* player = static_cast<Player*>(rptr->Value());
-	
-	return wrapRay( player->getEyeCast() );
+	auto ec = player->getEyeCast();
+	return wrapRay( ec );
 }
 
 ValueHandle player_move(const Arguments& args)

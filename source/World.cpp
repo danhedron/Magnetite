@@ -344,7 +344,28 @@ Magnetite::EntityList World::getEntities()
 raycast_r World::raycastWorld(const raycast_r &inray, bool solidOnly)
 {
 	raycast_r ray = inray;
-	Vector3 min, max;
+	
+	auto from = ray.orig;
+	auto to = ray.orig + (ray.dir * ray.maxDistance);
+	btVector3 bfrom( from.x, from.y, from.z );
+	btVector3 bto( to.x, to.y, to.z );
+	btCollisionWorld::ClosestRayResultCallback rayCallback(bfrom, bto);
+	MagnetiteCore::Singleton->getPhysicsWorld()->rayTest( bfrom, bto, rayCallback );
+	
+	if( rayCallback.hasHit() )
+	{
+		ray.hit = true;
+		ray.hitNormal = glm::vec3( rayCallback.m_hitNormalWorld.x(), rayCallback.m_hitNormalWorld.y(), rayCallback.m_hitNormalWorld.z() );
+		ray.worldHit = glm::vec3( rayCallback.m_hitPointWorld.x(), rayCallback.m_hitPointWorld.y(), rayCallback.m_hitPointWorld.z() );
+		ray.block = nullptr;
+		ray.chunk = nullptr;
+		ray.i0 = rayCallback.m_closestHitFraction * ray.maxDistance;
+	}
+	
+	return ray;
+	
+	// Old Raycast code
+	/*Vector3 min, max;
 	auto wcube = mWorldSize*mWorldSize*mWorldSize;
 	std::vector<Chunk*> hitChunks;
 	
@@ -396,9 +417,7 @@ raycast_r World::raycastWorld(const raycast_r &inray, bool solidOnly)
 				closest = r;
 			}
 		}
-	}
-	
-	return closest;
+	}*/
 }
 
 CollisionResponse World::AABBWorld( Vector3& min, Vector3& max )

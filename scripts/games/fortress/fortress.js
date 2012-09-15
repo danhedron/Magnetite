@@ -96,10 +96,6 @@ Game.keyDown = function(k)
 		case Events.Keys.Z:
 			this.player.moveTarget.y = -10;
 			break;
-		case Events.Keys.I:
-			// Create some test structures.
-			Structure.create('woodcutter', { x: 45, y: 119, z: 32 } );
-			break;
 	}
 }
 
@@ -128,7 +124,10 @@ Game.keyUp = function(k)
 
 Game.onPrimary = function( player )
 {
-	this.tools[ this.toolIndex % this.tools.length ].func.call( this, player );
+	var rs = world.fireRay( player.getEyeCast() );
+	
+	// Create some test structures wherever the player is facing.
+	Structure.create('woodcutter', { x: rs.worldHit.x + (rs.normal.x /2), y: rs.worldHit.y + (rs.normal.y /2), z: rs.worldHit.z + (rs.normal.z /2) } );
 }
 
 Game.onAlt = function( player )

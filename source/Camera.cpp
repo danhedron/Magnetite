@@ -47,9 +47,7 @@ Frustum& Camera::getFrustum()
 
 Vector3 Camera::getForward() 
 {
-	glm::mat3 r = getOrientationMatrix();
-	
-	return glm::normalize( r * glm::vec3( 0.f, 0.f, 1.f ) );
+	return glm::normalize( getOrientationMatrix() * glm::vec3( 0.f, 0.f, 1.f ) );
 }
 
 void Camera::applyMatrix( bool rot, bool pos ) 

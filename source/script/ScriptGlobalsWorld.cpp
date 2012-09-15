@@ -70,6 +70,13 @@ bool unwrapRay( Local<Value> ray, raycast_r& r )
 
 ValueHandle wrapRay( const raycast_r& ray )
 {
+	if( rayTemplate.IsEmpty() )
+	{
+		rayTemplate = Persistent<ObjectTemplate>::New(ObjectTemplate::New());
+		rayTemplate->Set( String::New("origin"), wrapVector3( Vector3() ) );
+		rayTemplate->Set( String::New("direction"), wrapVector3( Vector3(0, 1.f, 0) ) );	
+	}
+	
 	ObjectHandle rayO = rayTemplate->NewInstance();
 	
 	rayO->Set( String::New("origin"), wrapVector3( ray.orig ) );
@@ -148,6 +155,7 @@ Handle<ObjectTemplate> initWorld( )
 	world->Set(String::New("removeBlock"), FunctionTemplate::New(world_removeBlock));
 	world->Set(String::New("createBlock"), FunctionTemplate::New(world_createBlock));
 	world->Set(String::New("fireRay"), FunctionTemplate::New(world_fireRay));
+	world->Set(String::New("createRay"), FunctionTemplate::New(constructRay));
 	world->Set(String::New("createEntity"), FunctionTemplate::New(world_createEntity));
 	
 	return hs.Close( world );
