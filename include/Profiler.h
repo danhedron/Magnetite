@@ -24,6 +24,8 @@ namespace Perf {
 		
 		void end( const std::string& section );
 		
+		ProfileEntry& getEntry( const std::string& section );
+		
 		static Profiler& get();
 	};
 

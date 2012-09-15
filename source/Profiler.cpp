@@ -45,7 +45,15 @@ namespace Perf
 			long millis = (time.tv_sec * 1000) + (time.tv_usec / 1000);
 			it->second.latest = millis - it->second.currentStart;
 			it->second.total += it->second.latest;
-			//Util::log("Exiting " + section + " (" + Util::toString(it->second.latest) + ")");
+		}
+	}
+	
+	ProfileEntry& Profiler::getEntry( const std::string& section )
+	{
+		ProfilerEvents::iterator it = mEvents.find( section );
+		if( it != mEvents.end() )
+		{
+			return it->second;
 		}
 	}
 };

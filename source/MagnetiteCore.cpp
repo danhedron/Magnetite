@@ -19,6 +19,7 @@
 #include <Components/RenderableComponent.h>
 #include <ModelResource.h>
 #include <ProgramResource.h>
+#include <Profiler.h>
 #include <ctime>
 #include <thread>
 
@@ -184,6 +185,10 @@ void MagnetiteCore::go()
 	int lastX = mWindow.getSize().x/2;
 	int lastY = mWindow.getSize().y/2;
 	
+	// Hack to keep game think on main thread.
+	// ToDo: Make V8 work with threads, do game thinking in work thread.
+	bool gameThink = false;
+	
 	mRenderer->setCamera( mGame->getLocalPlayer()->getCamera() );
 	
 	std::thread rendering_thread( [&]() {
@@ -198,12 +203,16 @@ void MagnetiteCore::go()
 			}
 			timer.restart(); 
 			
+			gameThink = true;
+			
 			lDelta *= mTimescale;
 			
+			Perf::Profiler::get().begin("think");
 			mPhysicsWorld->stepSimulation( lDelta );
 			
 			//Ensure each loaded chunk is updated before being sent to the GPU
 			mWorld->update( lDelta );
+			Perf::Profiler::get().end("think");
 		}
 	});
 	
@@ -294,9 +303,14 @@ void MagnetiteCore::go()
 			}
 		}
 		
-		if( mGame != NULL )
-		{
-			mGame->think( lDelta );
+		if( gameThink ) {
+			Perf::Profiler::get().begin("gthink");
+			if( mGame != NULL )
+			{
+				mGame->think( lDelta );
+			}
+			Perf::Profiler::get().end("gthink");
+			gameThink = false;
 		}
 		
 		// Update all the characters
@@ -305,8 +319,9 @@ void MagnetiteCore::go()
 			(*it)->update( lDelta );
 		}
 		
-		
+		Perf::Profiler::get().begin("draw");
 		mRenderer->render(lDelta, mWorld);
+		Perf::Profiler::get().end("draw");
 		
 		mGame->uiPaint( mRenderer );
 

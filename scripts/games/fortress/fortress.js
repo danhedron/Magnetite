@@ -22,10 +22,12 @@ Game.onLoad = function()
 	
 	// Create a drone.
 	this.drones = [];
-	this.newDrone();
-	this.newDrone().t = 1;
-	this.newDrone().t = 2;
-	this.newDrone().t = 3;
+	for( var i = 0; i < 250; i++ )
+	{
+		var d = this.newDrone();
+		d.position.x = Math.random() * 100;
+		d.position.z = Math.random() * 100;
+	}
 }
 
 Game.build = function( b ) 
@@ -162,9 +164,7 @@ Game.think = function( dt )
 	var accel = 2.5;
 	for( var d in this.player.moveTarget )
 	{
-		var dimTarget = this.player.moveTarget[d];
-		var dimReal = this.player.moveSpeed[d];
-		var dif = dimTarget - dimReal;
+		var dif = this.player.moveTarget[d] - this.player.moveSpeed[d];
 		this.player.moveSpeed[d] += (dif*accel) * dt;
 	}
 	if( this.player.moveSpeed.x != 0 || this.player.moveSpeed.y != 0 || this.player.moveSpeed.z != 0 )

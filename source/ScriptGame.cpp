@@ -267,7 +267,7 @@ void ScriptGame::uiPaint(Renderer* r)
 }
 
 void ScriptGame::think( float dt )
-{	
+{
 	HandleScope hs;
 	PersistentContext ctx = MagnetiteCore::Singleton->getScriptManager()->getContext();
 	Context::Scope scope( ctx );

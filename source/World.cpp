@@ -345,9 +345,8 @@ raycast_r World::raycastWorld(const raycast_r &inray, bool solidOnly)
 {
 	raycast_r ray = inray;
 	
-	auto from = ray.orig;
 	auto to = ray.orig + (ray.dir * ray.maxDistance);
-	btVector3 bfrom( from.x, from.y, from.z );
+	btVector3 bfrom( ray.orig.x, ray.orig.y, ray.orig.z );
 	btVector3 bto( to.x, to.y, to.z );
 	btCollisionWorld::ClosestRayResultCallback rayCallback(bfrom, bto);
 	

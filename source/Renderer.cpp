@@ -16,6 +16,7 @@
 #include "Geometry.h"
 #include <Component.h>
 #include <BaseEntity.h>
+#include <Profiler.h>
 
 MeshGeometry* crosshairGeom = NULL;
 
@@ -366,10 +367,17 @@ void Renderer::drawStats(double dt, size_t chunkCount, World* world)
 	ss << "Magnetite Info:" << std::endl;
 	ss << "\tdt: " << dt << std::endl;
 	ss << "\tFPS: " << (1.f/dt) << std::endl;
+	auto t = Perf::Profiler::get().getEntry( "think" );
+	ss << "\tthink: " << t.latest << "ms" << std::endl;
+	auto g = Perf::Profiler::get().getEntry( "gthink" );
+	ss << "\tgame think: " << g.latest << "ms" << std::endl;
+	auto d = Perf::Profiler::get().getEntry( "draw" );
+	ss << "\tdraw: " << d.latest << "ms" << std::endl;
 	ss << "\tTimescale: " << MagnetiteCore::Singleton->getTimescale() << std::endl;
 	ss << "World Stats: " << std::endl;
 	ss << "\tBlocks: " << mBlRendered << "/" << mBlTotal << " - " << percent <<  std::endl;
 	ss << "\tRendered Chunks: " << chunkCount << std::endl;
+	ss << "\tEntity Count: " << world->getEntities().size() << std::endl;
 	ss << "\tTime: " << world->getSky()->getTime() % DAY_LENGTH << std::endl;
 	ss << "Camera: " << std::endl;
 	ss << "\tPosition: " << Util::toString(mCamera->getPosition()) << std::endl;
