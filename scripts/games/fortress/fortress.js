@@ -45,6 +45,17 @@ Game.newDrone = function() {
 	return d;
 };
 
+Game.createDrone = function() {
+	var rs = world.fireRay( this.player.getEyeCast() );
+	
+	// Create some test structures wherever the player is facing.
+	if( rs.hit )
+	{
+		var drone = this.newDrone();
+		drone.position = { x: rs.worldHit.x + (rs.normal.x /2), y: rs.worldHit.y - (rs.normal.y /2), z: rs.worldHit.z + (rs.normal.z /2) };
+	}
+}
+
 Game.onSpawn = function( p )
 {
 	// Hack.

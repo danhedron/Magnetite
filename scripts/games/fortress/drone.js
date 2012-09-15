@@ -12,7 +12,7 @@
 	this.t = 0;
 	// Hack until custom components are implemented.
 	this.tick = function( dt ) {
-		var p = { x: 30, y: this.position.y, z: 30 };
+		var p = { x: this.position.x, y: this.position.y, z: this.position.z };
 		
 		this.t += dt;
 		

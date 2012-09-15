@@ -26,6 +26,7 @@
 	this.activate = function(ctx) {
 		var mi = currentMenu.children[this.current];
 		if( mi.children != undefined && mi.children.length > 0 ) {
+			this.current = 0;
 			lastMenus.push(currentMenu);
 			currentMenu = mi;
 			this.breadcrumbs.push( currentMenu.text );
@@ -38,6 +39,7 @@
 	this.back = function() {
 		if( lastMenus.length > 0 )
 		{
+			this.current = 0;
 			currentMenu = lastMenus.pop();
 			this.breadcrumbs.pop();
 		}

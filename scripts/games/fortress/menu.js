@@ -27,10 +27,12 @@
 			},
 			{
 				text: 'Units',
-				chidren: [
+				children: [
 					{ 
 						text: 'Drone',
-						action: function() {}
+						action: function() {
+							this.createDrone();
+						}
 					}
 				]
 			}
