@@ -26,7 +26,14 @@
 			W:22,
 			X:23,
 			Y:24,
-			Z:25
+			Z:25,
+			Esc: 36,
+			Enter: 58,
+			Backspace: 59,
+			Left: 71,
+			Right: 72,
+			Up: 73,
+			Down: 74
 		}
 	};
 })();

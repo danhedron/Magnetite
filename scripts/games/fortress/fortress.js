@@ -17,24 +17,8 @@ Number.prototype.sign = function() {
 
 Game.onLoad = function()
 {
-	this.constructionMenu = new Menu({
-		items: [
-			{
-				text:'Buildings'
-			},
-			{
-				text:'Defences'
-			},
-			{
-				text:'Structures'
-			},
-			{
-				text:'Machinery'
-			}
-		]
-	});
-	this.constructionMenu.breadcrumbs = ["Menu", "Construction"];
-	this.constructionMenu.position = [20, 30];
+	this.menu = new Menu(require('./scripts/games/fortress/menu.js').root);
+	this.menu.position = [20, 30];
 	
 	// Create a drone.
 	this.drones = [];
@@ -42,6 +26,17 @@ Game.onLoad = function()
 	this.newDrone().t = 1;
 	this.newDrone().t = 2;
 	this.newDrone().t = 3;
+}
+
+Game.build = function( b ) 
+{
+	var rs = world.fireRay( this.player.getEyeCast() );
+	
+	// Create some test structures wherever the player is facing.
+	if( rs.hit )
+	{
+		Structure.create(b, { x: rs.worldHit.x + (rs.normal.x /2), y: rs.worldHit.y - (rs.normal.y /2), z: rs.worldHit.z + (rs.normal.z /2) } );
+	}
 }
 
 Game.newDrone = function() {
@@ -52,6 +47,7 @@ Game.newDrone = function() {
 
 Game.onSpawn = function( p )
 {
+	// Hack.
 	this.player = p;
 	this.player.setPosition( { x: 10, y: 130, z: 10 } );
 	this.player.moveTarget = { x: 0, y: 0, z: 0 };
@@ -96,6 +92,12 @@ Game.keyDown = function(k)
 		case Events.Keys.Z:
 			this.player.moveTarget.y = -10;
 			break;
+		case Events.Keys.Up: 
+			this.menu.move(-1);
+			break;
+		case Events.Keys.Down:
+			this.menu.move( 1);
+			break;
 	}
 }
 
@@ -119,18 +121,19 @@ Game.keyUp = function(k)
 		case Events.Keys.Z:
 			this.player.moveTarget.y = 0;
 			break;
+		case Events.Keys.Enter:
+			this.menu.activate(this);
+			break;
+		case Events.Keys.Backspace:
+			this.menu.back();
+			break;
+			
 	}
 }
 
 Game.onPrimary = function( player )
 {
-	var rs = world.fireRay( player.getEyeCast() );
-	
-	// Create some test structures wherever the player is facing.
-	if( rs.hit )
-	{
-		Structure.create('woodcutter', { x: rs.worldHit.x + (rs.normal.x /2), y: rs.worldHit.y - (rs.normal.y /2), z: rs.worldHit.z + (rs.normal.z /2) } );
-	}
+	this.build( 'woodcutter' );
 }
 
 Game.onAlt = function( player )
@@ -168,5 +171,5 @@ Game.think = function( dt )
 
 Game.draw = function()
 {
-	this.constructionMenu.draw();
+	this.menu.draw();
 }
