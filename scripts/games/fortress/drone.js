@@ -50,7 +50,13 @@
 		r.origin = p;
 		r = world.fireRay( r );
 		if( r.hit ) {
-			this.targetPosition.y = r.worldHit.y + this.hoverHeight + (Math.sin(this.t*2)*0.25);
+			// Let drones fly if they need to in order to reach their target.
+			if( this.actionQueue.length == 0 ) {
+				this.targetPosition.y = r.worldHit.y + this.hoverHeight + (Math.sin(this.t*2)*0.25);
+			}
+			else {
+				this.targetPosition.y = Math.max(r.worldHit.y + this.hoverHeight + (Math.sin(this.t*2)*0.25), this.targetPosition.y);
+			}
 		}
 		
 		var axes = ['x', 'y', 'z'];
@@ -103,7 +109,6 @@
 					if( block == false )
 					{
 						this.actionQueue = this.actionQueue.slice(1);
-						console.log( JSON.stringify( this.actionQueue ) );
 					}
 					break;
 			}
