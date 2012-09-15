@@ -312,6 +312,7 @@ void Chunk::generatePhysics()
 		btRigidBody::btRigidBodyConstructionInfo ci( 0, mPhysicsState, mPhysicsShape, btVector3(0,0,0) );
 		mPhysicsBody = new btRigidBody( ci );
 		mPhysicsBody->setCollisionFlags( mPhysicsBody->getCollisionFlags() | btRigidBody::CF_STATIC_OBJECT );
+		
 		CoreSingleton->getPhysicsWorld()
 			->addRigidBody( mPhysicsBody );
 	}

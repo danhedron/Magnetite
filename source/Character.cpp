@@ -63,7 +63,7 @@ Camera* Character::getCamera()
 raycast_r Character::getEyeCast()
 {
 	raycast_r ray;
-	ray.orig = getPosition() + Vector3( 0.f, mHeight /2, 0.f );
+	ray.orig = getPosition() + Vector3( 0.f, mHeight /2, 0.f ) + mCamera.getForward();
 	ray.dir = mCamera.getForward();
 	return ray;
 } 

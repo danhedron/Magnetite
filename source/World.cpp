@@ -350,6 +350,7 @@ raycast_r World::raycastWorld(const raycast_r &inray, bool solidOnly)
 	btVector3 bfrom( from.x, from.y, from.z );
 	btVector3 bto( to.x, to.y, to.z );
 	btCollisionWorld::ClosestRayResultCallback rayCallback(bfrom, bto);
+	
 	MagnetiteCore::Singleton->getPhysicsWorld()->rayTest( bfrom, bto, rayCallback );
 	
 	if( rayCallback.hasHit() )

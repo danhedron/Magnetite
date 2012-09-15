@@ -129,7 +129,7 @@ Game.onPrimary = function( player )
 	// Create some test structures wherever the player is facing.
 	if( rs.hit )
 	{
-		Structure.create('woodcutter', { x: rs.worldHit.x + (rs.normal.x /2), y: rs.worldHit.y + (rs.normal.y /2), z: rs.worldHit.z + (rs.normal.z /2) } );
+		Structure.create('woodcutter', { x: rs.worldHit.x + (rs.normal.x /2), y: rs.worldHit.y - (rs.normal.y /2), z: rs.worldHit.z + (rs.normal.z /2) } );
 	}
 }
 
