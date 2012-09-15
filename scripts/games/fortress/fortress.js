@@ -15,6 +15,21 @@ Number.prototype.sign = function() {
   }
 }
 
+// Todo: sort out library functions again.
+function subt( v1, v2 ) { return { x: v1.x - v2.x, y: v1.y - v2.y, z: v1.z - v2.z }; }
+function add( v1, v2 ) { return { x: v1.x + v2.x, y: v1.y + v2.y, z: v1.z + v2.z }; }
+function mul( v1, f ) { return { x: v1.x * f, y: v1.y * f, z: v1.z * f }; }
+function lent( v ) {
+	return Math.sqrt((v.x*v.x) + (v.y*v.y) + (v.z*v.z));
+}
+function norm( v ) {
+	var l = lent(v);
+	if( l > 0 ) {
+		return { x: v.x / l, y: v.y / l, z: v.z / l };
+	}
+	return v;
+}
+
 Game.onLoad = function()
 {
 	this.menu = new Menu(require('./scripts/games/fortress/menu.js').root);
@@ -22,11 +37,10 @@ Game.onLoad = function()
 	
 	// Create a drone.
 	this.drones = [];
-	for( var i = 0; i < 250; i++ )
+	for( var i = 0; i < 50; i++ )
 	{
 		var d = this.newDrone();
-		d.position.x = Math.random() * 100;
-		d.position.z = Math.random() * 100;
+		d.overridePosition({ x: Math.random() * 100, y: 140, z: Math.random() * 100 });
 	}
 }
 
@@ -34,15 +48,26 @@ Game.build = function( b )
 {
 	var rs = world.fireRay( this.player.getEyeCast() );
 	
-	// Create some test structures wherever the player is facing.
 	if( rs.hit )
 	{
-		Structure.create(b, { x: rs.worldHit.x + (rs.normal.x /2), y: rs.worldHit.y - (rs.normal.y /2), z: rs.worldHit.z + (rs.normal.z /2) } );
+		var p = { x: rs.worldHit.x + (rs.normal.x /2), y: rs.worldHit.y - (rs.normal.y /2), z: rs.worldHit.z + (rs.normal.z /2) };
+		var structure = {
+			'structure': b,
+			'position': p
+		};
+		
+		// Tell the nearest drone to do something about it.
+		this.getNearestDrone( p ).constructionQueue.push(structure);
 	}
+	
+}
+
+Game.createStructure = function( s ) {
+	Structure.create( s.structure, s.position );
 }
 
 Game.newDrone = function() {
-	var d = new Drone();
+	var d = new Drone(this);
 	this.drones.push(d);
 	return d;
 };
@@ -50,12 +75,27 @@ Game.newDrone = function() {
 Game.createDrone = function() {
 	var rs = world.fireRay( this.player.getEyeCast() );
 	
-	// Create some test structures wherever the player is facing.
 	if( rs.hit )
 	{
 		var drone = this.newDrone();
 		drone.position = { x: rs.worldHit.x + (rs.normal.x /2), y: rs.worldHit.y - (rs.normal.y /2), z: rs.worldHit.z + (rs.normal.z /2) };
 	}
+}
+
+Game.getNearestDrone = function( center ) {
+	var drone, ndrone;
+	var nearest = 100000;
+	for( var x = 0; x < this.drones.length; x++ )
+	{
+		drone = this.drones[x];
+		var d = { x: center.x - drone.position.x, y: center.y - drone.position.y, z: center.z - drone.position.z };
+		var lenth = lent( d );
+		if( lenth < nearest ) {
+			nearest = lenth;
+			ndrone = drone;
+		};
+	}
+	return ndrone;
 }
 
 Game.onSpawn = function( p )
