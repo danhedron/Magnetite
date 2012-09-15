@@ -16,8 +16,8 @@
 		
 		this.t += dt;
 		
-		p.x += Math.sin(this.t) * 10;
-		p.z += Math.cos(this.t) * 10;
+		p.x += Math.sin(this.t) * 3;
+		p.z += Math.cos(this.t) * 3;
 		
 		var r = new world.createRay();
 		r.direction = {x: 0, y: -1, z: 0};
@@ -29,8 +29,6 @@
 		
 		var deltaY = this.targetY - this.position.y;
 		this.position.y += (2 * deltaY) * dt;
-		
-		console.log( JSON.stringify( this.position ) );
 		
 		this.vis.setPosition(p);
 	};
