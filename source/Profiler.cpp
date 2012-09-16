@@ -32,11 +32,14 @@ namespace Perf
 		ent.name = section;
 		ent.total = 0;
 		
+		mMutex.lock();
 		mEvents.insert( ProfilerEvents::value_type( section, ent ) );
+		mMutex.unlock();
 	}
 	
 	void Profiler::end( const std::string& section )
 	{
+		mMutex.lock();
 		ProfilerEvents::iterator it = mEvents.find( section );
 		if( it != mEvents.end() )
 		{
@@ -46,15 +49,19 @@ namespace Perf
 			it->second.latest = millis - it->second.currentStart;
 			it->second.total += it->second.latest;
 		}
+		mMutex.unlock();
 	}
 	
 	ProfileEntry& Profiler::getEntry( const std::string& section )
 	{
+		mMutex.lock();
 		ProfilerEvents::iterator it = mEvents.find( section );
 		if( it != mEvents.end() )
 		{
+			mMutex.unlock();
 			return it->second;
 		}
+		mMutex.unlock();
 		// what to do if there is no entry?
 	}
 };

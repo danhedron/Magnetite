@@ -2,6 +2,7 @@
 #define _PROFILER_H_
 #include <map>
 #include <string>
+#include <mutex>
 
 namespace Perf {
 	
@@ -18,6 +19,9 @@ namespace Perf {
 	class Profiler
 	{
 		ProfilerEvents mEvents;
+		
+		// Mutex to ensure we don't cause a crash.
+		std::mutex mMutex;
 		
 	public:
 		void begin( const std::string& section );

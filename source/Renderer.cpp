@@ -256,9 +256,11 @@ void Renderer::render(double dt, World* world)
 				if( chnk )
 				{
 					// Ensure we get a lock to avoid visual artifacts.
-					chnk->getMutex().lock();
-					_renderChunk( regions[r], chnk );
-					chnk->getMutex().unlock();
+					if( chnk->getMutex().try_lock() )
+					{
+						_renderChunk( regions[r], chnk );
+						chnk->getMutex().unlock();
+					}
 				}
 			}
 		}
@@ -340,7 +342,7 @@ void Renderer::_renderChunk( Magnetite::ChunkRegionPtr region, Chunk* chunk )
 	float z = chunk->getZ() * CHUNK_WIDTH;
 	glTranslatef(x,y,z);
 	
-	if( !chunk->_hasChunkFlag( Chunk::MeshInvalid ) && chunk->getGeometry() != NULL ) {
+	if( !chunk->_hasChunkFlag( Chunk::MeshInvalid ) && chunk->getGeometry() != NULL && chunk->getVisibleFaceCount() > 0 ) {
 		Geometry* geom = chunk->getGeometry();
 		
 		if( geom->vertexBO == 0 || geom->indexBO == 0 )
