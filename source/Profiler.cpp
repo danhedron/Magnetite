@@ -55,5 +55,6 @@ namespace Perf
 		{
 			return it->second;
 		}
+		// what to do if there is no entry?
 	}
 };

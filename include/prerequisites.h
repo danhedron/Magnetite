@@ -41,6 +41,8 @@ typedef unsigned char LightIndex;
 typedef std::vector<WorldNode*> NodeList;
 typedef std::vector<WorldTree*> TreeList;
 
+typedef long ChunkScalar;
+
 //typedef *BaseBlock[] BlockList;
 
 namespace Magnetite {
@@ -67,6 +69,9 @@ class Chunk;
 #define CHUNK_HEIGHT 16
 #define CHUNK_SIZE (CHUNK_WIDTH*CHUNK_WIDTH*CHUNK_HEIGHT)
 #define NODE_SIZE ((CHUNK_HEIGHT/CHUNK_WIDTH))
+
+#define REGION_SIZE 8
+#define REGION_WORLD_SIZE (REGION_SIZE * CHUNK_WIDTH)
 
 #define TREE_LENGTH 512 // Defines the length of one side of an octree
 #define TREE_VOLUME (TREE_LENGTH*TREE_LENGTH*TREE_LENGTH)

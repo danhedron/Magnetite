@@ -1,6 +1,7 @@
 #ifndef _RENDERER_H_
 #define _RENDERER_H_
 #include "prerequisites.h"
+#include "Region.h"
 
 class Texture;
 class BaseBlock;
@@ -130,7 +131,7 @@ public:
 	 */
 	void _renderTree( WorldTree* tree );
 	void _renderNode( WorldNode* node, int depth  );
-	void _renderChunk( Chunk* chunk );
+	void _renderChunk( Magnetite::ChunkRegionPtr region, Chunk* chunk );
 
 	/**
 	 * Draws debug statistics onto the screen

@@ -59,6 +59,9 @@ set(MAGNETITE_SOURCES
 	source/Components/PhysicsComponent.cpp
 	source/Components/RenderableComponent.cpp
 	
+	# Paging 
+	source/Region.cpp
+	
 	source/PhysicsWorldObject.cpp
 	source/WorldItem.cpp
 	source/BaseResource.cpp
@@ -126,6 +129,9 @@ set(MAGNETITE_HEADERS
 	include/Components/InterpolatorComponent.h
 	include/Components/PhysicsComponent.h
 	include/Components/RenderableComponent.h
+	
+	# Paging
+	include/Region.h
 	
 	include/PhysicsWorldObject.h
 	include/WorldItem.h

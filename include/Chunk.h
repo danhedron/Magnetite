@@ -14,9 +14,9 @@ class World;
  */
 struct ChunkIndex
 {
-	long x;
-	long y;
-	long z;
+	ChunkScalar x;
+	ChunkScalar y;
+	ChunkScalar z;
 };
 
 typedef std::map<size_t, BlockPtr> BlockList;

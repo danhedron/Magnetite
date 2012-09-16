@@ -4,6 +4,7 @@
 #include "WorldNode.h"
 #include "Collision.h"
 #include "MovingBlock.h"
+#include "Region.h"
 
 class BaseTriangulator;
 class Chunk;
@@ -125,10 +126,12 @@ typedef Chunk** ChunkArray;
 class World
 {
 protected:
-	//ChunkList	mChunks;
-	//TreeList	mOctrees;
-	ChunkArray	mChunks;
-	// length of one edge of the world, in chunks
+	
+	//ChunkArray	mChunks;
+	
+	Magnetite::ChunkRegionArray mRegions;
+	
+	// Size of the world, in regions.
 	size_t 		mWorldSize;
 
 	Sky*		mSky;
@@ -167,9 +170,9 @@ public:
 	size_t coordsToIndex( int x, int y, int z );
 	
 	/**
-	 * Returns the current world size.
+	 * Returns the number of regions.
 	 */
-	size_t getChunkCount();
+	size_t getRegionCount() const;
 
 	/**
 	 * Returns the world's current stage
@@ -318,9 +321,14 @@ public:
 	void removeChunk(long x, long y, long z);
 	
 	/**
-	 * Returns the chunks in the world
+	 * Creates a Region at the given coordinates
 	 */
-	ChunkArray getChunks();
+	Magnetite::ChunkRegionPtr createRegion( const ChunkScalar x, const ChunkScalar y, const ChunkScalar z );
+	
+	/**
+	 * Returns all of the Regions.
+	 */
+	Magnetite::ChunkRegionArray getRegions() const;
 
 	/**
 	 * Creates a series of test chunks of radius size.
@@ -385,6 +393,11 @@ public:
 	 * Returns the chunk at the given indexes.
 	 */
 	Chunk* getChunk(const long x, const long y, const long z);
+	
+	/**
+	 * Returns the Region at the given indexes 
+	 */
+	Magnetite::ChunkRegionPtr getRegion(const ChunkScalar x, const ChunkScalar y, const ChunkScalar z);
 
 	/**
 	 * Performs an AABB test against the world.

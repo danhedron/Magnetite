@@ -231,12 +231,10 @@ void Renderer::render(double dt, World* world)
 	
 	rendered = 0;
 
-	ChunkArray chunks = world->getChunks();
-
 	if( mDrawWorld && mDebugMode != DEBUG_SKY ) 
 	{
 		mWorldProgram->makeActive();
-		
+			
 		// Set up the uniform for the world diffuse texture.
 		GLint samplerLocation = mWorldProgram->getUniformLocation("worldDiffuse");
 		if( samplerLocation != -1 )
@@ -247,15 +245,21 @@ void Renderer::render(double dt, World* world)
 			glBindTexture(GL_TEXTURE_2D, mWorldTexture->getName());
 		}
 		
-		
-		for( size_t c = 0; c < world->getChunkCount(); c++ )
+		// Just draw everything, need some occulusion technique.
+		auto regions = world->getRegions();
+		for( size_t r = 0;  r < world->getRegionCount(); r++ )
 		{
-			if( chunks[c] )
+			if( regions[r] == NULL ) continue;
+			for( size_t c = 0; c < regions[r]->count(); c++ )
 			{
-				// Ensure we get a lock to avoid visual artifacts.
-				chunks[c]->getMutex().lock();
-				_renderChunk( chunks[c] );
-				chunks[c]->getMutex().unlock();
+				auto chnk = regions[r]->get(c);
+				if( chnk )
+				{
+					// Ensure we get a lock to avoid visual artifacts.
+					chnk->getMutex().lock();
+					_renderChunk( regions[r], chnk );
+					chnk->getMutex().unlock();
+				}
 			}
 		}
 		
@@ -323,7 +327,7 @@ void Renderer::_renderNode(WorldNode *node, int depth)
 {
 }
 
-void Renderer::_renderChunk( Chunk* chunk )
+void Renderer::_renderChunk( Magnetite::ChunkRegionPtr region, Chunk* chunk )
 {
 	rendered++;
 	// Sort out view Matrix.

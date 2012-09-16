@@ -95,14 +95,14 @@ void Chunk::setBlockAt( BlockPtr block, short x, short y, short z )
 
 void Chunk::setBlockAt( BlockPtr block, short index )
 {
-	getMutex().lock();
-	
 	if( index < 0 || index > CHUNK_SIZE )
 		return;
 	if( mBlocks[ index ] != NULL )
 	{
 		removeBlockAt( index );
 	}
+	// Lock here to avoid locking the thread.
+	getMutex().lock();
 	mNumBlocks++;
 	mBlocks[ index ] = block;
 	_raiseChunkFlag( DataUpdated );

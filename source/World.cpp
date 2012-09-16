@@ -31,17 +31,8 @@ mTriangulator( new BlockTriangulator() )
 {	
 
 	mWorldSize = edgeSize;
-	mChunks = new ChunkPtr[edgeSize*edgeSize*edgeSize];
-	memset( mChunks, 0, sizeof( ChunkPtr ) * edgeSize*edgeSize*edgeSize); 
-	
-// 	for( size_t x = 0; x < edgeSize; x++ ) {
-// 		for( size_t z = 0; z < edgeSize; z++ ) {
-// 			for( size_t y = 0; y < edgeSize; y++ ) {
-// 				size_t idx = coordsToIndex( x, y, z );
-// 				mChunks[idx] = NULL;
-// 			}
-// 		}
-// 	}
+	mRegions = new Magnetite::ChunkRegionPtr[edgeSize*edgeSize*edgeSize];
+	memset( mRegions, 0, sizeof( Magnetite::ChunkRegionPtr ) * edgeSize*edgeSize*edgeSize);
 	
 	createSky( 0 );
 
@@ -56,7 +47,7 @@ World::~World()
 void World::buildTerrain()
 {
 	mGenerator = new ChunkGenerator(1024);
-	mGenerator->fillRegion( this, Vector3(0,0,0), Vector3( (mWorldSize-1) * CHUNK_WIDTH, (mWorldSize-1) * CHUNK_WIDTH, (mWorldSize-1) * CHUNK_WIDTH ) );
+	mGenerator->fillRegion( this, Vector3(0,0,0), Vector3( (mWorldSize) * REGION_WORLD_SIZE, (mWorldSize) * REGION_WORLD_SIZE, (mWorldSize) * REGION_WORLD_SIZE ) );
 	
 	//auto wcube = mWorldSize*mWorldSize*mWorldSize;
 	
@@ -103,32 +94,55 @@ BaseTriangulator* World::getTriangulator()
 
 BlockPtr World::getBlockAt( long x, long y, long z )
 {
-	size_t cx = floor( (x)/CHUNK_WIDTH );
-	size_t cy = floor( (y)/CHUNK_HEIGHT );
-	size_t cz = floor( (z)/CHUNK_WIDTH );
-	Chunk* c = getChunk( cx, cy, cz );
+	ChunkScalar rx = x / REGION_WORLD_SIZE;
+	ChunkScalar ry = y / REGION_WORLD_SIZE;
+	ChunkScalar rz = z / REGION_WORLD_SIZE;
+	Magnetite::ChunkRegionPtr r = getRegion(rx, ry, rz);
+	if( r == NULL ) return NULL;
+	ChunkScalar cx = (x / CHUNK_WIDTH) % REGION_SIZE;
+	ChunkScalar cy = (y / CHUNK_WIDTH) % REGION_SIZE;
+	ChunkScalar cz = (z / CHUNK_WIDTH) % REGION_SIZE;
+	
+	auto c = r->get( cx, cy, cz );
+	
 	if( c == NULL ) return NULL;
-	else return c->getBlockAt( x % CHUNK_WIDTH, y % CHUNK_HEIGHT, z % CHUNK_WIDTH );
+	
+	return c->getBlockAt( x % CHUNK_WIDTH, y % CHUNK_HEIGHT, z % CHUNK_WIDTH );
 }
 
 void World::removeBlockAt( long x, long y, long z )
 {
-	size_t cx = floor( ((float) x)/CHUNK_WIDTH );
-	size_t cy = floor( ((float) y)/CHUNK_HEIGHT );
-	size_t cz = floor( ((float) z)/CHUNK_WIDTH );
-	Chunk* c = getChunk( cx, cy, cz );
+	ChunkScalar rx = x / REGION_WORLD_SIZE;
+	ChunkScalar ry = y / REGION_WORLD_SIZE;
+	ChunkScalar rz = z / REGION_WORLD_SIZE;
+	Magnetite::ChunkRegionPtr r = getRegion(rx, ry, rz);
+	if( r == NULL ) return;
+	ChunkScalar cx = (x / CHUNK_WIDTH) % REGION_SIZE;
+	ChunkScalar cy = (y / CHUNK_WIDTH) % REGION_SIZE;
+	ChunkScalar cz = (z / CHUNK_WIDTH) % REGION_SIZE;
+	
+	auto c = r->get( cx, cy, cz );
+	
 	if( c == NULL ) return;
-	else c->removeBlockAt( x % CHUNK_WIDTH, y % CHUNK_HEIGHT, z % CHUNK_WIDTH );
+	
+	c->removeBlockAt( x % CHUNK_WIDTH, y % CHUNK_HEIGHT, z % CHUNK_WIDTH );
 }
 
 void World::setBlockAt( BaseBlock* b, long x, long y, long z )
 {
-	size_t cx = floor( ((float) x)/CHUNK_WIDTH );
-	size_t cy = floor( ((float) y)/CHUNK_HEIGHT );
-	size_t cz = floor( ((float) z)/CHUNK_WIDTH );
-	Chunk* c = getChunk( cx, cy, cz );
-	if( c == NULL ) return;
-	else c->setBlockAt( b, x % CHUNK_WIDTH, y % CHUNK_HEIGHT, z % CHUNK_WIDTH );
+	ChunkScalar rx = x / REGION_WORLD_SIZE;
+	ChunkScalar ry = y / REGION_WORLD_SIZE;
+	ChunkScalar rz = z / REGION_WORLD_SIZE;
+	Magnetite::ChunkRegionPtr r = getRegion(rx, ry, rz);
+	if( r == NULL ) return;
+	ChunkScalar cx = (x / CHUNK_WIDTH) % REGION_SIZE;
+	ChunkScalar cy = (y / CHUNK_WIDTH) % REGION_SIZE;
+	ChunkScalar cz = (z / CHUNK_WIDTH) % REGION_SIZE;
+	
+	auto c = r->get( cx, cy, cz );
+	if( c == NULL ) c = r->create( cx, cy, cz );
+	
+	c->setBlockAt( b, x % CHUNK_WIDTH, y % CHUNK_HEIGHT, z % CHUNK_WIDTH );
 }
 
 void World::moveBlock( long x, long y, long z, float time, long ex, long ey, long ez )
@@ -154,10 +168,16 @@ MovingBlockList& World::getMovingBlocks()
 
 LightIndex World::getLightLevel( long x, long y, long z )
 {
-	size_t cx = floor( ((float) x)/CHUNK_WIDTH );
-	size_t cy = floor( ((float) y)/CHUNK_HEIGHT );
-	size_t cz = floor( ((float) z)/CHUNK_WIDTH );
-	Chunk* c = getChunk( cx, cy, cz );
+	ChunkScalar rx = x / REGION_WORLD_SIZE;
+	ChunkScalar ry = y / REGION_WORLD_SIZE;
+	ChunkScalar rz = z / REGION_WORLD_SIZE;
+	Magnetite::ChunkRegionPtr r = getRegion(rx, ry, rz);
+	if( r == NULL ) return 255;
+	ChunkScalar cx = (x / CHUNK_WIDTH) % REGION_SIZE;
+	ChunkScalar cy = (y / CHUNK_WIDTH) % REGION_SIZE;
+	ChunkScalar cz = (z / CHUNK_WIDTH) % REGION_SIZE;
+	
+	auto c = r->get( cx, cy, cz );
 	if( c == NULL ) return 255;
 	return c->getLightLevel( x % CHUNK_WIDTH, y % CHUNK_HEIGHT, z % CHUNK_WIDTH );
 }
@@ -171,57 +191,80 @@ void World::destoryWorld()
 {
 	for( size_t i = 0; i < mWorldSize*mWorldSize*mWorldSize; i++ )
 	{
-		if(mChunks[i])
+		if(mRegions[i])
 		{
-			delete mChunks[i];
-			mChunks[i] = NULL;
+			delete mRegions[i];
+			mRegions[i] = NULL;
 		}
 	}
 }
 
-ChunkArray World::getChunks()
+Magnetite::ChunkRegionArray World::getRegions() const
 {
-	return mChunks;
+	return mRegions;
 }
 
-size_t World::getChunkCount()
+size_t World::getRegionCount() const
 {
 	return mWorldSize*mWorldSize*mWorldSize;
 }
 
 Chunk* World::getChunk(const long x, const long y, const long z)
 {
-	size_t index = coordsToIndex( x, y, z );
-	if( x < 0 || x > mWorldSize-1 || y < 0 || y > mWorldSize-1 || z < 0 || z > mWorldSize-1 )
-	{
-		return NULL;
-	}
-	else if( mChunks[index] == NULL )
-	{
-		// Chunk is inside the world bounds, but hasn't been created yet.
-		return createChunk( x, y, z );
-	}
-
-	return mChunks[index];
+	ChunkScalar rx = x / REGION_WORLD_SIZE;
+	ChunkScalar ry = y / REGION_WORLD_SIZE;
+	ChunkScalar rz = z / REGION_WORLD_SIZE;
+	Magnetite::ChunkRegionPtr r = getRegion(rx, ry, rz);
+	if( r == NULL ) return nullptr;
+	return r->get( x - (rx * REGION_SIZE * CHUNK_WIDTH), y - (ry * REGION_SIZE * CHUNK_WIDTH), z - (rz * REGION_SIZE * CHUNK_WIDTH) );
 }
 
-Chunk* World::createChunk(long x, long y, long z)
+Magnetite::ChunkRegionPtr World::getRegion( const ChunkScalar x, const ChunkScalar y, const ChunkScalar z )
 {
 	size_t index = coordsToIndex( x, y, z );
 	if( x < 0 || x > mWorldSize-1 || y < 0 || y > mWorldSize-1 || z < 0 || z > mWorldSize-1 )
+	{
 		return NULL;
-	mChunks[index] = new Chunk( ChunkIndex{ x, y, z }, this ); // 6859 (thanks to n3hima)
+	}
+	else if( mRegions[index] == NULL )
+	{
+		// Region is valid, but has not yet been created.
+		return createRegion( x, y, z );
+	}
+
+	return mRegions[index];
+}
+
+
+Chunk* World::createChunk(long x, long y, long z)
+{
+	ChunkScalar rx = x / REGION_WORLD_SIZE;
+	ChunkScalar ry = y / REGION_WORLD_SIZE;
+	ChunkScalar rz = z / REGION_WORLD_SIZE;
+	Magnetite::ChunkRegionPtr r = getRegion(rx, ry, rz);
+	if( r == NULL ) return NULL;
+	return r->create( x % REGION_SIZE, y % REGION_SIZE, z % REGION_SIZE );
+}
+
+Magnetite::ChunkRegionPtr World::createRegion( const ChunkScalar x, const ChunkScalar y, const ChunkScalar z )
+{
+	Util::log( "Created Region: " + Util::toString(x) + " " + Util::toString(y) + " " + Util::toString(z) );
+	size_t index = coordsToIndex( x, y, z );
+	if( x < 0 || x > mWorldSize-1 || y < 0 || y > mWorldSize-1 || z < 0 || z > mWorldSize-1 )
+		return NULL;
+	mRegions[index] = new Magnetite::ChunkRegion( x, y, z, this ); // 6859 (thanks to n3hima)
 	
-	return mChunks[index];
+	return mRegions[index];
 }
 
 void World::removeChunk( long x, long y, long z )
 {
-	size_t index = coordsToIndex( x, y, z );
-	if( index < 0 || index > mWorldSize*mWorldSize*mWorldSize )
-		return;
-	delete mChunks[index];
-	mChunks[index] = NULL;
+	ChunkScalar rx = x / REGION_WORLD_SIZE;
+	ChunkScalar ry = y / REGION_WORLD_SIZE;
+	ChunkScalar rz = z / REGION_WORLD_SIZE;
+	Magnetite::ChunkRegionPtr r = getRegion(rx, ry, rz);
+	if( r == NULL ) return;
+	return r->remove( x % REGION_SIZE, y % REGION_SIZE, z % REGION_SIZE );
 }
 
 void World::setPagingCamera( Camera* _c )
@@ -286,14 +329,19 @@ void World::update( float dt )
 	else
 	{
 		auto wcube = mWorldSize*mWorldSize*mWorldSize;
-		for( int i = 0; i < wcube; i++ )
+		for( size_t r = 0;  r < wcube; r++ )
 		{
-			if( mChunks[i] )
+			if( mRegions[r] == nullptr ) continue;
+			for( size_t c = 0; c < mRegions[r]->count(); c++ )
 			{
-				if( mChunks[i]->getMutex().try_lock() )
+				auto chnk = mRegions[r]->get(c);
+				if( chnk )
 				{
-					mChunks[i]->update(dt);
-					mChunks[i]->getMutex().unlock();
+					if( chnk->getMutex().try_lock() )
+					{
+						chnk->update(dt);
+						chnk->getMutex().unlock();
+					}
 				}
 			}
 		}
