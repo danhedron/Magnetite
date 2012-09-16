@@ -255,12 +255,7 @@ void Renderer::render(double dt, World* world)
 				auto chnk = regions[r]->get(c);
 				if( chnk )
 				{
-					// Ensure we get a lock to avoid visual artifacts.
-					if( chnk->getMutex().try_lock() )
-					{
-						_renderChunk( regions[r], chnk );
-						chnk->getMutex().unlock();
-					}
+					_renderChunk( regions[r], chnk );
 				}
 			}
 		}
@@ -331,18 +326,20 @@ void Renderer::_renderNode(WorldNode *node, int depth)
 
 void Renderer::_renderChunk( Magnetite::ChunkRegionPtr region, Chunk* chunk )
 {
-	rendered++;
-	// Sort out view Matrix.
-	glLoadIdentity();
-	auto view = glm::inverse( mCamera->getMatrix() );
-	glMultMatrixf( glm::value_ptr(view) );
-	
-	float x = chunk->getX() * CHUNK_WIDTH;
-	float y = chunk->getY() * CHUNK_HEIGHT;
-	float z = chunk->getZ() * CHUNK_WIDTH;
-	glTranslatef(x,y,z);
-	
-	if( !chunk->_hasChunkFlag( Chunk::MeshInvalid ) && chunk->getGeometry() != NULL && chunk->getVisibleFaceCount() > 0 ) {
+	if( !chunk->_hasChunkFlag( Chunk::MeshInvalid ) && chunk->getGeometry() != NULL && chunk->getVisibleFaceCount() > 0 )
+	{
+		chunk->getMutex().lock();
+		rendered++;
+		// Sort out view Matrix.
+		glLoadIdentity();
+		auto view = glm::inverse( mCamera->getMatrix() );
+		glMultMatrixf( glm::value_ptr(view) );
+		
+		float x = chunk->getX() * CHUNK_WIDTH;
+		float y = chunk->getY() * CHUNK_HEIGHT;
+		float z = chunk->getZ() * CHUNK_WIDTH;
+		glTranslatef(x,y,z);
+		
 		Geometry* geom = chunk->getGeometry();
 		
 		if( geom->vertexBO == 0 || geom->indexBO == 0 )
@@ -360,6 +357,8 @@ void Renderer::_renderChunk( Magnetite::ChunkRegionPtr region, Chunk* chunk )
 
 		glBindBuffer( GL_ARRAY_BUFFER, 0 );
 		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+		
+		chunk->getMutex().unlock();
 	}
 
 }
