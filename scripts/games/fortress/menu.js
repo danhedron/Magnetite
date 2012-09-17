@@ -12,6 +12,12 @@
 						}
 					},
 					{
+						text: 'Forge',
+						action: function() {
+							this.build('forge');
+						}
+					},
+					{
 						text: 'Guard Tower',
 						action: function() {
 							this.build('tower');

@@ -37,7 +37,7 @@ Game.onLoad = function()
 	
 	// Create a drone.
 	this.drones = [];
-	for( var i = 0; i < 50; i++ )
+	for( var i = 0; i < 20; i++ )
 	{
 		var d = this.newDrone();
 		d.overridePosition({ x: Math.random() * 100, y: 140, z: Math.random() * 100 });
