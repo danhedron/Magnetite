@@ -96,12 +96,15 @@ set(MAGNETITE_SOURCES
 	source/TextureManager.cpp
 	source/geometry/BaseTriangulator.cpp
 	source/geometry/BlockTriangulator.cpp
+	
+	# Scripting Interfaces
 	source/script/ScriptWrapper.cpp
 	source/script/ScriptGlobalsWorld.cpp
 	source/script/ScriptGlobalsDebug.cpp
 	source/script/ScriptExplosion.cpp
 	source/script/ScriptPlayer.cpp
-	source/script/ScriptEntity.cpp
+	source/script/Entities.cpp
+	
 	source/blocks/LogBlock.cpp
 	source/blocks/LeafBlock.cpp
 	source/Profiler.cpp
@@ -168,13 +171,16 @@ set(MAGNETITE_HEADERS
 	include/TextureManager.h
 	include/BaseTriangulator.h
 	include/BlockTriangulator.h
+	
+	#Script Interfaces
 	include/script/ScriptWrapper.h
 	include/script/ScriptGlobalsList.h
 	include/script/ScriptGlobalsWorld.h
 	include/script/ScriptGlobalsDebug.h
 	include/script/ScriptExplosion.h
 	include/script/ScriptPlayer.h
-	include/script/ScriptEntity.h
+	include/script/Entities.h
+	
 	include/blocks/LogBlock.h
 	include/blocks/LeafBlock.h
 	include/Profiler.h

@@ -1,4 +1,4 @@
-#include "script/ScriptEntity.h"
+#include "script/Entities.h"
 #include "ScriptWrapper.h"
 #include <BaseEntity.h>
 #include <Components/RenderableComponent.h>

@@ -1,6 +1,6 @@
 #include "ScriptGlobalsWorld.h"
 #include "ScriptGlobalsList.h"
-#include <ScriptEntity.h>
+#include <Entities.h>
 #include "MagnetiteCore.h"
 #include "World.h"
 #include "BaseBlock.h"

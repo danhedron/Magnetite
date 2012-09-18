@@ -1,5 +1,5 @@
-#ifndef _SCRIPTENTITY_H_
-#define _SCRIPTENTITY_H_
+#ifndef _ENTITIES_H_
+#define _ENTITIES_H_
 #include <v8.h>
 #include "prerequisites.h"
 
