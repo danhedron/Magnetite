@@ -164,7 +164,10 @@ void MagnetiteCore::startGame( const std::string& type )
 	
 	mGame->_loadGame();
 	
-	mScriptWrapper->runFile("./scripts/main.js");
+	{
+		v8::HandleScope hs;
+		mScriptWrapper->runFile("./scripts/main.js");
+	}
 	
 	// No multiplayer yet so just force player join
 	mGame->_playerJoined();

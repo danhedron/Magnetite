@@ -87,6 +87,8 @@ ValueHandle ScriptWrapper::runFile( std::string filename )
 		HandleScope scope;
 		TryCatch try_catch;
 		
+		Util::log("Running: " + filename );
+		
 		Handle<Script> script = Script::Compile( String::New(source.c_str()), String::New(filename.c_str()) );
 		if( script.IsEmpty() )
 		{
@@ -104,7 +106,7 @@ ValueHandle ScriptWrapper::runFile( std::string filename )
 			report(&try_catch);
 			return Undefined();
 		}
-		return r;
+		return scope.Close( r );
 	}
 	else
 	{

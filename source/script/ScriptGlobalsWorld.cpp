@@ -140,6 +140,15 @@ ValueHandle world_fireRay(const Arguments& args)
 	return Undefined();
 }
 
+Persistent<ObjectTemplate> scriptEntityTemplate;
+ValueHandle se_getEntity( const Arguments& args )
+{
+	auto external = args.This()->GetInternalField(0).As<External>();
+	auto self = static_cast<Magnetite::BaseEntity*>(external->Value());
+	
+	return wrapEntity(self);
+}
+
 ValueHandle world_createEntity( const Arguments& args )
 {
 	auto sw = MagnetiteCore::Singleton->getScriptManager();
@@ -151,11 +160,30 @@ ValueHandle world_createEntity( const Arguments& args )
 		Util::log("Resolved entity path: " + path + " for entity: " + *v8::String::AsciiValue( args[0]->ToString() ) );
 		if( path != "" ) {
 			// ToDo: More Caching?
-			auto entityObject = sw->runFile( path );
-			if( entityObject->IsObject() ) {
+			auto entityVal = sw->runFile( path );
+			if( entityVal->IsObject() ) {
+				auto entityObject = entityVal.As<Object>();
+				
+				// Ensure the scriptEntityTemplate exists
+				if( scriptEntityTemplate.IsEmpty() ) {
+					scriptEntityTemplate = Persistent<ObjectTemplate>::New( ObjectTemplate::New() );
+					
+					scriptEntityTemplate->Set( v8::String::New("getEntity"), FunctionTemplate::New( se_getEntity ) );
+					
+					scriptEntityTemplate->SetInternalFieldCount(1);
+				}
+				
 				auto entity = world->createEntity<Magnetite::Script::ScriptEntity>();
-				entity->setObject( PersistentObject::New( entityObject.As<Object>() ) );
-				return wrapEntity(entity);
+				
+				auto wraped = wrapEntity(entity);
+				
+				// What a hack.
+				auto scriptHelper = scriptEntityTemplate->NewInstance();
+				scriptHelper->SetInternalField(0, v8::External::New( entity ));
+				scriptHelper->SetPrototype( entityObject );
+				entity->setObject( PersistentObject::New( scriptHelper ) );
+				
+				return wraped;
 			}
 		}
 	}
