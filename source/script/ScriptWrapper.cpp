@@ -7,6 +7,7 @@
 #include "Player.h"
 #include "BaseBlock.h"
 #include "BlockFactory.h"
+#include <BaseGame.h>
 #include <fstream>
 
 
@@ -220,4 +221,24 @@ PersistentObject ScriptWrapper::newGame( const std::string& name )
 	PersistentObject game = loadGame(name);
 		
 	return game;
+}
+
+Magnetite::String ScriptWrapper::resolveEntityPath( const Magnetite::String& name )
+{
+	// Check in order if any of the valid directories exist; todo: make this less so.
+	auto currGame = MagnetiteCore::Singleton->getGame();
+	
+	std::ifstream test;
+	if( currGame ) {
+		auto p = std::string("./scripts/games/" + currGame->getPath() + "/entities/" + name + "/" + name + ".js");
+		test.open(p.c_str());
+		if( test.is_open() ) return p;
+	}
+	
+	auto p = std::string("./scripts/entities/" + name + "/" + name + ".js");
+	test.open(p.c_str());
+	if( test.is_open() ) return p;
+	
+	// This entity isn't even valid.
+	return "";
 }

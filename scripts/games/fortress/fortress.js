@@ -42,6 +42,10 @@ Game.onLoad = function()
 		var d = this.newDrone();
 		d.overridePosition({ x: Math.random() * 100, y: 140, z: Math.random() * 100 });
 	}
+	
+	// Create a test entity
+	this.anvil = world.createEntity('anvil');
+	this.anvil.create();
 }
 
 Game.build = function( b ) 

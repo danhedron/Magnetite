@@ -27,6 +27,11 @@ public:
 	 * Returns the name of this Game for printing purposes.
 	 */
 	virtual std::string getName();
+	
+	/**
+	 * Returns the path for this game, used for scripted games
+	 */
+	virtual Magnetite::String getPath();
 
 	/**
 	 * Returns true in singleplayer mode 

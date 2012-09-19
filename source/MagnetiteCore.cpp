@@ -154,6 +154,7 @@ void MagnetiteCore::startGame( const std::string& type )
 	ScriptGame* g = new ScriptGame();
 	g->setName("script");
 	g->_setScriptObject( mScriptWrapper->newGame(type) );
+	g->_setPath(type);
 	mGame = g;
 	if( mGame != NULL ) 
 		Util::log("Starting game: " + mGame->getName() );

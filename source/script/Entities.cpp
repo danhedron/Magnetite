@@ -154,6 +154,19 @@ ValueHandle entity_addComponent( const Arguments& args )
 	return Undefined();
 }
 
+ValueHandle entity_create( const Arguments& args )
+{
+	auto external = args.This()->GetInternalField(0).As<External>();
+	auto self = static_cast<Magnetite::BaseEntity*>(external->Value());
+	
+	if( self != nullptr )
+	{
+		self->create();
+	}
+	
+	return Undefined();
+}
+
 typedef std::map<Magnetite::BaseEntity*, PersistentObject> WrappedEntities;
 WrappedEntities gWrappedEntities;
 Persistent<ObjectTemplate> entityTemplate;
@@ -175,6 +188,7 @@ ValueHandle wrapEntity( Magnetite::BaseEntity* entity )
 		entityTemplate->SetInternalFieldCount(1);
 		
 		entityTemplate->Set(String::New("addComponent"), FunctionTemplate::New(entity_addComponent));
+		entityTemplate->Set(String::New("create"), FunctionTemplate::New(entity_create));
 	}
 	
 	PersistentObject pl = PersistentObject::New(entityTemplate->NewInstance());

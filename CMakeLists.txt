@@ -58,6 +58,7 @@ set(MAGNETITE_SOURCES
 	source/Components/InterpolatorComponent.cpp
 	source/Components/PhysicsComponent.cpp
 	source/Components/RenderableComponent.cpp
+	source/script/ScriptEntity.cpp
 	
 	# Paging 
 	source/Region.cpp
@@ -132,6 +133,7 @@ set(MAGNETITE_HEADERS
 	include/Components/InterpolatorComponent.h
 	include/Components/PhysicsComponent.h
 	include/Components/RenderableComponent.h
+	include/script/ScriptEntity.h
 	
 	# Paging
 	include/Region.h

@@ -8,6 +8,11 @@ namespace Magnetite {
 		
 	}
 	
+	void Component::create()
+	{
+		
+	}
+	
 	void Component::event( const BaseEvent& ev )
 	{
 		

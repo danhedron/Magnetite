@@ -1,6 +1,7 @@
 #include "ScriptGlobalsWorld.h"
 #include "ScriptGlobalsList.h"
 #include <Entities.h>
+#include <ScriptEntity.h>
 #include "MagnetiteCore.h"
 #include "World.h"
 #include "BaseBlock.h"
@@ -141,6 +142,25 @@ ValueHandle world_fireRay(const Arguments& args)
 
 ValueHandle world_createEntity( const Arguments& args )
 {
+	auto sw = MagnetiteCore::Singleton->getScriptManager();
+	auto world = MagnetiteCore::Singleton->getWorld();
+	
+	// Figure out if we need to create a base entity or a script entity.
+	if( args.Length() > 0 && args[0]->IsString() ) {
+		auto path = sw->resolveEntityPath( *v8::String::AsciiValue( args[0]->ToString() ) );
+		Util::log("Resolved entity path: " + path + " for entity: " + *v8::String::AsciiValue( args[0]->ToString() ) );
+		if( path != "" ) {
+			// ToDo: More Caching?
+			auto entityObject = sw->runFile( path );
+			if( entityObject->IsObject() ) {
+				auto entity = world->createEntity<Magnetite::Script::ScriptEntity>();
+				entity->setObject( PersistentObject::New( entityObject.As<Object>() ) );
+				return wrapEntity(entity);
+			}
+		}
+	}
+	
+	// Just return a blank entity
 	auto ent = MagnetiteCore::Singleton->getWorld()->createEntity<Magnetite::BaseEntity>();
 	
 	return wrapEntity(ent);

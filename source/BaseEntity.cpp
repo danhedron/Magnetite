@@ -24,6 +24,14 @@ namespace Magnetite {
 		return mName;
 	}
 	
+	void BaseEntity::create()
+	{
+		for( auto it = mComponents.begin(); it != mComponents.end(); it++ )
+		{
+			(*it)->create();
+		}
+	}
+	
 	void BaseEntity::fireEvent( const BaseEvent& event )
 	{
 		for( auto it = mComponents.begin(); it != mComponents.end(); it++ )

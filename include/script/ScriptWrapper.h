@@ -39,6 +39,11 @@ public:
 	 */
 	PersistentObject newGame( const std::string& name );
 	
+	/**
+	 * Resolves an entity to a path, since entities can be defined in multiple locations.
+	 */
+	Magnetite::String resolveEntityPath( const Magnetite::String& name );
+	
 	ValueHandle runFile( std::string filename );
 	
 	PersistentContext getContext();

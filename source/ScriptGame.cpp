@@ -19,6 +19,7 @@ ScriptGame::ScriptGame()
 {
 	mEngine = MagnetiteCore::Singleton; // Bad design they say? Humbug!
 	mPlayer = NULL;
+	mPathName = "";
 	clickMode = "remove";
 }
 
@@ -42,6 +43,11 @@ std::string ScriptGame::getName()
 	return "Un-named Game Type";
 }
 
+Magnetite::String ScriptGame::getPath()
+{
+	return mPathName;
+}
+
 void ScriptGame::setName( const std::string& name )
 {
 	mGameName = name;
@@ -50,6 +56,11 @@ void ScriptGame::setName( const std::string& name )
 void ScriptGame::_setScriptObject( PersistentObject object )
 {
 	mScriptObject = object;
+}
+
+void ScriptGame::_setPath( const Magnetite::String& path )
+{
+	mPathName = path;
 }
 
 void ScriptGame::_startGameSingle()

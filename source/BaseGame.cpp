@@ -29,6 +29,11 @@ std::string BaseGame::getName()
 	return "Default";
 }
 
+Magnetite::String BaseGame::getPath()
+{
+	return "";
+}
+
 void BaseGame::_startGameSingle()
 {
 	mIsSinglePlayer = true;

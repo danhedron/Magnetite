@@ -13,6 +13,11 @@ protected:
 	std::string mGameName;
 	
 	/**
+	 * Stores the folder name
+	 */
+	Magnetite::String mPathName;
+	
+	/**
 	 * The Javascript object!1
 	 */
 	PersistentObject mScriptObject;
@@ -27,6 +32,11 @@ public:
 	virtual std::string getName();
 	
 	/**
+	 * Returns the path for this game, used for scripted games
+	 */
+	virtual Magnetite::String getPath();
+
+	/**
 	 * Sets the friendly name for this game
 	 */
 	void setName( const std::string& name );
@@ -35,6 +45,11 @@ public:
 	 * Sets the internal object for javascript
 	 */
 	void _setScriptObject( PersistentObject object );
+	
+	/**
+	 * Sets the internal path 
+	 */
+	void _setPath( const Magnetite::String& path );
 
 	/**
 	 * Returns true in singleplayer mode 

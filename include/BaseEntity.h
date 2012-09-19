@@ -63,6 +63,11 @@ namespace Magnetite {
 		String getName() const;
 		
 		/**
+		 * Calls when the entitiy is due to spawn.
+		 */
+		virtual void create();
+		
+		/**
 		 * Propagates an event through all of the child components.
 		 * @param ev the event
 		 */
@@ -71,7 +76,7 @@ namespace Magnetite {
 		/**
 		 * Thinks all of the components.
 		 */
-		void think( float dt );
+		virtual void think( float dt );
 		
 		/**
 		 * Draws all of the components

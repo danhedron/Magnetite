@@ -36,6 +36,11 @@ class BaseEntity;
 		Component( BaseEntity* ent );
 		
 		/**
+		 * Callback for when the Component is created.
+		 */
+		virtual void create();
+		
+		/**
 		 * Callback for reciving an event.
 		 * @param ev Event object
 		 */
