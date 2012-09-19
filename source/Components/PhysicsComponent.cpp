@@ -87,7 +87,7 @@ namespace Magnetite
 		me.eventID = CE_POSITION_UPDATED;
 		me.position = Vector3( p.x(), p.y(), p.z() );
 		
-		mEntity->fireEvent(me);;
+		mEntity->fireEvent(me);
 	}
 	
 };

@@ -79,8 +79,8 @@
 					var dist = lent( subt( structure.position, this.position ) );
 					if( dist < this.constructionDistance )
 					{
-						game.createStructure( structure );
 						this.actionQueue = this.actionQueue.slice(1);
+						game.createStructure( structure );
 					}
 					break;
 				case 'clear':

@@ -59,4 +59,16 @@ namespace Magnetite {
 			(*it)->draw( info, dt);
 		}
 	}
+	
+	void BaseEntity::updatePosition( const Vector3& newpos )
+	{
+		MovementEvent me;
+		me.setDefaults();
+		
+		me.source = nullptr;
+		me.eventID = CE_POSITION_UPDATED;
+		me.position = newpos;
+		
+		fireEvent(me);
+	}
 };

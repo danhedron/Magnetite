@@ -82,6 +82,11 @@ namespace Magnetite {
 		 * Draws all of the components
 		 */
 		void draw( const Component::DrawInfo& info, float dt );
+		
+		/**
+		 * For convenience, fires a 'position updated' event.
+		 */
+		void updatePosition( const Vector3& newpos );
 	};
 	
 };

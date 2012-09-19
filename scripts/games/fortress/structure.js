@@ -22,5 +22,15 @@
 				}
 			}
 		}
+		
+		var entities = template.entities;
+		for( var i = 0; i < entities.length; i++ )
+		{
+			var e = entities[i];
+			var ent = world.createEntity( e.type );
+			console.log( JSON.stringify( add( e.position, position ) ) );
+			ent.create();
+			ent.setPosition( add( e.position, position ) );
+		}
 	}
 })());

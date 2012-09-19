@@ -167,6 +167,21 @@ ValueHandle entity_create( const Arguments& args )
 	return Undefined();
 }
 
+ValueHandle entity_setPosition( const Arguments& args )
+{
+	if( args.Length() < 1 && !args[0]->IsObject() ) return Undefined();
+	
+	auto external = args.This()->GetInternalField(0).As<External>();
+	auto self = static_cast<Magnetite::BaseEntity*>(external->Value());
+	
+	if( self != nullptr )
+	{
+		self->updatePosition( unwrapVector3( args[0] ) );
+	}
+	
+	return Undefined();
+}
+
 typedef std::map<Magnetite::BaseEntity*, PersistentObject> WrappedEntities;
 WrappedEntities gWrappedEntities;
 Persistent<ObjectTemplate> entityTemplate;
@@ -189,6 +204,7 @@ ValueHandle wrapEntity( Magnetite::BaseEntity* entity )
 		
 		entityTemplate->Set(String::New("addComponent"), FunctionTemplate::New(entity_addComponent));
 		entityTemplate->Set(String::New("create"), FunctionTemplate::New(entity_create));
+		entityTemplate->Set(String::New("setPosition"), FunctionTemplate::New(entity_setPosition));
 	}
 	
 	PersistentObject pl = PersistentObject::New(entityTemplate->NewInstance());
