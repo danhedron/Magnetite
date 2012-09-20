@@ -29,6 +29,12 @@
 							this.build('foundation');
 						}
 					},
+					{
+						text: 'Stockpile',
+						action: function() {
+							this.build('stockpile');
+						}
+					}
 				]
 			},
 			{

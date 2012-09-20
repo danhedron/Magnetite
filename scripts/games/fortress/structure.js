@@ -17,7 +17,11 @@
 				for( var z = 0; z < zb.length; z++ ) {
 					if( zb[z] != '' || zb[z] != undefined )
 					{
-						world.createBlock( zb[z], position.x + x, position.y + y, position.z + z );
+						world.createBlock( zb[z], position.x + x, position.y + y + template.yoffset, position.z + z );
+					}
+					if( zb[z] == '' ) 
+					{
+						world.removeBlock( position.x + x, position.y + y + template.yoffset, position.z + z );
 					}
 				}
 			}
@@ -28,9 +32,9 @@
 		{
 			var e = entities[i];
 			var ent = world.createEntity( e.type );
-			console.log( JSON.stringify( add( e.position, position ) ) );
+			ent.position = add( add( e.position, position ), { x: 0, y: template.yoffset, z: 0 } );
 			ent.create();
-			ent.setPosition( add( e.position, position ) );
+			ent.setPosition( add( add( e.position, position ), { x: 0, y: template.yoffset, z: 0 } ) );
 		}
 	}
 })());

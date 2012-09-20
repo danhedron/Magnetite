@@ -11,7 +11,7 @@ public:
 	GrassBlock(long x = 0, long y = 0, long z = 0);
 	~GrassBlock(void);
 
-	std::string getType();
+	virtual std::string getType();
 
 	void getTextureCoords( short face, short &x, short &y );
 

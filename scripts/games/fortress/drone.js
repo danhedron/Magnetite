@@ -19,9 +19,20 @@
 	
 	this.t = Math.random() * Math.PI*2;
 	
+	// Temp: Stores blocks the drone has collected.
+	this.blocks = [];
+	this.maxBlocks = 10;
+	
 	this.overridePosition = function( p ) {
 		this.position = JSON.parse(JSON.stringify(p));
 		this.targetPosition = JSON.parse(JSON.stringify(p));
+	}
+	
+	this.dump = function( stockpile ) {
+		this.actionQueue.unshift({
+			type: 'dump',
+			stockpile: stockpile
+		});
 	}
 	
 	this.construct = function( s ) {
@@ -39,6 +50,18 @@
 		});
 	}
 	
+	this.storeBlock = function( b ) {
+		this.blocks.push( b );
+		if( this.blocks.length > this.maxBlocks )
+		{
+			var pile = Game.getBestStockpile( this.position );
+			if( pile )
+			{
+				this.dump( pile );
+			}
+		}
+	}
+	
 	// Hack until custom components are implemented.
 	this.tick = function( dt ) {
 		var p = { x: this.position.x, y: this.position.y, z: this.position.z };
@@ -47,7 +70,7 @@
 		
 		var r = new world.createRay();
 		r.direction = this.downNormal;
-		r.origin = p;
+		r.origin = add( p, { x: 0, y: 5, z: 0 } );
 		r = world.fireRay( r );
 		if( r.hit ) {
 			// Let drones fly if they need to in order to reach their target.
@@ -100,6 +123,7 @@
 									var dist = lent( direction );
 									if( dist < this.constructionDistance )
 									{
+										this.storeBlock(b.type);
 										world.removeBlock( x, y, z );
 									}
 								}
@@ -110,6 +134,28 @@
 					{
 						this.actionQueue = this.actionQueue.slice(1);
 					}
+					break;
+				case 'dump':
+						this.targetPosition = add( action.stockpile.position, { x: 0, y: 0, z: 0 } );
+						var direction = subt( this.position, action.stockpile.position );
+						var dist = lent( direction );
+						if( dist < this.constructionDistance )
+						{
+							for( var i = 0; i < this.blocks.length; ) 
+							{
+								if( !action.stockpile.isAvailable() )
+								{
+									// Suddenly, the stockpile is unavailable :c
+									this.storeBlock( this.blocks[i] ); break;
+								}
+								else if( action.stockpile.canStore( this.blocks[i] ) )
+								{
+									action.stockpile.store( this.blocks[i] );
+									this.blocks.splice( i, 1 );
+								}
+							}
+							this.actionQueue = this.actionQueue.slice(1);
+						}
 					break;
 			}
 		}

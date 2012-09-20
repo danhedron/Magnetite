@@ -5,6 +5,9 @@ var Structure = require('./scripts/games/fortress/structure.js');
 
 Game.name = 'Fortress';
 
+// Hack I guess.
+Game.stockpiles = [];
+
 Number.prototype.sign = function() {
   if(this > 0) {
     return 1;
@@ -42,10 +45,6 @@ Game.onLoad = function()
 		var d = this.newDrone();
 		d.overridePosition({ x: Math.random() * 100, y: 140, z: Math.random() * 100 });
 	}
-	
-	// Create a test entity
-	this.anvil = world.createEntity('anvil');
-	this.anvil.create();
 }
 
 Game.build = function( b ) 
@@ -54,7 +53,7 @@ Game.build = function( b )
 	
 	if( rs.hit )
 	{
-		var p = { x: rs.worldHit.x + (rs.normal.x /2), y: rs.worldHit.y - (rs.normal.y /2), z: rs.worldHit.z + (rs.normal.z /2) };
+		var p = { x: rs.worldHit.x + (rs.normal.x /2), y: rs.worldHit.y + (rs.normal.y /2), z: rs.worldHit.z + (rs.normal.z /2) };
 		var structure = {
 			'structure': b,
 			'position': p
@@ -125,6 +124,23 @@ Game.getNearestDrone = function( center ) {
 		};
 	}
 	return ndrone;
+}
+
+Game.getBestStockpile = function( center, type ) {
+	// Returns the closest stockpile that can accomodate the given type.
+	var s;
+	var c;
+	for( var i = 0; i < this.stockpiles.length; i++ )
+	{
+		var pile = this.stockpiles[i];
+		var d = lent( subt( center, pile.position ) );
+		if( (c == undefined || d < c) && (pile.isAvailable() && ( type == undefined || pile.canStore(type) )) )
+		{
+			c = d;
+			s = pile;
+		}
+	}
+	return s;
 }
 
 Game.onSpawn = function( p )
