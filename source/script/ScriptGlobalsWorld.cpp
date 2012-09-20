@@ -26,10 +26,12 @@ ValueHandle wrapBlock( BaseBlock* block )
 	if( blockTemplate.IsEmpty() )
 	{
 		blockTemplate = Persistent<ObjectTemplate>::New(ObjectTemplate::New());
-		blockTemplate->Set( String::New( "type" ), String::New( block->getType().c_str() ) );
 	}
 	
 	PersistentObject obj = Persistent<Object>::New(blockTemplate->NewInstance());
+	
+	obj->Set( String::New( "type" ), String::New( block->getType().c_str() ), PropertyAttribute::ReadOnly );
+	
 	gWrappedBlocks.insert( WrappedBlocks::value_type( block, obj) );
 	
 	return obj;
