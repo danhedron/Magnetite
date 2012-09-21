@@ -46,8 +46,8 @@ namespace Magnetite
 		T* get( ChunkScalar x, ChunkScalar y, ChunkScalar z ) {
 			auto idx = z * REGION_SIZE * REGION_SIZE  + y * REGION_SIZE  + x;
 			auto c = mChunks[idx];
-			if( c == NULL )
-				return create( x, y, z );
+			//if( c == NULL )
+			//	return create( x, y, z );
 			return c;
 		}
 		

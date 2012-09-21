@@ -4,7 +4,8 @@
 #include "PhysicsState.h"
 #include <glm/gtc/matrix_transform.hpp>
 
-Character::Character( ) :
+Character::Character( ) 
+: mCamera( MagnetiteCore::Singleton->getWorld() ),
 mPhysicsController( NULL )
 {
 	setHeight( 1.9f );

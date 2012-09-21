@@ -3,8 +3,10 @@
 #include "prerequisites.h"
 #include "Matrix.h"
 #include "Frustum.h"
+#include "paging/PagingCamera.h"
 
-class Camera
+class World;
+class Camera : public Magnetite::PagingCamera
 {
 protected:
 	float mYaw;
@@ -13,7 +15,7 @@ protected:
 
 	Frustum mViewFrustum;
 public:
-	Camera(void);
+	Camera( World* world );
 	~Camera(void);
 
 	glm::mat4 getMatrix();

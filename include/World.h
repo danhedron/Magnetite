@@ -5,6 +5,7 @@
 #include "Collision.h"
 #include "MovingBlock.h"
 #include "Region.h"
+#include "paging/PagingContext.h"
 
 class BaseTriangulator;
 class Chunk;
@@ -123,7 +124,7 @@ enum WorldStage {
  */
 typedef Chunk** ChunkArray;
 
-class World
+class World : public Magnetite::PagingContext
 {
 protected:
 	
@@ -265,16 +266,6 @@ public:
 	 * Requests that the engine load or generate the chunk at the given index
 	 */
 	void requestChunk( int x, int y, int z );
-	
-	/**
-	 *	Converts world coordinates into chunk indexes.
-	 */
-	static Vector3 worldToChunks( const Vector3& vec );
-
-	/**
-	 *	Converts world coordinates into block offset ( in the chunk at that location )
-	 */
-	static Vector3 worldToBlock( const Vector3& vec );
 
 	/**
 	 * Returns the top-level Quadtree node at the given coordinates or NULL if it's not in memory
@@ -425,6 +416,16 @@ public:
 	 * Returns true if there is a block surrounding this point
 	 */
     bool hasNeighbours(short int x, short int y, short int z);
+	
+	/**
+	 * Called by the PagingContext when a new chunk is needed to be loaded.
+	 */
+	virtual void onPageEntered(const Magnetite::PageInfo& pageinfo);
+	
+	/**
+	 * Called by the PagingContext when a page should be unloaded.
+	 */
+	virtual void onPageExit(const Magnetite::PageInfo& pageinfo);
 
 };
 

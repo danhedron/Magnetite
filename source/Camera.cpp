@@ -1,4 +1,6 @@
 #include "Camera.h"
+#include "World.h"
+
 #include "Matrix.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -6,8 +8,9 @@
 #include <glm/gtx/transform.hpp>
 
 
-Camera::Camera(void)
-: mYaw( 0 ),
+Camera::Camera( World* world )
+: PagingCamera( world ),
+mYaw( 0 ),
 mPitch ( 0 )
 {
 	mViewFrustum.setCamera(this);
@@ -16,7 +19,7 @@ mPitch ( 0 )
 
 Camera::~Camera(void)
 {
-
+	//PagingCamera::~PagingCamera();
 }
 
 glm::mat4 Camera::getMatrix()
@@ -74,6 +77,7 @@ void Camera::setPosition(const Vector3 &v)
 {
 	mPosition = v;
 	mViewFrustum.updatePlanes();
+	PagingCamera::setPosition( v );
 }
 
 Vector3 Camera::getPosition()

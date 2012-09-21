@@ -34,6 +34,10 @@ mTriangulator( new BlockTriangulator() )
 	mRegions = new Magnetite::ChunkRegionPtr[edgeSize*edgeSize*edgeSize];
 	memset( mRegions, 0, sizeof( Magnetite::ChunkRegionPtr ) * edgeSize*edgeSize*edgeSize);
 	
+	setWorldSize( edgeSize * REGION_SIZE, edgeSize * REGION_SIZE, edgeSize * REGION_SIZE);
+	
+	setPageSize( CHUNK_WIDTH );
+	
 	createSky( 0 );
 
 	printDbg = false;
@@ -47,7 +51,7 @@ World::~World()
 void World::buildTerrain()
 {
 	mGenerator = new ChunkGenerator(1024);
-	mGenerator->fillRegion( this, Vector3(0,0,0), Vector3( (mWorldSize) * REGION_WORLD_SIZE, (mWorldSize) * REGION_WORLD_SIZE, (mWorldSize) * REGION_WORLD_SIZE ) );
+	//mGenerator->fillRegion( this, Vector3(0,0,0), Vector3( (mWorldSize) * REGION_WORLD_SIZE, (mWorldSize) * REGION_WORLD_SIZE, (mWorldSize) * REGION_WORLD_SIZE ) );
 	
 	//auto wcube = mWorldSize*mWorldSize*mWorldSize;
 	
@@ -243,7 +247,19 @@ Chunk* World::createChunk(long x, long y, long z)
 	ChunkScalar rz = z / REGION_WORLD_SIZE;
 	Magnetite::ChunkRegionPtr r = getRegion(rx, ry, rz);
 	if( r == NULL ) return NULL;
-	return r->create( x % REGION_SIZE, y % REGION_SIZE, z % REGION_SIZE );
+	
+	// Don't create if a chunk already exists.
+	auto c = r->get(x % REGION_SIZE, y % REGION_SIZE, z % REGION_SIZE);
+	if( c != nullptr ) return c;
+	
+	// Create a new chunk and generate it (for now.);
+	c = r->create( x % REGION_SIZE, y % REGION_SIZE, z % REGION_SIZE );
+	Util::log("Generating Chunk: " + Util::toString( x ) + " " + Util::toString( y ) + " " + Util::toString(z) );
+	mGenerator->fillRegion( this, 
+							Vector3( x * CHUNK_WIDTH, y * CHUNK_WIDTH, z * CHUNK_WIDTH ), 
+							Vector3( x * CHUNK_WIDTH + CHUNK_WIDTH, y * CHUNK_WIDTH + CHUNK_WIDTH, z * CHUNK_WIDTH + CHUNK_WIDTH )
+				);
+	return c;
 }
 
 Magnetite::ChunkRegionPtr World::createRegion( const ChunkScalar x, const ChunkScalar y, const ChunkScalar z )
@@ -302,8 +318,13 @@ void World::createWorldFolder()
 
 void World::update( float dt )
 {
-	if( mSky != NULL )
+	if( mSky != NULL ) 
+	{
 		mSky->update( dt );
+	}
+	
+	// Update paging information before we do anything else.
+	PagingContext::update();
 	
 	// Tick all of the entities.
 	for( auto it = mEntities.begin(); it != mEntities.end(); it++ )
@@ -579,23 +600,13 @@ raycast_r World::raycastCube(const raycast_r &inray, Vector3& min, Vector3& max)
 	return ray;
 }
 
-Vector3 World::worldToChunks(const Vector3 &vec)
+void World::onPageEntered( const Magnetite::PageInfo& info )
 {
-	Vector3 v;
-	v.x = floor( vec.x / (float)CHUNK_WIDTH );
-	v.y = floor( vec.y / (float)CHUNK_HEIGHT );
-	v.z = floor( vec.z / (float)CHUNK_WIDTH );
-	return v;
+	Util::log("Entered Page: " + Util::toString( info.x ) + " " + Util::toString( info.y ) + " " + Util::toString( info.z ) );
+	this->activateChunk( info.x, info.y, info.z );
 }
 
-Vector3 World::worldToBlock(const Vector3 &vec)
+void World::onPageExit( const Magnetite::PageInfo& info )
 {
-	Vector3 v;
-	v.x = abs((int)vec.x % CHUNK_WIDTH);// * ( vec.x < 0 ? -1.f : 1.f );
-	v.x = vec.x < 0 ? CHUNK_WIDTH - v.x - 1: v.x;
-	v.y = abs((int)vec.y % CHUNK_HEIGHT);// * ( vec.y < 0 ? -1.f : 1.f );
-	v.y = vec.y < 0 ? CHUNK_HEIGHT - v.y - 1 : v.y;
-	v.z = abs((int)vec.z % CHUNK_WIDTH);// * ( vec.z < 0 ? -1.f : 1.f );
-	v.z = vec.z < 0 ? CHUNK_WIDTH - v.z - 1: v.z;
-	return v;
+	
 }

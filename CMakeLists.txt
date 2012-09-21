@@ -62,6 +62,8 @@ set(MAGNETITE_SOURCES
 	
 	# Paging 
 	source/Region.cpp
+	source/paging/PagingCamera.cpp
+	source/paging/PagingContext.cpp
 	
 	source/PhysicsWorldObject.cpp
 	source/WorldItem.cpp
@@ -137,6 +139,8 @@ set(MAGNETITE_HEADERS
 	
 	# Paging
 	include/Region.h
+	include/paging/PagingCamera.h
+	include/paging/PagingContext.h
 	
 	include/PhysicsWorldObject.h
 	include/WorldItem.h
