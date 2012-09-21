@@ -47,7 +47,7 @@ namespace Magnetite
 				for( auto z = 0; z < wSize.z; z++ )
 				{
 					// Determine spherical distance.
-					pagePos = Vector3( x, y, z ) * mContext->getPageSize();
+					pagePos = Vector3( x, y, z ) * mContext->getPageSize() + mContext->getPageOffset();
 					auto d = glm::length( mPosition - pagePos );
 					if( d < (mFar - pageRad) )
 					{

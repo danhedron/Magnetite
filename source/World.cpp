@@ -36,6 +36,8 @@ mTriangulator( new BlockTriangulator() )
 	
 	setWorldSize( edgeSize * REGION_SIZE, edgeSize * REGION_SIZE, edgeSize * REGION_SIZE);
 	
+	setPageOffset( Vector3( CHUNK_WIDTH / 2.f, CHUNK_WIDTH / 2.f, CHUNK_WIDTH / 2.f ) );
+	
 	setPageSize( CHUNK_WIDTH );
 	
 	createSky( 0 );
@@ -215,12 +217,12 @@ size_t World::getRegionCount() const
 
 Chunk* World::getChunk(const long x, const long y, const long z)
 {
-	ChunkScalar rx = x / REGION_WORLD_SIZE;
-	ChunkScalar ry = y / REGION_WORLD_SIZE;
-	ChunkScalar rz = z / REGION_WORLD_SIZE;
+	ChunkScalar rx = x / REGION_SIZE;
+	ChunkScalar ry = y / REGION_SIZE;
+	ChunkScalar rz = z / REGION_SIZE;
 	Magnetite::ChunkRegionPtr r = getRegion(rx, ry, rz);
 	if( r == NULL ) return nullptr;
-	return r->get( x - (rx * REGION_SIZE * CHUNK_WIDTH), y - (ry * REGION_SIZE * CHUNK_WIDTH), z - (rz * REGION_SIZE * CHUNK_WIDTH) );
+	return r->get( x % REGION_SIZE, y % REGION_SIZE, z % REGION_SIZE );
 }
 
 Magnetite::ChunkRegionPtr World::getRegion( const ChunkScalar x, const ChunkScalar y, const ChunkScalar z )
@@ -242,11 +244,11 @@ Magnetite::ChunkRegionPtr World::getRegion( const ChunkScalar x, const ChunkScal
 
 Chunk* World::createChunk(long x, long y, long z)
 {
-	ChunkScalar rx = x / REGION_WORLD_SIZE;
-	ChunkScalar ry = y / REGION_WORLD_SIZE;
-	ChunkScalar rz = z / REGION_WORLD_SIZE;
+	ChunkScalar rx = x / REGION_SIZE;
+	ChunkScalar ry = y / REGION_SIZE;
+	ChunkScalar rz = z / REGION_SIZE;
 	Magnetite::ChunkRegionPtr r = getRegion(rx, ry, rz);
-	if( r == NULL ) return NULL;
+	if( r == NULL ) { return NULL; }
 	
 	// Don't create if a chunk already exists.
 	auto c = r->get(x % REGION_SIZE, y % REGION_SIZE, z % REGION_SIZE);
@@ -602,7 +604,11 @@ raycast_r World::raycastCube(const raycast_r &inray, Vector3& min, Vector3& max)
 
 void World::onPageEntered( const Magnetite::PageInfo& info )
 {
-	Util::log("Entered Page: " + Util::toString( info.x ) + " " + Util::toString( info.y ) + " " + Util::toString( info.z ) );
+	auto c = getChunk( info.x, info.y, info.z );
+	if( c == nullptr ) 
+		Util::log("Generated Page: " + Util::toString( info.x ) + " " + Util::toString( info.y ) + " " + Util::toString( info.z ) );
+	else
+		Util::log("Entered Page: " + Util::toString( info.x ) + " " + Util::toString( info.y ) + " " + Util::toString( info.z ) );
 	this->activateChunk( info.x, info.y, info.z );
 }
 

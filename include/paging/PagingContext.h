@@ -81,6 +81,11 @@ namespace Magnetite
 		void setPageSize( float size );
 		
 		/**
+		 * Sets the local offset for each page's position
+		 */
+		void setPageOffset( const Vector3& ofs );
+		
+		/**
 		 * Callback, called when a new page has become visible to a PagingCamera.
 		 * @param pageinfo Information about the new page.
 		 */

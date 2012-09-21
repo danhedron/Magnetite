@@ -48,6 +48,11 @@ namespace Magnetite
 		mPageSize = size;
 	}
 	
+	void PagingContext::setPageOffset( const Vector3& ofs )
+	{
+		mPageOffset = ofs;
+	}
+	
 	float PagingContext::getPageSize()
 	{
 		return mPageSize;
