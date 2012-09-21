@@ -366,17 +366,15 @@ void Renderer::_renderChunk( Magnetite::ChunkRegionPtr region, Chunk* chunk )
 void Renderer::drawStats(double dt, size_t chunkCount, World* world)
 {
 	size_t percent = ( mBlTotal > 0 ? (mBlRendered*100)/(mBlTotal) : 0 );
-
+	Perf::Profiler& perf = Perf::Profiler::get();
+	
 	std::stringstream ss;
 	ss << "Magnetite Info:" << std::endl;
 	ss << "\tdt: " << dt << std::endl;
 	ss << "\tFPS: " << (1.f/dt) << std::endl;
-	auto t = Perf::Profiler::get().getEntry( "think" );
-	ss << "\tthink: " << t.latest << "ms" << std::endl;
-	auto g = Perf::Profiler::get().getEntry( "gthink" );
-	ss << "\tgame think: " << g.latest << "ms" << std::endl;
-	auto d = Perf::Profiler::get().getEntry( "draw" );
-	ss << "\tdraw: " << d.latest << "ms" << std::endl;
+	ss << "\tthink: " << perf.getLastTime( "think" ) << "ms" << std::endl;
+	ss << "\tgame think: " << perf.getLastTime( "gthink" ) << "ms" << std::endl;
+	ss << "\tdraw: " << perf.getLastTime( "draw" ) << "ms" << std::endl;
 	ss << "\tTimescale: " << MagnetiteCore::Singleton->getTimescale() << std::endl;
 	ss << "World Stats: " << std::endl;
 	ss << "\tBlocks: " << mBlRendered << "/" << mBlTotal << " - " << percent <<  std::endl;

@@ -28,7 +28,9 @@ namespace Perf {
 		
 		void end( const std::string& section );
 		
-		ProfileEntry& getEntry( const std::string& section );
+		uint32_t getLastTime( const std::string& section );
+		
+		uint32_t getTotalTime( const std::string& section );
 		
 		static Profiler& get();
 	};

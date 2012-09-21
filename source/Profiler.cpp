@@ -52,16 +52,29 @@ namespace Perf
 		mMutex.unlock();
 	}
 	
-	ProfileEntry& Profiler::getEntry( const std::string& section )
+	uint32_t Profiler::getLastTime( const std::string& section )
 	{
+		uint32_t time = 0;
 		mMutex.lock();
 		ProfilerEvents::iterator it = mEvents.find( section );
 		if( it != mEvents.end() )
 		{
-			mMutex.unlock();
-			return it->second;
+			time = it->second.latest;
 		}
 		mMutex.unlock();
-		// what to do if there is no entry?
+		return time;
+	}
+	
+	uint32_t Profiler::getTotalTime( const std::string& section )
+	{
+		uint32_t time = 0;
+		mMutex.lock();
+		ProfilerEvents::iterator it = mEvents.find( section );
+		if( it != mEvents.end() )
+		{
+			time = it->second.total;
+		}
+		mMutex.unlock();
+		return time;
 	}
 };
