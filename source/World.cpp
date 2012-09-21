@@ -277,9 +277,9 @@ Magnetite::ChunkRegionPtr World::createRegion( const ChunkScalar x, const ChunkS
 
 void World::removeChunk( long x, long y, long z )
 {
-	ChunkScalar rx = x / REGION_WORLD_SIZE;
-	ChunkScalar ry = y / REGION_WORLD_SIZE;
-	ChunkScalar rz = z / REGION_WORLD_SIZE;
+	ChunkScalar rx = x / REGION_SIZE;
+	ChunkScalar ry = y / REGION_SIZE;
+	ChunkScalar rz = z / REGION_SIZE;
 	Magnetite::ChunkRegionPtr r = getRegion(rx, ry, rz);
 	if( r == NULL ) return;
 	return r->remove( x % REGION_SIZE, y % REGION_SIZE, z % REGION_SIZE );
@@ -606,13 +606,16 @@ void World::onPageEntered( const Magnetite::PageInfo& info )
 {
 	auto c = getChunk( info.x, info.y, info.z );
 	if( c == nullptr ) 
-		Util::log("Generated Page: " + Util::toString( info.x ) + " " + Util::toString( info.y ) + " " + Util::toString( info.z ) );
+		Util::log("Generated Chunk: " + Util::toString( info.x ) + " " + Util::toString( info.y ) + " " + Util::toString( info.z ) );
 	else
-		Util::log("Entered Page: " + Util::toString( info.x ) + " " + Util::toString( info.y ) + " " + Util::toString( info.z ) );
+		Util::log("Entered Chunk: " + Util::toString( info.x ) + " " + Util::toString( info.y ) + " " + Util::toString( info.z ) );
 	this->activateChunk( info.x, info.y, info.z );
 }
 
 void World::onPageExit( const Magnetite::PageInfo& info )
 {
-	
+	auto c = getChunk( info.x, info.y, info.z );
+	if( c == nullptr ) 
+		Util::log("Left Chunk: " + Util::toString( info.x ) + " " + Util::toString( info.y ) + " " + Util::toString( info.z ) );
+	this->deativateChunk( info.x, info.y, info.z );
 }

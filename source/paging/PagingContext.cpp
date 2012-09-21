@@ -93,6 +93,11 @@ namespace Magnetite
 						inf.x = x; inf.y = y; inf.z = z;
 						onPageEntered( inf );
 					}
+					else if( mNewPageMap[id] == 0 && mPageMap[id] != 0 )
+					{
+						inf.x = x; inf.y = y; inf.z = z;
+						onPageExit( inf );
+					}
 				}
 			}
 		}
