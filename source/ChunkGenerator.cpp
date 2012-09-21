@@ -72,13 +72,19 @@ void ChunkGenerator::fillRegion( World* w, const Vector3& min, const Vector3& ma
 				total = total + interpolatedNoise((float)(x) * freq * 0.05f , (float)(z) *freq * 0.05f ) * amp;
 			}
 			total = (total*30.f) + 128.f;
-			for( int y = 0; y < total-1; y++ )
+			size_t yt = total;
+			for( int y = floor(min.y); y < floor( max.y ) ; y++ )
 			{
-				BaseBlock* b = FactoryManager::getManager().createBlock("stone");
-				w->setBlockAt(b, x, y, z );
+				BaseBlock* b = nullptr;
+				if( y == yt ) {
+					b = FactoryManager::getManager().createBlock("grass");
+				}
+				else if( y < total-1 ) {
+					b = FactoryManager::getManager().createBlock("stone");
+				}
+				if( b )
+					w->setBlockAt(b, x, y, z );
 			}
-			BaseBlock* top = FactoryManager::getManager().createBlock("grass");
-			w->setBlockAt(top, x, total, z );
 		}
 	}
 }
