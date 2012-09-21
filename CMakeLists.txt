@@ -64,6 +64,7 @@ set(MAGNETITE_SOURCES
 	source/Region.cpp
 	source/paging/PagingCamera.cpp
 	source/paging/PagingContext.cpp
+	source/WorldSerializer.cpp
 	
 	source/PhysicsWorldObject.cpp
 	source/WorldItem.cpp
@@ -91,7 +92,6 @@ set(MAGNETITE_SOURCES
 	source/WaterBlock.cpp
 	source/MovingBlock.cpp
 	source/ChunkGenerator.cpp
-	source/ChunkLoader.cpp
 	source/World.cpp
 	source/WorldNode.cpp
 	source/WorldTree.cpp
@@ -137,10 +137,11 @@ set(MAGNETITE_HEADERS
 	include/Components/RenderableComponent.h
 	include/script/ScriptEntity.h
 	
-	# Paging
+	# Paging & Serialization
 	include/Region.h
 	include/paging/PagingCamera.h
 	include/paging/PagingContext.h
+	include/WorldSerializer.h
 	
 	include/PhysicsWorldObject.h
 	include/WorldItem.h
@@ -169,7 +170,6 @@ set(MAGNETITE_HEADERS
 	include/BaseBlock.h
 	include/MovingBlock.h
 	include/ChunkGenerator.h
-	include/ChunkLoader.h
 	include/World.h
 	include/WorldNode.h
 	include/WorldTree.h

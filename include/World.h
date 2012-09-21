@@ -7,6 +7,9 @@
 #include "Region.h"
 #include "paging/PagingContext.h"
 
+namespace Magnetite {
+class WorldSerializer;}
+
 class BaseTriangulator;
 class Chunk;
 typedef Chunk* ChunkPtr;
@@ -154,6 +157,11 @@ protected:
 	 */
 	BaseTriangulator* mTriangulator;
 	
+	/**
+	 * Serializer, for writing chunks to disk
+	 */
+	Magnetite::WorldSerializer* mSerializer;
+	
 public:
 	/** 
 	 * Constructor: -
@@ -236,7 +244,12 @@ public:
 	/**
 	 * Returns the name of the world
 	 */
-	std::string getName();
+	Magnetite::String getName();
+	
+	/**
+	 * Sets the name of the world.
+	 */
+	void setName( const Magnetite::String& name );
 
 	/**
 	 * Returns the path to the current world
@@ -296,12 +309,20 @@ public:
 	TreeList& getTopNodes();
 
 	/**
-	 * Creates a chunk at the given coordinates and fills it with test data
+	 * Creates a chunk at the given coordinates.
 	 * @param x Coordinate
 	 * @param y Coordinate
 	 * @param z Coordinate
 	 */
 	Chunk* createChunk(long x, long y, long z);
+	
+	/**
+	 * Generates data for the chunk at the given coordinates
+	 * @param x Coordinate.
+	 * @param y Coordinate.
+	 * @param z Coordinate.
+	 */
+	Chunk* generateChunk( ChunkScalar x, ChunkScalar y, ChunkScalar z );
 
 	/**
 	 * Removes the chunk at the given offset

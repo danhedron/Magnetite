@@ -11,6 +11,7 @@
 #include <LightingManager.h>
 #include <BlockTriangulator.h>
 #include <BaseEntity.h>
+#include <WorldSerializer.h>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
@@ -29,7 +30,6 @@ mPagingCamera( NULL ),
 mWorldStage( WORLD_NORMAL ),
 mTriangulator( new BlockTriangulator() )
 {	
-
 	mWorldSize = edgeSize;
 	mRegions = new Magnetite::ChunkRegionPtr[edgeSize*edgeSize*edgeSize];
 	memset( mRegions, 0, sizeof( Magnetite::ChunkRegionPtr ) * edgeSize*edgeSize*edgeSize);
@@ -43,11 +43,15 @@ mTriangulator( new BlockTriangulator() )
 	createSky( 0 );
 
 	printDbg = false;
+	
+	mSerializer = new Magnetite::WorldSerializer(this);
 }
 
 World::~World()
 {
 	destoryWorld();
+	
+	delete mSerializer;
 }
 
 void World::buildTerrain()
@@ -91,6 +95,16 @@ size_t World::coordsToIndex( int x, int y, int z )
 WorldStage World::getCurrentStage()
 {
 	return mWorldStage;
+}
+
+Magnetite::String World::getName()
+{
+	return mWorldName;
+}
+
+void World::setName( const Magnetite::String& name )
+{
+	mWorldName = name;
 }
 
 BaseTriangulator* World::getTriangulator()
@@ -256,11 +270,23 @@ Chunk* World::createChunk(long x, long y, long z)
 	
 	// Create a new chunk and generate it (for now.);
 	c = r->create( x % REGION_SIZE, y % REGION_SIZE, z % REGION_SIZE );
-	Util::log("Generating Chunk: " + Util::toString( x ) + " " + Util::toString( y ) + " " + Util::toString(z) );
+
+	return c;
+}
+
+Chunk* World::generateChunk( ChunkScalar x, ChunkScalar y, ChunkScalar z )
+{
+	auto c = getChunk( x, y, z );
+	if( c == nullptr )
+	{
+		c = createChunk( x, y, z );
+	}
+	
 	mGenerator->fillRegion( this, 
 							Vector3( x * CHUNK_WIDTH, y * CHUNK_WIDTH, z * CHUNK_WIDTH ), 
 							Vector3( x * CHUNK_WIDTH + CHUNK_WIDTH, y * CHUNK_WIDTH + CHUNK_WIDTH, z * CHUNK_WIDTH + CHUNK_WIDTH )
 				);
+	
 	return c;
 }
 
@@ -298,11 +324,19 @@ bool World::hasNeighbours(short int x, short int y, short int z)
 void World::activateChunk( long x, long y, long z )
 {
 	// Generate or load the chunk as it is not loaded.
-	createChunk( x, y, z );
+	if( mSerializer->hasChunk( x, y, z ) )
+	{
+		mSerializer->loadChunk( x, y, z );
+	}
+	else
+	{
+		generateChunk( x, y, z );
+	}
 }
 
 void World::deativateChunk( long x, long y, long z )
 {
+	mSerializer->saveChunk( x, y, z );
 	removeChunk( x, y, z );
 }
 
@@ -604,18 +638,10 @@ raycast_r World::raycastCube(const raycast_r &inray, Vector3& min, Vector3& max)
 
 void World::onPageEntered( const Magnetite::PageInfo& info )
 {
-	auto c = getChunk( info.x, info.y, info.z );
-	if( c == nullptr ) 
-		Util::log("Generated Chunk: " + Util::toString( info.x ) + " " + Util::toString( info.y ) + " " + Util::toString( info.z ) );
-	else
-		Util::log("Entered Chunk: " + Util::toString( info.x ) + " " + Util::toString( info.y ) + " " + Util::toString( info.z ) );
 	this->activateChunk( info.x, info.y, info.z );
 }
 
 void World::onPageExit( const Magnetite::PageInfo& info )
 {
-	auto c = getChunk( info.x, info.y, info.z );
-	if( c == nullptr ) 
-		Util::log("Left Chunk: " + Util::toString( info.x ) + " " + Util::toString( info.y ) + " " + Util::toString( info.z ) );
 	this->deativateChunk( info.x, info.y, info.z );
 }
