@@ -302,13 +302,14 @@ void Renderer::render(double dt, World* world)
 	{
 		(*it)->draw(i, dt);
 	}
-	
 
 	switch( mDebugMode ) {
 		case DEBUG_STATS:
 			drawStats( dt, rendered, world );
 			break;
 		case DEBUG_PHYSICS:
+			glLoadIdentity();
+			glMultMatrixf( glm::value_ptr( glm::mat4( glm::inverse(mCamera->getMatrix() ) ) ) );
 			MagnetiteCore::Singleton->getPhysicsWorld()->debugDrawWorld();
 			break;
 	};

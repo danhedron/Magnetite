@@ -5,6 +5,7 @@
 	{
 		var template = require('./scripts/games/fortress/structures/' + type + '.js');
 		var blocks = template.blocks;
+		var yoff = template.yoffset ? template.yoffset : 0;
 		
 		var xb;
 		var yb;
@@ -17,11 +18,11 @@
 				for( var z = 0; z < zb.length; z++ ) {
 					if( zb[z] != '' || zb[z] != undefined )
 					{
-						world.createBlock( zb[z], position.x + x, position.y + y + template.yoffset, position.z + z );
+						world.createBlock( zb[z], position.x + x, position.y + y + yoff, position.z + z );
 					}
 					if( zb[z] == '' ) 
 					{
-						world.removeBlock( position.x + x, position.y + y + template.yoffset, position.z + z );
+						world.removeBlock( position.x + x, position.y + y + yoff, position.z + z );
 					}
 				}
 			}
