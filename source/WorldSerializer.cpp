@@ -32,14 +32,7 @@ namespace Magnetite
 		// Open the stream.
 		std::ifstream stream( resolveRegion( x, y, z ).c_str(), std::ios::binary );
 		
-		if( !stream.is_open() ) 
-		{
-			Util::log("Unable to load chunk [" + mWorld->getName() +"] " + Util::toString(Vector3(x,y,z)));
-		}
-		else
-		{
-			Util::log("Loading chunk [" + mWorld->getName() +"] " + Util::toString(Vector3(x,y,z)));
-		}
+		if( !stream.is_open() ) return;
 		
 		auto c = mWorld->getChunk( x, y, z );
 		if( c == nullptr ) 
@@ -83,14 +76,7 @@ namespace Magnetite
 		// Open the stream.
 		std::ofstream stream( resolveRegion( x, y, z ).c_str() );//, std::ios::binary );
 		
-		if( !stream.is_open() ) 
-		{
-			Util::log("Failed to save chunk [" + mWorld->getName() +"] " + Util::toString(Vector3(x,y,z)));
-		}
-		else
-		{
-			Util::log("Saving chunk [" + mWorld->getName() +"] " + Util::toString(Vector3(x,y,z)));
-		}
+		if( !stream.is_open() ) return;
 		
 		auto c = mWorld->getChunk( x, y, z );
 		if( c == nullptr ) 

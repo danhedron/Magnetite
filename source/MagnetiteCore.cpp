@@ -374,7 +374,7 @@ void MagnetiteCore::newWorld( std::string name )
 {
 	unloadWorld();
 
-	mWorld = new World( 5 );
+	mWorld = new World( 3 );
 	mWorld->setName(name);
 	mWorld->buildTerrain();
 }

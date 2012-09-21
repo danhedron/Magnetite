@@ -288,8 +288,10 @@ void Chunk::generatePhysics()
 {
 	if( mPhysicsBody != NULL )
 	{
+		auto p = mPhysicsBody;
+		mPhysicsBody = nullptr;
 		CoreSingleton->getPhysicsWorld()
-			->removeRigidBody( mPhysicsBody );
+			->removeRigidBody( p );
 		delete mPhysicsState;
 		delete mPhysicsBody;
 		delete mPhysicsShape;

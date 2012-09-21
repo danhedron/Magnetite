@@ -375,6 +375,7 @@ void Renderer::drawStats(double dt, size_t chunkCount, World* world)
 	ss << "\tFPS: " << (1.f/dt) << std::endl;
 	ss << "\tthink: " << perf.getLastTime( "think" ) << "ms" << std::endl;
 	ss << "\tgame think: " << perf.getLastTime( "gthink" ) << "ms" << std::endl;
+	ss << "\tpaging: " << perf.getLastTime( "page" ) << "ms" << std::endl;
 	ss << "\tdraw: " << perf.getLastTime( "draw" ) << "ms" << std::endl;
 	ss << "\tTimescale: " << MagnetiteCore::Singleton->getTimescale() << std::endl;
 	ss << "World Stats: " << std::endl;

@@ -357,6 +357,11 @@ public:
 	 * Deactivates a chunk
 	 */
 	void deativateChunk( long x, long y, long z );
+	
+	/**
+	 * Causes all adjacent chunks to update
+	 */
+	void updateAdjacent( ChunkScalar x, ChunkScalar y, ChunkScalar z );
 
 	/**
 	 * Saves all chunks to disk

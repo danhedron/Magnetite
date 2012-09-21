@@ -12,6 +12,7 @@
 #include <BlockTriangulator.h>
 #include <BaseEntity.h>
 #include <WorldSerializer.h>
+#include <Profiler.h>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
@@ -231,6 +232,7 @@ size_t World::getRegionCount() const
 
 Chunk* World::getChunk(const long x, const long y, const long z)
 {
+	if( x < 0 || y < 0 || z < 0 ) return nullptr;
 	ChunkScalar rx = x / REGION_SIZE;
 	ChunkScalar ry = y / REGION_SIZE;
 	ChunkScalar rz = z / REGION_SIZE;
@@ -332,12 +334,33 @@ void World::activateChunk( long x, long y, long z )
 	{
 		generateChunk( x, y, z );
 	}
+	updateAdjacent(x, y, z);
 }
 
 void World::deativateChunk( long x, long y, long z )
 {
 	mSerializer->saveChunk( x, y, z );
 	removeChunk( x, y, z );
+}
+
+void World::updateAdjacent( ChunkScalar x, ChunkScalar y, ChunkScalar z )
+{
+	Chunk* c;
+	
+	c = getChunk( x + 1, y, z );
+	if( c ) c->_raiseChunkFlag( Chunk::MeshInvalid | Chunk::DataUpdated );
+	c = getChunk( x - 1, y, z );
+	if( c ) c->_raiseChunkFlag( Chunk::MeshInvalid | Chunk::DataUpdated );
+
+	c = getChunk( x, y + 1, z );
+	if( c ) c->_raiseChunkFlag( Chunk::MeshInvalid | Chunk::DataUpdated );
+	c = getChunk( x, y - 1, z );
+	if( c ) c->_raiseChunkFlag( Chunk::MeshInvalid | Chunk::DataUpdated );
+	
+	c = getChunk( x, y, z + 1 );
+	if( c ) c->_raiseChunkFlag( Chunk::MeshInvalid | Chunk::DataUpdated );
+	c = getChunk( x, y, z - 1 );
+	if( c ) c->_raiseChunkFlag( Chunk::MeshInvalid | Chunk::DataUpdated );
 }
 
 void World::createWorldFolder()
@@ -360,7 +383,9 @@ void World::update( float dt )
 	}
 	
 	// Update paging information before we do anything else.
+	Perf::Profiler::get().begin("page");
 	PagingContext::update();
+	Perf::Profiler::get().end("page");
 	
 	// Tick all of the entities.
 	for( auto it = mEntities.begin(); it != mEntities.end(); it++ )
