@@ -216,6 +216,8 @@ void MagnetiteCore::go()
 			//Ensure each loaded chunk is updated before being sent to the GPU
 			mWorld->update( lDelta );
 			Perf::Profiler::get().end("think");
+			
+			Perf::Profiler::get().newFrame();
 		}
 	});
 	
@@ -279,6 +281,10 @@ void MagnetiteCore::go()
 				(lEvt.key.code == sf::Keyboard::F6 ) ) {
 				mRenderer->setDebugMode( Renderer::DEBUG_SKY );
 			}
+			if( (lEvt.type == sf::Event::KeyReleased ) &&
+				(lEvt.key.code == sf::Keyboard::F7 ) ) {
+				mRenderer->setDebugMode( Renderer::DEBUG_PERF );
+			}
 			if( (lEvt.type == sf::Event::KeyPressed) &&
 				(lEvt.key.code == sf::Keyboard::Num9) ) {
 					mTimescale *= 0.5f;
@@ -329,6 +335,8 @@ void MagnetiteCore::go()
 		mGame->uiPaint( mRenderer );
 
 		mWindow.display();
+		// Tell the profiler to start a new frame.
+		Perf::Profiler::get().newFrame();
 	}
 
 	mWindow.close();

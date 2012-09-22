@@ -213,6 +213,12 @@ void Renderer::render(double dt, World* world)
 	mFpsAvg = (mFpsAvg + (1/dt)) / 2;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
+	// Set up the projection matrix before we draw the world
+	// todo: update the world rendering to use it's own matricies.
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glMultMatrixf( glm::value_ptr( mCamera->getFrustum().getPerspective()  ) );
+	
 	glMatrixMode(GL_MODELVIEW);
 
 	glEnable(GL_CULL_FACE);
@@ -312,6 +318,19 @@ void Renderer::render(double dt, World* world)
 			glMultMatrixf( glm::value_ptr( glm::mat4( glm::inverse(mCamera->getMatrix() ) ) ) );
 			MagnetiteCore::Singleton->getPhysicsWorld()->debugDrawWorld();
 			break;
+		case DEBUG_PERF:
+			auto profs = Perf::Profiler::getProfilers();
+			Perf::Profiler::profilersMutex.lock();
+			size_t i = 0;
+			for( auto it = profs.begin(); it != profs.end(); ++it )
+			{
+				glMatrixMode( GL_MODELVIEW );
+				glLoadIdentity();
+				glTranslatef( 1.f * (i++ % 2), 0.f, 0.f );
+				drawPerf( *it->second.get() );
+			}
+			Perf::Profiler::profilersMutex.unlock();
+			break;
 	};
 
 	drawCrosshair( dt );
@@ -387,6 +406,48 @@ void Renderer::drawStats(double dt, size_t chunkCount, World* world)
 	ss << "\tPosition: " << Util::toString(mCamera->getPosition()) << std::endl;
 
 	drawText( ss.str(), 6, 15 );
+}
+
+const static float perfcolours[] = {
+	0.75f, 0.0f,  0.0f,
+	0.0f,  0.75f, 0.0f,
+	0.0f,  0.0f,  0.75f,
+	0.75f, 0.75f, 0.0f,
+	0.0f,  0.75f, 0.75f
+};
+
+void Renderer::drawPerf( Perf::Profiler& prof )
+{
+	auto frames = prof.getFrames();
+	
+	//ToDo: replace this with non-deprecated opengl.
+	
+	glMatrixMode( GL_PROJECTION );
+	glLoadIdentity();
+	glMatrixMode( GL_MODELVIEW );
+	
+	glLineWidth( 2.f );
+	
+	float lstep = 1.f / (float)FRAME_COUNT;
+	float fstart = -1.f;
+	size_t ev = 0;
+	glBegin( GL_LINES );
+	for( auto it = frames.begin(); it != frames.end(); it++ )
+	{
+		float liney = -1.f;
+		ev = 0;
+		for( auto evit = it->begin(); evit != it->end(); evit++ )
+		{
+			float evHeight = (float)evit->second.latest / 60.f;
+			glColor3f( perfcolours[(ev*3)+0], perfcolours[(ev*3)+1], perfcolours[(ev*3)+2] );
+			ev = (ev+1) % 5;
+			
+			glVertex2f( fstart, liney );
+			glVertex2f( fstart, liney += evHeight );
+		}
+		fstart += lstep;
+	}
+	glEnd();
 }
 
 void Renderer::drawCrosshair( double dt )

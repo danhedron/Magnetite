@@ -2,6 +2,7 @@
 #define _RENDERER_H_
 #include "prerequisites.h"
 #include "Region.h"
+#include "Profiler.h"
 
 class Texture;
 class BaseBlock;
@@ -137,6 +138,11 @@ public:
 	 * Draws debug statistics onto the screen
 	 */
 	void drawStats( double dt, size_t chunkCount, World* world );
+	
+	/**
+	 * Draws debug information from the profiler on screen.
+	 */
+	void drawPerf( Perf::Profiler& profiler );
 
 	/**
 	 * Draws the crosshair
