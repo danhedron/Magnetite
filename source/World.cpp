@@ -326,11 +326,7 @@ bool World::hasNeighbours(short int x, short int y, short int z)
 void World::activateChunk( long x, long y, long z )
 {
 	// Generate or load the chunk as it is not loaded.
-	if( mSerializer->hasChunk( x, y, z ) )
-	{
-		mSerializer->loadChunk( x, y, z );
-	}
-	else
+	if( !mSerializer->loadChunk( x, y, z ) )
 	{
 		generateChunk( x, y, z );
 	}
@@ -348,19 +344,19 @@ void World::updateAdjacent( ChunkScalar x, ChunkScalar y, ChunkScalar z )
 	Chunk* c;
 	
 	c = getChunk( x + 1, y, z );
-	if( c ) c->_raiseChunkFlag( Chunk::MeshInvalid | Chunk::DataUpdated );
+	if( c ) c->_raiseChunkFlag( Chunk::DataUpdated );
 	c = getChunk( x - 1, y, z );
-	if( c ) c->_raiseChunkFlag( Chunk::MeshInvalid | Chunk::DataUpdated );
+	if( c ) c->_raiseChunkFlag( Chunk::DataUpdated );
 
 	c = getChunk( x, y + 1, z );
-	if( c ) c->_raiseChunkFlag( Chunk::MeshInvalid | Chunk::DataUpdated );
+	if( c ) c->_raiseChunkFlag( Chunk::DataUpdated );
 	c = getChunk( x, y - 1, z );
-	if( c ) c->_raiseChunkFlag( Chunk::MeshInvalid | Chunk::DataUpdated );
+	if( c ) c->_raiseChunkFlag( Chunk::DataUpdated );
 	
 	c = getChunk( x, y, z + 1 );
-	if( c ) c->_raiseChunkFlag( Chunk::MeshInvalid | Chunk::DataUpdated );
+	if( c ) c->_raiseChunkFlag( Chunk::DataUpdated );
 	c = getChunk( x, y, z - 1 );
-	if( c ) c->_raiseChunkFlag( Chunk::MeshInvalid | Chunk::DataUpdated );
+	if( c ) c->_raiseChunkFlag( Chunk::DataUpdated );
 }
 
 void World::createWorldFolder()
@@ -387,12 +383,31 @@ void World::update( float dt )
 	PagingContext::update();
 	Perf::Profiler::get().end("page");
 	
+	
+	Perf::Profiler::get().begin("ethink");
 	// Tick all of the entities.
 	for( auto it = mEntities.begin(); it != mEntities.end(); it++ )
 	{
 		(*it)->think(dt);
 	}
+	Perf::Profiler::get().end("ethink");
+	
+	Perf::Profiler::get().begin("lupdate");
+	Perf::Profiler::get().end("lupdate");
+	
+	Perf::Profiler::get().begin("cgupdate");
+	Perf::Profiler::get().end("cgupdate");
+	
+	Perf::Profiler::get().begin("pupdate");
+	Perf::Profiler::get().end("pupdate");
 
+	Perf::Profiler::get().begin("vupdate");
+	Perf::Profiler::get().end("vupdate");
+
+	Perf::Profiler::get().begin("geomBuild");
+	Perf::Profiler::get().end("geomBuild");
+	
+	Perf::Profiler::get().begin("think");
 	// Proccess the chunk loading queue
 	if( mChunksToLoad.size() > 0 ) {
 		mWorldStage = WORLD_GEN;
@@ -428,6 +443,7 @@ void World::update( float dt )
 			}
 		}
 	}
+	Perf::Profiler::get().end("think");
 }
 
 void World::updateMovingBlocks( float dt )

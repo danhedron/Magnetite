@@ -27,7 +27,7 @@ struct IntRay {
 	IntOffset points[point_count];
 };
 
-#define ray_count 16
+#define ray_count 4
 
 struct Sample {
 	float left, right, top, bottom, front, back;
@@ -126,7 +126,7 @@ void LightingManager::gatherLight( Chunk* chunk )
 	long pX = (chunk->getX() * CHUNK_WIDTH);
 	long pY = (chunk->getY() * CHUNK_HEIGHT);
 	long pZ = (chunk->getZ() * CHUNK_WIDTH);
-	Perf::Profiler::get().begin("Chunk Lighting");
+	
 	if( chunk->getBlockCount() > 0 && chunk->getBlockCount() < CHUNK_SIZE )
 	{
 		float right = 0, left = 0, top = 0, bottom = 0, front = 0, back = 0;
@@ -161,7 +161,7 @@ void LightingManager::gatherLight( Chunk* chunk )
 			}
 		}
 	}
-	Perf::Profiler::get().end("Chunk Lighting");
+	
 }
 
 void LightingManager::lightChunk( Chunk* chunk )

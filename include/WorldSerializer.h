@@ -34,8 +34,9 @@ namespace Magnetite
 		
 		/**
 		 * Requests that the serializer load the given chunk into the world.
+		 * @return true if the chunk was loaded, false otherwise.
 		 */
-		void loadChunk( ChunkScalar x, ChunkScalar y, ChunkScalar z );
+		bool loadChunk( ChunkScalar x, ChunkScalar y, ChunkScalar z );
 		
 		/**
 		 * Requests that the serializer writes the given chunk into the stream.

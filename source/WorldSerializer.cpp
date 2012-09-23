@@ -27,12 +27,12 @@ namespace Magnetite
 		return stream.is_open();
 	}
 	
-	void WorldSerializer::loadChunk( ChunkScalar x, ChunkScalar y, ChunkScalar z )
+	bool WorldSerializer::loadChunk( ChunkScalar x, ChunkScalar y, ChunkScalar z )
 	{
 		// Open the stream.
 		std::ifstream stream( resolveRegion( x, y, z ).c_str(), std::ios::binary );
 		
-		if( !stream.is_open() ) return;
+		if( !stream.is_open() ) return false;
 		
 		auto c = mWorld->getChunk( x, y, z );
 		if( c == nullptr ) 
@@ -43,7 +43,6 @@ namespace Magnetite
 		// Read the header.
 		size_t types;
 		stream.read( (char*)&types, sizeof(size_t) );
-		size_t ind = 0;
 		std::map<size_t, std::string> tmap;
 		for( size_t i = 0; i < types; i++ )
 		{
@@ -52,23 +51,22 @@ namespace Magnetite
 			tmap[i+1] = type;
 		}
 		
+		size_t id;
 		for( int i = 0; i < CHUNK_SIZE; i++ )
 		{
-			size_t id;
 			stream.read( (char*)(&id), sizeof(size_t) );
 			if( id != 0 )
 			{
 				std::string b = tmap[id];
-				if( b != "" )
-				{
-					auto block = FactoryManager::getManager().createBlock(b);
-					if( block != nullptr )
-						c->setBlockAt( block, i );
-				}
+				auto block = FactoryManager::getManager().createBlock(b);
+				if( block != nullptr )
+					c->setBlockAt( block, i );
 			}
 		}
 		
 		stream.close();
+		
+		return true;
 	}
 	
 	void WorldSerializer::saveChunk( ChunkScalar x, ChunkScalar y, ChunkScalar z )

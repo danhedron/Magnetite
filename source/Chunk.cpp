@@ -180,6 +180,8 @@ void Chunk::updateVisibility( )
 {
 	MagnetiteCore* core = CoreSingleton;
 	World* w = core->getWorld();
+	BaseBlock* b = nullptr;
+	short visFlags = 0;
 	
 	if( _hasChunkFlag( DataUpdated ) )
 	{
@@ -190,9 +192,10 @@ void Chunk::updateVisibility( )
 		for( long x = 0; x < CHUNK_WIDTH; x++ ) {
 			for( long y = 0; y < CHUNK_HEIGHT; y++ ) {
 				for( long z = 0; z < CHUNK_WIDTH; z++ ) {
-					if( mBlocks[BLOCK_INDEX_2( x, y, z)] == NULL ) continue;
-					BaseBlock* b = mBlocks[BLOCK_INDEX_2( x, y, z)];
-					short visFlags = 0;
+					auto bindex = BLOCK_INDEX_2( x, y, z);
+					b = mBlocks[bindex];
+					if( b == nullptr ) continue;
+					visFlags = 0;
 					//Check All axes for adjacent blocks.
 					BaseBlock* cb = w->getBlockAt( worldX + x + 1, worldY + y, worldZ + z );
 					if( cb == NULL || !cb->isOpaque() ) {
@@ -200,7 +203,7 @@ void Chunk::updateVisibility( )
 						visFlags = visFlags | FACE_RIGHT;
 					}
 					cb = w->getBlockAt( worldX + x - 1, worldY + y, worldZ + z );
-					if( cb == NULL || !cb->isOpaque() ) {
+					if( worldX + x != 0 && (cb == NULL || !cb->isOpaque()) ) {
 						mVisibleFaces++;
 						visFlags = visFlags | FACE_LEFT;
 					}
@@ -210,7 +213,7 @@ void Chunk::updateVisibility( )
 						visFlags = visFlags | FACE_TOP;
 					}
 					cb = w->getBlockAt( worldX + x, worldY + y - 1, worldZ + z );
-					if( cb == NULL || !cb->isOpaque() ) {
+					if( worldY + y != 0 && (cb == NULL || !cb->isOpaque()) ) {
 						mVisibleFaces++;
 						visFlags = visFlags | FACE_BOTTOM;
 					}
@@ -220,16 +223,16 @@ void Chunk::updateVisibility( )
 						visFlags = visFlags | FACE_BACK;
 					}
 					cb = w->getBlockAt( worldX + x, worldY + y, worldZ + z - 1 );
-					if( cb == NULL || !cb->isOpaque() ) {
+					if( worldZ + z != 0 && (cb == NULL || !cb->isOpaque()) ) {
 						mVisibleFaces++;
 						visFlags = visFlags | FACE_FORWARD;
 					}
 					b->updateVisFlags(visFlags);
-					BlockList::iterator it = mVisibleBlocks.find( BLOCK_INDEX_2( x, y, z ) );
+					BlockList::iterator it = mVisibleBlocks.find( bindex );
 					if( visFlags == 0 && it != mVisibleBlocks.end() )
 						mVisibleBlocks.erase( it );
 					else if( visFlags != 0 && it == mVisibleBlocks.end() )
-						mVisibleBlocks.insert( BlockList::value_type( BLOCK_INDEX_2( x, y, z ), b ) );
+						mVisibleBlocks.insert( BlockList::value_type( bindex, b ) );
 				}
 			}
 		}
@@ -241,7 +244,9 @@ void Chunk::requestGenerate()
 {
 	if( _hasChunkFlag( DataUpdated ) )
 	{
+		Perf::Profiler::get().begin("vupdate");
 		updateVisibility();
+		Perf::Profiler::get().end("vupdate");
 		if( _hasChunkFlag( MeshInvalid ) )
 		{
 			generate();
@@ -259,24 +264,36 @@ GeometryPtr Chunk::getGeometry()
 void Chunk::generate()
 {
 	// Lighting must be done before geometry
+	Perf::Profiler::get().begin("lupdate");
 	generateLighting();
+	Perf::Profiler::get().end("lupdate");
 	
+	Perf::Profiler::get().begin("cgupdate");
 	generateGeometry();
+	Perf::Profiler::get().end("cgupdate");
 	
+	Perf::Profiler::get().begin("pupdate");
 	// generate physics - geometry must already be generated
 	generatePhysics();
+	Perf::Profiler::get().end("pupdate");
 }
 
 void Chunk::generateGeometry()
 {
-	if( mGeometry != NULL ) 
+	if( mGeometry == NULL ) 
+	{
+		mGeometry = new TerrainGeometry();
+	}
+	else
 	{
 		delete mGeometry;
+		mGeometry = new TerrainGeometry();
 	}
-	mGeometry = new TerrainGeometry();
 	
-	mWorld->getTriangulator()->triangulateChunk(mGeometry, this);
-	
+	if( mVisibleBlocks.size() > 0 )
+	{
+		mWorld->getTriangulator()->triangulateChunk(mGeometry, this);
+	}
 }
 
 void Chunk::generateLighting()

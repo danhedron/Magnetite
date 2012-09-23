@@ -44,12 +44,21 @@ namespace Perf
 	
 	void Profiler::pushFrame()
 	{
+		// Lock the global mutex, since this can cause a crash if the renderer is currently drawing.
+		profilersMutex.lock();
+		
 		mFrames.push_back( mCurrentFrame );
 		if( mFrames.size() > FRAME_COUNT )
 		{
 			mFrames.pop_front();
 		}
 		mCurrentFrame = ProfilerEvents();
+		profilersMutex.unlock();
+		
+		timeval time;
+		gettimeofday(&time, NULL);
+		long millis = (time.tv_sec * 1000) + (time.tv_usec / 1000);
+		mFrameStart = millis;
 	}
 	
 	void Profiler::begin( const std::string& section )
@@ -60,7 +69,8 @@ namespace Perf
 			timeval time;
 			gettimeofday(&time, NULL);
 			long millis = (time.tv_sec * 1000) + (time.tv_usec / 1000);
-			it->second.start = millis;
+			it->second.start = millis - mFrameStart;
+			it->second.count++;
 			return;
 		}
 		
@@ -68,10 +78,11 @@ namespace Perf
 		timeval time;
 		gettimeofday(&time, NULL);
 		long millis = (time.tv_sec * 1000) + (time.tv_usec / 1000);
-		ent.start = millis;
+		ent.start = millis - mFrameStart;
 		ent.latest = 0;
 		ent.name = section;
 		ent.total = 0;
+		ent.count = 1;
 		
 		mMutex.lock();
 		mCurrentFrame.insert( ProfilerEvents::value_type( section, ent ) );
@@ -87,7 +98,7 @@ namespace Perf
 			timeval time;
 			gettimeofday(&time, NULL);
 			long millis = (time.tv_sec * 1000) + (time.tv_usec / 1000);
-			it->second.latest = millis - it->second.start;
+			it->second.latest = (millis - mFrameStart) - it->second.start;
 			it->second.total += it->second.latest;
 		}
 		mMutex.unlock();
@@ -119,6 +130,19 @@ namespace Perf
 		if( it != mCurrentFrame.end() )
 		{
 			time = it->second.total;
+		}
+		mMutex.unlock();
+		return time;
+	}
+		
+	size_t Profiler::getEventCount( const std::string& section )
+	{
+		size_t time = 0;
+		mMutex.lock();
+		ProfilerEvents::iterator it = mCurrentFrame.find( section );
+		if( it != mCurrentFrame.end() )
+		{
+			time = it->second.count;
 		}
 		mMutex.unlock();
 		return time;

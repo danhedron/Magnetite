@@ -188,10 +188,6 @@ void MagnetiteCore::go()
 	int lastX = mWindow.getSize().x/2;
 	int lastY = mWindow.getSize().y/2;
 	
-	// Hack to keep game think on main thread.
-	// ToDo: Make V8 work with threads, do game thinking in work thread.
-	bool gameThink = false;
-	
 	mRenderer->setCamera( mGame->getLocalPlayer()->getCamera() );
 	
 	std::thread rendering_thread( [&]() {
@@ -205,19 +201,16 @@ void MagnetiteCore::go()
 				continue;
 			}
 			timer.restart(); 
-			
-			gameThink = true;
+			Perf::Profiler::get().newFrame();
 			
 			lDelta *= mTimescale;
 			
-			Perf::Profiler::get().begin("think");
+			Perf::Profiler::get().begin("pthink");
 			mPhysicsWorld->stepSimulation( lDelta );
+			Perf::Profiler::get().end("pthink");
 			
 			//Ensure each loaded chunk is updated before being sent to the GPU
 			mWorld->update( lDelta );
-			Perf::Profiler::get().end("think");
-			
-			Perf::Profiler::get().newFrame();
 		}
 	});
 	
@@ -312,15 +305,13 @@ void MagnetiteCore::go()
 			}
 		}
 		
-		if( gameThink ) {
-			Perf::Profiler::get().begin("gthink");
-			if( mGame != NULL )
-			{
-				mGame->think( lDelta );
-			}
-			Perf::Profiler::get().end("gthink");
-			gameThink = false;
+		// Game is currently at 60fps due to vsync, should be moved.
+		Perf::Profiler::get().begin("gthink");
+		if( mGame != NULL )
+		{
+			mGame->think( lDelta );
 		}
+		Perf::Profiler::get().end("gthink");
 		
 		// Update all the characters
 		for( std::vector<Character*>::iterator it = mCharacters.begin(); it != mCharacters.end(); it++ )
@@ -382,7 +373,7 @@ void MagnetiteCore::newWorld( std::string name )
 {
 	unloadWorld();
 
-	mWorld = new World( 3 );
+	mWorld = new World( 2 );
 	mWorld->setName(name);
 	mWorld->buildTerrain();
 }

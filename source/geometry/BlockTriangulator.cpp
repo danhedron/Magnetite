@@ -7,6 +7,24 @@
 #include <TextureManager.h>
 #include "Geometry.h"
 
+/*
+ * 
+	vert.x = x;
+	vert.y = y;
+	vert.z = z;
+	vert.u0 = (GLubyte)u;
+	vert.v0 = (GLubyte)v;
+	vert.l = (GLubyte)(l*255);
+*/
+
+#define VERTEX( fn, xp, yp, zp, up, vp, lp ) \
+	data[ind + fn].x = pos.x + xp; \
+	data[ind + fn].y = pos.y + yp; \
+	data[ind + fn].z = pos.z + zp; \
+	data[ind + fn].u0 = up; \
+	data[ind + fn].v0 = vp; \
+	data[ind + fn].l = lp*255.f;
+
 // These are here for reference & eveuntually some cleaner code.
 /*static float face_vertices[] = {
 	0.f, 0.f, 0.f, // 0
@@ -34,6 +52,15 @@ void BlockTriangulator::triangulateChunk( TerrainGeometry* geom, Chunk* chunk )
 	GLuint numVerts = chunk->getVisibleFaceCount() * 4;
 	GLuint numEdges = chunk->getVisibleFaceCount() * 6;
 	
+	if(geom->vertexData != nullptr)
+	{
+		delete[] geom->vertexData;
+	}
+	if(geom->edgeData != nullptr)
+	{
+		delete[] geom->edgeData;
+	}
+	
 	geom->vertexData = new TerrainVertex[numVerts];
 	geom->edgeData = new GLedge[numEdges];
 	geom->vertexCount = numVerts;
@@ -47,6 +74,7 @@ void BlockTriangulator::triangulateChunk( TerrainGeometry* geom, Chunk* chunk )
 	auto edges = geom->edgeData;
 	long cx = (chunk->getX() * CHUNK_WIDTH), cy = (chunk->getY() * CHUNK_WIDTH), cz = (chunk->getZ() * CHUNK_WIDTH);
 	
+	Perf::Profiler::get().begin("geomBuild");
 	for( BlockList::iterator it = chunk->getVisibleBlocks().begin(); it != chunk->getVisibleBlocks().end(); ++it )
 	{
 		Vector3 pos = Util::indexToPosition( it->first );
@@ -67,18 +95,12 @@ void BlockTriangulator::triangulateChunk( TerrainGeometry* geom, Chunk* chunk )
 			GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 			
 			float color = World::getLightColor( chunk->getWorld()->getLightLevel( wx, wy, wz+1 ) );
-			data[ind + 0] = Geometry::terrainVertex( pos.x + 1.0f, pos.y + 1.0f, pos.z + 1.0f, // Coordinates
-									rect.x, rect.y,
-									color );
-			data[ind + 1] = Geometry::terrainVertex( pos.x - 0.0f, pos.y + 1.0f, pos.z + 1.0f, // Coordinates
-									rect.x + rect.w, rect.y,
-									color );
-			data[ind + 2] = Geometry::terrainVertex( pos.x - 0.0f, pos.y - 0.0f, pos.z + 1.0f, // Coordinates
-									rect.x + rect.w, rect.y + rect.h,
-									color );
-			data[ind + 3] = Geometry::terrainVertex( pos.x + 1.0f, pos.y - 0.0f, pos.z + 1.0f, // Coordinates
-									rect.x, rect.y + rect.h,
-									color );
+			
+			VERTEX( 0, 1.0f, 1.0f, 1.0f, rect.x,          rect.y,          color )
+			VERTEX( 1, 0.0f, 1.0f, 1.0f, rect.x + rect.w, rect.y,          color )
+			VERTEX( 2, 0.0f, 0.0f, 1.0f, rect.x + rect.w, rect.y + rect.h, color )
+			VERTEX( 3, 1.0f, 0.0f, 1.0f, rect.x,          rect.y + rect.h, color )
+			
 			edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
 			edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
 			eInd += 6;
@@ -90,18 +112,12 @@ void BlockTriangulator::triangulateChunk( TerrainGeometry* geom, Chunk* chunk )
 			GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
 			float color = World::getLightColor( chunk->getWorld()->getLightLevel( wx, wy, wz-1 ) );
-			data[ind + 0] = Geometry::terrainVertex( pos.x + 1.0f, pos.y + 1.0f, pos.z - 0.0f, // Coordinates
-									rect.x, rect.y,
-									color );
-			data[ind + 1] = Geometry::terrainVertex( pos.x - 0.0f, pos.y + 1.0f, pos.z - 0.0f, // Coordinates
-									rect.x + rect.w, rect.y,
-									color );
-			data[ind + 2] = Geometry::terrainVertex( pos.x - 0.0f, pos.y - 0.0f, pos.z - 0.0f, // Coordinates
-									rect.x + rect.w, rect.y + rect.h,
-									color );
-			data[ind + 3] = Geometry::terrainVertex( pos.x + 1.0f, pos.y - 0.0f, pos.z - 0.0f, // Coordinates
-									rect.x, rect.y + rect.h,
-									color );
+			
+			VERTEX( 0, 1.0f, 1.0f, 0.0f, rect.x,          rect.y,          color )
+			VERTEX( 1, 0.0f, 1.0f, 0.0f, rect.x + rect.w, rect.y,          color )
+			VERTEX( 2, 0.0f, 0.0f, 0.0f, rect.x + rect.w, rect.y + rect.h, color )
+			VERTEX( 3, 1.0f, 0.0f, 0.0f, rect.x,          rect.y + rect.h, color )
+			
 			edges[eInd + 5] = ind + 2; edges[eInd + 4] = ind + 1; edges[eInd + 3] = ind + 0;
 			edges[eInd + 2] = ind + 2; edges[eInd + 1] = ind + 0; edges[eInd + 0] = ind + 3;
 			eInd += 6;
@@ -111,20 +127,17 @@ void BlockTriangulator::triangulateChunk( TerrainGeometry* geom, Chunk* chunk )
 		if((visFlags & FACE_RIGHT) == FACE_RIGHT) {
 			it->second->getTextureCoords( FACE_RIGHT, texX, texY );
 			GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
-
+			
 			float color = World::getLightColor( chunk->getWorld()->getLightLevel( wx+1, wy, wz ) );
-			data[ind + 0] = Geometry::terrainVertex( pos.x + 1.0f, pos.y + 1.0f, pos.z + 1.0f, // Coordinates
-									rect.x + rect.w, rect.y,
-									color );
-			data[ind + 1] = Geometry::terrainVertex( pos.x + 1.0f, pos.y - 0.0f, pos.z + 1.0f, // Coordinates
-									rect.x + rect.w, rect.y + rect.h,
-									color );
-			data[ind + 2] = Geometry::terrainVertex( pos.x + 1.0f, pos.y - 0.0f, pos.z - 0.0f, // Coordinates
-									rect.x, rect.y + rect.h,
-									color );
-			data[ind + 3] = Geometry::terrainVertex( pos.x + 1.0f, pos.y + 1.0f, pos.z - 0.0f, // Coordinates
-									rect.x, rect.y,
-									color );
+
+			// + rect.w, rect.y,          color )
+			// + rect.w, rect.y + rect.h, color )
+			//          rect.y + rect.h, color )
+			VERTEX( 0, 1.0f, 1.0f, 1.0f, rect.x,          rect.y,          color )
+			VERTEX( 1, 1.0f, 0.0f, 1.0f, rect.x,          rect.y + rect.h, color )
+			VERTEX( 2, 1.0f, 0.0f, 0.0f, rect.x + rect.w, rect.y + rect.h, color )
+			VERTEX( 3, 1.0f, 1.0f, 0.0f, rect.x + rect.w, rect.y,          color )
+			
 			edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
 			edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
 			eInd += 6;
@@ -136,18 +149,12 @@ void BlockTriangulator::triangulateChunk( TerrainGeometry* geom, Chunk* chunk )
 			GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
 			float color = World::getLightColor( chunk->getWorld()->getLightLevel( wx, wy-1, wz ) );
-			data[ind + 0] = Geometry::terrainVertex( pos.x - 0.0f, pos.y - 0.0f, pos.z + 1.0f, // Coordinates
-									rect.x, rect.y,
-									color );
-			data[ind + 1] = Geometry::terrainVertex( pos.x - 0.0f, pos.y - 0.0f, pos.z - 0.0f, // Coordinates
-									rect.x + rect.w, rect.y,
-									color );
-			data[ind + 2] = Geometry::terrainVertex( pos.x + 1.0f, pos.y - 0.0f, pos.z - 0.0f, // Coordinates
-									rect.x + rect.w, rect.y + rect.h,
-									color );
-			data[ind + 3] = Geometry::terrainVertex( pos.x + 1.0f, pos.y - 0.0f, pos.z + 1.0f, // Coordinates
-									rect.x, rect.y + rect.h,
-									color );
+			
+			VERTEX( 0, 0.0f, 0.0f, 1.0f, rect.x,          rect.y,          color )
+			VERTEX( 1, 0.0f, 0.0f, 0.0f, rect.x + rect.w, rect.y,          color )
+			VERTEX( 2, 1.0f, 0.0f, 0.0f, rect.x + rect.w, rect.y + rect.h, color )
+			VERTEX( 3, 1.0f, 0.0f, 1.0f, rect.x,          rect.y + rect.h, color )
+			
 			edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
 			edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
 			eInd += 6;
@@ -159,18 +166,12 @@ void BlockTriangulator::triangulateChunk( TerrainGeometry* geom, Chunk* chunk )
 			GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
 			float color = World::getLightColor( chunk->getWorld()->getLightLevel( wx, wy+1, wz ) );
-			data[ind + 0] = Geometry::terrainVertex( pos.x - 0.0f, pos.y + 1.0f, pos.z + 1.0f, // Coordinates
-									rect.x, rect.y,
-									color );
-			data[ind + 1] = Geometry::terrainVertex( pos.x + 1.0f, pos.y + 1.0f, pos.z + 1.0f, // Coordinates
-									rect.x + rect.w, rect.y,
-									color );
-			data[ind + 2] = Geometry::terrainVertex( pos.x + 1.0f, pos.y + 1.0f, pos.z - 0.0f, // Coordinates
-									rect.x + rect.w, rect.y + rect.h,
-									color );
-			data[ind + 3] = Geometry::terrainVertex( pos.x - 0.0f, pos.y + 1.0f, pos.z - 0.0f, // Coordinates
-									rect.x, rect.y + rect.h,
-									color );
+			
+			VERTEX( 0, 0.0f, 1.0f, 1.0f, rect.x,          rect.y,          color )
+			VERTEX( 1, 1.0f, 1.0f, 1.0f, rect.x + rect.w, rect.y,          color )
+			VERTEX( 2, 1.0f, 1.0f, 0.0f, rect.x + rect.w, rect.y + rect.h, color )
+			VERTEX( 3, 0.0f, 1.0f, 0.0f, rect.x,          rect.y + rect.h, color )
+			
 			edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
 			edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
 			eInd += 6;
@@ -182,23 +183,18 @@ void BlockTriangulator::triangulateChunk( TerrainGeometry* geom, Chunk* chunk )
 			GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
 
 			float color = World::getLightColor( chunk->getWorld()->getLightLevel( wx-1, wy, wz ) );
-			data[ind + 0] = Geometry::terrainVertex( pos.x - 0.0f, pos.y + 1.0f, pos.z - 0.0f, // Coordinates
-									rect.x + rect.w, rect.y,
-									color );
-			data[ind + 1] = Geometry::terrainVertex( pos.x - 0.0f, pos.y - 0.0f, pos.z - 0.0f, // Coordinates
-									rect.x + rect.w, rect.y + rect.h,
-									color );
-			data[ind + 2] = Geometry::terrainVertex( pos.x - 0.0f, pos.y - 0.0f, pos.z + 1.0f, // Coordinates
-									rect.x, rect.y + rect.h,
-									color );
-			data[ind + 3] = Geometry::terrainVertex( pos.x - 0.0f, pos.y + 1.0f, pos.z + 1.0f, // Coordinates
-									rect.x, rect.y,
-									color );
+			
+			VERTEX( 0, 0.0f, 1.0f, 0.0f, rect.x,          rect.y,          color )
+			VERTEX( 1, 0.0f, 0.0f, 0.0f, rect.x,          rect.y + rect.h, color )
+			VERTEX( 2, 0.0f, 0.0f, 1.0f, rect.x + rect.w, rect.y + rect.h, color )
+			VERTEX( 3, 0.0f, 1.0f, 1.0f, rect.x + rect.w, rect.y,          color )
+			
 			edges[eInd + 0] = ind + 2; edges[eInd + 1] = ind + 1; edges[eInd + 2] = ind + 0;
 			edges[eInd + 3] = ind + 2; edges[eInd + 4] = ind + 0; edges[eInd + 5] = ind + 3;
 			eInd += 6;
 			ind += 4;
 		}
+		Perf::Profiler::get().end("geomBuild");
 	}
 	
 }

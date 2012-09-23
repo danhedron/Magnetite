@@ -17,6 +17,7 @@ namespace Perf {
 		uint32_t start;
 		uint32_t latest;
 		uint32_t total;
+		size_t count;
 	};
 	
 	class Profiler;
@@ -33,6 +34,11 @@ namespace Perf {
 		
 		// Mutex to ensure we don't cause a crash.
 		std::mutex mMutex;
+		
+		/**
+		 * The time of the start of the current frame.
+		 */
+		uint32_t mFrameStart;
 		
 		void pushFrame();
 	public:
@@ -61,6 +67,11 @@ namespace Perf {
 		 * Returns the sum of all of the named blocks (per frame).
 		 */
 		uint32_t getTotalTime( const std::string& section );
+		
+		/**
+		 * Returns the number of the given blocks that have occured in the recent frame.
+		 */
+		size_t getEventCount( const std::string& section );
 		
 		/**
 		 * Returns the internal frame reference, for use in the renderer.

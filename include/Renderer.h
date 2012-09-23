@@ -142,7 +142,7 @@ public:
 	/**
 	 * Draws debug information from the profiler on screen.
 	 */
-	void drawPerf( Perf::Profiler& profiler );
+	void drawPerf( size_t id, Perf::Profiler& profiler );
 
 	/**
 	 * Draws the crosshair
@@ -156,7 +156,7 @@ public:
 	 * @param x Coordinate 
 	 * @param y Coordinate
 	 */
-	void drawText( std::string text, int x, int y );
+	void drawText( std::string text, int x, int y, const Vector3& colour = Vector3(0.f, 1.f, 0.f) );
 
 	/**
 	 * Toggles the drawing of the camera's frustum

@@ -327,7 +327,7 @@ void Renderer::render(double dt, World* world)
 				glMatrixMode( GL_MODELVIEW );
 				glLoadIdentity();
 				glTranslatef( 1.f * (i++ % 2), 0.f, 0.f );
-				drawPerf( *it->second.get() );
+				drawPerf( i, *it->second.get() );
 			}
 			Perf::Profiler::profilersMutex.unlock();
 			break;
@@ -413,10 +413,13 @@ const static float perfcolours[] = {
 	0.0f,  0.75f, 0.0f,
 	0.0f,  0.0f,  0.75f,
 	0.75f, 0.75f, 0.0f,
-	0.0f,  0.75f, 0.75f
+	0.0f,  0.75f, 0.75f,
+	0.75f, 0.0f,  0.75f,
+	0.75f, 0.75f, 0.75f
+	
 };
 
-void Renderer::drawPerf( Perf::Profiler& prof )
+void Renderer::drawPerf( size_t id, Perf::Profiler& prof )
 {
 	auto frames = prof.getFrames();
 	
@@ -426,7 +429,7 @@ void Renderer::drawPerf( Perf::Profiler& prof )
 	glLoadIdentity();
 	glMatrixMode( GL_MODELVIEW );
 	
-	glLineWidth( 2.f );
+	glLineWidth( 1.f );
 	
 	float lstep = 1.f / (float)FRAME_COUNT;
 	float fstart = -1.f;
@@ -434,20 +437,30 @@ void Renderer::drawPerf( Perf::Profiler& prof )
 	glBegin( GL_LINES );
 	for( auto it = frames.begin(); it != frames.end(); it++ )
 	{
-		float liney = -1.f;
 		ev = 0;
 		for( auto evit = it->begin(); evit != it->end(); evit++ )
 		{
 			float evHeight = (float)evit->second.latest / 60.f;
+			float evStart = (float)evit->second.start / 60.f;
 			glColor3f( perfcolours[(ev*3)+0], perfcolours[(ev*3)+1], perfcolours[(ev*3)+2] );
-			ev = (ev+1) % 5;
+			ev = (ev+1) % 7;
 			
-			glVertex2f( fstart, liney );
-			glVertex2f( fstart, liney += evHeight );
+			glVertex2f( fstart, -1.f + evStart );
+			glVertex2f( fstart, -1.f + evStart + evHeight );
 		}
 		fstart += lstep;
 	}
 	glEnd();
+	
+	auto first = frames.back();
+	ev = 0;
+	size_t i = 0;
+	for( auto evit = first.begin(); evit != first.end(); evit++ )
+	{
+		drawText( Util::toString(evit->second.count) + " " + evit->first, 100 + id * 200, 200 + i++ * 30, Vector3(perfcolours[(ev*3)+0], perfcolours[(ev*3)+1], perfcolours[(ev*3)+2]) );
+		ev = (ev+1) % 7;
+	}
+	
 }
 
 void Renderer::drawCrosshair( double dt )
@@ -486,11 +499,11 @@ void Renderer::drawCrosshair( double dt )
 	disable2D();
 }
 
-void Renderer::drawText(std::string text, int x, int y)
+void Renderer::drawText(std::string text, int x, int y, const Vector3& colour )
 {
 	mWindow->pushGLStates();
 	sf::Text drawableString(text, sf::Font::getDefaultFont(), 17.f);
-	drawableString.setColor(sf::Color(0,255,0));
+	drawableString.setColor(sf::Color(colour.x*255.f,colour.y*255.f,colour.z*255.f));
 	drawableString.setPosition( x, y );
 	mWindow->draw(drawableString);
 	mWindow->popGLStates();

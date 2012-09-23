@@ -2,7 +2,7 @@
 #include <ProgramResource.h>
 
 Geometry::Geometry()
-:edgeData(NULL),
+: edgeData(NULL),
 vertexCount(0),
 edgeCount(0),
 vertexBO(0),
@@ -79,13 +79,14 @@ GeometryVertex Geometry::vertex(float x, float y, float z, float u, float v, flo
 }
 
 MeshGeometry::MeshGeometry()
+: vertexData(nullptr)
 {
 	
 }
 
 MeshGeometry::~MeshGeometry()
 {
-	
+	delete[] vertexData;
 }
 
 void MeshGeometry::bindToBuffer()
@@ -109,22 +110,25 @@ void MeshGeometry::bindVertexAttributes( ProgramResource* program )
 }
 
 TerrainGeometry::TerrainGeometry()
+: vertexData(nullptr)
 {
 	
 }
 
 TerrainGeometry::~TerrainGeometry()
 {
-	
+	delete[] vertexData;
 }
 
 void TerrainGeometry::bindToBuffer()
 {
-	glGenBuffers(1, &this->vertexBO);
+	if( this->vertexBO == 0 )
+		glGenBuffers(1, &this->vertexBO);
 	glBindBuffer( GL_ARRAY_BUFFER, this->vertexBO);
 	glBufferData( GL_ARRAY_BUFFER, sizeof(TerrainVertex)*this->vertexCount+1, this->vertexData, GL_STATIC_DRAW );
 
-	glGenBuffers(1, &this->indexBO);
+	if( this->indexBO == 0 )
+		glGenBuffers(1, &this->indexBO);
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, this->indexBO );
 	glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(GLedge)*this->edgeCount+1, this->edgeData, GL_STATIC_DRAW );
 
