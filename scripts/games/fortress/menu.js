@@ -56,6 +56,12 @@
 						action: function() {
 							this.clear();
 						}
+					},
+					{ 
+						text: 'Fill area',
+						action: function() {
+							this.fill();
+						}
 					}
 				]
 			}

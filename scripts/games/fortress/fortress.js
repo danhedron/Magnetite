@@ -84,6 +84,32 @@ Game.clear = function()
 	}
 }
 
+Game.fill = function()
+{
+	var rs = world.fireRay( this.player.getEyeCast() );
+	
+	if( rs.hit )
+	{
+		var p = { x: rs.worldHit.x - (rs.normal.x /2), y: rs.worldHit.y - (rs.normal.y /2), z: rs.worldHit.z - (rs.normal.z /2) };
+		
+		if( this.fillStart == undefined ) 
+		{
+			this.fillStart = p;
+		}
+		else 
+		{
+			this.fillArea( this.fillStart, p );
+			this.fillStart = undefined;
+		}
+	}
+}
+
+Game.fillArea = function( min, max )
+{
+	// Tell the nearest drone to do something about it.
+	this.getNearestDrone( min ).fillArea( 'dirt', min, max );
+}
+
 Game.clearArea = function( min, max )
 {
 	// Tell the nearest drone to do something about it.

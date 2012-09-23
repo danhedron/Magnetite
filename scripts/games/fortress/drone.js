@@ -50,6 +50,14 @@
 		});
 	}
 	
+	this.fillArea = function( type, min, max ) {
+		this.actionQueue.push({
+			type: 'fill',
+			min: min,
+			max: max,
+			block: type
+		});
+	}
 	this.storeBlock = function( b ) {
 		this.blocks.push( b );
 		if( this.blocks.length > this.maxBlocks )
@@ -131,6 +139,36 @@
 						}
 					}
 					if( block == false )
+					{
+						this.actionQueue = this.actionQueue.slice(1);
+					}
+					break;
+				case 'fill':
+					var blocks = 0;
+					for( var y = action.min.y; y <= action.max.y; y++ )
+					{
+						for( var x = action.min.x; x <= action.max.x; x++ )
+						{
+							for( var z = action.min.z; z <= action.max.z; z++ )
+							{
+								var b = world.getBlock( x, y, z );
+								if( b == undefined ) {
+									block = true; // we have at least one block.
+									if( blocks == 0 ) {
+										var direction = subt( this.position, {x: x, y: y, z: z} );
+										this.targetPosition = add( {x: x, y: y, z: z}, mul(norm(direction), 2 ) );
+										var dist = lent( direction );
+										if( dist < this.constructionDistance )
+										{
+											world.createBlock( action.block, x, y, z );
+										}
+									}
+									blocks++;
+								}
+							}
+						}
+					}
+					if( blocks == 0 )
 					{
 						this.actionQueue = this.actionQueue.slice(1);
 					}
