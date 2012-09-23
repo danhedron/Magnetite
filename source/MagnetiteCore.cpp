@@ -190,7 +190,7 @@ void MagnetiteCore::go()
 	
 	mRenderer->setCamera( mGame->getLocalPlayer()->getCamera() );
 	
-	std::thread rendering_thread( [&]() {
+	std::thread physics_thread( [&]() {
 		sf::Clock timer;
 		
 		while(mContinue && mWindow.isOpen()) {
@@ -205,16 +205,37 @@ void MagnetiteCore::go()
 			
 			lDelta *= mTimescale;
 			
+			// Do physics.
 			Perf::Profiler::get().begin("pthink");
+			physicsMutex.lock();
 			mPhysicsWorld->stepSimulation( lDelta );
+			physicsMutex.unlock();
 			Perf::Profiler::get().end("pthink");
+		}
+	});
+	
+	std::thread world_thread( [&]() {
+		sf::Clock timer;
+		
+		while(mContinue && mWindow.isOpen()) {
+			float lDelta = ((float)timer.getElapsedTime().asMilliseconds())/1000;
 			
-			//Ensure each loaded chunk is updated before being sent to the GPU
+			if( lDelta < 1.f/60.f )
+			{
+				continue;
+			}
+			timer.restart(); 
+			Perf::Profiler::get().newFrame();
+			
+			lDelta *= mTimescale;
+			
+			// Update all of the world related objects.
 			mWorld->update( lDelta );
 		}
 	});
 	
-	rendering_thread.detach();
+	physics_thread.detach();
+	world_thread.detach();
 	
 	mClock.restart();
 	while(mContinue && mWindow.isOpen()) {

@@ -321,13 +321,14 @@ void Renderer::render(double dt, World* world)
 		case DEBUG_PERF:
 			auto profs = Perf::Profiler::getProfilers();
 			Perf::Profiler::profilersMutex.lock();
-			size_t i = 0;
+			size_t i = 1;
 			for( auto it = profs.begin(); it != profs.end(); ++it )
 			{
 				glMatrixMode( GL_MODELVIEW );
 				glLoadIdentity();
-				glTranslatef( 1.f * (i++ % 2), 0.f, 0.f );
+				glTranslatef( 1.f * (i % 2), 1.f * ( i / 2 ), 0.f );
 				drawPerf( i, *it->second.get() );
+				i++;
 			}
 			Perf::Profiler::profilersMutex.unlock();
 			break;
@@ -440,8 +441,8 @@ void Renderer::drawPerf( size_t id, Perf::Profiler& prof )
 		ev = 0;
 		for( auto evit = it->begin(); evit != it->end(); evit++ )
 		{
-			float evHeight = (float)evit->second.latest / 60.f;
-			float evStart = (float)evit->second.start / 60.f;
+			float evHeight = (float)evit->second.latest / 120.f;
+			float evStart = (float)evit->second.start / 120.f;
 			glColor3f( perfcolours[(ev*3)+0], perfcolours[(ev*3)+1], perfcolours[(ev*3)+2] );
 			ev = (ev+1) % 7;
 			

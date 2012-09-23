@@ -307,8 +307,10 @@ void Chunk::generatePhysics()
 	{
 		auto p = mPhysicsBody;
 		mPhysicsBody = nullptr;
+		CoreSingleton->physicsMutex.lock();
 		CoreSingleton->getPhysicsWorld()
 			->removeRigidBody( p );
+		CoreSingleton->physicsMutex.unlock();
 		delete mPhysicsState;
 		delete mPhysicsBody;
 		delete mPhysicsShape;

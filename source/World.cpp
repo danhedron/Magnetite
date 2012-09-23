@@ -496,7 +496,9 @@ raycast_r World::raycastWorld(const raycast_r &inray, bool solidOnly)
 	btVector3 bto( to.x, to.y, to.z );
 	btCollisionWorld::ClosestRayResultCallback rayCallback(bfrom, bto);
 	
+	MagnetiteCore::Singleton->physicsMutex.lock();
 	MagnetiteCore::Singleton->getPhysicsWorld()->rayTest( bfrom, bto, rayCallback );
+	MagnetiteCore::Singleton->physicsMutex.unlock();
 	
 	if( rayCallback.hasHit() )
 	{

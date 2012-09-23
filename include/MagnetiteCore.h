@@ -1,6 +1,7 @@
 #ifndef _OPENCRAFTCORE_H_
 #define _OPENCRAFTCORE_H_
 #include "prerequisites.h"
+#include <mutex>
 
 class Player;
 class Renderer;
@@ -50,7 +51,7 @@ protected:
 	 */
 	std::vector<Character*>	mCharacters;
 	BaseGame*	mGame;
-
+	
 public:
 	MagnetiteCore(void);
 	~MagnetiteCore(void);
@@ -119,6 +120,11 @@ public:
 	 * retuns the physics world
 	 */
 	btDiscreteDynamicsWorld* getPhysicsWorld();
+	
+	/**
+	 * Global Mutex for the Physics system.
+	 */
+	std::mutex physicsMutex;
 
 	/**
 	 * Unloads the currently loaded world (if any)
