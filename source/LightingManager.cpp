@@ -139,7 +139,7 @@ void LightingManager::gatherLight( Chunk* chunk )
 						long wy = y + pY;
 						long wz = z + pZ;
 						right = 0; left = 0; top = 0; bottom = 0; front = 0; back = 0;
-						/*for( ray = &rays[0], rayend = &rays[0 + ray_count]; ray < rayend; ray++ ) {
+						for( ray = &rays[0], rayend = &rays[0 + ray_count]; ray < rayend; ray++ ) {
 							for( offs = &ray->points[0], offend = &ray->points[0 + point_count]; offs < offend; offs++ ) {
 								obs = world->getBlockAt( wx + offs->x, wy + offs->y, wz + offs->z );
 								if( obs ) break;
@@ -153,9 +153,9 @@ void LightingManager::gatherLight( Chunk* chunk )
 								front += ray->front;
 								back += ray->back;
 							}
-						}*/
-						//LightIndex lighness = smp.getSample(right, left, top, bottom, front, back) * 255;
-						chunk->setLightLevel( 255, x, y, z);
+						}
+						LightIndex lighness = std::min(smp.getSample(right, left, top, bottom, front, back) * 255.f * 2.f, 255.f);
+						chunk->setLightLevel( lighness, x, y, z);
 					}
 				}
 			}
