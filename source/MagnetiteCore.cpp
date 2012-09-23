@@ -328,6 +328,9 @@ void MagnetiteCore::go()
 			}
 		}
 		
+		// Tell the profiler to start a new frame.
+		Perf::Profiler::get().newFrame();
+		
 		// Game is currently at 60fps due to vsync, should be moved.
 		Perf::Profiler::get().begin("gthink");
 		if( mGame != NULL )
@@ -349,8 +352,6 @@ void MagnetiteCore::go()
 		mGame->uiPaint( mRenderer );
 
 		mWindow.display();
-		// Tell the profiler to start a new frame.
-		Perf::Profiler::get().newFrame();
 	}
 
 	mWindow.close();
@@ -396,7 +397,7 @@ void MagnetiteCore::newWorld( std::string name )
 {
 	unloadWorld();
 
-	mWorld = new World( 2 );
+	mWorld = new World( 5 );
 	mWorld->setName(name);
 }
 

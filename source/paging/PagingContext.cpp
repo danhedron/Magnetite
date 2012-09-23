@@ -1,5 +1,6 @@
 #include "paging/PagingContext.h"
 #include <paging/PagingCamera.h>
+#include <Profiler.h>
 
 namespace Magnetite
 {
@@ -40,6 +41,7 @@ namespace Magnetite
 		if( mPageMap != nullptr )
 			delete[] mPageMap;
 		mPageMap = new size_t[ x * y * z ];
+		mNewPageMap = new size_t[ mXPages * mYPages * mZPages ];
 		memset( mPageMap, 0, sizeof(size_t) * x * y * z ); 
 	}
 	
@@ -71,40 +73,54 @@ namespace Magnetite
 	
 	void PagingContext::update()
 	{
-		mNewPageMap = new size_t[ mXPages * mYPages * mZPages ];
+		Perf::Profiler::get().begin("pcupdate");
 		memset( mNewPageMap, 0, sizeof(size_t) * mXPages * mYPages * mZPages ); 
 		
 		for( auto it = mCameras.begin(); it != mCameras.end(); ++it )
 		{
 			(*it)->update();
 		}
+		Perf::Profiler::get().end("pcupdate");
+		
+		Perf::Profiler::get().begin("pload");
+		Perf::Profiler::get().end("pload");
+		Perf::Profiler::get().begin("punload");
+		Perf::Profiler::get().end("punload");
 		
 		PageInfo inf;
-		for( ChunkScalar x = 0; x < mXPages; x++ )
+		size_t id = 0;
+		Perf::Profiler::get().begin("page");
+		for( ChunkScalar z = 0; z < mZPages; z++ )
 		{
 			for( ChunkScalar y = 0; y < mYPages; y++ )
 			{
-				for( ChunkScalar z = 0; z < mZPages; z++ )
+				for( ChunkScalar x = 0; x < mXPages; x++ )
 				{
-					auto id = ( z * mXPages * mYPages + y * mXPages + x );
 					// Compareate.
 					if( mPageMap[id] == 0 && mNewPageMap[id] != 0 )
 					{
+						Perf::Profiler::get().begin("pload");
 						inf.x = x; inf.y = y; inf.z = z;
 						onPageEntered( inf );
+						Perf::Profiler::get().end("pload");
 					}
 					else if( mNewPageMap[id] == 0 && mPageMap[id] != 0 )
 					{
+						Perf::Profiler::get().begin("punload");
 						inf.x = x; inf.y = y; inf.z = z;
 						onPageExit( inf );
+						Perf::Profiler::get().end("punload");
 					}
+					id++;
 				}
 			}
 		}
+		Perf::Profiler::get().end("page");
 		
 		// Now we swap.
-		delete[] mPageMap;
+		auto pm = mPageMap;
 		mPageMap = mNewPageMap;
+		mNewPageMap = pm;
 	}
 	
 	void PagingContext::pageInView( ChunkScalar x, ChunkScalar y, ChunkScalar z )

@@ -1,6 +1,7 @@
 #ifndef _WORLDSERIALIZER_H_
 #define _WORLDSERIALIZER_H_
 #include "prerequisites.h"
+#include <memory>
 
 class World;
 namespace Magnetite 
@@ -15,6 +16,8 @@ namespace Magnetite
 	protected:
 		
 		World* mWorld;
+		
+		Magnetite::String mWorldPath;
 		
 	public:
 		

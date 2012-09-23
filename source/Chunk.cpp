@@ -186,7 +186,7 @@ void Chunk::updateVisibility( )
 					visFlags = 0;
 					//Check All axes for adjacent blocks.
 					BaseBlock* cb = w->getBlockAt( worldX + x + 1, worldY + y, worldZ + z );
-					if( cb == NULL || !cb->isOpaque() ) {
+					if( (cb == NULL || !cb->isOpaque()) ) {
 						mVisibleFaces++;
 						visFlags = visFlags | FACE_RIGHT;
 					}

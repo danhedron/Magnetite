@@ -416,8 +416,9 @@ const static float perfcolours[] = {
 	0.75f, 0.75f, 0.0f,
 	0.0f,  0.75f, 0.75f,
 	0.75f, 0.0f,  0.75f,
-	0.75f, 0.75f, 0.75f
-	
+	0.75f, 0.75f, 0.75f,
+	0.25f, 0.25f, 0.75f,
+	0.75f, 0.25f, 0.25f
 };
 
 void Renderer::drawPerf( size_t id, Perf::Profiler& prof )
@@ -430,7 +431,7 @@ void Renderer::drawPerf( size_t id, Perf::Profiler& prof )
 	glLoadIdentity();
 	glMatrixMode( GL_MODELVIEW );
 	
-	glLineWidth( 1.f );
+	glLineWidth( mScrWidth / 2 / FRAME_COUNT );
 	
 	float lstep = 1.f / (float)FRAME_COUNT;
 	float fstart = 0.f;
@@ -444,7 +445,7 @@ void Renderer::drawPerf( size_t id, Perf::Profiler& prof )
 			float evHeight = (float)evit->second.latest / 120.f;
 			float evStart = (float)evit->second.start / 120.f;
 			glColor3f( perfcolours[(ev*3)+0], perfcolours[(ev*3)+1], perfcolours[(ev*3)+2] );
-			ev = (ev+1) % 7;
+			ev = (ev+1) % 9;
 			
 			glVertex2f( fstart, 0.f + evStart );
 			glVertex2f( fstart, 0.f + evStart + evHeight );
@@ -458,8 +459,8 @@ void Renderer::drawPerf( size_t id, Perf::Profiler& prof )
 	size_t i = 0;
 	for( auto evit = first.begin(); evit != first.end(); evit++ )
 	{
-		drawText( Util::toString(evit->second.count) + " " + evit->first, 10 + (mScrWidth/2) * ((id-1) % 2), 10 + (mScrHeight/2) * ((id/2)) + i++ * 30, Vector3(perfcolours[(ev*3)+0], perfcolours[(ev*3)+1], perfcolours[(ev*3)+2]) );
-		ev = (ev+1) % 7;
+		drawText( Util::toString(evit->second.count) + " " + evit->first, 10 + (mScrWidth/2) * ((id-1) % 2), 10 + (mScrHeight/2) * ((id/2)) + i++ * 20, Vector3(perfcolours[(ev*3)+0], perfcolours[(ev*3)+1], perfcolours[(ev*3)+2]) );
+		ev = (ev+1) % 9;
 	}
 	
 }

@@ -291,7 +291,7 @@ void World::activateChunk( long x, long y, long z )
 	{
 		generateChunk( x, y, z );
 	}
-	updateAdjacent(x, y, z);
+	//updateAdjacent(x, y, z);
 }
 
 void World::deativateChunk( long x, long y, long z )
@@ -323,9 +323,7 @@ void World::updateAdjacent( ChunkScalar x, ChunkScalar y, ChunkScalar z )
 void World::update( float dt )
 {
 	// Update paging information before we do anything else.
-	Perf::Profiler::get().begin("page");
 	PagingContext::update();
-	Perf::Profiler::get().end("page");
 	
 	// Add these entries to the profiler so that they don't end up coming and going.
 	Perf::Profiler::get().begin("lupdate");
