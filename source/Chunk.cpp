@@ -342,8 +342,10 @@ void Chunk::generatePhysics()
 		mPhysicsBody = new btRigidBody( ci );
 		mPhysicsBody->setCollisionFlags( mPhysicsBody->getCollisionFlags() | btRigidBody::CF_STATIC_OBJECT );
 		
+		CoreSingleton->physicsMutex.lock();
 		CoreSingleton->getPhysicsWorld()
 			->addRigidBody( mPhysicsBody );
+		CoreSingleton->physicsMutex.unlock();
 	}
 }
 

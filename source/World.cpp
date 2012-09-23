@@ -28,7 +28,6 @@
 World::World( size_t edgeSize )
 : mSky( NULL ),
 mPagingCamera( NULL ),
-mWorldStage( WORLD_NORMAL ),
 mTriangulator( new BlockTriangulator() )
 {	
 	mWorldSize = edgeSize;
@@ -55,47 +54,9 @@ World::~World()
 	delete mSerializer;
 }
 
-void World::buildTerrain()
-{
-	mGenerator = new ChunkGenerator(1024);
-	//mGenerator->fillRegion( this, Vector3(0,0,0), Vector3( (mWorldSize) * REGION_WORLD_SIZE, (mWorldSize) * REGION_WORLD_SIZE, (mWorldSize) * REGION_WORLD_SIZE ) );
-	
-	//auto wcube = mWorldSize*mWorldSize*mWorldSize;
-	
-	// Initial Ordering:
-	// - Generate Lighting 
-	// - Generate Visibility Data
-	// - Generate Geometry
-	
-	/*for( int i = 0; i < wcube; i++ )
-	{
-		if( mChunks[i] )
-		{
-			mChunks[i]->updateVisibility();
-			mChunks[i]->generateLighting();
-		}
-	}
-	
-	for( int i = 0; i < wcube; i++ )
-	{
-		if( mChunks[i] )
-		{
-			mChunks[i]->generateGeometry();
-			mChunks[i]->generatePhysics();
-			mChunks[i]->_lowerChunkFlag( Chunk::MeshInvalid );
-			mChunks[i]->_lowerChunkFlag( Chunk::DataUpdated );
-		}
-	}*/
-}
-
 size_t World::coordsToIndex( int x, int y, int z )
 {
 	return ( z * mWorldSize * mWorldSize + y * mWorldSize + x );
-}
-
-WorldStage World::getCurrentStage()
-{
-	return mWorldStage;
 }
 
 Magnetite::String World::getName()
@@ -359,39 +320,14 @@ void World::updateAdjacent( ChunkScalar x, ChunkScalar y, ChunkScalar z )
 	if( c ) c->_raiseChunkFlag( Chunk::DataUpdated );
 }
 
-void World::createWorldFolder()
-{
-	char currPath[FILENAME_MAX];
-	getcwd(currPath, sizeof currPath);
-	std::string path = currPath;
-//	if( mkdir( (path + "\\worlds\\").c_str() ) != ENOENT ) {
-//		if( mkdir( (path + "\\worlds\\" + mWorldName + "\\").c_str() ) != ENOENT ) {
-//			mkdir( (path + "\\worlds\\" + mWorldName + "\\chunks").c_str() );
-//		}
-//	}
-}
-
 void World::update( float dt )
 {
-	if( mSky != NULL ) 
-	{
-		mSky->update( dt );
-	}
-	
 	// Update paging information before we do anything else.
 	Perf::Profiler::get().begin("page");
 	PagingContext::update();
 	Perf::Profiler::get().end("page");
 	
-	
-	Perf::Profiler::get().begin("ethink");
-	// Tick all of the entities.
-	for( auto it = mEntities.begin(); it != mEntities.end(); it++ )
-	{
-		(*it)->think(dt);
-	}
-	Perf::Profiler::get().end("ethink");
-	
+	// Add these entries to the profiler so that they don't end up coming and going.
 	Perf::Profiler::get().begin("lupdate");
 	Perf::Profiler::get().end("lupdate");
 	
@@ -407,43 +343,41 @@ void World::update( float dt )
 	Perf::Profiler::get().begin("geomBuild");
 	Perf::Profiler::get().end("geomBuild");
 	
-	Perf::Profiler::get().begin("think");
-	// Proccess the chunk loading queue
-	if( mChunksToLoad.size() > 0 ) {
-		mWorldStage = WORLD_GEN;
-		for( int i = 0; mChunksToLoad.size() > 0 && i < 10; i++ ) {
-			ChunkRequest req = mChunksToLoad.back();
-			Chunk* c = createChunk( req.x, req.y, req.z);
-			c->requestGenerate();
-			mChunksToLoad.pop_back();
-		}
-	
-		//for( ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it ) {
-		//	(*it)->requestGenerate();
-		//}
-		mWorldStage = WORLD_NORMAL;
-	}
-	else
+	Perf::Profiler::get().begin("wthink");
+	auto wcube = mWorldSize*mWorldSize*mWorldSize;
+	for( size_t r = 0;  r < wcube; r++ )
 	{
-		auto wcube = mWorldSize*mWorldSize*mWorldSize;
-		for( size_t r = 0;  r < wcube; r++ )
+		if( mRegions[r] == nullptr ) continue;
+		for( size_t c = 0; c < mRegions[r]->count(); c++ )
 		{
-			if( mRegions[r] == nullptr ) continue;
-			for( size_t c = 0; c < mRegions[r]->count(); c++ )
+			auto chnk = mRegions[r]->get(c);
+			if( chnk )
 			{
-				auto chnk = mRegions[r]->get(c);
-				if( chnk )
+				if( chnk->getMutex().try_lock() )
 				{
-					if( chnk->getMutex().try_lock() )
-					{
-						chnk->update(dt);
-						chnk->getMutex().unlock();
-					}
+					chnk->update(dt);
+					chnk->getMutex().unlock();
 				}
 			}
 		}
 	}
-	Perf::Profiler::get().end("think");
+	Perf::Profiler::get().end("wthink");
+}
+
+void World::updateEntities( float dt )
+{
+	if( mSky != NULL ) 
+	{
+		mSky->update( dt );
+	}
+	
+	Perf::Profiler::get().begin("ethink");
+	// Tick all of the entities.
+	for( auto it = mEntities.begin(); it != mEntities.end(); it++ )
+	{
+		(*it)->think(dt);
+	}
+	Perf::Profiler::get().end("ethink");
 }
 
 void World::updateMovingBlocks( float dt )
@@ -510,172 +444,6 @@ raycast_r World::raycastWorld(const raycast_r &inray, bool solidOnly)
 		ray.i0 = rayCallback.m_closestHitFraction * ray.maxDistance;
 	}
 	
-	return ray;
-	
-	// Old Raycast code
-	/*Vector3 min, max;
-	auto wcube = mWorldSize*mWorldSize*mWorldSize;
-	std::vector<Chunk*> hitChunks;
-	
-	for( int i = 0; i < wcube; i++ )
-	{
-		if( !mChunks[i] ) { continue; }
-		Chunk* c = mChunks[i];
-		min = Vector3( c->getX() * CHUNK_WIDTH, c->getY() * CHUNK_HEIGHT, c->getZ() * CHUNK_WIDTH );
-		max = Vector3( c->getX() * CHUNK_WIDTH + CHUNK_WIDTH, c->getY() * CHUNK_HEIGHT + CHUNK_WIDTH, c->getZ() * CHUNK_WIDTH + CHUNK_WIDTH );
-		ray = raycastCube( ray, min, max );
-		if( ray.hit && ray.i0 <= inray.maxDistance )
-		{
-			hitChunks.push_back( c );
-		}
-	}
-	
-	ray.hit = false;
-	raycast_r closest;
-	float dist = std::numeric_limits<float>::max();
-	
-	for( int i = 0; i < hitChunks.size(); i++ )
-	{
-		Chunk* hitChunk = hitChunks[i];
-		BlockArray blocks = hitChunk->getBlocks();
-		
-		for( size_t c = 0; c < CHUNK_SIZE-1; c++ )
-		{
-			if( (blocks)[c] == NULL ) continue;
-			BaseBlock* b = (blocks)[c];
-
-			if( solidOnly && !b->isSolid() )
-				continue;
-
-			Vector3 bPos = Util::indexToPosition( c );
-			min = Vector3( hitChunk->getX() * CHUNK_WIDTH - 0.0f,
-					hitChunk->getY() * CHUNK_HEIGHT + 0.0f,
-					hitChunk->getZ() * CHUNK_WIDTH - 0.0f ) + bPos;
-			max = Vector3( hitChunk->getX() * CHUNK_WIDTH + 1.0f,
-					hitChunk->getY() * CHUNK_HEIGHT + 1.0f,
-					hitChunk->getZ() * CHUNK_WIDTH + 1.0f ) + bPos;
-			raycast_r r = inray;
-			r = raycastCube(r, min, max);
-			if( r.hit == true && r.i0 < dist ) {
-				r.block = b;
-				r.blockPosition = bPos;
-				r.blockIndex = c;
-				r.chunk = hitChunk;
-				dist = r.i0;
-				closest = r;
-			}
-		}
-	}*/
-}
-
-CollisionResponse World::AABBWorld( Vector3& min, Vector3& max )
-{
-	/*ChunkList hitChunks;
-	AABB targetBB;
-	targetBB.center = (min + (max-min)/2);
-	targetBB.extents = (max-min);
-	CollisionResponse r;
-	for(ChunkList::iterator it = mChunks.begin(); it != mChunks.end(); ++it)
-	{
-		AABB chunkAABB;
-		chunkAABB.center = Vector3( (*it)->getX() * CHUNK_WIDTH + CHUNK_WIDTH/2, (*it)->getY() * CHUNK_HEIGHT + CHUNK_HEIGHT/2, (*it)->getZ() * CHUNK_WIDTH + CHUNK_WIDTH/2 );
-		chunkAABB.extents = Vector3( CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_WIDTH );
-		Collision::AABBvsAABB( chunkAABB, targetBB, r );
-		if( r.collision ) {
-			hitChunks.push_back( *it );
-		}
-	}
-	r.response = Vector3();
-
-	BlockList* blocks = NULL;
-	AABB bb;
-	CollisionResponse final;
-	final.collision = false;
-	Vector3 ofs( 0,0,0 );
-
-	for(ChunkList::iterator it = hitChunks.begin(); it != hitChunks.end(); ++it)
-	{
-		blocks = (*it)->getVisibleBlocks();
-		Vector3 chunkPos( (*it)->getX() * CHUNK_WIDTH, (*it)->getY() * CHUNK_HEIGHT, (*it)->getZ() * CHUNK_WIDTH );
-		for(BlockList::iterator block = blocks->begin(); block != blocks->end(); ++block) {
-			bb.center = chunkPos + Util::indexToPosition( block->first )
-				+ Vector3( 0.5f, 0.5f, 0.5f );
-			bb.extents = Vector3( 1.0f, 1.0f, 1.0f );
-			Collision::AABBvsAABB( bb, targetBB, r );
-			if( r.collision ) {
-				final.collision = true;
-				ofs.x = std::max( ofs.x, r.response.x );
-				ofs.y = std::max( ofs.y, r.response.y );
-				ofs.z = std::max( ofs.z, r.response.z );
-			}
-		}	
-	}
-
-	if( ( ofs.x > ofs.y ) && ( ofs.x > ofs.z ) ) {
-		final.response.x = ofs.x;
-	}
-	else if( ( ofs.y > ofs.x ) && ( ofs.y > ofs.z ) ) {
-		final.response.y = ofs.y;
-	}
-	else if( ( ofs.z > ofs.x ) && ( ofs.z > ofs.y ) ) {
-		final.response.z = ofs.z;
-	}
-
-
-	return final;*/
-	return CollisionResponse();
-}
-
-Vector3 normals[3] = {
-	Vector3(1.f, 0.f, 0.f), // X
-	Vector3(0.f, 1.f, 0.f), // Y
-	Vector3(0.f, 0.f, 1.f) // Z
-};
-
-raycast_r World::raycastCube(const raycast_r &inray, Vector3& min, Vector3& max)
-{
-	raycast_r ray(inray);
-
-	float Tnear = INT_MIN; // These values are plenty large enough.
-	float Tfar	= INT_MAX;
-
-	for(int p = 0; p < 3; p++) {
-		Vector3 norm = normals[p]; 
-		if( ray.dir[p] == 0 ) {
-			// Ray is parallel to this plane
-			if( ray.orig[p] < min[p] || ray.orig[p] > max[p] )
-			{
-				// Ray is outside of the planes of this axis, it can't intersect.
-				ray.hit = false; 
-				return ray;
-			}
-		}
-		else
-		{
-			float t1 = (min[p] - ray.orig[p]) / ray.dir[p];
-			float t2 = (max[p] - ray.orig[p]) / ray.dir[p];
-			if( t1 > t2 ) {
-				std::swap( t1, t2 );
-			}
-			else { norm = -norm; }
-			if( t1 > Tnear ) {
-				Tnear = t1;
-				ray.hitNormal = norm;
-			}
-			if( t2 < Tfar ) Tfar = t2;
-			if( Tnear > Tfar || Tfar < 0 ) {
-				ray.hit = false;
-				return ray;
-			}
-		}
-	}
-
-	ray.hitNormal = glm::normalize( ray.hitNormal );
-
-	ray.hit = true;
-	ray.i0 = Tnear;
-	ray.i1 = Tfar;
-	ray.worldHit = ray.orig + ( ray.dir * ray.i0 );
 	return ray;
 }
 

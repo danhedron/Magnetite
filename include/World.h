@@ -113,16 +113,6 @@ struct ChunkRequest
 typedef std::vector<ChunkRequest> ChunkLoadList;
 
 /**
-* World Stage ENUM, used for determining certain behaviours
-* During WORLD_GEN, adjacent chunks are NOT updated if an edge update occurs
-*/
-enum WorldStage {
-	WORLD_GEN = 1, // World is being mass-generated
-	WORLD_NORMAL = 2 // World is being run as normal
-};
-
-
-/**
  * ChunkArray - an array of Chunks
  */
 typedef Chunk** ChunkArray;
@@ -142,7 +132,6 @@ protected:
 	ChunkGenerator* mGenerator;
 	Camera*		mPagingCamera;
 	std::string mWorldName;
-	WorldStage mWorldStage;
 	ChunkLoadList mChunksToLoad;
 	
 	MovingBlockList mMovingBlocks;
@@ -183,11 +172,6 @@ public:
 	 */
 	size_t getRegionCount() const;
 
-	/**
-	 * Returns the world's current stage
-	 */
-	WorldStage getCurrentStage();
-	
 	/**
 	 * Returns the triangulator to use for generating meshes.
 	 */
@@ -279,35 +263,7 @@ public:
 	 * Requests that the engine load or generate the chunk at the given index
 	 */
 	void requestChunk( int x, int y, int z );
-
-	/**
-	 * Returns the top-level Quadtree node at the given coordinates or NULL if it's not in memory
-	 * @param Vector3 pos The position to use
-	 * @param safe In the case that the leaf doesn't exist and this is true, the leaf will be created for you.
-	 */
-	WorldNode* getWorldNode( const Vector3& pos, bool safe = false );
-
-	/**
-	 * Returns the WorldTree containing the given chunk index
-	 * @param Vector3 index The Index being searched for
-	 * @param bool create if true then the tree required to store a chunk at this point is created.
-	 */
-	WorldTree* getWorldTree( const Vector3& index, bool create = false );
-
-	/**
-	 * Returns the chunk node at the given position
-	 */
-	WorldNode* getChunkNode( const Vector3& pos, bool safe = false );
-	void _populateTree( WorldNode* parent, const NodeIndex &ppos, int depth );
-
-	std::string printTree();
-	std::string _printTree(WorldNode* node, int depth);
-
-	/**
-	 * Returns the list of top-level nodes
-	 */
-	TreeList& getTopNodes();
-
+	
 	/**
 	 * Creates a chunk at the given coordinates.
 	 * @param x Coordinate
@@ -364,16 +320,6 @@ public:
 	void updateAdjacent( ChunkScalar x, ChunkScalar y, ChunkScalar z );
 
 	/**
-	 * Saves all chunks to disk
-	 */
-	void saveAllChunks();
-
-	/**
-	 * Creates the folder structure for the current world
-	 */
-	void createWorldFolder();
-
-	/**
 	 * Sets the camera used for paging chunks
 	 */
 	void setPagingCamera( Camera* _c );
@@ -384,22 +330,19 @@ public:
 	void destoryWorld();
 
 	/**
-	 * Updates all loaded chunks
+	 * Updates all terrain related matters.
 	 */
 	void update( float dt );
+	
+	/**
+	 * Updates entities in the world.
+	 */
+	void updateEntities( float dt );
 	
 	/**
 	 * Updates all of the moving blocks
 	 */
 	void updateMovingBlocks( float dt );
-
-	/**
-	 * Performs a raycast test against a single cube
-	 * @param ray Raycast object.
-	 * @param min Cube minimum.
-	 * @param max Cube maximum.
-	 */
-	raycast_r raycastCube(const raycast_r &ray, Vector3& min, Vector3& max);
 
 	/**
 	 * Performs a raytest against the world.
@@ -417,13 +360,6 @@ public:
 	Magnetite::ChunkRegionPtr getRegion(const ChunkScalar x, const ChunkScalar y, const ChunkScalar z);
 
 	/**
-	 * Performs an AABB test against the world.
-	 */
-	CollisionResponse AABBWorld( Vector3& min, Vector3& max );
-
-	collision_r AABBCube( Vector3& min, Vector3& max, Vector3& minb, Vector3& maxb );
-
-	/**
 	 * Creates a new sky object 
 	 */
 	void createSky( size_t time );
@@ -432,11 +368,6 @@ public:
 	 * @returns a Pointer to the sky object.
 	 */
 	Sky* getSky();
-	
-	/**
-	 * Builds the data for the initial world
-	 */
-    void buildTerrain();
 	
 	/**
 	 * Returns true if there is a block surrounding this point

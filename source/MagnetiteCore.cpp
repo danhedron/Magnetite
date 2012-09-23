@@ -211,6 +211,8 @@ void MagnetiteCore::go()
 			mPhysicsWorld->stepSimulation( lDelta );
 			physicsMutex.unlock();
 			Perf::Profiler::get().end("pthink");
+			
+			mWorld->updateEntities(lDelta);
 		}
 	});
 	
@@ -396,7 +398,6 @@ void MagnetiteCore::newWorld( std::string name )
 
 	mWorld = new World( 2 );
 	mWorld->setName(name);
-	mWorld->buildTerrain();
 }
 
 void MagnetiteCore::unloadWorld()
