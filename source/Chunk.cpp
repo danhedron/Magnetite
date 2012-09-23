@@ -27,24 +27,12 @@ mNumBlocks( 0 )
 	
 	// Allocates the internal block array 
 	_allocateArray( CHUNK_SIZE );
-	
-	/*for(int x = 0; x < CHUNK_WIDTH; x++)
-	{
-		for(int z = 0; z < CHUNK_WIDTH; z++)
-		{
-			for(int y = 0; y < CHUNK_HEIGHT; y++)
-			{
-				BaseBlock* block = NULL;
-				block = FactoryManager::getManager().createBlock("stone");
-				setBlockAt( block, x, y, z  );
-			}
-		}
-	}*/
 }
 
 Chunk::~Chunk()
 {
 	delete[] mBlocks;
+	delete[] mLightValues;
 }
 
 long Chunk::getX()
