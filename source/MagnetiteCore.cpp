@@ -101,12 +101,12 @@ void MagnetiteCore::init(int *argc, char **argv)
 	sf::ContextSettings wnds;
 	wnds.depthBits = 24;
 	//wnds.AntialiasingLevel = 2;
-	mWindow.create(sf::VideoMode(800,600,32), "Magnetite", sf::Style::Close | sf::Style::Resize, wnds);
+	mWindow.create(sf::VideoMode(1280,720,32), "Magnetite", sf::Style::Close | sf::Style::Resize, wnds);
 	mWindow.setKeyRepeatEnabled( false );
 	mWindow.setVerticalSyncEnabled( false );
 	mRenderer->initialize(mWindow);
 	mTextureManager->initalize();
-	mRenderer->resizeViewport(0,0,800,600);
+	mRenderer->resizeViewport(0,0,1280,720);
 	initalizePhysics();
 }
 

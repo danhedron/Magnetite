@@ -40,12 +40,19 @@ namespace Magnetite
 		auto wSize = mContext->getWorldSize();
 		Vector3 pagePos;
 		auto pageRad = 1.4f * (mContext->getPageSize() / 2.f);
-		for( auto x = 0; x < wSize.x; x++ )
+		
+		auto camPage = (mPosition - mContext->getPageOffset()) / mContext->getPageSize();
+		auto camViewPageSize = mFar / mContext->getPageSize();
+		
+		for( auto x = floor( camPage.x - camViewPageSize ); x < floor( camPage.x + camViewPageSize ); x++ )
 		{
-			for( auto y = 0; y < wSize.y; y++ )
+			for( auto y = floor( camPage.y - camViewPageSize); y < floor( camPage.y + camViewPageSize); y++ )
 			{
-				for( auto z = 0; z < wSize.z; z++ )
+				for( auto z = floor( camPage.z - camViewPageSize); z < floor( camPage.z + camViewPageSize); z++ )
 				{
+					if( x  < 0 || x >= wSize.x ) continue;
+					if( y  < 0 || y >= wSize.y ) continue;
+					if( z  < 0 || z >= wSize.z ) continue;
 					// Determine spherical distance.
 					pagePos = Vector3( x, y, z ) * mContext->getPageSize() + mContext->getPageOffset();
 					auto d = glm::length( mPosition - pagePos );

@@ -293,5 +293,5 @@ Game.think = function( dt )
 
 Game.draw = function()
 {
-	this.menu.draw();
+	//this.menu.draw();
 }
