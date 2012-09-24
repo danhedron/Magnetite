@@ -6,6 +6,7 @@
 #include <deque>
 #include <thread>
 #include <thread>
+#include "prerequisites.h"
 
 #define FRAME_COUNT 128
 
@@ -40,8 +41,17 @@ namespace Perf {
 		 */
 		uint32_t mFrameStart;
 		
+		/**
+		 * String identifier for this profiler.
+		 */
+		Magnetite::String mID;
+		
 		void pushFrame();
 	public:
+		
+		void setID( const Magnetite::String& id );
+		
+		Magnetite::String getID();
 		
 		/**
 		 * Begins profiling a new block

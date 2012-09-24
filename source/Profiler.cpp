@@ -61,6 +61,16 @@ namespace Perf
 		mFrameStart = millis;
 	}
 	
+	void Profiler::setID( const Magnetite::String& id )
+	{
+		mID = id;
+	}
+	
+	Magnetite::String Profiler::getID()
+	{
+		return mID;
+	}
+	
 	void Profiler::begin( const std::string& section )
 	{
 		ProfilerEvents::iterator it = mCurrentFrame.find( section );

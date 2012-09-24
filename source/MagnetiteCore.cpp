@@ -193,6 +193,9 @@ void MagnetiteCore::go()
 	std::thread physics_thread( [&]() {
 		sf::Clock timer;
 		
+		// Set profiler ID
+		Perf::Profiler::get().setID("logic");
+		
 		while(mContinue && mWindow.isOpen()) {
 			float lDelta = ((float)timer.getElapsedTime().asMilliseconds())/1000;
 			
@@ -219,6 +222,8 @@ void MagnetiteCore::go()
 	std::thread world_thread( [&]() {
 		sf::Clock timer;
 		
+		Perf::Profiler::get().setID("world");
+		
 		while(mContinue && mWindow.isOpen()) {
 			float lDelta = ((float)timer.getElapsedTime().asMilliseconds())/1000;
 			
@@ -238,6 +243,8 @@ void MagnetiteCore::go()
 	
 	physics_thread.detach();
 	world_thread.detach();
+	
+	Perf::Profiler::get().setID("main");
 	
 	mClock.restart();
 	while(mContinue && mWindow.isOpen()) {

@@ -463,6 +463,8 @@ void Renderer::drawPerf( size_t id, Perf::Profiler& prof )
 		ev = (ev+1) % 9;
 	}
 	
+	drawText( prof.getID(),  mScrWidth/4 + (mScrWidth/2) * ((id-1) % 2), (mScrHeight/4) + (mScrHeight/2) * ((id/2)), Vector3(0.8f, 0.8f, 0.8f) );
+	
 }
 
 void Renderer::drawCrosshair( double dt )
