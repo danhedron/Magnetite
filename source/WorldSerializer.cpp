@@ -48,7 +48,7 @@ namespace Magnetite
 	
 	String WorldSerializer::resolveRegion( ChunkScalar x, ChunkScalar y, ChunkScalar z )
 	{
-		return mWorldPath + "/chunk" + Util::toString(x) + "." + Util::toString(y) + "." + Util::toString(z);
+		return  "./worlds/" + mWorld->getName() + "/chunk" + Util::toString(x) + "." + Util::toString(y) + "." + Util::toString(z);
 	}
 	
 	bool WorldSerializer::hasChunk( ChunkScalar x, ChunkScalar y, ChunkScalar z )
@@ -59,52 +59,33 @@ namespace Magnetite
 	
 	bool WorldSerializer::loadChunk( ChunkScalar x, ChunkScalar y, ChunkScalar z )
 	{
-		
-		Perf::Profiler::get().begin("sopen");
 		std::ifstream stream( resolveRegion(x, y, z).c_str() );
 		if( !stream.is_open() ) return false;
 		
-		Perf::Profiler::get().end("sopen");
-
 		auto c = mWorld->getChunk( x, y, z );
 		if( c == nullptr ) 
 		{
 			c = mWorld->createChunk( x, y, z );
 		}
 		
-		// Read the header.
-		size_t types;
-		size_t blockcount;
-		stream.read( (char*)&types, sizeof(size_t) );
-		std::string tmap[types];
-		for( size_t i = 0; i < types; i++ )
-		{
-			std::string type;
-			std::getline(stream, type, '\0');
-			tmap[i] = type;
-		}
-		
-		stream.read( (char*)&blockcount, sizeof(size_t) );
-		size_t* data = new size_t[blockcount];
-		stream.read( (char*)data, sizeof(size_t)*blockcount );
+		ChunkData d;
+		stream.read( (char*)&d, sizeof(ChunkData) );
 		
 		stream.close();
 		
 		Perf::Profiler::get().begin("dread");
 		size_t id;
-		for( int i = 0; i < blockcount; i++ )
+		for( int i = 0; i < CHUNK_SIZE; i++ )
 		{
-			id = data[i];
+			id = d.blockData[i];
 			if( id != 0 )
 			{
-				auto block = FactoryManager::getManager().createBlock(tmap[id-1]);
+				auto block = FactoryManager::getManager().createBlock(idmap[id]);
 				if( block != nullptr )
 					c->setBlockAt( block, i );
 			}
 		}
 		Perf::Profiler::get().end("dread");
-		
-		delete[] data;
 		
 		return true;
 	}
@@ -117,7 +98,7 @@ namespace Magnetite
 			return;
 		}
 	
-		//std::ofstream stream( resolveRegion(x, y, z).c_str() );
+		std::ofstream stream( resolveRegion(x, y, z).c_str() );
 		
 		ChunkData d;
 		
@@ -133,8 +114,8 @@ namespace Magnetite
 			}
 		}
 		
-		//stream.write( (char*)&d , sizeof(d) );
+		stream.write( (char*)&d , sizeof(d) );
 		
-		///stream.close();
+		stream.close();
 	}
 };

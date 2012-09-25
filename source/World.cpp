@@ -289,11 +289,11 @@ bool World::hasNeighbours(short int x, short int y, short int z)
 void World::activateChunk( long x, long y, long z )
 {
 	// Generate or load the chunk as it is not loaded.
-	//if( !mSerializer->loadChunk( x, y, z ) )
-	//{
+	if( !mSerializer->loadChunk( x, y, z ) )
+	{
 		generateChunk( x, y, z );
-	//}
-	//updateAdjacent(x, y, z);
+	}
+	updateAdjacent(x, y, z);
 }
 
 void World::deactivateChunk( long x, long y, long z )
@@ -352,7 +352,7 @@ void World::update( float dt )
 	// Process the chunk loading queue
 	mWorldMutex.lock();
 	//Perf::Profiler::get().begin("qproc");
-	while( mChunkRequests.size() > 0 )
+	if( mChunkRequests.size() > 0 )
 	{
 		auto &r = mChunkRequests.at(0);
 		
