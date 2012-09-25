@@ -61,6 +61,20 @@ void ChunkGenerator::fillRegion( World* w, const Vector3& min, const Vector3& ma
 {
 	float p = 0.25f;
 	float octs = 10;
+	
+	// Flood fill anything below 98.
+	for( ChunkScalar x = min.x; x < max.x; x++ )
+	{
+		for( ChunkScalar z = min.z; z < max.z; z++ )
+		{
+			for( ChunkScalar y = min.y; y < std::min( 98.f, max.y); y++ )
+			{
+				auto b = FactoryManager::getManager().createBlock("stone");
+				w->setBlockAt( b, x, y, z);
+			}
+		}
+	}
+
 	for( int x = floor(min.x); x < floor( max.x ); x++ )
 	{
 		for( int z = floor(min.z); z < floor( max.z ); z++ )
@@ -73,7 +87,7 @@ void ChunkGenerator::fillRegion( World* w, const Vector3& min, const Vector3& ma
 			}
 			total = (total*30.f) + 128.f;
 			size_t yt = total;
-			for( int y = floor(min.y); y < std::min(floor( max.y ), floor(total+1)) ; y++ )
+			for( int y = std::max(floor(min.y), 98.0); y < std::min(floor( max.y ), floor(total+1)) ; y++ )
 			{
 				BaseBlock* b = nullptr;
 				if( y == yt ) {
@@ -91,60 +105,50 @@ void ChunkGenerator::fillRegion( World* w, const Vector3& min, const Vector3& ma
 
 void ChunkGenerator::fillChunk(Chunk *chunk)
 {
-	if( chunk->getY() > 0 ) return; //Don't fill chunks above ground yet (supermountains yet to come)
-	if( chunk->getY() == 0 ) {
-		float p = 0.25f;
-		float octs = 10;
-		for( int x = 0; x < CHUNK_WIDTH; x++ ) {
-			for( int z = 0; z < CHUNK_WIDTH; z++ ) {
-				float total = 0.f;
-				for( float i = 0; i < octs; i++ ) {
-					float freq = pow(2.f, i);
-					float amp = pow(p, i);
-					int Cx, Cz;
-					Cx=(chunk->getX()*CHUNK_WIDTH);
-					Cz=(chunk->getZ()*CHUNK_WIDTH);
-					total = total + interpolatedNoise((float)(Cx + x) * freq * 0.05f , (float)(Cz + z) *freq * 0.05f ) * amp;
-				}
-				std::string type = "stone";
-				total = (total*30.f) + 64.f;
-				for( int y = 0; y < total; y++ ) {
-					if( y > total - 5 )
-						type = "dirt";
-					if( y > total -1 )
-						type = "grass";
-					BaseBlock* block = FactoryManager::getManager().createBlock(type);
-					if( block ) {
-						chunk->setBlockAt( block, x, y, z );
-					}
-				}
-	/*			if( 64 + total < 64 )
-				{
-					for( int y = 64+total; y < 64; y++ ) {
-						BaseBlock* block = FactoryManager::createBlock("water");
-						if( block ) {
-							block->setPosition( x, y, z );
-							chunk->addBlockToChunk( block );
-						}
-					}
-				}*/
-			}
-		}
-	}
-	else
+	// Get the factories we need.
+	auto &sf = FactoryManager::getManager().blockFactoryList.find("stone")->second;
+	
+	ChunkScalar xsz = chunk->getX() * CHUNK_WIDTH + CHUNK_WIDTH;
+	ChunkScalar zsz = chunk->getZ() * CHUNK_WIDTH + CHUNK_WIDTH;
+	ChunkScalar ysz = std::min(chunk->getY() * CHUNK_WIDTH + CHUNK_WIDTH, 98l);
+	
+	// Flood fill anything below 128.
+	for( ChunkScalar x = chunk->getX()*CHUNK_WIDTH, xb = 0; x < xsz; x++, xb++ )
 	{
-		for( int x = 0; x < CHUNK_WIDTH; x++ ) {
-			for( int z = 0; z < CHUNK_WIDTH; z++ ) {
-				std::string type = "stone";
-				for( int y = 0; y < CHUNK_HEIGHT; y++ ) {
-					BaseBlock* block = FactoryManager::getManager().createBlock(type);
-					if( block ) {
-						chunk->setBlockAt( block, x, y, z );
-					}
-				}
+		for( ChunkScalar z = chunk->getZ()*CHUNK_WIDTH, zb = 0; z < zsz; z++, zb++ )
+		{
+			for( ChunkScalar y = chunk->getY()*CHUNK_WIDTH, yb = 0; y < ysz; y++, yb++ )
+			{
+				auto b = sf->create();
+				chunk->setBlockAt( b, xb, yb, zb);
 			}
 		}
 	}
-	//chunk->generate();
-	//chunk->forceGenerate();
+
+// 	for( int x = floor(min.x); x < floor( max.x ); x++ )
+// 	{
+// 		for( int z = floor(min.z); z < floor( max.z ); z++ )
+// 		{
+// 			float total = 0.f;
+// 			for( float i = 0; i < octs; i++ ) {
+// 				float freq = pow(2.f, i);
+// 				float amp = pow(p, i);
+// 				total = total + interpolatedNoise((float)(x) * freq * 0.05f , (float)(z) *freq * 0.05f ) * amp;
+// 			}
+// 			total = (total*30.f) + 128.f;
+// 			size_t yt = total;
+// 			for( int y = std::max(floor(min.y), 98.0); y < std::min(floor( max.y ), floor(total+1)) ; y++ )
+// 			{
+// 				BaseBlock* b = nullptr;
+// 				if( y == yt ) {
+// 					b = FactoryManager::getManager().createBlock("grass");
+// 				}
+// 				else if( y < yt ) {
+// 					b = FactoryManager::getManager().createBlock("stone");
+// 				}
+// 				if( b )
+// 					w->setBlockAt(b, x, y, z );
+// 			}
+// 		}
+// 	}
 }

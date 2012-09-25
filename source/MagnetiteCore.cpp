@@ -225,11 +225,7 @@ void MagnetiteCore::go()
 		
 		while(mContinue && mWindow.isOpen()) {
 			float lDelta = ((float)timer.getElapsedTime().asMilliseconds())/1000;
-			
-			if( lDelta < 1.f/60.f )
-			{
-				continue;
-			}
+			if( lDelta < 1/60.f ) { continue; }
 			timer.restart(); 
 			Perf::Profiler::get().newFrame();
 			

@@ -3,6 +3,7 @@
 #include <BaseBlock.h>
 #include <BlockFactory.h>
 #include <Profiler.h>
+#include <Chunk.h>
 
 namespace Magnetite
 {

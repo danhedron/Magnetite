@@ -2,9 +2,9 @@
 #define _WORLD_H_
 #include "prerequisites.h"
 #include <deque>
-#include "Collision.h"
+#include <mutex>
+#include "Region.h"
 #include "MovingBlock.h"
-#include "Chunk.h"
 #include "paging/PagingContext.h"
 
 namespace Magnetite {
@@ -107,12 +107,11 @@ class Camera;
 
 struct ChunkRequest
 {
-	int x, y, z;
+	ChunkScalar x, y, z;
 	bool unload;
 };
 
 typedef std::deque<ChunkRequest> ChunkLoadList;
-
 /**
  * ChunkArray - an array of Chunks
  */
@@ -131,9 +130,8 @@ protected:
 
 	Sky*		mSky;
 	ChunkGenerator* mGenerator;
-	Camera*		mPagingCamera;
 	std::string mWorldName;
-	ChunkLoadList mChunksToLoad;
+	ChunkLoadList mChunkRequests;
 	
 	MovingBlockList mMovingBlocks;
 	
@@ -168,11 +166,6 @@ public:
 	 */
 	~World( void );
 
-	/**
-	 * Converts coordinates into indexes 
-	 */
-	size_t coordsToIndex( int x, int y, int z );
-	
 	/**
 	 * Returns the number of regions.
 	 */
@@ -329,11 +322,6 @@ public:
 	 * Causes all adjacent chunks to update
 	 */
 	void updateAdjacent( ChunkScalar x, ChunkScalar y, ChunkScalar z );
-
-	/**
-	 * Sets the camera used for paging chunks
-	 */
-	void setPagingCamera( Camera* _c );
 
 	/**
 	 * Destroys all chunks in the world.

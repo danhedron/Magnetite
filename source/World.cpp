@@ -23,9 +23,11 @@
 #include <unistd.h>
 #endif
 
+// For convenience
+#define c2i( x, y, z ) ( z * mWorldSize * mWorldSize + y * mWorldSize + x )
+
 World::World( size_t edgeSize )
 : mSky( NULL ),
-mPagingCamera( NULL ),
 mTriangulator( new BlockTriangulator() )
 {	
 	mWorldSize = edgeSize;
@@ -50,11 +52,6 @@ World::~World()
 	destoryWorld();
 	
 	delete mSerializer;
-}
-
-size_t World::coordsToIndex( int x, int y, int z )
-{
-	return ( z * mWorldSize * mWorldSize + y * mWorldSize + x );
 }
 
 Magnetite::String World::getName()
@@ -202,7 +199,7 @@ Chunk* World::getChunk(const long x, const long y, const long z)
 
 Magnetite::ChunkRegionPtr World::getRegion( const ChunkScalar x, const ChunkScalar y, const ChunkScalar z )
 {
-	size_t index = coordsToIndex( x, y, z );
+	size_t index = c2i( x, y, z );
 	if( x < 0 || x > mWorldSize-1 || y < 0 || y > mWorldSize-1 || z < 0 || z > mWorldSize-1 )
 	{
 		return NULL;
@@ -219,14 +216,16 @@ Magnetite::ChunkRegionPtr World::getRegion( const ChunkScalar x, const ChunkScal
 void World::requestChunk( ChunkScalar x, ChunkScalar y, ChunkScalar z )
 {
 	mWorldMutex.lock();
-	mChunksToLoad.push_back( ChunkRequest{ x, y, z, false } );
+	ChunkRequest r = { x, y, z, false } ;
+	mChunkRequests.push_back( r );
 	mWorldMutex.unlock();
 }
 
 void World::requestChunkUnload( ChunkScalar x, ChunkScalar y, ChunkScalar z )
 {
 	mWorldMutex.lock();
-	mChunksToLoad.push_back( ChunkRequest{ x, y, z, true } );
+	ChunkRequest r = { x, y, z, true } ;
+	mChunkRequests.push_back( r );
 	mWorldMutex.unlock();
 }
 
@@ -250,29 +249,31 @@ Chunk* World::createChunk(long x, long y, long z)
 
 Chunk* World::generateChunk( ChunkScalar x, ChunkScalar y, ChunkScalar z )
 {
+	Perf::Profiler::get().begin("tgen");
+
 	auto c = getChunk( x, y, z );
 	if( c == nullptr )
 	{
 		c = createChunk( x, y, z );
 	}
 	
-	mGenerator->fillRegion( this, 
+	/*mGenerator->fillRegion( this, 
 							Vector3( x * CHUNK_WIDTH, y * CHUNK_WIDTH, z * CHUNK_WIDTH ), 
 							Vector3( x * CHUNK_WIDTH + CHUNK_WIDTH, y * CHUNK_WIDTH + CHUNK_WIDTH, z * CHUNK_WIDTH + CHUNK_WIDTH )
-				);
-	
+				);*/
+	mGenerator->fillChunk( c );
+	Perf::Profiler::get().end("tgen");
+
 	return c;
 }
 
 Magnetite::ChunkRegionPtr World::createRegion( const ChunkScalar x, const ChunkScalar y, const ChunkScalar z )
 {
 	Util::log( "Created Region: " + Util::toString(x) + " " + Util::toString(y) + " " + Util::toString(z) );
-	size_t index = coordsToIndex( x, y, z );
 	if( x < 0 || x > mWorldSize-1 || y < 0 || y > mWorldSize-1 || z < 0 || z > mWorldSize-1 )
 		return NULL;
-	mRegions[index] = new Magnetite::ChunkRegion( x, y, z, this ); // 6859 (thanks to n3hima)
-	
-	return mRegions[index];
+	size_t index = c2i( x, y, z );
+	return (mRegions[index] = new Magnetite::ChunkRegion( x, y, z, this ));
 }
 
 void World::removeChunk( long x, long y, long z )
@@ -283,11 +284,6 @@ void World::removeChunk( long x, long y, long z )
 	Magnetite::ChunkRegionPtr r = getRegion(rx, ry, rz);
 	if( r == NULL ) return;
 	return r->remove( x % REGION_SIZE, y % REGION_SIZE, z % REGION_SIZE );
-}
-
-void World::setPagingCamera( Camera* _c )
-{
-	mPagingCamera = _c;
 }
 
 bool World::hasNeighbours(short int x, short int y, short int z)
@@ -302,7 +298,7 @@ void World::activateChunk( long x, long y, long z )
 	//{
 		generateChunk( x, y, z );
 	//}
-	//updateAdjacent(x, y, z);
+	updateAdjacent(x, y, z);
 }
 
 void World::deactivateChunk( long x, long y, long z )
@@ -333,21 +329,6 @@ void World::updateAdjacent( ChunkScalar x, ChunkScalar y, ChunkScalar z )
 
 void World::update( float dt )
 {
-	// Update paging information before we do anything else.
-	PagingContext::update();
-	
-	// Process the chunk loading queue.
-	mWorldMutex.lock();
-	if( mChunksToLoad.size() > 0 ) {
-		auto it = mChunksToLoad.begin();
-		if( it->unload )
-			this->deactivateChunk( it->x, it->y, it->z );
-		else
-			this->activateChunk( it->x, it->y, it->z );
-		mChunksToLoad.erase(it);
-	}
-	mWorldMutex.unlock();
-	
 	// Add these entries to the profiler so that they don't end up coming and going.
 	Perf::Profiler::get().begin("lupdate");
 	Perf::Profiler::get().end("lupdate");
@@ -358,17 +339,46 @@ void World::update( float dt )
 	Perf::Profiler::get().begin("pupdate");
 	Perf::Profiler::get().end("pupdate");
 	
-	Perf::Profiler::get().begin("pcreate");
-	Perf::Profiler::get().end("pcreate");
-	
 	Perf::Profiler::get().begin("vupdate");
 	Perf::Profiler::get().end("vupdate");
 
-	Perf::Profiler::get().begin("geomBuild");
-	Perf::Profiler::get().end("geomBuild");
+	Perf::Profiler::get().begin("tgen");
+	Perf::Profiler::get().end("tgen");
 	
-	Perf::Profiler::get().begin("cgen");
-	Perf::Profiler::get().end("cgen");
+	// Update paging information before we do anything else.
+	PagingContext::update();
+	
+	Perf::Profiler::get().begin("ca");
+	Perf::Profiler::get().end("ca");
+	
+	Perf::Profiler::get().begin("cu");
+	Perf::Profiler::get().end("cu");
+	
+	// Process the chunk loading queue
+	mWorldMutex.lock();
+	//Perf::Profiler::get().begin("qproc");
+	while( mChunkRequests.size() > 0 )
+	{
+		auto &r = mChunkRequests.at(0);
+		
+		if( r.unload ) {
+			Perf::Profiler::get().begin("cu");
+			this->deactivateChunk( r.x, r.y, r.z );
+			Perf::Profiler::get().end("cu");
+		}
+		else
+		{
+			//Perf::Profiler::get().begin("ca");
+			this->activateChunk( r.x, r.y, r.z );
+			//Perf::Profiler::get().end("ca");
+		}
+		
+		mChunkRequests.pop_front();
+	}
+	
+	//Perf::Profiler::get().end("qproc");
+
+	mWorldMutex.unlock();
 	
 	Perf::Profiler::get().begin("wthink");
 	auto wcube = mWorldSize*mWorldSize*mWorldSize;

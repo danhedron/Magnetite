@@ -74,7 +74,6 @@ void BlockTriangulator::triangulateChunk( TerrainGeometry* geom, Chunk* chunk )
 	auto edges = geom->edgeData;
 	long cx = (chunk->getX() * CHUNK_WIDTH), cy = (chunk->getY() * CHUNK_WIDTH), cz = (chunk->getZ() * CHUNK_WIDTH);
 	
-	Perf::Profiler::get().begin("geomBuild");
 	for( BlockList::iterator it = chunk->getVisibleBlocks().begin(); it != chunk->getVisibleBlocks().end(); ++it )
 	{
 		Vector3 pos = Util::indexToPosition( it->first );
@@ -194,7 +193,6 @@ void BlockTriangulator::triangulateChunk( TerrainGeometry* geom, Chunk* chunk )
 			eInd += 6;
 			ind += 4;
 		}
-		Perf::Profiler::get().end("geomBuild");
 	}
 	
 }

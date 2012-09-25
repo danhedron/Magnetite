@@ -84,27 +84,10 @@ BlockPtr* Chunk::getBlocks()
 	return mBlocks;
 }
 
-void Chunk::setBlockAt( BlockPtr block, short x, short y, short z )
-{
-	setBlockAt( block, BLOCK_INDEX_2( x, y, z ) );
-}
+//void Chunk::setBlockAt( BlockPtr block, ChunkScalar x, ChunkScalar y, ChunkScalar z )
 
-void Chunk::setBlockAt( BlockPtr block, short index )
-{
-	if( index < 0 || index > CHUNK_SIZE )
-		return;
-	if( mBlocks[ index ] != NULL )
-	{
-		removeBlockAt( index );
-	}
-	// Lock here to avoid locking the thread.
-	getMutex().lock();
-	mNumBlocks++;
-	mBlocks[ index ] = block;
-	_raiseChunkFlag( DataUpdated );
-	
-	getMutex().unlock();
-}
+//void Chunk::setBlockAt( BlockPtr block, ChunkScalar index )
+
 
 BlockPtr Chunk::getBlockAt( short x, short y, short z )
 {

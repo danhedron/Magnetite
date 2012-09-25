@@ -129,12 +129,28 @@ public:
 	/**
 	 * Inserts the block at the given position
 	 */
-	void setBlockAt( BlockPtr block, short x, short y, short z );
+	inline void setBlockAt( BlockPtr block, ChunkScalar x, ChunkScalar y, ChunkScalar z )
+	{
+		setBlockAt( block, BLOCK_INDEX_2( x, y, z ) );
+	}
 
 	/**
 	 * Inserts the block at the given index
 	 */
-	void setBlockAt( BlockPtr block, short index );
+	inline void setBlockAt( BlockPtr block, ChunkScalar index )
+	{
+		if( index > CHUNK_SIZE || index < 0 ) return;
+		if( mBlocks[ index ] != NULL )
+		{
+			removeBlockAt( index );
+		}
+		// Lock here to avoid locking the thread.
+		getMutex().lock();
+		mNumBlocks++;
+		mBlocks[ index ] = block;
+		_raiseChunkFlag( DataUpdated );
+		getMutex().unlock();
+	}
 
 	/**
 	 * Removes a block at the given position 
