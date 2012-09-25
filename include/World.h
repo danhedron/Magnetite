@@ -179,7 +179,10 @@ public:
 	/**
 	 * Returns the color of a brightness level
 	 */
-	static float getLightColor( LightIndex light );
+	inline static float getLightColor( LightIndex light )
+	{
+		return ( 0.1f + ( 0.9f * ( (float)light/256 ) ) );
+	}
 	
 	/**
 	 * Returns the block at the world index specified

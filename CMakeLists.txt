@@ -26,7 +26,8 @@ project(Magnetite)
 set (MAGNETITE_VERSION_MAJOR 0)
 set (MAGNETITE_VERSION_MINOR 1)
 
-set(CMAKE_CXX_FLAGS "-std=c++0x -Wall")
+# Set GCC flags to some sensible defaults
+set(CMAKE_CXX_FLAGS "-std=c++0x -Wall -O")
 
 #Pass important things to Code
 configure_file(

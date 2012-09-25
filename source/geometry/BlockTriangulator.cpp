@@ -72,28 +72,34 @@ void BlockTriangulator::triangulateChunk( TerrainGeometry* geom, Chunk* chunk )
 	
 	auto data = geom->vertexData;
 	auto edges = geom->edgeData;
-	long cx = (chunk->getX() * CHUNK_WIDTH), cy = (chunk->getY() * CHUNK_WIDTH), cz = (chunk->getZ() * CHUNK_WIDTH);
+	ChunkScalar cx = (chunk->getX() * CHUNK_WIDTH), cy = (chunk->getY() * CHUNK_WIDTH), cz = (chunk->getZ() * CHUNK_WIDTH);
+	auto tm = MagnetiteCore::Singleton->getTextureManager();
+	auto w = chunk->getWorld();
+	auto &vb = chunk->getVisibleBlocks();
 	
-	for( BlockList::iterator it = chunk->getVisibleBlocks().begin(); it != chunk->getVisibleBlocks().end(); ++it )
+	ChunkScalar wx, wy, wz;
+	short texX, texY;
+	short visFlags;
+	Vector3 pos;
+	GLuvrect rect;
+	
+	BaseBlock* b;
+	
+	for( BlockList::iterator it = vb.begin(); it != vb.end(); ++it )
 	{
-		Vector3 pos = Util::indexToPosition( it->first );
-		/*context.worldX = pos.x;
-		context.worldY = pos.y;
-		context.worldZ = pos.z;
-		context.chunk = chunk;
-		context.world = chunk->getWorld();*/
-		//it->second->buildCubeData( context, vind, eind, verts, edges );
+		pos = Util::indexToPosition( it->first );
+		b = it->second;
 		
-		long wx = cx + pos.x, wy = cy + pos.y, wz = cz + pos.z;
-		short texX = 0, texY = 0;
-		short visFlags = it->second->getVisFlags();
+		wx = cx + pos.x; wy = cy + pos.y; wz = cz + pos.z;
+		texX = 0, texY = 0;
+		visFlags = it->second->getVisFlags();
 			
 		/* Face -Z */
 		if((visFlags & FACE_BACK) == FACE_BACK ) {
-			it->second->getTextureCoords( FACE_BACK, texX, texY );
-			GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
+			b->getTextureCoords( FACE_BACK, texX, texY );
+			rect = tm->getBlockUVs( texX, texY );
 			
-			float color = World::getLightColor( chunk->getWorld()->getLightLevel( wx, wy, wz+1 ) );
+			float color = World::getLightColor( w->getLightLevel( wx, wy, wz+1 ) );
 			
 			VERTEX( 0, 1.0f, 1.0f, 1.0f, rect.x,          rect.y,          color )
 			VERTEX( 1, 0.0f, 1.0f, 1.0f, rect.x + rect.w, rect.y,          color )
@@ -107,10 +113,10 @@ void BlockTriangulator::triangulateChunk( TerrainGeometry* geom, Chunk* chunk )
 		}
 		/* Face +Z */
 		if((visFlags & FACE_FORWARD) == FACE_FORWARD ) {
-			it->second->getTextureCoords( FACE_FORWARD, texX, texY );
-			GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
+			b->getTextureCoords( FACE_FORWARD, texX, texY );
+			rect = tm->getBlockUVs( texX, texY );
 
-			float color = World::getLightColor( chunk->getWorld()->getLightLevel( wx, wy, wz-1 ) );
+			float color = World::getLightColor( w->getLightLevel( wx, wy, wz-1 ) );
 			
 			VERTEX( 0, 1.0f, 1.0f, 0.0f, rect.x,          rect.y,          color )
 			VERTEX( 1, 0.0f, 1.0f, 0.0f, rect.x + rect.w, rect.y,          color )
@@ -124,10 +130,10 @@ void BlockTriangulator::triangulateChunk( TerrainGeometry* geom, Chunk* chunk )
 		}
 		/* Face +X */
 		if((visFlags & FACE_RIGHT) == FACE_RIGHT) {
-			it->second->getTextureCoords( FACE_RIGHT, texX, texY );
-			GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
+			b->getTextureCoords( FACE_RIGHT, texX, texY );
+			rect = tm->getBlockUVs( texX, texY );
 			
-			float color = World::getLightColor( chunk->getWorld()->getLightLevel( wx+1, wy, wz ) );
+			float color = World::getLightColor( w->getLightLevel( wx+1, wy, wz ) );
 
 			// + rect.w, rect.y,          color )
 			// + rect.w, rect.y + rect.h, color )
@@ -144,10 +150,10 @@ void BlockTriangulator::triangulateChunk( TerrainGeometry* geom, Chunk* chunk )
 		}
 		/* Face -Y */
 		if((visFlags & FACE_BOTTOM) == FACE_BOTTOM) {
-			it->second->getTextureCoords( FACE_BOTTOM, texX, texY );
-			GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
+			b->getTextureCoords( FACE_BOTTOM, texX, texY );
+			rect = tm->getBlockUVs( texX, texY );
 
-			float color = World::getLightColor( chunk->getWorld()->getLightLevel( wx, wy-1, wz ) );
+			float color = World::getLightColor( w->getLightLevel( wx, wy-1, wz ) );
 			
 			VERTEX( 0, 0.0f, 0.0f, 1.0f, rect.x,          rect.y,          color )
 			VERTEX( 1, 0.0f, 0.0f, 0.0f, rect.x + rect.w, rect.y,          color )
@@ -161,10 +167,10 @@ void BlockTriangulator::triangulateChunk( TerrainGeometry* geom, Chunk* chunk )
 		}
 		/* Face +Y */
 		if((visFlags & FACE_TOP) == FACE_TOP) {
-			it->second->getTextureCoords( FACE_TOP, texX, texY );
-			GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
+			b->getTextureCoords( FACE_TOP, texX, texY );
+			rect = tm->getBlockUVs( texX, texY );
 
-			float color = World::getLightColor( chunk->getWorld()->getLightLevel( wx, wy+1, wz ) );
+			float color = World::getLightColor( w->getLightLevel( wx, wy+1, wz ) );
 			
 			VERTEX( 0, 0.0f, 1.0f, 1.0f, rect.x,          rect.y,          color )
 			VERTEX( 1, 1.0f, 1.0f, 1.0f, rect.x + rect.w, rect.y,          color )
@@ -178,10 +184,10 @@ void BlockTriangulator::triangulateChunk( TerrainGeometry* geom, Chunk* chunk )
 		}
 		/* Face -X */
 		if((visFlags & FACE_LEFT) == FACE_LEFT) {
-			it->second->getTextureCoords( FACE_LEFT, texX, texY );
-			GLuvrect rect = MagnetiteCore::Singleton->getTextureManager()->getBlockUVs( texX, texY );
+			b->getTextureCoords( FACE_LEFT, texX, texY );
+			rect = tm->getBlockUVs( texX, texY );
 
-			float color = World::getLightColor( chunk->getWorld()->getLightLevel( wx-1, wy, wz ) );
+			float color = World::getLightColor( w->getLightLevel( wx-1, wy, wz ) );
 			
 			VERTEX( 0, 0.0f, 1.0f, 0.0f, rect.x,          rect.y,          color )
 			VERTEX( 1, 0.0f, 0.0f, 0.0f, rect.x,          rect.y + rect.h, color )

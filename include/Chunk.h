@@ -165,12 +165,21 @@ public:
 	/**
 	 * Returns the block at the given position
 	 */
-	BlockPtr getBlockAt( short x, short y, short z );
-
+	inline BlockPtr getBlockAt( ChunkScalar x, ChunkScalar y, ChunkScalar z )
+	{
+		if( x < 0 || x >= CHUNK_WIDTH || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_WIDTH )
+			return NULL;
+		return getBlockAt( BLOCK_INDEX_2( x, y, z ) );
+	}
 	/**
 	 * Returns the block at the given index
 	 */
-	BlockPtr getBlockAt( size_t index );
+	inline BlockPtr getBlockAt( const size_t index )
+	{
+		// No bounds checking, goota be careful.
+		return mBlocks[ index ];
+	}
+
 
 	/**
 	 * Returns all of the blocks

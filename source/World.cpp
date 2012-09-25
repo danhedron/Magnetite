@@ -159,11 +159,6 @@ LightIndex World::getLightLevel( long x, long y, long z )
 	return c->getLightLevel( x % CHUNK_WIDTH, y % CHUNK_HEIGHT, z % CHUNK_WIDTH );
 }
 
-float World::getLightColor( LightIndex light )
-{
-	return ( 0.1f + ( 0.9f * ( (float)light/256 ) ) );
-}
-
 void World::destoryWorld()
 {
 	for( size_t i = 0; i < mWorldSize*mWorldSize*mWorldSize; i++ )
@@ -298,7 +293,7 @@ void World::activateChunk( long x, long y, long z )
 	//{
 		generateChunk( x, y, z );
 	//}
-	updateAdjacent(x, y, z);
+	//updateAdjacent(x, y, z);
 }
 
 void World::deactivateChunk( long x, long y, long z )
@@ -362,9 +357,9 @@ void World::update( float dt )
 		auto &r = mChunkRequests.at(0);
 		
 		if( r.unload ) {
-			Perf::Profiler::get().begin("cu");
+			//Perf::Profiler::get().begin("cu");
 			this->deactivateChunk( r.x, r.y, r.z );
-			Perf::Profiler::get().end("cu");
+			//Perf::Profiler::get().end("cu");
 		}
 		else
 		{

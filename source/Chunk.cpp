@@ -89,19 +89,10 @@ BlockPtr* Chunk::getBlocks()
 //void Chunk::setBlockAt( BlockPtr block, ChunkScalar index )
 
 
-BlockPtr Chunk::getBlockAt( short x, short y, short z )
-{
-	if( x < 0 || x >= CHUNK_WIDTH || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_WIDTH )
-		return NULL;
-	return getBlockAt( BLOCK_INDEX_2( x, y, z ) );
-}
+//BlockPtr Chunk::getBlockAt( short x, short y, short z )
 
-BlockPtr Chunk::getBlockAt( size_t index )
-{
-	if( index < 0 || index > CHUNK_SIZE - 1 )
-		return NULL;
-	return mBlocks[ index ];
-}
+
+//BlockPtr Chunk::getBlockAt( size_t index )
 
 void Chunk::removeBlockAt( short x, short y, short z )
 {

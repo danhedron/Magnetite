@@ -107,6 +107,7 @@ void ChunkGenerator::fillChunk(Chunk *chunk)
 {
 	// Get the factories we need.
 	auto &sf = FactoryManager::getManager().blockFactoryList.find("stone")->second;
+	auto &gf = FactoryManager::getManager().blockFactoryList.find("grass")->second;
 	
 	ChunkScalar xsz = chunk->getX() * CHUNK_WIDTH + CHUNK_WIDTH;
 	ChunkScalar zsz = chunk->getZ() * CHUNK_WIDTH + CHUNK_WIDTH;
@@ -124,31 +125,34 @@ void ChunkGenerator::fillChunk(Chunk *chunk)
 			}
 		}
 	}
+	
+	float octs = 8, p = 0.25f;
 
-// 	for( int x = floor(min.x); x < floor( max.x ); x++ )
-// 	{
-// 		for( int z = floor(min.z); z < floor( max.z ); z++ )
-// 		{
-// 			float total = 0.f;
-// 			for( float i = 0; i < octs; i++ ) {
-// 				float freq = pow(2.f, i);
-// 				float amp = pow(p, i);
-// 				total = total + interpolatedNoise((float)(x) * freq * 0.05f , (float)(z) *freq * 0.05f ) * amp;
-// 			}
-// 			total = (total*30.f) + 128.f;
-// 			size_t yt = total;
-// 			for( int y = std::max(floor(min.y), 98.0); y < std::min(floor( max.y ), floor(total+1)) ; y++ )
-// 			{
-// 				BaseBlock* b = nullptr;
-// 				if( y == yt ) {
-// 					b = FactoryManager::getManager().createBlock("grass");
-// 				}
-// 				else if( y < yt ) {
-// 					b = FactoryManager::getManager().createBlock("stone");
-// 				}
-// 				if( b )
-// 					w->setBlockAt(b, x, y, z );
-// 			}
-// 		}
-// 	}
+	
+	ChunkScalar ys = std::max( chunk->getY() * CHUNK_HEIGHT, 98l );
+	ChunkScalar ye = chunk->getY() * CHUNK_HEIGHT + CHUNK_HEIGHT;
+	
+	if( chunk->getY() * CHUNK_HEIGHT > 128 + 30 ) return;
+	for( ChunkScalar x = chunk->getX()*CHUNK_WIDTH, xb = 0; x < xsz; x++, xb++ )
+	{
+		for( ChunkScalar z = chunk->getZ()*CHUNK_WIDTH, zb = 0; z < zsz; z++, zb++ )
+		{
+			float total = 0.f;
+			for( float i = 0; i < octs; i++ ) {
+				float freq = pow(2.f, i);
+				float amp = pow(p, i);
+				total = total + interpolatedNoise((float)(x) * freq * 0.05f , (float)(z) *freq * 0.05f ) * amp;
+			}
+			total = std::floor((total*30.f) + 128.f);
+			ChunkScalar yt = total;
+			
+			for( ChunkScalar y = ys, yb = ys % CHUNK_HEIGHT; y < ye; y++, yb++ )
+			{
+				if( y < yt-1 ) 
+					chunk->setBlockAt(sf->create(), xb, yb, zb );
+				else if( y < yt )
+					chunk->setBlockAt(gf->create(), xb, yb, zb ); 
+			}
+		}
+	}
 }
