@@ -54,13 +54,13 @@
 					{ 
 						text: 'Clear area',
 						action: function() {
-							this.clear();
+							this.selectArea( this.clearArea );
 						}
 					},
 					{ 
 						text: 'Fill area',
 						action: function() {
-							this.fill();
+							this.selectArea( this.fillArea );
 						}
 					}
 				]

@@ -64,7 +64,7 @@ Game.build = function( b )
 	}
 }
 
-Game.clear = function()
+Game.selectArea = function( callback )
 {
 	var rs = world.fireRay( this.player.getEyeCast() );
 	
@@ -72,34 +72,23 @@ Game.clear = function()
 	{
 		var p = { x: rs.worldHit.x - (rs.normal.x /2), y: rs.worldHit.y - (rs.normal.y /2), z: rs.worldHit.z - (rs.normal.z /2) };
 		
-		if( this.clearStart == undefined ) 
+		if( this.areaStart == undefined ) 
 		{
-			this.clearStart = p;
+			this.areaStart = p;
 		}
 		else 
 		{
-			this.clearArea( this.clearStart, p );
-			this.clearStart = undefined;
-		}
-	}
-}
-
-Game.fill = function()
-{
-	var rs = world.fireRay( this.player.getEyeCast() );
-	
-	if( rs.hit )
-	{
-		var p = { x: rs.worldHit.x - (rs.normal.x /2), y: rs.worldHit.y - (rs.normal.y /2), z: rs.worldHit.z - (rs.normal.z /2) };
-		
-		if( this.fillStart == undefined ) 
-		{
-			this.fillStart = p;
-		}
-		else 
-		{
-			this.fillArea( this.fillStart, p );
-			this.fillStart = undefined;
+			var min = {
+				x: Math.min( this.areaStart.x, p.x ),
+				y: Math.min( this.areaStart.y, p.y ),
+				z: Math.min( this.areaStart.z, p.z )
+			}, max = {
+				x: Math.max( this.areaStart.x, p.x ),
+				y: Math.max( this.areaStart.y, p.y ),
+				z: Math.max( this.areaStart.z, p.z )
+			}
+			callback.call( this, min, max );
+			this.areaStart = undefined;
 		}
 	}
 }
@@ -293,5 +282,5 @@ Game.think = function( dt )
 
 Game.draw = function()
 {
-	//this.menu.draw();
+	this.menu.draw();
 }

@@ -117,6 +117,7 @@
 				case 'clear':
 					// Find the first non-empty block in the area
 					var block = false;
+					var closest = 1000;
 					for( var x = action.min.x; x <= action.max.x; x++ )
 					{
 						for( var z = action.min.z; z <= action.max.z; z++ )
@@ -127,8 +128,11 @@
 								if( b != undefined ) {
 									block = true; // we have at least one block.
 									var direction = subt( this.position, {x: x, y: y, z: z} );
-									this.targetPosition = add( {x: x, y: y, z: z}, mul(norm(direction), 2 ) );
 									var dist = lent( direction );
+									if( dist < closest ) {
+										this.targetPosition = {x: x, y: y, z: z};
+										closest = dist;
+									}
 									if( dist < this.constructionDistance )
 									{
 										this.storeBlock(b.type);
