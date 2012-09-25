@@ -343,6 +343,11 @@ public:
 	 * Updates all of the moving blocks
 	 */
 	void updateMovingBlocks( float dt );
+	
+	/**
+	 * Updates paging 
+	 */
+	void updatePages();
 
 	/**
 	 * Performs a raytest against the world.

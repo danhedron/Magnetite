@@ -73,13 +73,13 @@ void ChunkGenerator::fillRegion( World* w, const Vector3& min, const Vector3& ma
 			}
 			total = (total*30.f) + 128.f;
 			size_t yt = total;
-			for( int y = floor(min.y); y < floor( max.y ) ; y++ )
+			for( int y = floor(min.y); y < std::min(floor( max.y ), floor(total+1)) ; y++ )
 			{
 				BaseBlock* b = nullptr;
 				if( y == yt ) {
 					b = FactoryManager::getManager().createBlock("grass");
 				}
-				else if( y < total-1 ) {
+				else if( y < yt ) {
 					b = FactoryManager::getManager().createBlock("stone");
 				}
 				if( b )

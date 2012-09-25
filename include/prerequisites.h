@@ -65,8 +65,8 @@ class Chunk;
 
 #define CoreSingleton (MagnetiteCore::Singleton)
 
-#define CHUNK_WIDTH 16
-#define CHUNK_HEIGHT 16
+#define CHUNK_WIDTH 32
+#define CHUNK_HEIGHT 32
 #define CHUNK_SIZE (CHUNK_WIDTH*CHUNK_WIDTH*CHUNK_HEIGHT)
 #define NODE_SIZE ((CHUNK_HEIGHT/CHUNK_WIDTH))
 

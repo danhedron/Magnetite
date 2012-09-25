@@ -73,14 +73,12 @@ namespace Magnetite
 	
 	void PagingContext::update()
 	{
-		Perf::Profiler::get().begin("pcupdate");
 		memset( mNewPageMap, 0, sizeof(size_t) * mXPages * mYPages * mZPages ); 
 		
 		for( auto it = mCameras.begin(); it != mCameras.end(); ++it )
 		{
 			(*it)->update();
 		}
-		Perf::Profiler::get().end("pcupdate");
 		
 		Perf::Profiler::get().begin("pload");
 		Perf::Profiler::get().end("pload");
@@ -92,17 +90,18 @@ namespace Magnetite
 		Perf::Profiler::get().begin("page");
 		for( ChunkScalar z = 0; z < mZPages; z++ )
 		{
-			for( ChunkScalar y = 0; y < mYPages; y++ )
+			for( ChunkScalar x = 0; x < mXPages; x++ )
 			{
-				for( ChunkScalar x = 0; x < mXPages; x++ )
+				for( ChunkScalar y = 0; y < mYPages; y++ )
 				{
+					id = z * mXPages * mYPages + y * mXPages + x;
 					// Compareate.
 					if( mPageMap[id] == 0 && mNewPageMap[id] != 0 )
 					{
 						Perf::Profiler::get().begin("pload");
 						inf.x = x; inf.y = y; inf.z = z;
 						onPageEntered( inf );
-						Perf::Profiler::get().end("pload");
+						Perf::Profiler::get().begin("pload");
 					}
 					else if( mNewPageMap[id] == 0 && mPageMap[id] != 0 )
 					{
@@ -111,7 +110,6 @@ namespace Magnetite
 						onPageExit( inf );
 						Perf::Profiler::get().end("punload");
 					}
-					id++;
 				}
 			}
 		}

@@ -169,60 +169,71 @@ void Chunk::updateVisibility( )
 	MagnetiteCore* core = CoreSingleton;
 	World* w = core->getWorld();
 	BaseBlock* b = nullptr;
+	BaseBlock* cb = nullptr;
 	short visFlags = 0;
+	BlockList::iterator it;
 	
 	if( _hasChunkFlag( DataUpdated ) )
 	{
+		size_t id = 0;
 		mVisibleFaces = 0;
 		long worldX = getX() * CHUNK_WIDTH;
 		long worldY = getY() * CHUNK_HEIGHT;
 		long worldZ = getZ() * CHUNK_WIDTH;
-		for( long x = 0; x < CHUNK_WIDTH; x++ ) {
+		long xB = worldX;
+		long yB = worldY;
+		
+		for( long z = 0; z < CHUNK_WIDTH; z++ ) {
 			for( long y = 0; y < CHUNK_HEIGHT; y++ ) {
-				for( long z = 0; z < CHUNK_WIDTH; z++ ) {
-					auto bindex = BLOCK_INDEX_2( x, y, z);
-					b = mBlocks[bindex];
-					if( b == nullptr ) continue;
+				for( long x = 0; x < CHUNK_WIDTH; x++ ) {
+					id = BLOCK_INDEX_2( x, y, z );
+					b = mBlocks[id];
+					if( b == nullptr ) { 					worldX++; continue; }
 					visFlags = 0;
 					//Check All axes for adjacent blocks.
-					BaseBlock* cb = w->getBlockAt( worldX + x + 1, worldY + y, worldZ + z );
+					cb = w->getBlockAt( worldX + 1, worldY, worldZ );
 					if( (cb == NULL || !cb->isOpaque()) ) {
 						mVisibleFaces++;
-						visFlags = visFlags | FACE_RIGHT;
+						visFlags |= FACE_RIGHT;
 					}
-					cb = w->getBlockAt( worldX + x - 1, worldY + y, worldZ + z );
-					if( worldX + x != 0 && (cb == NULL || !cb->isOpaque()) ) {
+					cb = w->getBlockAt( worldX - 1, worldY, worldZ );
+					if( (cb == NULL || !cb->isOpaque()) ) {
 						mVisibleFaces++;
-						visFlags = visFlags | FACE_LEFT;
+						visFlags |= FACE_LEFT;
 					}
-					cb = w->getBlockAt( worldX + x, worldY + y + 1, worldZ + z );
+					cb = w->getBlockAt( worldX, worldY + 1, worldZ );
 					if( cb == NULL || !cb->isOpaque() ) {
 						mVisibleFaces++;
-						visFlags = visFlags | FACE_TOP;
+						visFlags |= FACE_TOP;
 					}
-					cb = w->getBlockAt( worldX + x, worldY + y - 1, worldZ + z );
-					if( worldY + y != 0 && (cb == NULL || !cb->isOpaque()) ) {
+					cb = w->getBlockAt( worldX, worldY - 1, worldZ );
+					if( (cb == NULL || !cb->isOpaque()) ) {
 						mVisibleFaces++;
-						visFlags = visFlags | FACE_BOTTOM;
+						visFlags |= FACE_BOTTOM;
 					}
-					cb = w->getBlockAt( worldX + x, worldY + y, worldZ + z + 1 );
+					cb = w->getBlockAt( worldX, worldY, worldZ + 1 );
 					if( cb == NULL || !cb->isOpaque() ) {
 						mVisibleFaces++;
-						visFlags = visFlags | FACE_BACK;
+						visFlags |= FACE_BACK;
 					}
-					cb = w->getBlockAt( worldX + x, worldY + y, worldZ + z - 1 );
-					if( worldZ + z != 0 && (cb == NULL || !cb->isOpaque()) ) {
+					cb = w->getBlockAt( worldX, worldY, worldZ - 1 );
+					if( (cb == NULL || !cb->isOpaque()) ) {
 						mVisibleFaces++;
-						visFlags = visFlags | FACE_FORWARD;
+						visFlags |= FACE_FORWARD;
 					}
 					b->updateVisFlags(visFlags);
-					BlockList::iterator it = mVisibleBlocks.find( bindex );
+					it = mVisibleBlocks.find( id );
 					if( visFlags == 0 && it != mVisibleBlocks.end() )
 						mVisibleBlocks.erase( it );
 					else if( visFlags != 0 && it == mVisibleBlocks.end() )
-						mVisibleBlocks.insert( BlockList::value_type( bindex, b ) );
+						mVisibleBlocks.insert( BlockList::value_type( id, b ) );
+					worldX++;
 				}
+				worldX -= CHUNK_WIDTH;
+				worldY++;
 			}
+			worldY -= CHUNK_HEIGHT;
+			worldZ++;
 		}
 		_raiseChunkFlag( MeshInvalid );
 	}

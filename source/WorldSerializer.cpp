@@ -6,10 +6,38 @@
 
 namespace Magnetite
 {
+	struct ChunkHeader
+	{
+		uint32_t tCount;
+	};
+	
+	struct ChunkData
+	{
+		uint32_t blockData[CHUNK_SIZE];
+	};
+	
+	static std::map<Magnetite::String, size_t> tmap;
+	static std::map<size_t,Magnetite::String> idmap;
+	
 	WorldSerializer::WorldSerializer( World* w )
 	: mWorld( w )
 	{
 		mWorldPath = "./worlds/" + mWorld->getName();
+		
+		// Prepare the type proxy list
+		BlockFactoryList& list = FactoryManager::getManager().blockFactoryList;
+		size_t types = list.size();
+		
+		size_t ind = 0;
+
+		for( BlockFactoryList::iterator it = list.begin(); it != list.end(); ++it )
+		{
+			ind++;
+			auto s = it->first.c_str();
+			tmap[it->first] = ind;
+			idmap[ind] = it->first;
+		}
+		
 	}
 	
 	WorldSerializer::~WorldSerializer()
@@ -30,12 +58,12 @@ namespace Magnetite
 	
 	bool WorldSerializer::loadChunk( ChunkScalar x, ChunkScalar y, ChunkScalar z )
 	{
-		Perf::Profiler::get().begin("streamo");
 		
+		Perf::Profiler::get().begin("sopen");
 		std::ifstream stream( resolveRegion(x, y, z).c_str() );
 		if( !stream.is_open() ) return false;
 		
-		Perf::Profiler::get().end("streamo");
+		Perf::Profiler::get().end("sopen");
 
 		auto c = mWorld->getChunk( x, y, z );
 		if( c == nullptr ) 
@@ -61,6 +89,7 @@ namespace Magnetite
 		
 		stream.close();
 		
+		Perf::Profiler::get().begin("dread");
 		size_t id;
 		for( int i = 0; i < blockcount; i++ )
 		{
@@ -72,6 +101,7 @@ namespace Magnetite
 					c->setBlockAt( block, i );
 			}
 		}
+		Perf::Profiler::get().end("dread");
 		
 		delete[] data;
 		
@@ -80,49 +110,30 @@ namespace Magnetite
 	
 	void WorldSerializer::saveChunk( ChunkScalar x, ChunkScalar y, ChunkScalar z )
 	{
-		std::ofstream stream( resolveRegion(x, y, z).c_str() );
-		
 		auto c = mWorld->getChunk( x, y, z );
-		if( c == nullptr ) 
+		if( c == nullptr || c->getBlockCount() == 0 ) 
 		{
-
-			stream.close();
 			return;
 		}
 	
-		// Write the header.
-		BlockFactoryList& list = FactoryManager::getManager().blockFactoryList;
-		size_t types = list.size();
-		size_t blocks = CHUNK_SIZE;
-		size_t ind = 0;
-		std::map<std::string, size_t> tmap;
-		stream.write( (char*)&types, sizeof(size_t) );
-		for( BlockFactoryList::iterator it = list.begin(); it != list.end(); ++it )
-		{
-			auto s = it->first.c_str();
-			tmap[it->first] = ++ind;
-			stream.write( s, strlen(s) + 1 );
-		}
-		stream.write( (char*)(&blocks), sizeof(size_t) );
+		//std::ofstream stream( resolveRegion(x, y, z).c_str() );
 		
-		size_t *data = new size_t[CHUNK_SIZE];
+		ChunkData d;
 		
 		for( int i = 0; i < CHUNK_SIZE; i++ )
 		{
 			auto b = c->getBlockAt(i);
 			if( b != nullptr ) {
-				data[i] = tmap[b->getType()];
+				d.blockData[i] = tmap[b->getType()];
 			}
 			else
 			{
-				data[i] = 0;
+				d.blockData[i] = 0;
 			}
 		}
 		
-		stream.write( (char*)data , sizeof(size_t) * CHUNK_SIZE );
+		//stream.write( (char*)&d , sizeof(d) );
 		
-		delete[] data;
-		
-		stream.close();
+		///stream.close();
 	}
 };

@@ -287,10 +287,10 @@ bool World::hasNeighbours(short int x, short int y, short int z)
 void World::activateChunk( long x, long y, long z )
 {
 	// Generate or load the chunk as it is not loaded.
-	if( !mSerializer->loadChunk( x, y, z ) )
-	{
+	//if( !mSerializer->loadChunk( x, y, z ) )
+	//{
 		generateChunk( x, y, z );
-	}
+	//}
 	//updateAdjacent(x, y, z);
 }
 
@@ -334,12 +334,21 @@ void World::update( float dt )
 	
 	Perf::Profiler::get().begin("pupdate");
 	Perf::Profiler::get().end("pupdate");
+	
+	Perf::Profiler::get().begin("dread");
+	Perf::Profiler::get().end("dread");
 
+	Perf::Profiler::get().begin("sopen");
+	Perf::Profiler::get().end("sopen");
+	
 	Perf::Profiler::get().begin("vupdate");
 	Perf::Profiler::get().end("vupdate");
 
 	Perf::Profiler::get().begin("geomBuild");
 	Perf::Profiler::get().end("geomBuild");
+	
+	Perf::Profiler::get().begin("cgen");
+	Perf::Profiler::get().end("cgen");
 	
 	Perf::Profiler::get().begin("wthink");
 	auto wcube = mWorldSize*mWorldSize*mWorldSize;
