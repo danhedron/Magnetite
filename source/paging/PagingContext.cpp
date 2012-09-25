@@ -79,15 +79,9 @@ namespace Magnetite
 		{
 			(*it)->update();
 		}
-		
-		Perf::Profiler::get().begin("pload");
-		Perf::Profiler::get().end("pload");
-		Perf::Profiler::get().begin("punload");
-		Perf::Profiler::get().end("punload");
-		
+
 		PageInfo inf;
 		size_t id = 0;
-		Perf::Profiler::get().begin("page");
 		for( ChunkScalar z = 0; z < mZPages; z++ )
 		{
 			for( ChunkScalar x = 0; x < mXPages; x++ )
@@ -98,22 +92,17 @@ namespace Magnetite
 					// Compareate.
 					if( mPageMap[id] == 0 && mNewPageMap[id] != 0 )
 					{
-						Perf::Profiler::get().begin("pload");
 						inf.x = x; inf.y = y; inf.z = z;
 						onPageEntered( inf );
-						Perf::Profiler::get().begin("pload");
 					}
 					else if( mNewPageMap[id] == 0 && mPageMap[id] != 0 )
 					{
-						Perf::Profiler::get().begin("punload");
 						inf.x = x; inf.y = y; inf.z = z;
 						onPageExit( inf );
-						Perf::Profiler::get().end("punload");
 					}
 				}
 			}
 		}
-		Perf::Profiler::get().end("page");
 		
 		// Now we swap.
 		auto pm = mPageMap;

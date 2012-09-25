@@ -1,6 +1,7 @@
 #ifndef _CHUNK_H_
 #define _CHUNK_H_
 #include "prerequisites.h"
+#include "Region.h"
 #include <mutex>
 
 // for standard size types
@@ -8,16 +9,6 @@
 
 class TerrainGeometry;
 class World;
-/**
- * @struct ChunkIndex
- * contains the 3 components of a chunk's index in the world
- */
-struct ChunkIndex
-{
-	ChunkScalar x;
-	ChunkScalar y;
-	ChunkScalar z;
-};
 
 typedef std::map<size_t, BlockPtr> BlockList;
 
@@ -101,8 +92,12 @@ public:
 		DataUpdated = 1, // Data has been updated, Visibility check needed
 		MeshInvalid = 2 // Data has changed, mesh should be updated.
 	};
+	
+	/**
+	 * Method for getting the block directly from us if it's inside this chunk
+	 */
+	inline BaseBlock* getBlockAtWorld( ChunkScalar x, ChunkScalar y, ChunkScalar z );
 
-public:
 	Chunk( ChunkIndex index, World*  world );
 	~Chunk();
 
@@ -251,6 +246,5 @@ public:
 	 */
 	std::mutex& getMutex();
 };
-
 
 #endif

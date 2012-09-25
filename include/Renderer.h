@@ -1,7 +1,7 @@
 #ifndef _RENDERER_H_
 #define _RENDERER_H_
 #include "prerequisites.h"
-#include "Region.h"
+#include "Chunk.h"
 #include "Profiler.h"
 
 class Texture;
@@ -127,11 +127,6 @@ public:
 
 	void render( double dt, World* world );
 
-	/**
-	 * Finds out if the given node is in the view frustum, and if so continues to children or draws the chunk on the node
-	 */
-	void _renderTree( WorldTree* tree );
-	void _renderNode( WorldNode* node, int depth  );
 	void _renderChunk( Magnetite::ChunkRegionPtr region, Chunk* chunk );
 
 	/**

@@ -37,6 +37,7 @@ Game.onLoad = function()
 {
 	this.menu = new Menu(require('./scripts/games/fortress/menu.js').root);
 	this.menu.position = [20, 30];
+	this.drawMenu = false;
 	
 	// Create a drone.
 	this.drones = [];
@@ -211,6 +212,9 @@ Game.keyDown = function(k)
 		case Events.Keys.Down:
 			this.menu.move( 1);
 			break;
+		case Events.Keys.Space:
+			this.drawMenu = !this.drawMenu;
+			break;
 	}
 }
 
@@ -282,5 +286,6 @@ Game.think = function( dt )
 
 Game.draw = function()
 {
-	this.menu.draw();
+	if( this.drawMenu )
+		this.menu.draw();
 }

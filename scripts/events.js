@@ -28,6 +28,7 @@
 			Y:24,
 			Z:25,
 			Esc: 36,
+			Space: 57,
 			Enter: 58,
 			Backspace: 59,
 			Left: 71,

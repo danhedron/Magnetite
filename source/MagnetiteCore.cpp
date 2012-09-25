@@ -1,10 +1,9 @@
 #include "ScriptWrapper.h"
 #include "MagnetiteCore.h"
-#include "Renderer.h"
 #include "TextureManager.h"
 #include "InputManager.h"
-#include "StoneBlock.h"
 #include "World.h"
+#include "Renderer.h"
 #include "Player.h"
 #include "Character.h"
 #include "BlockFactory.h"
@@ -227,7 +226,7 @@ void MagnetiteCore::go()
 		while(mContinue && mWindow.isOpen()) {
 			float lDelta = ((float)timer.getElapsedTime().asMilliseconds())/1000;
 			
-			if( lDelta < 1.f/30.f )
+			if( lDelta < 1.f/60.f )
 			{
 				continue;
 			}

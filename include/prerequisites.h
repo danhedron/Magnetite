@@ -1,3 +1,6 @@
+#ifndef _PREREQUISITES_H_
+#define _PREREQUISITES_H_
+
 /**
  * Libaries
  */
@@ -20,9 +23,21 @@
 #include <iostream>
 #include <stdio.h>
 
-#include "util.h"
 #include "Vector.h"
 #include "Matrix.h"
+
+typedef long ChunkScalar;
+
+/**
+ * @struct ChunkIndex
+ * contains the 3 components of a chunk's index in the world
+ */
+struct ChunkIndex
+{
+	ChunkScalar x;
+	ChunkScalar y;
+	ChunkScalar z;
+};
 
 /**
  * Define vector type
@@ -30,18 +45,11 @@
 typedef std::vector<std::string> stringvector;
 
 class BaseBlock;
-class WorldNode;
-class WorldTree;
 typedef BaseBlock* BlockPtr;
 typedef BlockPtr* BlockArray;
 typedef std::map<size_t,BaseBlock*> BlockList;
 typedef std::pair<const size_t,BaseBlock*> BlockPosPair;
 typedef unsigned char LightIndex;
-
-typedef std::vector<WorldNode*> NodeList;
-typedef std::vector<WorldTree*> TreeList;
-
-typedef long ChunkScalar;
 
 //typedef *BaseBlock[] BlockList;
 
@@ -73,9 +81,6 @@ class Chunk;
 #define REGION_SIZE 8
 #define REGION_WORLD_SIZE (REGION_SIZE * CHUNK_WIDTH)
 
-#define TREE_LENGTH 512 // Defines the length of one side of an octree
-#define TREE_VOLUME (TREE_LENGTH*TREE_LENGTH*TREE_LENGTH)
-
 //#define BLOCK_POSITION( index ) index % CHUNK_WIDTH * CHUNK_HEIGHT , (index - std::floorf( index / CHUNK_WIDTH*CHUNK_HEIGHT ) - (index % CHUNK_WIDTH))   , std::floorf( index / CHUNK_WIDTH*CHUNK_HEIGHT ) 
 #define BLOCK_INDEX_2( x, y, z ) ( z * CHUNK_WIDTH * CHUNK_HEIGHT + y * CHUNK_WIDTH + x )
 #define BLOCK_INDEX( block ) (block->getZ() * CHUNK_WIDTH * CHUNK_HEIGHT + block->getY() * CHUNK_WIDTH + block->getX())
@@ -83,3 +88,7 @@ class Chunk;
 #define PRINT_GLERROR {GLenum err = glGetError(); if(err) Util::log(Util::toString(err));}
 
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
+
+#include "util.h"
+
+#endif

@@ -1,7 +1,6 @@
 #ifndef _REGION_H_
 #define _REGION_H_
 #include "prerequisites.h"
-#include "Chunk.h"
 
 #define rgidx ( z * REGION_SIZE * REGION_SIZE + y * REGION_SIZE + x )
 
@@ -65,7 +64,7 @@ namespace Magnetite
 			ChunkScalar index = rgidx;
 			if( x < 0 || x > REGION_SIZE-1 || y < 0 || y > REGION_SIZE-1 || z < 0 || z > REGION_SIZE-1 )
 				return NULL;
-			mChunks[index] = new Chunk( ChunkIndex{ mX * REGION_SIZE + x, mY * REGION_SIZE + y, mZ * REGION_SIZE + z }, mWorld ); // 6859 (thanks to n3hima)
+			mChunks[index] = new T( ChunkIndex{ mX * REGION_SIZE + x, mY * REGION_SIZE + y, mZ * REGION_SIZE + z }, mWorld ); // 6859 (thanks to n3hima)
 			
 			return mChunks[index];
 		}
@@ -82,6 +81,7 @@ namespace Magnetite
 	typedef Region<Chunk> ChunkRegion;
 	typedef ChunkRegion* ChunkRegionPtr;
 	typedef ChunkRegion** ChunkRegionArray;
+
 };
 
 #endif

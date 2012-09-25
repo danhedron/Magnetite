@@ -1,8 +1,6 @@
 #include "World.h"
 #include "Chunk.h"
 #include "BaseBlock.h"
-//#include "WorldTree.h"
-//#include "WorldNode.h"
 #include "Renderer.h"
 #include "Sky.h"
 #include "Camera.h"
@@ -218,6 +216,19 @@ Magnetite::ChunkRegionPtr World::getRegion( const ChunkScalar x, const ChunkScal
 	return mRegions[index];
 }
 
+void World::requestChunk( ChunkScalar x, ChunkScalar y, ChunkScalar z )
+{
+	mWorldMutex.lock();
+	mChunksToLoad.push_back( ChunkRequest{ x, y, z, false } );
+	mWorldMutex.unlock();
+}
+
+void World::requestChunkUnload( ChunkScalar x, ChunkScalar y, ChunkScalar z )
+{
+	mWorldMutex.lock();
+	mChunksToLoad.push_back( ChunkRequest{ x, y, z, true } );
+	mWorldMutex.unlock();
+}
 
 Chunk* World::createChunk(long x, long y, long z)
 {
@@ -294,7 +305,7 @@ void World::activateChunk( long x, long y, long z )
 	//updateAdjacent(x, y, z);
 }
 
-void World::deativateChunk( long x, long y, long z )
+void World::deactivateChunk( long x, long y, long z )
 {
 	mSerializer->saveChunk( x, y, z );
 	removeChunk( x, y, z );
@@ -325,6 +336,18 @@ void World::update( float dt )
 	// Update paging information before we do anything else.
 	PagingContext::update();
 	
+	// Process the chunk loading queue.
+	mWorldMutex.lock();
+	if( mChunksToLoad.size() > 0 ) {
+		auto it = mChunksToLoad.begin();
+		if( it->unload )
+			this->deactivateChunk( it->x, it->y, it->z );
+		else
+			this->activateChunk( it->x, it->y, it->z );
+		mChunksToLoad.erase(it);
+	}
+	mWorldMutex.unlock();
+	
 	// Add these entries to the profiler so that they don't end up coming and going.
 	Perf::Profiler::get().begin("lupdate");
 	Perf::Profiler::get().end("lupdate");
@@ -335,11 +358,8 @@ void World::update( float dt )
 	Perf::Profiler::get().begin("pupdate");
 	Perf::Profiler::get().end("pupdate");
 	
-	Perf::Profiler::get().begin("dread");
-	Perf::Profiler::get().end("dread");
-
-	Perf::Profiler::get().begin("sopen");
-	Perf::Profiler::get().end("sopen");
+	Perf::Profiler::get().begin("pcreate");
+	Perf::Profiler::get().end("pcreate");
 	
 	Perf::Profiler::get().begin("vupdate");
 	Perf::Profiler::get().end("vupdate");
@@ -456,10 +476,10 @@ raycast_r World::raycastWorld(const raycast_r &inray, bool solidOnly)
 
 void World::onPageEntered( const Magnetite::PageInfo& info )
 {
-	this->activateChunk( info.x, info.y, info.z );
+	this->requestChunk( info.x, info.y, info.z );
 }
 
 void World::onPageExit( const Magnetite::PageInfo& info )
 {
-	this->deativateChunk( info.x, info.y, info.z );
+	this->requestChunkUnload( info.x, info.y, info.z );
 }

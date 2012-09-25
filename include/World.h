@@ -1,10 +1,10 @@
 #ifndef _WORLD_H_
 #define _WORLD_H_
 #include "prerequisites.h"
-#include "WorldNode.h"
+#include <deque>
 #include "Collision.h"
 #include "MovingBlock.h"
-#include "Region.h"
+#include "Chunk.h"
 #include "paging/PagingContext.h"
 
 namespace Magnetite {
@@ -108,9 +108,10 @@ class Camera;
 struct ChunkRequest
 {
 	int x, y, z;
+	bool unload;
 };
 
-typedef std::vector<ChunkRequest> ChunkLoadList;
+typedef std::deque<ChunkRequest> ChunkLoadList;
 
 /**
  * ChunkArray - an array of Chunks
@@ -150,6 +151,11 @@ protected:
 	 * Serializer, for writing chunks to disk
 	 */
 	Magnetite::WorldSerializer* mSerializer;
+	
+	/**
+	 * Mutex for thread-orientated work.
+	 */
+	std::mutex mWorldMutex;
 	
 public:
 	/** 
@@ -262,7 +268,12 @@ public:
 	/**
 	 * Requests that the engine load or generate the chunk at the given index
 	 */
-	void requestChunk( int x, int y, int z );
+	void requestChunk( ChunkScalar x, ChunkScalar y, ChunkScalar z );
+	
+	/**
+	 * Requests that the engine unload the given chunk.
+	 */
+	void requestChunkUnload( ChunkScalar x, ChunkScalar y, ChunkScalar z );
 	
 	/**
 	 * Creates a chunk at the given coordinates.
@@ -312,7 +323,7 @@ public:
 	/**
 	 * Deactivates a chunk
 	 */
-	void deativateChunk( long x, long y, long z );
+	void deactivateChunk( long x, long y, long z );
 	
 	/**
 	 * Causes all adjacent chunks to update

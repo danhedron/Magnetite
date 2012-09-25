@@ -12,6 +12,14 @@
 
 #include "Geometry.h"
 
+
+BaseBlock* Chunk::getBlockAtWorld( ChunkScalar x, ChunkScalar y, ChunkScalar z )
+{
+	if( x < 0 || y < 0 || z < 0 || x / CHUNK_WIDTH != mWorldIndex.x || y / CHUNK_HEIGHT != mWorldIndex.y || z / CHUNK_WIDTH != mWorldIndex.z ) return mWorld->getBlockAt(x,y,z);
+	auto id = (z%CHUNK_WIDTH) * CHUNK_WIDTH * CHUNK_HEIGHT + (y%CHUNK_HEIGHT) * CHUNK_WIDTH + (x%CHUNK_WIDTH);
+	return mBlocks[id];
+}
+
 Chunk::Chunk( ChunkIndex index, World* world )
 : mWorld( world ),
 mGeometry (NULL),
@@ -161,79 +169,82 @@ size_t Chunk::getVisibleFaceCount()
 
 BlockList& Chunk::getVisibleBlocks()
 {
-		return mVisibleBlocks;
+	return mVisibleBlocks;
 }
 
 void Chunk::updateVisibility( )
 {
-	MagnetiteCore* core = CoreSingleton;
-	World* w = core->getWorld();
 	BaseBlock* b = nullptr;
 	BaseBlock* cb = nullptr;
 	short visFlags = 0;
 	BlockList::iterator it;
 	
-	if( _hasChunkFlag( DataUpdated ) )
+	if( _hasChunkFlag( DataUpdated ) && getBlockCount() > 0 )
 	{
 		size_t id = 0;
 		mVisibleFaces = 0;
-		long worldX = getX() * CHUNK_WIDTH;
-		long worldY = getY() * CHUNK_HEIGHT;
-		long worldZ = getZ() * CHUNK_WIDTH;
-		long xB = worldX;
-		long yB = worldY;
+		ChunkScalar worldX = getX() * CHUNK_WIDTH;
+		ChunkScalar worldY = getY() * CHUNK_HEIGHT;
+		ChunkScalar worldZ = getZ() * CHUNK_WIDTH;
+		ChunkScalar blockX = 0;
+		ChunkScalar blockY = 0;
+		ChunkScalar blockZ = 0;
 		
 		for( long z = 0; z < CHUNK_WIDTH; z++ ) {
 			for( long y = 0; y < CHUNK_HEIGHT; y++ ) {
 				for( long x = 0; x < CHUNK_WIDTH; x++ ) {
 					id = BLOCK_INDEX_2( x, y, z );
 					b = mBlocks[id];
-					if( b == nullptr ) { 					worldX++; continue; }
+					if( b == nullptr ) { continue; }
+					
+					blockX = worldX + x; blockY = worldY + y; blockZ = worldZ + z;
+					
 					visFlags = 0;
 					//Check All axes for adjacent blocks.
-					cb = w->getBlockAt( worldX + 1, worldY, worldZ );
+					cb = getBlockAtWorld( blockX + 1, blockY, blockZ );
 					if( (cb == NULL || !cb->isOpaque()) ) {
 						mVisibleFaces++;
 						visFlags |= FACE_RIGHT;
 					}
-					cb = w->getBlockAt( worldX - 1, worldY, worldZ );
+					cb = getBlockAtWorld( blockX - 1, blockY, blockZ );
 					if( (cb == NULL || !cb->isOpaque()) ) {
 						mVisibleFaces++;
 						visFlags |= FACE_LEFT;
 					}
-					cb = w->getBlockAt( worldX, worldY + 1, worldZ );
+					cb = getBlockAtWorld( blockX, blockY + 1, blockZ );
 					if( cb == NULL || !cb->isOpaque() ) {
 						mVisibleFaces++;
 						visFlags |= FACE_TOP;
 					}
-					cb = w->getBlockAt( worldX, worldY - 1, worldZ );
+					cb = getBlockAtWorld( blockX, blockY - 1, blockZ );
 					if( (cb == NULL || !cb->isOpaque()) ) {
 						mVisibleFaces++;
 						visFlags |= FACE_BOTTOM;
 					}
-					cb = w->getBlockAt( worldX, worldY, worldZ + 1 );
+					cb = getBlockAtWorld( blockX, blockY, blockZ + 1 );
 					if( cb == NULL || !cb->isOpaque() ) {
 						mVisibleFaces++;
 						visFlags |= FACE_BACK;
 					}
-					cb = w->getBlockAt( worldX, worldY, worldZ - 1 );
+					cb = getBlockAtWorld( blockX, blockY, blockZ - 1 );
 					if( (cb == NULL || !cb->isOpaque()) ) {
 						mVisibleFaces++;
 						visFlags |= FACE_FORWARD;
 					}
-					b->updateVisFlags(visFlags);
-					it = mVisibleBlocks.find( id );
-					if( visFlags == 0 && it != mVisibleBlocks.end() )
-						mVisibleBlocks.erase( it );
-					else if( visFlags != 0 && it == mVisibleBlocks.end() )
-						mVisibleBlocks.insert( BlockList::value_type( id, b ) );
-					worldX++;
+					if( b->getVisFlags() != visFlags ) {
+						// Check to see if we need to change the VB data.
+						if( visFlags > 0 && b->getVisFlags() == 0 ) {
+							mVisibleBlocks.insert( BlockList::value_type( id, b ) );
+						}
+						else if( visFlags == 0 && b->getVisFlags() > 0 )
+						{
+							it = mVisibleBlocks.find( id );
+							mVisibleBlocks.erase( it );
+						}
+						b->updateVisFlags(visFlags);
+					}
 				}
-				worldX -= CHUNK_WIDTH;
-				worldY++;
 			}
-			worldY -= CHUNK_HEIGHT;
-			worldZ++;
 		}
 		_raiseChunkFlag( MeshInvalid );
 	}
@@ -318,28 +329,40 @@ void Chunk::generatePhysics()
 	
 	if( mGeometry->vertexCount > 0 && mGeometry->edgeData > 0 )
 	{
-		btTriangleIndexVertexArray* meshInterface = new btTriangleIndexVertexArray;
-		btIndexedMesh part;
+		if( getBlockCount() < CHUNK_SIZE )
+		{
+			btTriangleIndexVertexArray* meshInterface = new btTriangleIndexVertexArray;
+			btIndexedMesh part;
 
-		int vertSize = sizeof( TerrainVertex );
-		int indexSize = sizeof( GLedge );
+			int vertSize = sizeof( TerrainVertex );
+			int indexSize = sizeof( GLedge );
 
-		part.m_vertexBase = (const unsigned char*)&mGeometry->vertexData[0].x;
-		part.m_vertexStride = vertSize;
-		part.m_numVertices = mGeometry->vertexCount;
-		part.m_vertexType = PHY_FLOAT;
-		part.m_triangleIndexBase = (const unsigned char*)&mGeometry->edgeData[0];
-		part.m_triangleIndexStride = indexSize * 3;
-		part.m_numTriangles = mGeometry->edgeCount / 3;
-		part.m_indexType = PHY_SHORT;
+			part.m_vertexBase = (const unsigned char*)&mGeometry->vertexData[0].x;
+			part.m_vertexStride = vertSize;
+			part.m_numVertices = mGeometry->vertexCount;
+			part.m_vertexType = PHY_FLOAT;
+			part.m_triangleIndexBase = (const unsigned char*)&mGeometry->edgeData[0];
+			part.m_triangleIndexStride = indexSize * 3;
+			part.m_numTriangles = mGeometry->edgeCount / 3;
+			part.m_indexType = PHY_SHORT;
 
-		meshInterface->addIndexedMesh( part, PHY_SHORT );
+			meshInterface->addIndexedMesh( part, PHY_SHORT );
 
-		mPhysicsShape = new btBvhTriangleMeshShape( meshInterface, true );//new btConvexTriangleMeshShape( meshInterface );////new btBoxShape( btVector3(8, 64, 8) );
-		mPhysicsState = new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3( getX() * CHUNK_WIDTH, getY() * CHUNK_HEIGHT, getZ() * CHUNK_WIDTH)));
-		btRigidBody::btRigidBodyConstructionInfo ci( 0, mPhysicsState, mPhysicsShape, btVector3(0,0,0) );
-		mPhysicsBody = new btRigidBody( ci );
-		mPhysicsBody->setCollisionFlags( mPhysicsBody->getCollisionFlags() | btRigidBody::CF_STATIC_OBJECT );
+			mPhysicsShape = new btBvhTriangleMeshShape( meshInterface, true );//new btConvexTriangleMeshShape( meshInterface );////new btBoxShape( btVector3(8, 64, 8) );
+			mPhysicsState = new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3( getX() * CHUNK_WIDTH, getY() * CHUNK_HEIGHT, getZ() * CHUNK_WIDTH)));
+			btRigidBody::btRigidBodyConstructionInfo ci( 0, mPhysicsState, mPhysicsShape, btVector3(0,0,0) );
+			mPhysicsBody = new btRigidBody( ci );
+			mPhysicsBody->setCollisionFlags( mPhysicsBody->getCollisionFlags() | btRigidBody::CF_STATIC_OBJECT );
+		}
+		else
+		{
+			// Chunk is a solid block.
+			mPhysicsShape = new btBoxShape( btVector3(CHUNK_WIDTH/2, CHUNK_HEIGHT/2, CHUNK_WIDTH/2) );
+			mPhysicsState = new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3( getX() * CHUNK_WIDTH, getY() * CHUNK_HEIGHT, getZ() * CHUNK_WIDTH)));
+			btRigidBody::btRigidBodyConstructionInfo ci( 0, mPhysicsState, mPhysicsShape, btVector3(0,0,0) );
+			mPhysicsBody = new btRigidBody( ci );
+			mPhysicsBody->setCollisionFlags( mPhysicsBody->getCollisionFlags() | btRigidBody::CF_STATIC_OBJECT );
+		}
 		
 		CoreSingleton->physicsMutex.lock();
 		CoreSingleton->getPhysicsWorld()

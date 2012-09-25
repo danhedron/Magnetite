@@ -93,8 +93,6 @@ set(MAGNETITE_SOURCES
 	source/MovingBlock.cpp
 	source/ChunkGenerator.cpp
 	source/World.cpp
-	source/WorldNode.cpp
-	source/WorldTree.cpp
 	source/Explosion.cpp
 	source/TextureManager.cpp
 	source/geometry/BaseTriangulator.cpp
@@ -171,8 +169,6 @@ set(MAGNETITE_HEADERS
 	include/MovingBlock.h
 	include/ChunkGenerator.h
 	include/World.h
-	include/WorldNode.h
-	include/WorldTree.h
 	include/Explosion.h
 	include/TextureManager.h
 	include/BaseTriangulator.h

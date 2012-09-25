@@ -1,6 +1,5 @@
 #include "Renderer.h"
 #include "World.h"
-#include "WorldTree.h"
 #include "Sky.h"
 #include "BaseBlock.h"
 #include "MagnetiteCore.h"
@@ -335,14 +334,6 @@ void Renderer::render(double dt, World* world)
 	};
 
 	drawCrosshair( dt );
-}
-
-void Renderer::_renderTree(WorldTree* tree)
-{
-}
-
-void Renderer::_renderNode(WorldNode *node, int depth)
-{
 }
 
 void Renderer::_renderChunk( Magnetite::ChunkRegionPtr region, Chunk* chunk )
