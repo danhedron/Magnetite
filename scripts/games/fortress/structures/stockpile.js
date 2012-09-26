@@ -1,5 +1,7 @@
 ({
 	yoffset: -1,
+	repeatx: true,
+	repeatz: true,
 	blocks: [
 		[
 			['log'   , 'cobble', 'cobble', 'cobble', 'cobble', 'cobble', 'cobble',    'log'],

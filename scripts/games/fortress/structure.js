@@ -2,7 +2,7 @@
 	this.structures = [];
 	
 	// a structure 'request', to make things a bit simpler.
-	function StructureRequest( template, position, flipxz, length ) {
+	function StructureRequest( template, position, flipxz, length, width ) {
 		this.position = position;
 		this.create = function( )
 		{
@@ -18,9 +18,9 @@
 			yb = blocks;
 			for( var y = 0; y < yb.length; y++ ) {
 				xb = yb[y];
-				for( var x = 0; x < (template.repeat ? length : xb.length); x++ ) {
+				for( var x = 0; x < ((template.repeatx||template.repeat) ? length : xb.length); x++ ) {
 					zb = xb[(x % xb.length)];
-					for( var z = 0; z < zb.length; z++ ) {
+					for( var z = 0; z < (template.repeatz ? width : zb.length); z++ ) {
 						
 						wy = position.y + y + yoff;
 						wx = position.x;
@@ -34,9 +34,9 @@
 							wz += z + zoff;
 						}
 						
-						if( zb[z] != '' || zb[z] != undefined )
+						if( zb[z%zb.length] != '' || zb[z%zb.length] != undefined )
 						{
-							world.createBlock( zb[z], wx, wy, wz );
+							world.createBlock( zb[z%zb.length], wx, wy, wz );
 						}
 						if( zb[z] == '' ) 
 						{
@@ -82,6 +82,24 @@
 				return new StructureRequest( template, min, true, parseInt(Math.ceil(lz)) );
 		}
 		
+		// 2D repeating 
+		if( template.repeatx && template.repeatz && this.startPos == undefined )
+		{
+			this.startPos = position;
+			return undefined;
+		}
+		else
+		{
+			var min = minv( this.startPos, position );
+			var max = maxv( this.startPos, position );
+			var lx = max.x - min.x;
+			var lz = max.z - min.z;
+			this.startPos = undefined;
+			if( lx > lz )
+				return new StructureRequest( template, min, false, parseInt(Math.ceil(lx)), parseInt(Math.ceil(lz)) );
+			else
+				return new StructureRequest( template, min, true, parseInt(Math.ceil(lz)), parseInt(Math.ceil(lx)) );
+		}
 		return new StructureRequest( template, position );
 	}
 })());
