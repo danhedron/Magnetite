@@ -79,7 +79,7 @@
 			if( lx > lz )
 				return new StructureRequest( template, min, false, parseInt(Math.ceil(lx)) );
 			else
-				return new StructureRequest( template, min, false, parseInt(Math.ceil(lz)) );
+				return new StructureRequest( template, min, true, parseInt(Math.ceil(lz)) );
 		}
 		
 		return new StructureRequest( template, position );

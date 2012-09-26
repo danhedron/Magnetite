@@ -57,7 +57,13 @@
 								}
 							},
 						]
-					}
+					},
+					{
+						text: 'Battlements',
+						action: function() {
+							this.build('battlements');
+						}
+					},
 				]
 			},
 			{
