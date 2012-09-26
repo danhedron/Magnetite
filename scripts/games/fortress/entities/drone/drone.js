@@ -112,7 +112,7 @@
 					if( dist < this.constructionDistance )
 					{
 						this.actionQueue = this.actionQueue.slice(1);
-						game.createStructure( structure );
+						Game.createStructure( structure );
 					}
 					break;
 				case 'clear':

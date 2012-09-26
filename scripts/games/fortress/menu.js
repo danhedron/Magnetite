@@ -34,6 +34,12 @@
 						action: function() {
 							this.build('stockpile');
 						}
+					},
+					{
+						text: 'Wall',
+						action: function() {
+							this.build('wall');
+						}
 					}
 				]
 			},
