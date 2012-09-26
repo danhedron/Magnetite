@@ -32,6 +32,9 @@ function norm( v ) {
 	}
 	return v;
 }
+// Returns the smallest posible vector from the input.
+function minv( v1, v2 ) { return { x : Math.min( v1.x, v2.x ), y: Math.min( v1.y, v2.y ), z: Math.min( v1.z, v2.z ) }; }
+function maxv( v1, v2 ) { return { x : Math.max( v1.x, v2.x ), y: Math.max( v1.y, v2.y ), z: Math.max( v1.z, v2.z ) }; }
 
 Game.onLoad = function()
 {
