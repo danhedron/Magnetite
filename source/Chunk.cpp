@@ -39,6 +39,11 @@ mNumBlocks( 0 )
 
 Chunk::~Chunk()
 {
+	for( size_t i = 0; i < CHUNK_SIZE; i ++ )
+	{
+		if( mBlocks[i] != nullptr )
+			delete mBlocks[i];
+	}
 	delete[] mBlocks;
 	delete[] mLightValues;
 }
@@ -122,6 +127,16 @@ BlockList& Chunk::getVisibleBlocks()
 	return mVisibleBlocks;
 }
 
+#define CHECK_FACE( cond, dx, dy, dz, face ) \
+	if( cond || mWorld->getChunk( getX() + dx, getY() + dy, getZ() + dz ) != nullptr ) \
+	{\
+		cb = getBlockAtWorld( blockX + dx, blockY + dy, blockZ + dz );\
+		if( cb == NULL || !cb->isOpaque() ) {\
+			mVisibleFaces++;\
+			visFlags |= face;\
+		}\
+	}
+
 void Chunk::updateVisibility( )
 {
 	BaseBlock* b = nullptr;
@@ -140,47 +155,32 @@ void Chunk::updateVisibility( )
 		ChunkScalar blockY = 0;
 		ChunkScalar blockZ = 0;
 		
+		bool fc = getBlockCount() == CHUNK_SIZE;
+		
 		for( long z = 0; z < CHUNK_WIDTH; z++ ) {
 			for( long y = 0; y < CHUNK_HEIGHT; y++ ) {
 				for( long x = 0; x < CHUNK_WIDTH; x++ ) {
 					id = BLOCK_INDEX_2( x, y, z );
 					b = mBlocks[id];
 					if( b == nullptr ) { continue; }
-					
+					if( fc && ( x > 0 && x < CHUNK_WIDTH-1 && y > 0 && y < CHUNK_HEIGHT-1 && z > 0 && z < CHUNK_WIDTH-1 ) ) { continue; }
+				
 					blockX = worldX + x; blockY = worldY + y; blockZ = worldZ + z;
 					
 					visFlags = 0;
 					//Check All axes for adjacent blocks.
-					cb = getBlockAtWorld( blockX + 1, blockY, blockZ );
-					if( (cb == NULL || !cb->isOpaque()) ) {
-						mVisibleFaces++;
-						visFlags |= FACE_RIGHT;
-					}
-					cb = getBlockAtWorld( blockX - 1, blockY, blockZ );
-					if( (cb == NULL || !cb->isOpaque()) ) {
-						mVisibleFaces++;
-						visFlags |= FACE_LEFT;
-					}
-					cb = getBlockAtWorld( blockX, blockY + 1, blockZ );
-					if( cb == NULL || !cb->isOpaque() ) {
-						mVisibleFaces++;
-						visFlags |= FACE_TOP;
-					}
-					cb = getBlockAtWorld( blockX, blockY - 1, blockZ );
-					if( (cb == NULL || !cb->isOpaque()) ) {
-						mVisibleFaces++;
-						visFlags |= FACE_BOTTOM;
-					}
-					cb = getBlockAtWorld( blockX, blockY, blockZ + 1 );
-					if( cb == NULL || !cb->isOpaque() ) {
-						mVisibleFaces++;
-						visFlags |= FACE_BACK;
-					}
-					cb = getBlockAtWorld( blockX, blockY, blockZ - 1 );
-					if( (cb == NULL || !cb->isOpaque()) ) {
-						mVisibleFaces++;
-						visFlags |= FACE_FORWARD;
-					}
+					CHECK_FACE( x < CHUNK_WIDTH-1,  1, 0, 0, FACE_RIGHT );
+					
+					CHECK_FACE( x > 0,             -1, 0, 0, FACE_LEFT );
+					
+					CHECK_FACE( y < CHUNK_HEIGHT-1, 0, 1, 0, FACE_TOP );
+					
+					CHECK_FACE( y > 0,              0,-1, 0, FACE_BOTTOM );
+					
+					CHECK_FACE( z < CHUNK_WIDTH-1,  0, 0, 1, FACE_BACK );
+					
+					CHECK_FACE( z > 0,              0, 0,-1, FACE_FORWARD );
+					
 					if( b->getVisFlags() != visFlags ) {
 						// Check to see if we need to change the VB data.
 						if( visFlags > 0 && b->getVisFlags() == 0 ) {

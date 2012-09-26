@@ -59,7 +59,7 @@ float ChunkGenerator::smooth( float x, float z )
 
 void ChunkGenerator::fillRegion( World* w, const Vector3& min, const Vector3& max )
 {
-	float p = 0.25f;
+	float p = 0.25f; 
 	float octs = 10;
 	
 	// Flood fill anything below 98.
