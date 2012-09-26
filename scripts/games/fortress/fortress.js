@@ -52,20 +52,19 @@ Game.onLoad = function()
 	}
 }
 
-Game.build = function( b ) 
+Game.build = function( t ) 
 {
 	var rs = world.fireRay( this.player.getEyeCast() );
 	
 	if( rs.hit )
 	{
 		var p = { x: rs.worldHit.x + (rs.normal.x /2), y: rs.worldHit.y + (rs.normal.y /2), z: rs.worldHit.z + (rs.normal.z /2) };
-		var structure = {
-			'structure': b,
-			'position': p
-		};
-		
-		// Tell the nearest drone to do something about it.
-		this.getNearestDrone( p ).construct(structure);
+		// Try and get a request
+		var sr = Structure.create( t, p );
+		if( sr != undefined ) {
+			// Tell the nearest drone to do something about it.
+			this.getNearestDrone( p ).construct(sr);
+		}
 	}
 }
 
@@ -98,10 +97,10 @@ Game.selectArea = function( callback )
 	}
 }
 
-Game.fillArea = function( min, max )
+Game.fillArea = function( type, min, max )
 {
 	// Tell the nearest drone to do something about it.
-	this.getNearestDrone( min ).fillArea( 'dirt', min, max );
+	this.getNearestDrone( min ).fillArea( type, min, max );
 }
 
 Game.clearArea = function( min, max )
@@ -126,7 +125,8 @@ Game.createDrone = function() {
 	if( rs.hit )
 	{
 		var drone = this.newDrone();
-		drone.position = { x: rs.worldHit.x + (rs.normal.x /2), y: rs.worldHit.y - (rs.normal.y /2), z: rs.worldHit.z + (rs.normal.z /2) };
+		drone.overridePosition( { x: rs.worldHit.x + (rs.normal.x /2), y: rs.worldHit.y - (rs.normal.y /2), z: rs.worldHit.z + (rs.normal.z /2) } );
+		drone.create();
 	}
 }
 

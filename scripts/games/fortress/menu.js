@@ -37,9 +37,26 @@
 					},
 					{
 						text: 'Wall',
-						action: function() {
-							this.build('wall');
-						}
+						children: [
+							{ 
+								text: 'Wooden',
+								action: function() {
+									this.build('wwall');
+								}
+							},
+							{ 
+								text: 'Log',
+								action: function() {
+									this.build('wall');
+								}
+							},
+							{ 
+								text: 'Stone',
+								action: function() {
+									this.build('swall');
+								}
+							},
+						]
 					}
 				]
 			},
@@ -65,9 +82,21 @@
 					},
 					{ 
 						text: 'Fill area',
-						action: function() {
-							this.selectArea( this.fillArea );
-						}
+						children: [
+							{
+								text: 'Dirt',
+								action: function() {
+									this.selectArea( function( min, max ) { this.fillArea( 'dirt', min, max ) } );
+								}
+							},
+							{
+								text: 'Grass',
+								action: function() {
+									this.selectArea( function( min, max ) { this.fillArea( 'grass', min, max ) } );
+								}
+							}
+						]
+						
 					}
 				]
 			}
