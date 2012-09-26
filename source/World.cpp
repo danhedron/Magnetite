@@ -286,7 +286,7 @@ void World::activateChunk( long x, long y, long z )
 	{
 		generateChunk( x, y, z );
 	}
-	//updateAdjacent(x, y, z);
+	updateAdjacent(x, y, z);
 }
 
 void World::deactivateChunk( long x, long y, long z )
