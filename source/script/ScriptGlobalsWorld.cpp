@@ -172,19 +172,24 @@ ValueHandle world_createEntity( const Arguments& args )
 					
 					scriptEntityTemplate->Set( v8::String::New("getEntity"), FunctionTemplate::New( se_getEntity ) );
 					
-					scriptEntityTemplate->SetInternalFieldCount(1);
+					//scriptEntityTemplate->SetInternalFieldCount(1);
 				}
 				
 				auto entity = world->createEntity<Magnetite::Script::ScriptEntity>();
 				
 				auto wraped = wrapEntity(entity);
 				
-				// What a hack.
-				auto scriptHelper = scriptEntityTemplate->NewInstance();
-				scriptHelper->SetInternalField(0, v8::External::New( entity ));
-				scriptHelper->SetPrototype( entityObject );
-				entity->setObject( PersistentObject::New( scriptHelper ) );
-				
+				if( wraped->IsObject() ) 
+				{
+					// What a hack.
+					auto scriptHelper = scriptEntityTemplate->NewInstance();
+					//scriptHelper->SetInternalField(0, v8::External::New( entity ));
+					scriptHelper->SetPrototype( entityObject );
+					
+					wraped.As<Object>()->SetPrototype( scriptHelper );
+					
+					entity->setObject( PersistentObject::New( wraped.As<Object>() ) );
+				}
 				return wraped;
 			}
 		}

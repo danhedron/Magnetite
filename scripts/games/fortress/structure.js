@@ -29,13 +29,15 @@
 		}
 		
 		var entities = template.entities;
-		for( var i = 0; i < entities.length; i++ )
-		{
-			var e = entities[i];
-			var ent = world.createEntity( e.type );
-			ent.position = add( add( e.position, position ), { x: 0, y: template.yoffset, z: 0 } );
-			ent.create();
-			ent.setPosition( add( add( e.position, position ), { x: 0, y: template.yoffset, z: 0 } ) );
+		if( entities ) {
+			for( var i = 0; i < entities.length; i++ )
+			{
+				var e = entities[i];
+				var ent = world.createEntity( e.type );
+				ent.position = add( add( e.position, position ), { x: 0, y: template.yoffset, z: 0 } );
+				ent.create();
+				ent.setPosition( add( add( e.position, position ), { x: 0, y: template.yoffset, z: 0 } ) );
+			}
 		}
 	}
 })());

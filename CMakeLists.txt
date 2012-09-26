@@ -27,7 +27,7 @@ set (MAGNETITE_VERSION_MAJOR 0)
 set (MAGNETITE_VERSION_MINOR 1)
 
 # Set GCC flags to some sensible defaults
-set(CMAKE_CXX_FLAGS "-std=c++0x -Wall -O")
+set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -O")
 
 #Pass important things to Code
 configure_file(

@@ -195,6 +195,7 @@ bool Renderer::isWorldVisible()
 void Renderer::setCamera( Camera* cam )
 {
 	mCamera = cam;
+	resizeViewport( 0, 0, mScrWidth, mScrHeight);
 }
 
 void Renderer::toggleCameraFrustum()
@@ -216,7 +217,10 @@ void Renderer::render(double dt, World* world)
 	// todo: update the world rendering to use it's own matricies.
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glMultMatrixf( glm::value_ptr( mCamera->getFrustum().getPerspective()  ) );
+	if( mCamera )
+	{
+		glMultMatrixf( glm::value_ptr( mCamera->getFrustum().getPerspective()  ) );
+	}
 	
 	glMatrixMode(GL_MODELVIEW);
 
@@ -226,86 +230,92 @@ void Renderer::render(double dt, World* world)
 	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 	glLoadIdentity();
-	glMultMatrixf( glm::value_ptr( glm::mat4( glm::inverse(mCamera->getOrientationMatrix() ) ) ) );
-	if( world->getSky() != NULL )
+	if( mCamera )
 	{
-		glDisable( GL_DEPTH_TEST );
-		world->getSky()->renderSky();
-		glEnable( GL_DEPTH_TEST );
+		glMultMatrixf( glm::value_ptr( glm::mat4( glm::inverse(mCamera->getOrientationMatrix() ) ) ) );
 	}
-	
-	rendered = 0;
-
-	if( mDrawWorld && mDebugMode != DEBUG_SKY ) 
+	if( world != nullptr )
 	{
-		mWorldProgram->makeActive();
-			
-		// Set up the uniform for the world diffuse texture.
-		GLint samplerLocation = mWorldProgram->getUniformLocation("worldDiffuse");
-		if( samplerLocation != -1 )
+		if( world->getSky() != NULL )
 		{
-			glEnable(GL_TEXTURE_2D);
-			glUniform1i( samplerLocation, 0 );
-			glActiveTexture( GL_TEXTURE0 );
-			glBindTexture(GL_TEXTURE_2D, mWorldTexture->getName());
+			glDisable( GL_DEPTH_TEST );
+			world->getSky()->renderSky();
+			glEnable( GL_DEPTH_TEST );
 		}
 		
-		// Just draw everything, need some occulusion technique.
-		auto regions = world->getRegions();
-		for( size_t r = 0;  r < world->getRegionCount(); r++ )
+		rendered = 0;
+
+		if( mDrawWorld && mDebugMode != DEBUG_SKY ) 
 		{
-			if( regions[r] == NULL ) continue;
-			for( size_t c = 0; c < regions[r]->count(); c++ )
+			mWorldProgram->makeActive();
+				
+			// Set up the uniform for the world diffuse texture.
+			GLint samplerLocation = mWorldProgram->getUniformLocation("worldDiffuse");
+			if( samplerLocation != -1 )
 			{
-				auto chnk = regions[r]->get(c);
-				if( chnk )
+				glEnable(GL_TEXTURE_2D);
+				glUniform1i( samplerLocation, 0 );
+				glActiveTexture( GL_TEXTURE0 );
+				glBindTexture(GL_TEXTURE_2D, mWorldTexture->getName());
+			}
+			
+			// Just draw everything, need some occulusion technique.
+			auto regions = world->getRegions();
+			for( size_t r = 0;  r < world->getRegionCount(); r++ )
+			{
+				if( regions[r] == NULL ) continue;
+				for( size_t c = 0; c < regions[r]->count(); c++ )
 				{
-					_renderChunk( regions[r], chnk );
+					auto chnk = regions[r]->get(c);
+					if( chnk )
+					{
+						_renderChunk( regions[r], chnk );
+					}
 				}
 			}
-		}
-		
-		// Draw moving blocks
-		MovingBlockList& moving = world->getMovingBlocks();
-		for( MovingBlock& b : moving )
-		{
-			TerrainGeometry* geom = b.geom;
-			if( geom->vertexBO == 0 || geom->indexBO == 0 )
+			
+			// Draw moving blocks
+			MovingBlockList& moving = world->getMovingBlocks();
+			for( MovingBlock& b : moving )
 			{
-				geom->bindToBuffer();
-				// Check everything went ok, if not skip the block.
-				if( geom->vertexBO == 0 || geom->indexBO == 0 ) continue;
+				TerrainGeometry* geom = b.geom;
+				if( geom->vertexBO == 0 || geom->indexBO == 0 )
+				{
+					geom->bindToBuffer();
+					// Check everything went ok, if not skip the block.
+					if( geom->vertexBO == 0 || geom->indexBO == 0 ) continue;
+				}
+				
+				glBindBuffer( GL_ARRAY_BUFFER, geom->vertexBO );
+				glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, geom->indexBO );
+			
+				geom->bindVertexAttributes(mWorldProgram);
+				
+				glDrawRangeElements( GL_TRIANGLES, 0, geom->vertexCount, geom->edgeCount, GL_UNSIGNED_SHORT, 0);
+				
+				glBindBuffer( GL_ARRAY_BUFFER, 0 );
+				glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 			}
 			
-			glBindBuffer( GL_ARRAY_BUFFER, geom->vertexBO );
-			glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, geom->indexBO );
-		
-			geom->bindVertexAttributes(mWorldProgram);
+			if( samplerLocation != -1 )
+			{
+				glDisable(GL_TEXTURE_2D);
+				glActiveTexture( GL_TEXTURE0 );
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
 			
-			glDrawRangeElements( GL_TRIANGLES, 0, geom->vertexCount, geom->edgeCount, GL_UNSIGNED_SHORT, 0);
-			
-			glBindBuffer( GL_ARRAY_BUFFER, 0 );
-			glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+			//Detatch the world program
+			mWorldProgram->deactivate();
 		}
 		
-		if( samplerLocation != -1 )
+		auto entities = world->getEntities();
+		Magnetite::Component::DrawInfo i;
+		i.projection = mCamera->getFrustum().getPerspective();
+		i.view = glm::inverse(mCamera->getMatrix());
+		for( auto it = entities.begin(); it != entities.end(); ++it )
 		{
-			glDisable(GL_TEXTURE_2D);
-			glActiveTexture( GL_TEXTURE0 );
-			glBindTexture(GL_TEXTURE_2D, 0);
+			(*it)->draw(i, dt);
 		}
-		
-		//Detatch the world program
-		mWorldProgram->deactivate();
-	}
-	
-	auto entities = world->getEntities();
-	Magnetite::Component::DrawInfo i;
-	i.projection = mCamera->getFrustum().getPerspective();
-	i.view = glm::inverse(mCamera->getMatrix());
-	for( auto it = entities.begin(); it != entities.end(); ++it )
-	{
-		(*it)->draw(i, dt);
 	}
 
 	switch( mDebugMode ) {

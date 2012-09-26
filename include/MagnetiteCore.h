@@ -2,6 +2,8 @@
 #define _OPENCRAFTCORE_H_
 #include "prerequisites.h"
 #include <mutex>
+#include <deque>
+#include <functional>
 
 class Player;
 class Renderer;
@@ -12,6 +14,8 @@ class Character;
 class BaseGame;
 class ResourceManager;
 class ScriptWrapper;
+
+typedef std::function<void ()> Work;
 
 /** @class MagnetiteCore
  * Responsible for managing stuff
@@ -52,6 +56,16 @@ protected:
 	std::vector<Character*>	mCharacters;
 	BaseGame*	mGame;
 	
+	/**
+	 * Work Queue for work to do on the main thread.
+	 */
+	std::deque<Work> mWorkQueue;
+	
+	/**
+	 * Mutex for game work queue.
+	 */
+	std::mutex mWorkQueueMutex;
+	
 public:
 	MagnetiteCore(void);
 	~MagnetiteCore(void);
@@ -85,16 +99,11 @@ public:
 	 * @return a pointer to the game object
 	 */
 	BaseGame* getGame();
-
+	
 	/**
-	 * Removes the block the player is looking at
+	 * Function to queue work for the game thread.
 	 */
-	void removeEyeBlock();
-
-	/**
-	 * Places a block where the player is looking
-	 */
-	void placeEyeBlock();
+	void runOnMainThread( const Work& fn );
 
 	/**
 	 * Starts a new game of the specified type

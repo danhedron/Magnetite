@@ -41,6 +41,7 @@ mScriptWrapper( NULL ),
 mTextureManager( NULL ),
 mInputManager( NULL ),
 mWorld( NULL ),
+mGame( NULL ),
 mContinue( true ),
 mTimescale( 1.f ),
 mPBroadphase( NULL ),
@@ -56,6 +57,7 @@ mLastY( 0.f )
 	mTextureManager = new TextureManager();
 	mInputManager = new InputManager();
 	mScriptWrapper = new ScriptWrapper();
+	mScriptWrapper->init();
 	mInputManager->setEventCallback( Inputs::FORWARD, &globalEventHandler );
 	mInputManager->setEventCallback( Inputs::BACK, &globalEventHandler );
 	mInputManager->setEventCallback( Inputs::LEFT, &globalEventHandler );
@@ -145,31 +147,41 @@ void MagnetiteCore::screenshot()
 	screen.saveToFile(fname);
 }
 
+void MagnetiteCore::runOnMainThread( const Work& fn )
+{
+	mWorkQueueMutex.lock();
+	mWorkQueue.push_back(fn);
+	mWorkQueueMutex.unlock();
+}
+
 void MagnetiteCore::startGame( const std::string& type )
 {
-	mScriptWrapper->init();
-	
-	//mGame = FactoryManager::getManager().createGame(type);
-	ScriptGame* g = new ScriptGame();
-	g->setName("script");
-	g->_setScriptObject( mScriptWrapper->newGame(type) );
-	g->_setPath(type);
-	mGame = g;
-	if( mGame != NULL ) 
-		Util::log("Starting game: " + mGame->getName() );
-	mGame->_startGameSingle();
-	
-	newWorld("test");
-	
-	mGame->_loadGame();
-	
-	{
-		v8::HandleScope hs;
-		mScriptWrapper->runFile("./scripts/main.js");
-	}
-	
-	// No multiplayer yet so just force player join
-	mGame->_playerJoined();
+	runOnMainThread( [&]() { 
+		
+		//mGame = FactoryManager::getManager().createGame(type);
+		ScriptGame* g = new ScriptGame();
+		g->setName("script");
+		g->_setScriptObject( mScriptWrapper->newGame(type) );
+		g->_setPath(type);
+		mGame = g;
+		if( mGame != NULL ) 
+			Util::log("Starting game: " + mGame->getName() );
+		mGame->_startGameSingle();
+		
+		newWorld("test");
+		
+		mGame->_loadGame();
+		
+		{
+			v8::HandleScope hs;
+			mScriptWrapper->runFile("./scripts/main.js");
+		}
+		
+		// No multiplayer yet so just force player join
+		mGame->_playerJoined();
+		
+		mRenderer->setCamera( mGame->getLocalPlayer()->getCamera() );
+	});
 }
 
 void MagnetiteCore::inputMovement( const Vector3 &v )
@@ -186,8 +198,6 @@ void MagnetiteCore::go()
 {
 	int lastX = mWindow.getSize().x/2;
 	int lastY = mWindow.getSize().y/2;
-	
-	mRenderer->setCamera( mGame->getLocalPlayer()->getCamera() );
 	
 	std::thread physics_thread( [&]() {
 		sf::Clock timer;
@@ -214,7 +224,10 @@ void MagnetiteCore::go()
 			physicsMutex.unlock();
 			Perf::Profiler::get().end("pthink");
 			
-			mWorld->updateEntities(lDelta);
+			if( mWorld != NULL )
+			{
+				mWorld->updateEntities(lDelta);
+			}
 		}
 	});
 	
@@ -232,7 +245,10 @@ void MagnetiteCore::go()
 			lDelta *= mTimescale;
 			
 			// Update all of the world related objects.
-			mWorld->update( lDelta );
+			if( mWorld != NULL )
+			{
+				mWorld->update( lDelta );
+			}
 		}
 	});
 	
@@ -333,13 +349,15 @@ void MagnetiteCore::go()
 		// Tell the profiler to start a new frame.
 		Perf::Profiler::get().newFrame();
 		
-		// Game is currently at 60fps due to vsync, should be moved.
-		Perf::Profiler::get().begin("gthink");
-		if( mGame != NULL )
+		// Process any work for this thread.
+		mWorkQueueMutex.lock();
+		while( mWorkQueue.size() > 0 ) 
 		{
-			mGame->think( lDelta );
+			auto w = mWorkQueue.front();
+			w();
+			mWorkQueue.pop_front();
 		}
-		Perf::Profiler::get().end("gthink");
+		mWorkQueueMutex.unlock();
 		
 		// Update all the characters
 		for( std::vector<Character*>::iterator it = mCharacters.begin(); it != mCharacters.end(); it++ )
@@ -350,6 +368,14 @@ void MagnetiteCore::go()
 		Perf::Profiler::get().begin("draw");
 		mRenderer->render(lDelta, mWorld);
 		Perf::Profiler::get().end("draw");
+		
+		// Todo: get the game processing onto the logic thread.
+		Perf::Profiler::get().begin("gthink");
+		if( mGame != NULL )
+		{
+			mGame->think( lDelta );
+		}
+		Perf::Profiler::get().end("gthink");
 		
 		mGame->uiPaint( mRenderer );
 

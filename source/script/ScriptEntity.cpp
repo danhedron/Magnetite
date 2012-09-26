@@ -28,13 +28,18 @@ namespace Magnetite {
 			PersistentContext ctx = MagnetiteCore::Singleton->getScriptManager()->getContext();
 			Context::Scope scope( ctx );
 			HandleScope hs;
-			if( mScriptObject->Has( v8::String::New("create") ) )
+			// Get the object prototype, which contains the script-side create.
+			auto proto = mScriptObject->GetPrototype();
+			if( proto->IsObject() )
 			{
-				auto createVal = mScriptObject->Get( v8::String::New("create") );
-				if( createVal->IsFunction() )
-				{
-					auto createFunc = createVal.As<Function>();
-					createFunc->Call( mScriptObject, 0, nullptr );
+				auto protobj = proto.As<Object>();
+				if( protobj->Has( v8::String::New("create") ) ) {
+					auto createVal = protobj->Get( v8::String::New("create") );
+					if( createVal->IsFunction() )
+					{
+						auto createFunc = createVal.As<Function>();
+						createFunc->Call( mScriptObject, 0, nullptr );
+					}
 				}
 			}
 			
@@ -43,18 +48,27 @@ namespace Magnetite {
 		
 		void ScriptEntity::think( float dt )
 		{
-			/*PersistentContext ctx = MagnetiteCore::Singleton->getScriptManager()->getContext();
-			Context::Scope scope( ctx );
-			HandleScope hs;
-			if( mScriptObject->Has( v8::String::New("think") ) )
-			{
-				auto createVal = mScriptObject->Get( v8::String::New("think") );
-				if( createVal->IsFunction() )
+			MagnetiteCore::Singleton->runOnMainThread( [&,dt]() { 
+				// Perhaps a better (thread safe) mechanism for handling callbacks could be devised.
+				PersistentContext ctx = MagnetiteCore::Singleton->getScriptManager()->getContext();
+				Context::Scope scope( ctx );
+				HandleScope hs;
+				// Get the object prototype, which contains the script-side create.
+				auto proto = mScriptObject->GetPrototype();
+				if( proto->IsObject() )
 				{
-					auto createFunc = createVal.As<Function>();
-					createFunc->Call( mScriptObject, 0 , nullptr);
+					auto protobj = proto.As<Object>();
+					if( protobj->Has( v8::String::New("think") ) ) {
+						auto createVal = protobj->Get( v8::String::New("think") );
+						if( createVal->IsFunction() )
+						{
+							auto createFunc = createVal.As<Function>();
+							ValueHandle args[] = { Number::New(dt) };
+							createFunc->Call( mScriptObject, 1, args );
+						}
+					}
 				}
-			}*/
+			});
 			
 			BaseEntity::think(dt);
 		}

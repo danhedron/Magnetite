@@ -41,10 +41,11 @@ Game.onLoad = function()
 	
 	// Create a drone.
 	this.drones = [];
-	for( var i = 0; i < 20; i++ )
+	for( var i = 0; i < 10; i++ )
 	{
 		var d = this.newDrone();
 		d.overridePosition({ x: Math.random() * 100, y: 140, z: Math.random() * 100 });
+		d.create();
 	}
 }
 
@@ -111,7 +112,7 @@ Game.createStructure = function( s ) {
 }
 
 Game.newDrone = function() {
-	var d = new Drone(this);
+	var d = world.createEntity('drone');
 	this.drones.push(d);
 	return d;
 };
@@ -278,10 +279,6 @@ Game.think = function( dt )
 	
 	this.player.setYaw( this.player.turnAngle += (this.player.turnSpeed * dt) );
 	this.player.setPitch( this.player.lookAngle );
-	
-	for( var i = 0; i < this.drones.length; i++ ) {
-		this.drones[i].tick(dt);
-	}
 }
 
 Game.draw = function()
