@@ -244,21 +244,14 @@ Chunk* World::createChunk(long x, long y, long z)
 
 Chunk* World::generateChunk( ChunkScalar x, ChunkScalar y, ChunkScalar z )
 {
-	Perf::Profiler::get().begin("tgen");
-
 	auto c = getChunk( x, y, z );
 	if( c == nullptr )
 	{
 		c = createChunk( x, y, z );
 	}
 	
-	/*mGenerator->fillRegion( this, 
-							Vector3( x * CHUNK_WIDTH, y * CHUNK_WIDTH, z * CHUNK_WIDTH ), 
-							Vector3( x * CHUNK_WIDTH + CHUNK_WIDTH, y * CHUNK_WIDTH + CHUNK_WIDTH, z * CHUNK_WIDTH + CHUNK_WIDTH )
-				);*/
 	mGenerator->fillChunk( c );
-	Perf::Profiler::get().end("tgen");
-
+	
 	return c;
 }
 
@@ -293,7 +286,7 @@ void World::activateChunk( long x, long y, long z )
 	{
 		generateChunk( x, y, z );
 	}
-	updateAdjacent(x, y, z);
+	//updateAdjacent(x, y, z);
 }
 
 void World::deactivateChunk( long x, long y, long z )
@@ -307,19 +300,19 @@ void World::updateAdjacent( ChunkScalar x, ChunkScalar y, ChunkScalar z )
 	Chunk* c;
 	
 	c = getChunk( x + 1, y, z );
-	if( c ) c->_raiseChunkFlag( Chunk::DataUpdated );
+	if( c ) c->_raiseChunkFlag( Chunk::DataUpdated | Chunk::SkipLight );
 	c = getChunk( x - 1, y, z );
-	if( c ) c->_raiseChunkFlag( Chunk::DataUpdated );
+	if( c ) c->_raiseChunkFlag( Chunk::DataUpdated | Chunk::SkipLight );
 
 	c = getChunk( x, y + 1, z );
-	if( c ) c->_raiseChunkFlag( Chunk::DataUpdated );
+	if( c ) c->_raiseChunkFlag( Chunk::DataUpdated | Chunk::SkipLight );
 	c = getChunk( x, y - 1, z );
-	if( c ) c->_raiseChunkFlag( Chunk::DataUpdated );
+	if( c ) c->_raiseChunkFlag( Chunk::DataUpdated | Chunk::SkipLight );
 	
 	c = getChunk( x, y, z + 1 );
-	if( c ) c->_raiseChunkFlag( Chunk::DataUpdated );
+	if( c ) c->_raiseChunkFlag( Chunk::DataUpdated | Chunk::SkipLight );
 	c = getChunk( x, y, z - 1 );
-	if( c ) c->_raiseChunkFlag( Chunk::DataUpdated );
+	if( c ) c->_raiseChunkFlag( Chunk::DataUpdated | Chunk::SkipLight );
 }
 
 void World::update( float dt )
@@ -330,6 +323,9 @@ void World::update( float dt )
 	
 	Perf::Profiler::get().begin("cgupdate");
 	Perf::Profiler::get().end("cgupdate");
+	
+	Perf::Profiler::get().begin("dread");
+	Perf::Profiler::get().end("dread");
 	
 	Perf::Profiler::get().begin("pupdate");
 	Perf::Profiler::get().end("pupdate");
@@ -357,15 +353,15 @@ void World::update( float dt )
 		auto &r = mChunkRequests.at(0);
 		
 		if( r.unload ) {
-			//Perf::Profiler::get().begin("cu");
+			Perf::Profiler::get().begin("cu");
 			this->deactivateChunk( r.x, r.y, r.z );
-			//Perf::Profiler::get().end("cu");
+			Perf::Profiler::get().end("cu");
 		}
 		else
 		{
-			//Perf::Profiler::get().begin("ca");
+			Perf::Profiler::get().begin("ca");
 			this->activateChunk( r.x, r.y, r.z );
-			//Perf::Profiler::get().end("ca");
+			Perf::Profiler::get().end("ca");
 		}
 		
 		mChunkRequests.pop_front();

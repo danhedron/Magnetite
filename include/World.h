@@ -272,6 +272,13 @@ public:
 	void requestChunkUnload( ChunkScalar x, ChunkScalar y, ChunkScalar z );
 	
 	/**
+	 * Returns the number of queued chunk requests.
+	 */
+	size_t getNumChunkRequests() {
+		return mChunkRequests.size();
+	}
+	
+	/**
 	 * Creates a chunk at the given coordinates.
 	 * @param x Coordinate
 	 * @param y Coordinate

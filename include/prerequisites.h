@@ -49,7 +49,7 @@ typedef BaseBlock* BlockPtr;
 typedef BlockPtr* BlockArray;
 typedef std::map<size_t,BaseBlock*> BlockList;
 typedef std::pair<const size_t,BaseBlock*> BlockPosPair;
-typedef unsigned char LightIndex;
+typedef uint8_t LightIndex;
 
 //typedef *BaseBlock[] BlockList;
 

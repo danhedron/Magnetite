@@ -15,6 +15,8 @@ namespace Magnetite
 	struct ChunkData
 	{
 		uint32_t blockData[CHUNK_SIZE];
+		LightIndex lightData[CHUNK_SIZE];
+		
 	};
 	
 	static std::map<Magnetite::String, size_t> tmap;
@@ -75,16 +77,22 @@ namespace Magnetite
 		
 		Perf::Profiler::get().begin("dread");
 		size_t id;
+		LightIndex lv;
 		for( int i = 0; i < CHUNK_SIZE; i++ )
 		{
 			id = d.blockData[i];
+			lv = d.lightData[i];
 			if( id != 0 )
 			{
 				auto block = FactoryManager::getManager().createBlock(idmap[id]);
 				if( block != nullptr )
 					c->setBlockAt( block, i );
 			}
+			c->setLightLevel( lv, i );
 		}
+		
+		c->_raiseChunkFlag( Chunk::SkipLight );
+		
 		Perf::Profiler::get().end("dread");
 		
 		return true;
@@ -112,6 +120,7 @@ namespace Magnetite
 			{
 				d.blockData[i] = 0;
 			}
+			d.lightData[i] = c->getLightLevel( i );
 		}
 		
 		stream.write( (char*)&d , sizeof(d) );

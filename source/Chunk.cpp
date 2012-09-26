@@ -63,13 +63,6 @@ World* Chunk::getWorld()
 	return mWorld;
 }
 
-size_t Chunk::getLightLevel( short x, short y, short z )
-{
-	if( x < 0 || x >= CHUNK_WIDTH || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_WIDTH )
-		return 255;
-	return mLightValues[ BLOCK_INDEX_2( x, y, z ) ];
-}
-
 void Chunk::_allocateArray( size_t size )
 {
 	mBlocks = new BlockPtr[size];
@@ -83,16 +76,6 @@ BlockPtr* Chunk::getBlocks()
 {
 	return mBlocks;
 }
-
-//void Chunk::setBlockAt( BlockPtr block, ChunkScalar x, ChunkScalar y, ChunkScalar z )
-
-//void Chunk::setBlockAt( BlockPtr block, ChunkScalar index )
-
-
-//BlockPtr Chunk::getBlockAt( short x, short y, short z )
-
-
-//BlockPtr Chunk::getBlockAt( size_t index )
 
 void Chunk::removeBlockAt( short x, short y, short z )
 {
@@ -127,13 +110,6 @@ bool Chunk::hasNeighbours( long x, long y, long z )
 	if( getBlockAt(x, y, z - 1) ) return true;
 	if( getBlockAt(x, y, z + 1) ) return true;
 	return false;
-}
-
-void Chunk::setLightLevel( LightIndex value, short x, short y, short z )
-{
-	if( x < 0 || x >= CHUNK_WIDTH || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_WIDTH )
-		return;
-	mLightValues[ BLOCK_INDEX_2( x, y, z ) ] = value;
 }
 
 size_t Chunk::getVisibleFaceCount()
@@ -282,7 +258,14 @@ void Chunk::generateGeometry()
 
 void Chunk::generateLighting()
 {
-	LightingManager::lightChunk( this );
+	if( !_hasChunkFlag( SkipLight ) )
+	{
+		LightingManager::lightChunk( this );
+	}
+	else
+	{
+		_lowerChunkFlag( SkipLight );
+	}
 }
 
 void Chunk::generatePhysics()
@@ -322,10 +305,12 @@ void Chunk::generatePhysics()
 
 			meshInterface->addIndexedMesh( part, PHY_SHORT );
 
-			mPhysicsShape = new btBvhTriangleMeshShape( meshInterface, true );//new btConvexTriangleMeshShape( meshInterface );////new btBoxShape( btVector3(8, 64, 8) );
+			//mPhysicsShape = new btBvhTriangleMeshShape( meshInterface, true );//new btConvexTriangleMeshShape( meshInterface );////new btBoxShape( btVector3(8, 64, 8) );
+			mPhysicsShape = new btBvhTriangleMeshShape( meshInterface, false );
 			mPhysicsState = new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3( getX() * CHUNK_WIDTH, getY() * CHUNK_HEIGHT, getZ() * CHUNK_WIDTH)));
 			btRigidBody::btRigidBodyConstructionInfo ci( 0, mPhysicsState, mPhysicsShape, btVector3(0,0,0) );
 			mPhysicsBody = new btRigidBody( ci );
+			
 			mPhysicsBody->setCollisionFlags( mPhysicsBody->getCollisionFlags() | btRigidBody::CF_STATIC_OBJECT );
 		}
 		else

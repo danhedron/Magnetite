@@ -90,7 +90,8 @@ public:
 	 */
 	enum {
 		DataUpdated = 1, // Data has been updated, Visibility check needed
-		MeshInvalid = 2 // Data has changed, mesh should be updated.
+		MeshInvalid = 2, // Data has changed, mesh should be updated.
+		SkipLight = 4 // Skips updating lighting for one update.
 	};
 	
 	/**
@@ -121,11 +122,6 @@ public:
 	 */
 	World* getWorld();
 	
-	/**
-	 * returns the light level at the block
-	 */
-	size_t getLightLevel( short x, short y, short z );
-
 	/**
 	 * Inserts the block at the given position
 	 */
@@ -204,7 +200,39 @@ public:
 	/** 
 	 * Sets the light value at the given pointer
 	 */
-	void setLightLevel( LightIndex value, short x, short y, short z );
+	void setLightLevel( LightIndex value, short x, short y, short z ) {
+		if( x >= 0 && x < CHUNK_WIDTH && y >= 0 && y < CHUNK_HEIGHT && z >= 0 && z < CHUNK_WIDTH )
+			mLightValues[ BLOCK_INDEX_2( x, y, z ) ] = value;
+	}
+	
+	/**
+	 * Sets the light level for the given index.
+	 */
+	void setLightLevel( LightIndex value, ChunkScalar ind ) {
+		if( ind >= 0 && ind < CHUNK_SIZE ) { 
+			mLightValues[ ind ] = value;
+		}
+	}
+	
+	/**
+	 * returns the light level at the block
+	 */
+	LightIndex getLightLevel( ChunkScalar x, ChunkScalar y, ChunkScalar z )
+	{
+		if( x >= 0 && x < CHUNK_WIDTH && y >= 0 && y < CHUNK_HEIGHT && z >= 0 && z < CHUNK_WIDTH )
+			return mLightValues[ BLOCK_INDEX_2( x, y, z ) ];
+		return 255;
+	}
+
+	/**
+	 * Gets the light level for the given index.
+	 */
+	LightIndex getLightLevel( ChunkScalar ind ) {
+		if( ind >= 0 && ind < CHUNK_SIZE ) { 
+			return mLightValues[ ind ];
+		}
+		return 255;
+	}
 	
 	/**
 	 * Returns a pointer to this chunk's geometry

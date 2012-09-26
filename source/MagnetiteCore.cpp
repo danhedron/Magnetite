@@ -238,7 +238,7 @@ void MagnetiteCore::go()
 		
 		while(mContinue && mWindow.isOpen()) {
 			float lDelta = ((float)timer.getElapsedTime().asMilliseconds())/1000;
-			if( lDelta < 1/60.f ) { continue; }
+			if( lDelta < 1/30.f && (mWorld == nullptr || mWorld->getNumChunkRequests() == 0) ) { continue; }
 			timer.restart(); 
 			Perf::Profiler::get().newFrame();
 			
@@ -249,6 +249,8 @@ void MagnetiteCore::go()
 			{
 				mWorld->update( lDelta );
 			}
+			
+			std::this_thread::yield();
 		}
 	});
 	
