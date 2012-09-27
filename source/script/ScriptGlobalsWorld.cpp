@@ -142,13 +142,52 @@ ValueHandle world_fireRay(const Arguments& args)
 	return Undefined();
 }
 
-Persistent<ObjectTemplate> scriptEntityTemplate;
-ValueHandle se_getEntity( const Arguments& args )
+bool unwrapSearch( EntitySearch& es, ObjectHandle obj )
 {
-	auto external = args.This()->GetInternalField(0).As<External>();
-	auto self = static_cast<Magnetite::BaseEntity*>(external->Value());
+	HandleScope hs;
+	if( obj->Has(V8STR("center")) )
+	{
+		auto center = obj->Get(V8STR("center"));
+		if( !center->IsObject() ) return false;
+		es.center = unwrapVector3(center);
+		es.flags |= EntitySearch::SearchFlags::SF_Position;
+	}
 	
-	return wrapEntity(self);
+	if( obj->Has(V8STR("maxDistance")) )
+	{
+		auto mD = obj->Get(V8STR("center"));
+		if( !mD->IsNumber() ) return false;
+		es.maxDistance = mD->NumberValue();
+		es.flags |= EntitySearch::SearchFlags::SF_MaxDistance;
+	}
+	
+	if( obj->Has(V8STR("type")) )
+	{
+		auto td = obj->Get(V8STR("type"));
+		if( !td->IsString() ) return false;
+		es.type = *String::AsciiValue(td);
+		es.flags |= EntitySearch::SearchFlags::SF_Type;
+	}
+	
+	return true;
+}
+
+ValueHandle world_findEntity( const Arguments& args )
+{
+	if( args.Length() > 0 && args[0]->IsObject() )
+	{
+		EntitySearch es;
+		if( unwrapSearch( es, args[0].As<Object>() ) )
+		{
+			auto r = CoreSingleton->getWorld()->findEntity( es );
+			return wrapEntity(r);
+		}
+		else
+		{
+			Util::log("Invaid search options");
+		}
+	}
+	return Undefined();
 }
 
 ValueHandle world_createEntity( const Arguments& args )
@@ -158,35 +197,24 @@ ValueHandle world_createEntity( const Arguments& args )
 	
 	// Figure out if we need to create a base entity or a script entity.
 	if( args.Length() > 0 && args[0]->IsString() ) {
-		auto path = sw->resolveEntityPath( *v8::String::AsciiValue( args[0]->ToString() ) );
-		Util::log("Resolved entity path: " + path + " for entity: " + *v8::String::AsciiValue( args[0]->ToString() ) );
+		v8::String::AsciiValue type( args[0]->ToString() );
+		auto path = sw->resolveEntityPath( *type );
+		Util::log("Resolved entity path: " + path + " for entity: " + *type );
 		if( path != "" ) {
 			// ToDo: More Caching?
 			auto entityVal = sw->runFile( path );
 			if( entityVal->IsObject() ) {
 				auto entityObject = entityVal.As<Object>();
 				
-				// Ensure the scriptEntityTemplate exists
-				if( scriptEntityTemplate.IsEmpty() ) {
-					scriptEntityTemplate = Persistent<ObjectTemplate>::New( ObjectTemplate::New() );
-					
-					scriptEntityTemplate->Set( v8::String::New("getEntity"), FunctionTemplate::New( se_getEntity ) );
-					
-					//scriptEntityTemplate->SetInternalFieldCount(1);
-				}
-				
 				auto entity = world->createEntity<Magnetite::Script::ScriptEntity>();
+				entity->setTypeName(*type);
 				
 				auto wraped = wrapEntity(entity);
 				
 				if( wraped->IsObject() ) 
 				{
-					// What a hack.
-					auto scriptHelper = scriptEntityTemplate->NewInstance();
-					//scriptHelper->SetInternalField(0, v8::External::New( entity ));
-					scriptHelper->SetPrototype( entityObject );
-					
-					wraped.As<Object>()->SetPrototype( scriptHelper );
+					// Set the script object as the prototype for the wrapped entitity, makes everything 'just work'
+					wraped.As<Object>()->SetPrototype( entityObject );
 					
 					entity->setObject( PersistentObject::New( wraped.As<Object>() ) );
 				}
@@ -211,6 +239,7 @@ Handle<ObjectTemplate> initWorld( )
 	world->Set(String::New("createBlock"), FunctionTemplate::New(world_createBlock));
 	world->Set(String::New("fireRay"), FunctionTemplate::New(world_fireRay));
 	world->Set(String::New("createRay"), FunctionTemplate::New(constructRay));
+	world->Set(String::New("findEntity"), FunctionTemplate::New(world_findEntity));
 	world->Set(String::New("createEntity"), FunctionTemplate::New(world_createEntity));
 	
 	return hs.Close( world );

@@ -15,7 +15,7 @@ mPitch ( 0 )
 {
 	mViewFrustum.setCamera(this);
 	setPosition(Vector3());
-	setViewDistance( 200.f );
+	setViewDistance( 400.f );
 }
 
 Camera::~Camera(void)

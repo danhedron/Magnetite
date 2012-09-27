@@ -30,6 +30,11 @@ namespace Magnetite {
 		 * Pointer to the world
 		 */
 		World* mWorld;
+		
+		/**
+		 * Last last position update that was recived.
+		 */
+		Vector3 mLastPosition;
 		 
 		/**
 		 * A list of components attached to this entity
@@ -63,6 +68,11 @@ namespace Magnetite {
 		String getName() const;
 		
 		/**
+		 * Gets the type name of the entity
+		 */
+		virtual String getType() { return "base"; }
+		
+		/**
 		 * Calls when the entitiy is due to spawn.
 		 */
 		virtual void create();
@@ -87,6 +97,13 @@ namespace Magnetite {
 		 * For convenience, fires a 'position updated' event.
 		 */
 		void updatePosition( const Vector3& newpos );
+		
+		/**
+		 * Returns the latest position
+		 */
+		Vector3 getLastPosition() {
+			return mLastPosition;
+		}
 	};
 	
 };

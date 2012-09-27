@@ -3,12 +3,14 @@
 #include "prerequisites.h"
 #include <deque>
 #include <mutex>
+#include <glm/core/type.hpp>
 #include "Region.h"
 #include "MovingBlock.h"
 #include "paging/PagingContext.h"
 
 namespace Magnetite {
-class WorldSerializer;}
+class WorldSerializer;class BaseEntity;
+}
 
 class BaseTriangulator;
 class Chunk;
@@ -88,16 +90,42 @@ struct raycast_r
 };
 
 /**
- * @struct AABB->AABB collision test 
+ * @struct EntitySearch
+ * 
+ * Struct for entity search option
  */
-struct collision_r
+struct EntitySearch 
 {
-	Vector3 response;
-
-	bool collision;
-
-	collision_r() {
-		collision = false;
+	enum SearchFlags {
+		SF_None = 0,
+		SF_Position = 1,
+		SF_Type = 2,
+		SF_MaxDistance = 4
+	};
+	
+	/**
+	 * Flags for which search options to enable
+	 */
+	uint8_t flags;
+	
+	/**
+	 * Type of entity to find.
+	 */
+	Magnetite::String type;
+	
+	/**
+	 * Center to search from
+	 */
+	Vector3 center;
+	
+	/**
+	 * maximum distance to find entities.
+	 */
+	float maxDistance;
+	
+	void setDefaults() {
+		flags = SF_None;
+		maxDistance = 0.f;
 	}
 };
 
@@ -259,6 +287,11 @@ public:
 	
 	Magnetite::EntityList getEntities();
 	
+	/**
+	 * Search for a single Entities
+	 */
+	Magnetite::BaseEntity* findEntity( const EntitySearch& es );
+	
 	bool printDbg;
 
 	/**
@@ -306,6 +339,11 @@ public:
 	 * Creates a Region at the given coordinates
 	 */
 	Magnetite::ChunkRegionPtr createRegion( const ChunkScalar x, const ChunkScalar y, const ChunkScalar z );
+	
+	/**
+	 * Destroys a region
+	 */
+	void removeRegion( const ChunkScalar x, const ChunkScalar y, const ChunkScalar z );
 	
 	/**
 	 * Returns all of the Regions.

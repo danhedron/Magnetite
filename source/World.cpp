@@ -264,6 +264,18 @@ Magnetite::ChunkRegionPtr World::createRegion( const ChunkScalar x, const ChunkS
 	return (mRegions[index] = new Magnetite::ChunkRegion( x, y, z, this ));
 }
 
+void World::removeRegion( const ChunkScalar x, const ChunkScalar y, const ChunkScalar z )
+{
+	if( x < 0 || x > mWorldSize-1 || y < 0 || y > mWorldSize-1 || z < 0 || z > mWorldSize-1 )
+		return;
+	size_t index = c2i( x, y, z );
+	if( mRegions[index] != nullptr ) 
+	{
+		delete mRegions[index];
+		mRegions[index] = nullptr;
+	}
+}
+
 void World::removeChunk( long x, long y, long z )
 {
 	ChunkScalar rx = x / REGION_SIZE;
@@ -442,6 +454,33 @@ void World::createSky( size_t time )
 Sky* World::getSky()
 {
 	return mSky;
+}
+
+Magnetite::BaseEntity* World::findEntity( const EntitySearch& es )
+{
+	float nearDist = 10000000.f;
+	Magnetite::BaseEntity* nearest = nullptr;
+	
+	for( Magnetite::BaseEntity* ent : mEntities )
+	{
+		//if( (es.flags & EntitySearch::SF_Type) == EntitySearch::SF_Type && ent->getType() != es.type ) continue;
+		if( (es.flags & EntitySearch::SearchFlags::SF_Position) == EntitySearch::SearchFlags::SF_Position ) {
+			auto a = ent->getLastPosition() - es.center;
+			auto l = glm::length(a);
+			
+			if( (es.flags & EntitySearch::SearchFlags::SF_MaxDistance) == EntitySearch::SearchFlags::SF_MaxDistance ) {
+				if( l > es.maxDistance ) continue;
+			}
+			
+			if( l < nearDist )
+			{
+				nearDist = l;
+				nearest = ent;
+			}
+		}
+	}
+	
+	return nearest;
 }
 
 Magnetite::EntityList World::getEntities()

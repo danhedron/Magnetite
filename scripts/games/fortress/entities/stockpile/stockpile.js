@@ -4,7 +4,7 @@
 		var dimensions = { x: 6, y: 3, z: 6 };
 		
 		// Get the entity and define some usefull methods.
-		var entity = this.getEntity();
+		var entity = this;
 		
 		var position = entity.position;
 		

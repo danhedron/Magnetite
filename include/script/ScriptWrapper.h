@@ -3,6 +3,8 @@
 #include <v8.h>
 #include "prerequisites.h"
 
+#define V8STR( str ) String::New( str )
+
 typedef v8::Persistent<v8::Context> PersistentContext;
 typedef v8::Persistent<v8::Object> PersistentObject;
 typedef v8::Handle<v8::Value> ValueHandle;

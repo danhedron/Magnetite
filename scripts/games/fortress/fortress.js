@@ -131,19 +131,13 @@ Game.createDrone = function() {
 }
 
 Game.getNearestDrone = function( center ) {
-	var drone, ndrone;
-	var nearest = 100000;
-	for( var x = 0; x < this.drones.length; x++ )
-	{
-		drone = this.drones[x];
-		var d = { x: center.x - drone.position.x, y: center.y - drone.position.y, z: center.z - drone.position.z };
-		var lenth = lent( d );
-		if( lenth < nearest ) {
-			nearest = lenth;
-			ndrone = drone;
-		};
-	}
-	return ndrone;
+	
+	var drone = world.findEntity({
+		'type': 'drone',
+		'center': center
+	});
+	
+	return drone;
 }
 
 Game.getBestStockpile = function( center, type ) {

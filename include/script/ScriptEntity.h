@@ -20,6 +20,11 @@ namespace Magnetite
 			 * Persistent Handle on the Script object.
 			 */
 			PersistentObject mScriptObject;
+			
+			/**
+			 * Cache for entity type name
+			 */
+			String mTypeName;
 		public:
 			
 			ScriptEntity(World* world);
@@ -30,6 +35,10 @@ namespace Magnetite
 			 * Sets the script object
 			 */
 			void setObject( PersistentObject obj );
+			
+			virtual String getType() { return mTypeName; }
+			
+			void setTypeName( const String& name ) { mTypeName = name; }
 			
 			virtual void create();
 			

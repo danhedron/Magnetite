@@ -69,6 +69,8 @@ namespace Magnetite {
 		me.eventID = CE_POSITION_UPDATED;
 		me.position = newpos;
 		
+		mLastPosition = newpos;
+		
 		fireEvent(me);
 	}
 };
