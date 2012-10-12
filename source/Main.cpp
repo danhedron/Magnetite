@@ -42,7 +42,7 @@ int main( int argc, char** argv ) {
 	
 	MagnetiteCore core;
 
-	core.init(&argc, argv);
+	core.init(argc, argv);
 
 	core.startGame(game);
 

@@ -92,8 +92,23 @@ MagnetiteCore::~MagnetiteCore(void)
 	delete mPBroadphase;
 }
 
-void MagnetiteCore::init(int *argc, char **argv)
+#define HASARG( longname, shortname ) (strcmp(longname, argv[i] ) == 0 || strcmp(shortname, argv[i] ) == 0)
+
+void MagnetiteCore::init(int argc, char **argv)
 {
+	size_t width = 640, height = 480;
+	for( size_t i = 0; i < argc; i++ )
+	{
+		if( HASARG("--width", "-w" ) &&  i + 1 < argc )
+		{
+			width = atoi(argv[i+1]);
+		}
+		if( HASARG("--height", "-h" ) &&  i + 1 < argc )
+		{
+			height = atoi(argv[i+1]);
+		}
+	}
+	
 	mResourceManager = new ResourceManager();
 	mResourceManager->addLocation("./resources/shaders/");
 	mResourceManager->addLocation("./resources/sprites/");
@@ -101,13 +116,13 @@ void MagnetiteCore::init(int *argc, char **argv)
 	mResourceManager->addLocation("./resources/models/");
 	sf::ContextSettings wnds;
 	wnds.depthBits = 24;
-	//wnds.AntialiasingLevel = 2;
-	mWindow.create(sf::VideoMode(640,480,32), "Magnetite", sf::Style::Close | sf::Style::Resize, wnds);
+	wnds.antialiasingLevel = 4;
+	mWindow.create(sf::VideoMode(width,height,32), "Magnetite", sf::Style::Close | sf::Style::Resize, wnds);
 	mWindow.setKeyRepeatEnabled( false );
 	mWindow.setVerticalSyncEnabled( false );
 	mRenderer->initialize(mWindow);
 	mTextureManager->initalize();
-	mRenderer->resizeViewport(0,0,640,480);
+	mRenderer->resizeViewport(0,0,width,height);
 	initalizePhysics();
 }
 

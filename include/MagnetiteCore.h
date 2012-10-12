@@ -183,7 +183,7 @@ public:
 	 * @param argc The programs' argument count
 	 * @param argv the argument list
 	 */
-	void init(int *argc, char **argv);
+	void init(int argc, char **argv);
 
 	/**
 	 * Initalize the physics engine
