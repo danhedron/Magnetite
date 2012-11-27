@@ -109,6 +109,8 @@ void MagnetiteCore::init(int argc, char **argv)
 		}
 	}
 	
+	glewInit();
+	
 	mResourceManager = new ResourceManager();
 	mResourceManager->addLocation("./resources/shaders/");
 	mResourceManager->addLocation("./resources/sprites/");

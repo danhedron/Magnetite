@@ -239,11 +239,11 @@ if(OPENGL_FOUND)
 	include_directories(${OPENGL_INCLUDE_DIR})
 endif(OPENGL_FOUND)
 
-find_package(GLee REQUIRED)
-if(GLEE_FOUND)
-	target_link_libraries(Magnetite ${GLEE_LIBRARIES})
-	include_directories(${GLEE_INCLUDE_DIR})
-endif(GLEE_FOUND)
+find_package(GLew REQUIRED)
+if(GLEW_FOUND)
+	target_link_libraries(Magnetite ${GLEW_LIBRARIES})
+	include_directories(${GLEW_INCLUDE_DIR})
+endif(GLEW_FOUND)
 
 # Find Assimp
 find_package(ASSIMP REQUIRED)
