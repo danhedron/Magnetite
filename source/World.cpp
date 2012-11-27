@@ -28,7 +28,8 @@
 
 World::World( size_t edgeSize )
 : mSky( NULL ),
-mTriangulator( new BlockTriangulator() )
+mTriangulator( new BlockTriangulator() ),
+mThreadID(std::this_thread::get_id())
 {	
 	mWorldSize = edgeSize;
 	mRegions = new Magnetite::ChunkRegionPtr[edgeSize*edgeSize*edgeSize];
@@ -404,8 +405,15 @@ void World::update( float dt )
 	Perf::Profiler::get().end("wthink");
 }
 
+void World::addEntity( Magnetite::BaseEntity* ent )
+{
+	assert(std::this_thread::get_id() == mThreadID);
+	mEntities.push_back(ent);
+}
+
 void World::updateEntities( float dt )
 {
+	assert(std::this_thread::get_id() == mThreadID);
 	if( mSky != NULL ) 
 	{
 		mSky->update( dt );
@@ -460,7 +468,7 @@ Magnetite::BaseEntity* World::findEntity( const EntitySearch& es )
 {
 	float nearDist = 10000000.f;
 	Magnetite::BaseEntity* nearest = nullptr;
-	
+	mWorldMutex.lock();
 	for( Magnetite::BaseEntity* ent : mEntities )
 	{
 		//if( (es.flags & EntitySearch::SF_Type) == EntitySearch::SF_Type && ent->getType() != es.type ) continue;
@@ -479,6 +487,7 @@ Magnetite::BaseEntity* World::findEntity( const EntitySearch& es )
 			}
 		}
 	}
+	mWorldMutex.unlock();
 	
 	return nearest;
 }

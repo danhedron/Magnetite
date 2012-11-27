@@ -3,6 +3,7 @@
 #include "prerequisites.h"
 #include <deque>
 #include <mutex>
+#include <thread>
 #include <glm/core/type.hpp>
 #include "Region.h"
 #include "MovingBlock.h"
@@ -183,7 +184,18 @@ protected:
 	 */
 	std::mutex mWorldMutex;
 	
+	/**
+	 * Internal function to add entities to the mEntities list.
+	 */
+	void addEntity( Magnetite::BaseEntity* ent );
+	
 public:
+	
+	/**
+	 * World thread id.
+	 */
+    std::thread::id mThreadID;
+	
 	/** 
 	 * Constructor: -
 	 */
@@ -281,7 +293,7 @@ public:
 	template<class T> T* createEntity()
 	{
 		T* e = new T(this);
-		mEntities.push_back(e);
+		addEntity(e);
 		return e;
 	};
 	

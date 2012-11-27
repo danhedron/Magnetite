@@ -7,6 +7,7 @@
 //#define NOMINMAX
 #include <limits.h>
 #include <GL/GLee.h>
+#include <assert.h>
 #undef None
 #include <SFML/Window.hpp>
 #include <SFML/OpenGL.hpp>

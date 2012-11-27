@@ -238,11 +238,6 @@ void MagnetiteCore::go()
 			mPhysicsWorld->stepSimulation( lDelta );
 			physicsMutex.unlock();
 			Perf::Profiler::get().end("pthink");
-			
-			if( mWorld != NULL )
-			{
-				mWorld->updateEntities(lDelta);
-			}
 		}
 	});
 	
@@ -393,6 +388,11 @@ void MagnetiteCore::go()
 			mGame->think( lDelta );
 		}
 		Perf::Profiler::get().end("gthink");
+		
+		if( mWorld != NULL )
+		{
+			mWorld->updateEntities(lDelta);
+		}
 		
 		mGame->uiPaint( mRenderer );
 
