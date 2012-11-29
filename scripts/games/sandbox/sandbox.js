@@ -1,3 +1,5 @@
+var Events = require('scripts/events.js');
+
 Game.name = 'Sandbox';
 
 Number.prototype.sign = function() {
@@ -109,35 +111,31 @@ Game.keyDown = function(k)
 {
 	switch( k )
 	{
-		case 68:
+		case Events.Keys.R:
 			this.changeBlock(-1);
 			break;
-		case 67:
+		case Events.Keys.F:
 			this.changeBlock( 1);
 			break;
-		case 22:
-			// W
+		case Events.Keys.W:
 			this.player.moveTarget.x = -1;
 			break;
-		case 0:
-			// A
+		case Events.Keys.A:
 			this.player.moveTarget.z = -1;
 			break;
-		case 18:
-			// S
+		case Events.Keys.S:
 			this.player.moveTarget.x = 1;
 			break;
-		case 3:
-			// D
+		case Events.Keys.D:
 			this.player.moveTarget.z = 1;
 			break;
-		case 16:
+		case Events.Keys.Z:
 			this.player.moveTarget.y = 1;
 			break;
-		case 4:
+		case Events.Keys.X:
 			this.player.moveTarget.y = -1;
 			break;
-		case 57:
+		case Events.Keys.Space:
 			this.player.enableFlying( !this.player.isFlying() )
 			break;
 	}
@@ -147,24 +145,20 @@ Game.keyUp = function(k)
 {
 	switch( k )
 	{
-		case 22:
-			// W
+		case Events.Keys.W:
 			this.player.moveTarget.x = 0;
 			break;
-		case 0:
-			// A
+		case Events.Keys.A:
 			this.player.moveTarget.z = -0;
 			break;
-		case 18:
-			// S
+		case Events.Keys.S:
 			this.player.moveTarget.x = -0;
 			break;
-		case 3:
-			// D
+		case Events.Keys.D:
 			this.player.moveTarget.z = 0;
 			break;
-		case 16:
-		case 4:
+		case Events.Keys.Z:
+		case Events.Keys.X:
 			this.player.moveTarget.y = 0;
 			break;
 	}

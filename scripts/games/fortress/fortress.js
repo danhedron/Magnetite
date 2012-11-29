@@ -182,20 +182,16 @@ Game.keyDown = function(k)
 		case Events.Keys.E:
 			this.player.turnSpeed -= 40;
 			break;
-		case 22:
-			// W
+		case Events.Keys.W:
 			this.player.moveTarget.x = -10;
 			break;
-		case 0:
-			// A
+		case Events.Keys.A:
 			this.player.moveTarget.z = -10;
 			break;
-		case 18:
-			// S
+		case Events.Keys.S:
 			this.player.moveTarget.x = 10;
 			break;
-		case 3:
-			// D
+		case Events.Keys.D:
 			this.player.moveTarget.z = 10;
 			break;
 		case Events.Keys.X:
