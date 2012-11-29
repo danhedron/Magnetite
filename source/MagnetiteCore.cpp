@@ -66,7 +66,6 @@ mLastY( 0.f )
 	mInputManager->setEventCallback( Inputs::SPRINT, &globalEventHandler );
 	mInputManager->setEventCallback( Inputs::SCREENSHOT, &globalEventHandler );
 	mInputManager->setEventCallback( Inputs::FLY, &globalEventHandler );
-	mInputManager->setEventCallback( Inputs::RESPAWN, &globalEventHandler );
 }
 
 MagnetiteCore::~MagnetiteCore(void)
