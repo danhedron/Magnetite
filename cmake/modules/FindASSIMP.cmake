@@ -8,7 +8,7 @@
 
 SET(ASSIMP "assimp")
 
-FIND_PATH(ASSIMP_INCLUDE_DIR NAMES assimp/assimp.h
+FIND_PATH(ASSIMP_INCLUDE_DIR NAMES assimp/ai_assert.h
   PATHS
   /usr/include
   /usr/local/include
