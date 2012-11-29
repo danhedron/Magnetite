@@ -16,8 +16,27 @@ It is crafted with love and care by:
  * Howell Duggan
    * Art
 
-Licence
--------
+## Game
+To run the game, use the ``--game`` flag to select a game mode.
+Current game modes include:
+ + fortress
+ + sandbox
+### Key bindings
+ * To move, use `WASD`.
+
+ * In fortress mode, To turn left and right, use `QE`.
+ * In fortress mode, To alter your altitude, use `XZ`.
+
+ * In sandbox mode, use ``space`` to toggle flying.
+ * In sandbox mode, use ``RF`` to switch between blocks.
+ * In sandbox mode, press ``Alt`` to show the block menu.
+ * In sandbox mode, use ``MOUSE2`` to toggle between build modes (add, delete, explode, and plant tree).
+ * Use `SPACE` to access the menu.
+ * Use the `up` and `down` cursor keys to navigate the menu.
+ * Use `enter` to select an option.
+ * Use `bksp` to return to the previous menu.
+ 
+## Licence
 
 Opencraft is licensed under the GPLv3 license. Unless otherwise indicated.
 
