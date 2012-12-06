@@ -21,6 +21,7 @@ To run the game, use the ``--game`` flag to select a game mode.
 Current game modes include:
  + fortress
  + sandbox
+
 ### Key bindings
  * To move, use `WASD`.
 
