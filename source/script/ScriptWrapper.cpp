@@ -116,6 +116,21 @@ ValueHandle ScriptWrapper::runFile( std::string filename )
 	return Undefined();
 }
 
+ValueHandle ScriptWrapper::runFunction( Handle<Function> func, Handle<Object> self, int argc, ValueHandle argv[] )
+{
+	HandleScope hs;
+	Context::Scope scope( mContext );
+	
+	TryCatch try_catch;
+	auto r = func->Call( self, argc, argv );
+	
+	if(r.IsEmpty())
+	{
+		report(&try_catch);
+		return Undefined();
+	}
+}
+
 ValueHandle import(const Arguments& args)
 {
 	if( args.Length() >= 1 )

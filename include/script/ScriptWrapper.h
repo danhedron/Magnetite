@@ -48,6 +48,8 @@ public:
 	
 	ValueHandle runFile( std::string filename );
 	
+	ValueHandle runFunction( v8::Handle<v8::Function> func, v8::Handle<v8::Object> self, int argc, ValueHandle argv[] );
+	
 	PersistentContext getContext();
 
 	void init();

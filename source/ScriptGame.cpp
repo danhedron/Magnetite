@@ -313,7 +313,7 @@ void ScriptGame::keyDown( size_t evt )
 			Local<Function> onLoad = Local<Function>::Cast( onLoadVal );
 			Handle<Value> args[1];
 			args[0] = Number::New( evt );
-			onLoad->Call( mScriptObject, 1, args );
+			MagnetiteCore::Singleton->getScriptManager()->runFunction( onLoad, mScriptObject, 1, args );
 		}
 	}
 }
