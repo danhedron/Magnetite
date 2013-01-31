@@ -28,8 +28,7 @@
 
 World::World( size_t edgeSize )
 : mSky( NULL ),
-mTriangulator( new BlockTriangulator() ),
-mThreadID(std::this_thread::get_id())
+mTriangulator( new BlockTriangulator() )
 {	
 	mWorldSize = edgeSize;
 	mRegions = new Magnetite::ChunkRegionPtr[edgeSize*edgeSize*edgeSize];
@@ -361,7 +360,7 @@ void World::update( float dt )
 	// Process the chunk loading queue
 	mWorldMutex.lock();
 	//Perf::Profiler::get().begin("qproc");
-	if( mChunkRequests.size() > 0 )
+	while( mChunkRequests.size() > 0 )
 	{
 		auto &r = mChunkRequests.at(0);
 		
@@ -372,13 +371,16 @@ void World::update( float dt )
 		}
 		else
 		{
-			Perf::Profiler::get().begin("ca");
-			this->activateChunk( r.x, r.y, r.z );
-			Perf::Profiler::get().end("ca");
+			mThreadPool.schedule([=](){
+				this->activateChunk( r.x, r.y, r.z );
+			});
 		}
 		
 		mChunkRequests.pop_front();
 	}
+	
+	// Wait for the thread pool to finish.
+	mThreadPool.join();
 	
 	//Perf::Profiler::get().end("qproc");
 
@@ -403,13 +405,11 @@ void World::update( float dt )
 
 void World::addEntity( Magnetite::BaseEntity* ent )
 {
-	assert(std::this_thread::get_id() == mThreadID);
 	mEntities.push_back(ent);
 }
 
 void World::updateEntities( float dt )
 {
-	assert(std::this_thread::get_id() == mThreadID);
 	if( mSky != NULL ) 
 	{
 		mSky->update( dt );

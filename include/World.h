@@ -8,6 +8,7 @@
 #include "Region.h"
 #include "MovingBlock.h"
 #include "paging/PagingContext.h"
+#include "ThreadPool.h"
 
 namespace Magnetite {
 class WorldSerializer;class BaseEntity;
@@ -189,13 +190,12 @@ protected:
 	 */
 	void addEntity( Magnetite::BaseEntity* ent );
 	
-public:
-	
 	/**
-	 * World thread id.
+	 * Thread Pool for paralelizing chunk operations.
 	 */
-    std::thread::id mThreadID;
+	Magnetite::SimpleThreadPool mThreadPool;
 	
+public:
 	/** 
 	 * Constructor: -
 	 */
