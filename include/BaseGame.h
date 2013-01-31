@@ -11,14 +11,21 @@ class Renderer;
 class BaseGame
 {
 protected:
-	//< Reference to the engine object
+	/**
+	 * Core pointer (so that we can pretend it's not a singleton).
+	 */
 	MagnetiteCore* mEngine;
-	//< Reference to the local player ( Or NULL if this is a dedicated server )
+	
+	/**
+	 * Refrence to the local player, if applicable.
+	 */
 	Player* mPlayer;
-	//< Keeps track of singleplayer ness
+	
+	/**
+	 * True if the game is running without multiplayer.
+	 */
 	bool mIsSinglePlayer;
-
-	std::string clickMode;
+	
 public:
 	BaseGame();
 	~BaseGame();
@@ -37,11 +44,6 @@ public:
 	 * Returns true in singleplayer mode 
 	 */
 	bool isSingleplayer();
-
-	/**
-	 * Creates a new, run of the mill character
-	 */
-	Character* createCharacter();
 
 	/**
 	 * Returns the local player
@@ -100,7 +102,6 @@ public:
 	virtual void keyUp( size_t evt );
 
 	//========================= Internal stuff
-
 	/**
 	 * Starts a singleplayer instance of this game
 	 */
