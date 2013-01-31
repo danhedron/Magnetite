@@ -48,28 +48,25 @@ namespace Magnetite {
 		
 		void ScriptEntity::think( float dt )
 		{
-			MagnetiteCore::Singleton->runOnMainThread( [&,dt]() { 
-				// Perhaps a better (thread safe) mechanism for handling callbacks could be devised.
-				PersistentContext ctx = MagnetiteCore::Singleton->getScriptManager()->getContext();
-				Context::Scope scope( ctx );
-				HandleScope hs;
-				// Get the object prototype, which contains the script-side create.
-				auto proto = mScriptObject->GetPrototype();
-				if( proto->IsObject() )
-				{
-					auto protobj = proto.As<Object>();
-					if( protobj->Has( v8::String::New("think") ) ) {
-						auto createVal = protobj->Get( v8::String::New("think") );
-						if( createVal->IsFunction() )
-						{
-							auto createFunc = createVal.As<Function>();
-							ValueHandle args[] = { Number::New(dt) };
-							createFunc->Call( mScriptObject, 1, args );
-						}
+			// Perhaps a better (thread safe) mechanism for handling callbacks could be devised.
+			PersistentContext ctx = MagnetiteCore::Singleton->getScriptManager()->getContext();
+			Context::Scope scope( ctx );
+			HandleScope hs;
+			// Get the object prototype, which contains the script-side create.
+			auto proto = mScriptObject->GetPrototype();
+			if( proto->IsObject() )
+			{
+				auto protobj = proto.As<Object>();
+				if( protobj->Has( v8::String::New("think") ) ) {
+					auto createVal = protobj->Get( v8::String::New("think") );
+					if( createVal->IsFunction() )
+					{
+						auto createFunc = createVal.As<Function>();
+						ValueHandle args[] = { Number::New(dt) };
+						createFunc->Call( mScriptObject, 1, args );
 					}
 				}
-			});
-			
+			}
 			BaseEntity::think(dt);
 		}
 		

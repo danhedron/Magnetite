@@ -8,7 +8,6 @@
 #include "BaseBlock.h"
 #include "Camera.h"
 #include "World.h"
-#include "Explosion.h"
 
 //Handled by magic 
 REG_GAME_TYPE( "script", ScriptGame )
@@ -16,11 +15,9 @@ REG_GAME_TYPE( "script", ScriptGame )
 using namespace v8;
 
 ScriptGame::ScriptGame()
+: mGameName(""),
+mPathName("")
 {
-	mEngine = MagnetiteCore::Singleton; // Bad design they say? Humbug!
-	mPlayer = NULL;
-	mPathName = "";
-	clickMode = "remove";
 }
 
 ScriptGame::~ScriptGame()
@@ -313,7 +310,7 @@ void ScriptGame::keyDown( size_t evt )
 			Local<Function> onLoad = Local<Function>::Cast( onLoadVal );
 			Handle<Value> args[1];
 			args[0] = Number::New( evt );
-			onLoad->Call( mScriptObject, 1, args );
+			MagnetiteCore::Singleton->getScriptManager()->runFunction( onLoad, mScriptObject, 1, args );
 		}
 	}
 }

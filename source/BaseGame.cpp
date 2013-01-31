@@ -8,15 +8,13 @@
 #include "BaseBlock.h"
 #include "Camera.h"
 #include "World.h"
-#include "Explosion.h"
 
 REG_GAME_TYPE( "default", BaseGame )
 
 BaseGame::BaseGame()
+: mEngine(MagnetiteCore::Singleton),
+mPlayer(NULL)
 {
-	mEngine = MagnetiteCore::Singleton; // Bad design they say? Humbug!
-	mPlayer = NULL;
-	clickMode = "remove";
 }
 
 BaseGame::~BaseGame()
@@ -26,7 +24,7 @@ BaseGame::~BaseGame()
 
 std::string BaseGame::getName()
 {
-	return "Default";
+	return "Base";
 }
 
 Magnetite::String BaseGame::getPath()
@@ -42,7 +40,7 @@ void BaseGame::_startGameSingle()
 
 void BaseGame::_startGame()
 {
-	Util::log("#== Sandbox Game v0.1 ==================");
+	Util::log("#== Base Game Type ==================");
 	Util::log("# is multiplayer: " + Util::toString( !isSingleplayer() ) );
 }
 
@@ -71,52 +69,13 @@ Player* BaseGame::getLocalPlayer()
 	return mPlayer;
 }
 
-Character* BaseGame::createCharacter()
-{
-	return mEngine->createCharacter();
-}
-
 void BaseGame::_inputEvents( const InputEvent& e )
 {
-	if( e.event == Inputs::FORWARD ) {
-		if( e.down )
-			_inputMovement( Vector3( 0.f, 0.f, -1.f ) );
-		else
-			_inputMovement( Vector3( 0.f, 0.f, 1.f ) );
-	}
-	if( e.event == Inputs::LEFT ) {
-		if( e.down )
-			_inputMovement( Vector3( -1.f, 0.f, 0.f ) );
-		else
-			_inputMovement( Vector3( 1.f, 0.f, 0.f ) );
-	}
-	if( e.event == Inputs::RIGHT ) {
-		if( e.down )
-			_inputMovement( Vector3( 1.f, 0.f, 0.f ) );
-		else
-			_inputMovement( Vector3( -1.f, 0.f, 0.f ) );
-	}
-	if( e.event == Inputs::BACK ) {
-		if( e.down )
-			_inputMovement( Vector3( 0.f, 0.f, 1.f ) );
-		else
-			_inputMovement( Vector3( 0.f, 0.f, -1.f ) );
-	}
-	if( e.event == Inputs::JUMP && e.down ) {
-		//if( getLocalPlayer() ) mPlayer->jump();
-	}
-	if( e.event == Inputs::SPRINT ) {
-		//if( getLocalPlayer() ) mPlayer->enableSprint( e.down );
-	}
-	if( e.event == Inputs::RESPAWN && e.down ) {
-		if( getLocalPlayer() ) mPlayer->setPosition( Vector3( 0, 150.f, 0 ) );
-	}
+
 }
 
 void BaseGame::_inputMovement( const Vector3& v )
 {
-	//if( getLocalPlayer() )
-		//mPlayer->addMoveDelta( v );
 }
 
 void BaseGame::_mouseMoved( const float x, const float y )
@@ -150,21 +109,15 @@ void BaseGame::playerJoin( Player* player )
 
 void BaseGame::playerSpawn( Player* player )
 {
-	//if( player == mPlayer )
-	//	Util::log( "You just spawned!" );
 	player->setPosition( Vector3( 0.f, 120.f, 0.f )  );
 }
 
 void BaseGame::playerKilled( Character* player )
 {
-	//if( player == mPlayer )
-	//	Util::log( "You just died! D:" );
 }
 
 void BaseGame::characterDamage( Character* player )
 {
-	//if( player == mPlayer )
-	//	Util::log( "You're taking damage" );
 }
 
 void BaseGame::playerPrimaryClick( Player* player )
@@ -179,7 +132,6 @@ void BaseGame::playerAltClick( Player* player )
 
 void BaseGame::uiPaint(Renderer* r)
 {
-	r->drawText(clickMode, 10, 50);
 }
 
 void BaseGame::think( float dt )

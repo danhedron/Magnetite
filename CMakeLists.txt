@@ -94,7 +94,6 @@ set(MAGNETITE_SOURCES
 	source/MovingBlock.cpp
 	source/ChunkGenerator.cpp
 	source/World.cpp
-	source/Explosion.cpp
 	source/TextureManager.cpp
 	source/geometry/BaseTriangulator.cpp
 	source/geometry/BlockTriangulator.cpp
@@ -103,7 +102,6 @@ set(MAGNETITE_SOURCES
 	source/script/ScriptWrapper.cpp
 	source/script/ScriptGlobalsWorld.cpp
 	source/script/ScriptGlobalsDebug.cpp
-	source/script/ScriptExplosion.cpp
 	source/script/ScriptPlayer.cpp
 	source/script/Entities.cpp
 	
@@ -170,7 +168,6 @@ set(MAGNETITE_HEADERS
 	include/MovingBlock.h
 	include/ChunkGenerator.h
 	include/World.h
-	include/Explosion.h
 	include/TextureManager.h
 	include/BaseTriangulator.h
 	include/BlockTriangulator.h
@@ -180,7 +177,6 @@ set(MAGNETITE_HEADERS
 	include/script/ScriptGlobalsList.h
 	include/script/ScriptGlobalsWorld.h
 	include/script/ScriptGlobalsDebug.h
-	include/script/ScriptExplosion.h
 	include/script/ScriptPlayer.h
 	include/script/Entities.h
 	

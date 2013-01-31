@@ -8,7 +8,7 @@ class ScriptGame : public BaseGame
 {
 protected:
 	/**
-	 * Stores the friendly name for this game
+	 * The 'user friendly' name for this game type.
 	 */
 	std::string mGameName;
 	
@@ -18,7 +18,7 @@ protected:
 	Magnetite::String mPathName;
 	
 	/**
-	 * The Javascript object!1
+	 * Javascript Side Object.
 	 */
 	PersistentObject mScriptObject;
 
