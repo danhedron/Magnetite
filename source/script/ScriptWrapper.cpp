@@ -129,6 +129,8 @@ ValueHandle ScriptWrapper::runFunction( Handle<Function> func, Handle<Object> se
 		report(&try_catch);
 		return Undefined();
 	}
+	
+	return r;
 }
 
 ValueHandle import(const Arguments& args)
