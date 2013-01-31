@@ -41,7 +41,6 @@ mScriptWrapper( NULL ),
 mTextureManager( NULL ),
 mInputManager( NULL ),
 mWorld( NULL ),
-mGame( NULL ),
 mContinue( true ),
 mTimescale( 1.f ),
 mPBroadphase( NULL ),
@@ -49,6 +48,7 @@ mPCConfig( NULL ),
 mCCDispatch ( NULL ),
 mSolver( NULL ),
 mPhysicsWorld( NULL ),
+mGame( NULL ),
 mLastX( 0.f ),
 mLastY( 0.f )
 {
@@ -163,41 +163,31 @@ void MagnetiteCore::screenshot()
 	screen.saveToFile(fname);
 }
 
-void MagnetiteCore::runOnMainThread( const Work& fn )
-{
-	mWorkQueueMutex.lock();
-	mWorkQueue.push_back(fn);
-	mWorkQueueMutex.unlock();
-}
-
 void MagnetiteCore::startGame( const std::string& type )
 {
-	runOnMainThread( [&]() { 
-		
-		//mGame = FactoryManager::getManager().createGame(type);
-		ScriptGame* g = new ScriptGame();
-		g->setName("script");
-		g->_setScriptObject( mScriptWrapper->newGame(type) );
-		g->_setPath(type);
-		mGame = g;
-		if( mGame != NULL ) 
-			Util::log("Starting game: " + mGame->getName() );
-		mGame->_startGameSingle();
-		
-		newWorld("test");
-		
-		mGame->_loadGame();
-		
-		{
-			v8::HandleScope hs;
-			mScriptWrapper->runFile("./scripts/main.js");
-		}
-		
-		// No multiplayer yet so just force player join
-		mGame->_playerJoined();
-		
-		mRenderer->setCamera( mGame->getLocalPlayer()->getCamera() );
-	});
+	//mGame = FactoryManager::getManager().createGame(type);
+	ScriptGame* g = new ScriptGame();
+	g->setName("script");
+	g->_setScriptObject( mScriptWrapper->newGame(type) );
+	g->_setPath(type);
+	mGame = g;
+	if( mGame != NULL ) 
+		Util::log("Starting game: " + mGame->getName() );
+	mGame->_startGameSingle();
+	
+	newWorld("test");
+	
+	mGame->_loadGame();
+	
+	{
+		v8::HandleScope hs;
+		mScriptWrapper->runFile("./scripts/main.js");
+	}
+	
+	// No multiplayer yet so just force player join
+	mGame->_playerJoined();
+	
+	mRenderer->setCamera( mGame->getLocalPlayer()->getCamera() );
 }
 
 void MagnetiteCore::inputMovement( const Vector3 &v )
@@ -215,65 +205,19 @@ void MagnetiteCore::go()
 	int lastX = mWindow.getSize().x/2;
 	int lastY = mWindow.getSize().y/2;
 	
-	std::thread physics_thread( [&]() {
-		sf::Clock timer;
-		
-		// Set profiler ID
-		Perf::Profiler::get().setID("logic");
-		
-		while(mContinue && mWindow.isOpen()) {
-			float lDelta = ((float)timer.getElapsedTime().asMilliseconds())/1000;
-			
-			if( lDelta < 1.f/60.f )
-			{
-				continue;
-			}
-			timer.restart(); 
-			Perf::Profiler::get().newFrame();
-			
-			lDelta *= mTimescale;
-			
-			// Do physics.
-			Perf::Profiler::get().begin("pthink");
-			physicsMutex.lock();
-			mPhysicsWorld->stepSimulation( lDelta );
-			physicsMutex.unlock();
-			Perf::Profiler::get().end("pthink");
-		}
-	});
-	
-	std::thread world_thread( [&]() {
-		sf::Clock timer;
-		
-		Perf::Profiler::get().setID("world");
-		
-		while(mContinue && mWindow.isOpen()) {
-			float lDelta = ((float)timer.getElapsedTime().asMilliseconds())/1000;
-			if( lDelta < 1/30.f && (mWorld == nullptr || mWorld->getNumChunkRequests() == 0) ) { continue; }
-			timer.restart(); 
-			Perf::Profiler::get().newFrame();
-			
-			lDelta *= mTimescale;
-			
-			// Update all of the world related objects.
-			if( mWorld != NULL )
-			{
-				mWorld->update( lDelta );
-			}
-			
-			std::this_thread::yield();
-		}
-	});
-	
-	physics_thread.detach();
-	world_thread.detach();
-	
 	Perf::Profiler::get().setID("main");
+	
+	float gameTime = 0.f;
+	float timeAccumulator = 0.f;
+	const float frameTime = 1.f/60.f;
 	
 	mClock.restart();
 	while(mContinue && mWindow.isOpen()) {
-		float lDelta = ((float)mClock.getElapsedTime().asMilliseconds())/1000;
+		float fTime = (mClock.getElapsedTime().asMilliseconds())/1000.f;
 		mClock.restart();
+		
+		timeAccumulator += fTime;
+		gameTime += fTime;
 		
 		// Handle Events before we do anything
 		sf::Event lEvt;
@@ -362,46 +306,41 @@ void MagnetiteCore::go()
 		// Tell the profiler to start a new frame.
 		Perf::Profiler::get().newFrame();
 		
-		// Process any work for this thread.
-		mWorkQueueMutex.lock();
-		while( mWorkQueue.size() > 0 ) 
-		{
-			auto w = mWorkQueue.front();
-			w();
-			mWorkQueue.pop_front();
-		}
-		mWorkQueueMutex.unlock();
-		
-		// Update all the characters
-		for( std::vector<Character*>::iterator it = mCharacters.begin(); it != mCharacters.end(); it++ )
-		{
-			(*it)->update( lDelta );
+		while( timeAccumulator >= frameTime ) {
+			// Update all the characters
+			for( std::vector<Character*>::iterator it = mCharacters.begin(); it != mCharacters.end(); it++ )
+			{
+				(*it)->update( frameTime );
+			}
+			
+			// Todo: get the game processing onto the logic thread.
+			Perf::Profiler::get().begin("gthink");
+			if( mGame != NULL )
+			{
+				mGame->think( frameTime );
+			}
+			Perf::Profiler::get().end("gthink");
+			
+			if( mWorld != NULL )
+			{
+				mWorld->updateEntities(frameTime);
+				mWorld->update(frameTime);
+			}
+			mPhysicsWorld->stepSimulation(frameTime);
+			
+			timeAccumulator -= frameTime;
 		}
 		
 		Perf::Profiler::get().begin("draw");
-		mRenderer->render(lDelta, mWorld);
+		mRenderer->render(fTime, mWorld);
 		Perf::Profiler::get().end("draw");
 		
-		// Todo: get the game processing onto the logic thread.
-		Perf::Profiler::get().begin("gthink");
-		if( mGame != NULL )
-		{
-			mGame->think( lDelta );
-		}
-		Perf::Profiler::get().end("gthink");
-		
-		if( mWorld != NULL )
-		{
-			mWorld->updateEntities(lDelta);
-		}
-		
 		mGame->uiPaint( mRenderer );
-
+		
 		mWindow.display();
 	}
-
+	
 	mWindow.close();
-
 }
 
 void MagnetiteCore::exit()
