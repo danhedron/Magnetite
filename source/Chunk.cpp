@@ -89,8 +89,6 @@ void Chunk::removeBlockAt( short x, short y, short z )
 
 void Chunk::removeBlockAt( short index )
 {
-	getMutex().lock();
-	
 	if( index < 0 || index > CHUNK_SIZE )
 		return;
 	BlockList::iterator it = mVisibleBlocks.find( index );
@@ -100,8 +98,6 @@ void Chunk::removeBlockAt( short index )
 	mNumBlocks--;
 	mBlocks[index] = NULL;
 	_raiseChunkFlag( DataUpdated );
-	
-	getMutex().unlock();
 }
 
 bool Chunk::hasNeighbours( long x, long y, long z )
@@ -368,9 +364,4 @@ void Chunk::_lowerChunkFlag( uint16_t flag )
 const size_t Chunk::getBlockCount()
 {
 	return mNumBlocks;
-}
-
-std::mutex& Chunk::getMutex()
-{
-	return mMutex;
 }
