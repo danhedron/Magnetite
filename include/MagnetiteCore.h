@@ -15,8 +15,6 @@ class BaseGame;
 class ResourceManager;
 class ScriptWrapper;
 
-typedef std::function<void ()> Work;
-
 /** @class MagnetiteCore
  * Responsible for managing stuff
  */
@@ -56,16 +54,6 @@ protected:
 	std::vector<Character*>	mCharacters;
 	BaseGame*	mGame;
 	
-	/**
-	 * Work Queue for work to do on the main thread.
-	 */
-	std::deque<Work> mWorkQueue;
-	
-	/**
-	 * Mutex for game work queue.
-	 */
-	std::mutex mWorkQueueMutex;
-	
 public:
 	MagnetiteCore(void);
 	~MagnetiteCore(void);
@@ -100,11 +88,6 @@ public:
 	 */
 	BaseGame* getGame();
 	
-	/**
-	 * Function to queue work for the game thread.
-	 */
-	void runOnMainThread( const Work& fn );
-
 	/**
 	 * Starts a new game of the specified type
 	 */
