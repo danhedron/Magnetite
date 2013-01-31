@@ -394,11 +394,7 @@ void World::update( float dt )
 			auto chnk = mRegions[r]->get(c);
 			if( chnk )
 			{
-				if( chnk->getMutex().try_lock() )
-				{
-					chnk->update(dt);
-					chnk->getMutex().unlock();
-				}
+				chnk->update(dt);
 			}
 		}
 	}

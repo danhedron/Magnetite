@@ -350,7 +350,6 @@ void Renderer::_renderChunk( Magnetite::ChunkRegionPtr region, Chunk* chunk )
 {
 	if( !chunk->_hasChunkFlag( Chunk::MeshInvalid ) && chunk->getGeometry() != NULL && chunk->getVisibleFaceCount() > 0 )
 	{
-		chunk->getMutex().lock();
 		rendered++;
 		// Sort out view Matrix.
 		glLoadIdentity();
@@ -379,8 +378,6 @@ void Renderer::_renderChunk( Magnetite::ChunkRegionPtr region, Chunk* chunk )
 
 		glBindBuffer( GL_ARRAY_BUFFER, 0 );
 		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-		
-		chunk->getMutex().unlock();
 	}
 
 }

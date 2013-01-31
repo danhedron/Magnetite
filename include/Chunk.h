@@ -77,12 +77,6 @@ protected:
 	 * Block counter
 	 */
 	size_t mNumBlocks;
-	
-	/**
-	 * Threading lock
-	 *  ensures that only one thread is doing something with this chunk.
-	 */
-	std::mutex mMutex;
 
 public:
 	/**
@@ -140,12 +134,9 @@ public:
 		{
 			removeBlockAt( index );
 		}
-		// Lock here to avoid locking the thread.
-		getMutex().lock();
 		mNumBlocks++;
 		mBlocks[ index ] = block;
 		_raiseChunkFlag( DataUpdated );
-		getMutex().unlock();
 	}
 
 	/**
@@ -293,11 +284,6 @@ public:
 	 * Returns the number of non-empty blocks in the chunk
 	 */
     const size_t getBlockCount();
-	
-	/**
-	 * Returns the mutex for this chunk
-	 */
-	std::mutex& getMutex();
 };
 
 #endif
